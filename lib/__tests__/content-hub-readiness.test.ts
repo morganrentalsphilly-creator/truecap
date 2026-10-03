@@ -110,8 +110,9 @@ describe("content hub touch targets", () => {
     const strategyGuides = read(
       "components/marketing/city-strategy-guides.tsx",
     );
+    // The data pages' link tags (DESIGN.md radius by role: 2px), still 44px.
     expect(strategyGuides).toContain(
-      "inline-flex min-h-11 min-w-11 items-center rounded-full",
+      "inline-flex min-h-11 min-w-11 items-center rounded-sm",
     );
   });
 

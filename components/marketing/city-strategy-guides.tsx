@@ -44,16 +44,19 @@ export function CityStrategyGuides({
   if (combos.length === 0) return null;
 
   return (
+    // The data pages' link group (components/marketing/safe-market-page.tsx,
+    // DATA_LINK_GROUP_*): a rule, a sentence-case label, 2px tags at 44px.
+    // The strings are written out here because that module imports this one.
     <section className="mt-12 border-t border-border pt-6">
-      <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-3">
+      <p className="mb-3 text-base font-semibold text-foreground">
         {cityName} strategy guides
       </p>
-      <div className="flex flex-wrap gap-2 text-sm">
+      <div className="flex flex-wrap gap-2">
         {combos.map((c) => (
           <IntentPrefetchLink
             key={c.strategy}
             href={`/markets/${c.citySlug}/${c.strategy}`}
-            className="inline-flex min-h-11 min-w-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="inline-flex min-h-11 min-w-11 items-center rounded-sm border border-border px-3 text-sm text-foreground transition-colors hover:bg-band"
           >
             {c.strategyLabel} in {c.cityName}
           </IntentPrefetchLink>

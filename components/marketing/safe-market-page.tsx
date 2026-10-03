@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
-import { CheckCircle2, MapPin } from "lucide-react";
+import type { ReactNode } from "react";
 import { Header } from "@/components/investcalc/header";
+import { ARTICLE_META, ARTICLE_META_LINK, ARTICLE_META_NEXT } from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { CityStrategyGuides } from "@/components/marketing/city-strategy-guides";
 import { DataFaq } from "@/components/marketing/data-faq";
+import { PageHero, RuledList, UnderTitleAnalyzeLink } from "@/components/marketing/page-parts";
+import { Section, SectionHeading } from "@/components/marketing/section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
+import { LedgerFigure } from "@/components/ledger/ledger-parts";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { SourceMethodologyBox } from "@/components/marketing/source-methodology-box";
 import { BLOG_POSTS } from "@/lib/blog-posts";
@@ -43,6 +47,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { JsonLd } from "@/components/seo/json-ld";
 import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
+import { cn } from "@/lib/utils";
 
 export type SafeMarketPageIdentity = {
   city: string;
@@ -104,6 +109,79 @@ export function buildSafeMarketMetadata({
 }
 
 /* ------------------------------------------------------------------------ */
+/* The data-page grammar (DESIGN.md "Chrome" and "As built in the rollout"). */
+/* The market, state and city-strategy templates share it: PageHero with the */
+/* byline, the breadcrumb as a meta line and the one analyze link under the  */
+/* H1, then one 68ch reading column of sections on rules and space. No       */
+/* cards, no eyebrow, no uppercase label, no arrow, nothing under 14px.      */
+/* Class strings only (tokens from app/globals.css), so the three templates  */
+/* cannot drift; the words stay in the pages and the data builders.          */
+/* ------------------------------------------------------------------------ */
+
+/** The page root: clips sideways bleed without a scroll container (app/page.tsx's root). */
+export const DATA_PAGE_ROOT_CLASS = "relative overflow-x-clip";
+
+/** <main id="main" tabIndex={-1}>: the skip link's target, never a focus ring. */
+export const DATA_PAGE_MAIN_CLASS = "min-w-0 outline-none";
+
+/** The hero's lede and a section's running text: marketing body, in ink. */
+export const DATA_LEDE_CLASS = "mt-4 max-w-[68ch] text-pretty text-lg leading-relaxed text-foreground";
+export const DATA_TEXT_CLASS = "mt-4 text-pretty text-lg leading-relaxed text-foreground";
+
+/** A secondary line (a guidance paragraph, a table's footnote): 14px Ink 2. */
+export const DATA_NOTE_CLASS = "mt-3 text-pretty text-sm leading-relaxed text-muted-foreground";
+
+/** A section in the column: 64px above, as ArticleBody spaces an H2. */
+export const DATA_SECTION_CLASS = "mt-16";
+
+/** An H3 inside a section: the H3 step in the display voice. */
+export const DATA_SUBHEADING_CLASS = "font-display text-balance text-h3-sm sm:text-2xl";
+
+/** The breadcrumb, set as the meta line under the H1 (hub links with a 44px target). */
+export const DATA_BREADCRUMB_LIST_CLASS = "flex flex-wrap items-center gap-x-2";
+export const DATA_BREADCRUMB_CURRENT_CLASS = "text-foreground";
+
+/**
+ * A HUD table on rules: the 2px ink rule opens it, sentence-case heads in
+ * Ink 2 on the rule, rows on soft rules, figures in DM Mono (LedgerFigure).
+ * No minimum width and no card. The ScrollX wrapper pins the first column;
+ * its pinned cells take the paper the table sits on, not ScrollX's raised
+ * card and band.
+ */
+export const DATA_TABLE_SCROLL_CLASS =
+  "mt-6 [&_table_td:first-child]:bg-background [&_table_th:first-child]:bg-background";
+export const DATA_TABLE_CLASS = "w-full border-t-2 border-foreground text-base";
+export const DATA_TABLE_HEAD_ROW_CLASS = "border-b border-border text-left align-bottom";
+export const DATA_TABLE_HEAD_CELL_CLASS = "py-2.5 pr-4 text-sm font-semibold text-muted-foreground";
+export const DATA_TABLE_HEAD_FIGURE_CLASS = "py-2.5 pl-4 text-right text-sm font-semibold text-muted-foreground";
+export const DATA_TABLE_ROW_CLASS = "border-b border-rule-soft";
+export const DATA_TABLE_LABEL_CELL_CLASS = "py-2.5 pr-4 font-semibold text-foreground";
+export const DATA_TABLE_FIGURE_CELL_CLASS = "py-2.5 pl-4 text-right text-foreground";
+export const DATA_TABLE_PRIOR_FIGURE_CELL_CLASS = "py-2.5 pl-4 text-right text-muted-foreground";
+
+/** Labeled figures side by side (the sample underwrite, a state's facts): a ruled list, three columns from 640px. */
+export const DATA_FIGURES_CLASS = "mt-6 grid border-t-2 border-foreground sm:grid-cols-3 sm:gap-x-8";
+export const DATA_FIGURE_ITEM_CLASS = "border-b border-rule-soft py-4";
+export const DATA_FIGURE_LABEL_CLASS = "text-sm font-semibold text-muted-foreground";
+export const DATA_FIGURE_VALUE_CLASS = "mt-1 text-2xl font-medium text-foreground";
+
+/** A group of cross-links under the page's ask: a rule, a sentence-case label, 2px tags with a 44px target. */
+export const DATA_LINK_GROUP_CLASS = "mt-12 border-t border-border pt-6";
+export const DATA_LINK_GROUP_LABEL_CLASS = "mb-3 text-base font-semibold text-foreground";
+export const DATA_LINK_ROW_CLASS = "flex flex-wrap gap-2";
+export const DATA_TAG_LINK_CLASS =
+  "inline-flex min-h-11 min-w-11 items-center rounded-sm border border-border px-3 text-sm text-foreground transition-colors hover:bg-band";
+
+/** The reading column under the hero. PageHero's bottom rule separates the head, so the section adds none. */
+export function DataPageBody({ children }: { children: ReactNode }) {
+  return (
+    <Section rule="none" rhythm="tight">
+      <div className="max-w-[68ch] [&>*:first-child]:mt-0">{children}</div>
+    </Section>
+  );
+}
+
+/* ------------------------------------------------------------------------ */
 /* Shared market-page sections. Both city render paths (the programmatic     */
 /* app/markets/[city] template and the bespoke SafeMarketPage) use these and */
 /* one data builder (lib/markets/market-page-data.ts), so they cannot drift. */
@@ -121,7 +199,11 @@ export function MarketDataAsOf({ year }: { year: number }) {
   );
 }
 
-/** Home › Markets › State › City. The state crumb appears only when a state guide exists. */
+/**
+ * Home › Markets › State › City. The state crumb appears only when a state
+ * guide exists. Navigation set as a meta line under the H1 (MarketHero
+ * mounts it), never above it; each link keeps a 44px target.
+ */
 export function MarketBreadcrumb({
   city,
   stateName,
@@ -132,16 +214,16 @@ export function MarketBreadcrumb({
   stateSlug: string | null;
 }) {
   return (
-    <nav aria-label="Breadcrumb" className="mb-6 text-xs">
-      <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
+    <nav aria-label="Breadcrumb" className={ARTICLE_META_NEXT}>
+      <ol className={DATA_BREADCRUMB_LIST_CLASS}>
         <li>
-          <IntentPrefetchLink href="/" className="hover:text-foreground">
+          <IntentPrefetchLink href="/" className={ARTICLE_META_LINK}>
             Home
           </IntentPrefetchLink>
         </li>
         <li aria-hidden="true">›</li>
         <li>
-          <IntentPrefetchLink href="/markets" className="hover:text-foreground">
+          <IntentPrefetchLink href="/markets" className={ARTICLE_META_LINK}>
             Markets
           </IntentPrefetchLink>
         </li>
@@ -149,14 +231,14 @@ export function MarketBreadcrumb({
         {stateSlug ? (
           <>
             <li>
-              <IntentPrefetchLink href={`/states/${stateSlug}`} className="hover:text-foreground">
+              <IntentPrefetchLink href={`/states/${stateSlug}`} className={ARTICLE_META_LINK}>
                 {stateName}
               </IntentPrefetchLink>
             </li>
             <li aria-hidden="true">›</li>
           </>
         ) : null}
-        <li className="font-semibold text-foreground">{city}</li>
+        <li className={DATA_BREADCRUMB_CURRENT_CLASS}>{city}</li>
       </ol>
     </nav>
   );
@@ -171,14 +253,26 @@ function sampleFor(city: string, hud: HudRent) {
   });
 }
 
-/** Eyebrow, H1 (the data title), byline, and the HUD lead with FMR's definition. */
+/**
+ * The page head on PageHero: the H1 (the data title), then under it the
+ * place line ("{City}, {ST}", the words the old eyebrow carried), the byline,
+ * the breadcrumb, the one "Analyze a deal free" link (audit row P2-80: the
+ * action in the first screen) and the HUD lead with FMR's definition. The
+ * link sits before the lead, as in a post header, so the long lead does not
+ * push it below the first phone screen.
+ */
 export function MarketHero({
   city,
   stateCode,
+  stateName,
+  stateSlug,
   data,
 }: {
   city: string;
   stateCode: string;
+  stateName: string;
+  /** The state guide's slug, or null while that guide is not indexable. */
+  stateSlug: string | null;
   data: MarketPageData;
 }) {
   const { hud } = data;
@@ -189,15 +283,14 @@ export function MarketHero({
       ? `At a stated ${usd(SAMPLE_DEAL_FIXTURE.values.purchasePrice)} price with the 3-bedroom FMR as a placeholder rent, TrueCap's sample underwrite below comes to ${cashFlow < 0 ? "−" : "+"}${usd(Math.abs(cashFlow))}/mo cash flow, a ${sample.capRate.toFixed(1)}% cap rate, and a ${sample.dscr.toFixed(2)} DSCR. A specific ${city} property runs on its own price, rent, tax bill, and insurance.`
       : `TrueCap has no HUD figure for ${city}. Bring the property's own rent, tax bill, and insurance evidence, then run the address with every assumption labeled and editable.`;
   return (
-    <header>
-      <p className="flex items-center gap-1.5 text-2xs font-bold uppercase tracking-widest text-primary">
-        <MapPin className="size-3.5" /> {city}, {stateCode}
+    <PageHero title={data.h1}>
+      <p className={ARTICLE_META}>
+        {city}, {stateCode}
       </p>
-      <h1 className="mt-2 text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-        {data.h1}
-      </h1>
       <BlogByline />
-      <p className="mt-5 text-lg leading-relaxed text-foreground">
+      <MarketBreadcrumb city={city} stateName={stateName} stateSlug={stateSlug} />
+      <UnderTitleAnalyzeLink />
+      <p className={DATA_LEDE_CLASS}>
         {data.lead ? (
           <>
             <strong>{data.lead}</strong> {FMR_DEFINITION_CLAUSE} (
@@ -205,7 +298,7 @@ export function MarketHero({
               href={HUD_FMR_OVERVIEW_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold text-primary hover:underline"
+              className="tc-link"
             >
               HUD
             </a>
@@ -218,7 +311,7 @@ export function MarketHero({
                   target="_blank"
                   rel="noopener noreferrer"
                   data-market-voucher-note=""
-                  className="font-semibold text-primary hover:underline"
+                  className="tc-link"
                 >
                   {data.voucherNote.linkLabel}
                 </a>
@@ -229,7 +322,7 @@ export function MarketHero({
         ) : null}
         {detail}
       </p>
-    </header>
+    </PageHero>
   );
 }
 
@@ -238,13 +331,12 @@ export function MarketHero({
  * ZIP-level SAFMR rows when HUD publishes them.
  *
  * Neither table sets a minimum width. The ZIP table's 24rem minimum, inside
- * the card's padding, hid its whole 3-bedroom column at 390px (78px cut,
+ * a card's padding, hid its whole 3-bedroom column at 390px (78px cut,
  * nothing to say so), and the bedroom table's 18rem overflowed at 360px.
- * Without them both fit a 360px phone, the column heads wrapping to two
- * lines. Where a table still overflows (the bedroom table at 320px) its
- * first column stays pinned and ScrollX shows its "Scroll for more" caption.
- * The pinned cells take the card's background and the solid header band
- * (components/ui/scroll-x.tsx), so the header row is the solid band too.
+ * Without them, and without the card, both have the column's full width. If
+ * a table still overflows, its first column stays pinned and ScrollX shows
+ * its "Scroll for more" caption. The tables sit on the paper on rules
+ * (DATA_TABLE_*), so the pinned cells take the paper too.
  */
 export function MarketFmrSection({
   city,
@@ -256,21 +348,16 @@ export function MarketFmrSection({
   const { hud, area, safmr } = data;
   if (!hud) return null;
   const prior = area?.prior ?? null;
-  const cell =
-    "px-4 py-2.5 text-2xs font-bold uppercase tracking-widest text-muted-foreground";
   const rows = [
     { label: "2 bedrooms", now: hud.rent2br, before: prior?.rent2br ?? null },
     { label: "3 bedrooms", now: hud.rent3br, before: prior?.rent3br ?? null },
   ];
   return (
-    <section
-      data-market-fmr=""
-      className="mt-10 rounded-2xl border border-border bg-card p-6"
-    >
-      <h2 className="text-2xl font-extrabold text-foreground">
+    <section data-market-fmr="" className={DATA_SECTION_CLASS}>
+      <SectionHeading>
         {city} {fmrLabel(hud.year)}
-      </h2>
-      <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+      </SectionHeading>
+      <p className={DATA_TEXT_CLASS}>
         {fmrLabel(hud.year)} for {data.areaPhrase}. It is an area
         benchmark, not what a specific unit rents for: compare it with current
         leases for the address.
@@ -281,7 +368,7 @@ export function MarketFmrSection({
               href={area.sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold text-primary hover:underline"
+              className="tc-link"
             >
               HUD&apos;s FY{area.year} page for this area
             </a>{" "}
@@ -289,36 +376,38 @@ export function MarketFmrSection({
           </>
         ) : null}
       </p>
-      <ScrollX cue stickyFirstColumn label="Market table" className="mt-4 overflow-x-auto rounded-xl border border-border">
-        <table className="w-full text-sm">
+      <ScrollX cue stickyFirstColumn label="Market table" className={DATA_TABLE_SCROLL_CLASS}>
+        <table className={DATA_TABLE_CLASS}>
           <caption className="sr-only">
             {fmrLabel(hud.year)} by bedroom count, {area ? area.areaName : city}
           </caption>
           <thead>
-            <tr className="border-b border-border bg-muted text-left">
-              <th scope="col" className={cell}>
+            <tr className={DATA_TABLE_HEAD_ROW_CLASS}>
+              <th scope="col" className={DATA_TABLE_HEAD_CELL_CLASS}>
                 Bedrooms
               </th>
               {prior ? (
-                <th scope="col" className={`${cell} text-right`}>
+                <th scope="col" className={DATA_TABLE_HEAD_FIGURE_CLASS}>
                   FY{prior.year} / month
                 </th>
               ) : null}
-              <th scope="col" className={`${cell} text-right`}>
+              <th scope="col" className={DATA_TABLE_HEAD_FIGURE_CLASS}>
                 FY{hud.year} / month
               </th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.label} className="border-b border-border last:border-b-0">
-                <td className="px-4 py-2.5 font-semibold text-foreground">{row.label}</td>
+              <tr key={row.label} className={DATA_TABLE_ROW_CLASS}>
+                <td className={DATA_TABLE_LABEL_CELL_CLASS}>{row.label}</td>
                 {prior ? (
-                  <td className="px-4 py-2.5 text-right text-muted-foreground">
-                    {row.before === null ? "—" : usd(row.before)}
+                  <td className={DATA_TABLE_PRIOR_FIGURE_CELL_CLASS}>
+                    <LedgerFigure>{row.before === null ? "—" : usd(row.before)}</LedgerFigure>
                   </td>
                 ) : null}
-                <td className="px-4 py-2.5 text-right text-foreground">{usd(row.now)}</td>
+                <td className={DATA_TABLE_FIGURE_CELL_CLASS}>
+                  <LedgerFigure>{usd(row.now)}</LedgerFigure>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -326,11 +415,11 @@ export function MarketFmrSection({
       </ScrollX>
 
       {safmr ? (
-        <div className="mt-6">
-          <h3 className="text-lg font-extrabold text-foreground">
+        <div className="mt-10">
+          <h3 className={DATA_SUBHEADING_CLASS}>
             By ZIP code: HUD Small Area Fair Market Rent (FY{safmr.year})
           </h3>
-          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          <p className={DATA_TEXT_CLASS}>
             HUD also publishes ZIP-level Fair Market Rents for the{" "}
             {safmr.areaName}, the region that includes {city}. They vary by
             ZIP and bedroom count.
@@ -341,7 +430,7 @@ export function MarketFmrSection({
                   href={area.safmrSourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-semibold text-primary hover:underline"
+                  className="tc-link"
                 >
                   HUD&apos;s ZIP table
                 </a>{" "}
@@ -349,45 +438,42 @@ export function MarketFmrSection({
               </>
             ) : null}
           </p>
-          <ScrollX cue stickyFirstColumn label="Market table" className="mt-3 overflow-x-auto rounded-xl border border-border">
-            <table className="w-full text-sm">
+          <ScrollX cue stickyFirstColumn label="Market table" className={DATA_TABLE_SCROLL_CLASS}>
+            <table className={DATA_TABLE_CLASS}>
               <caption className="sr-only">
                 HUD Small Area Fair Market Rent (FY{safmr.year}) by ZIP code, {safmr.areaName}
               </caption>
               <thead>
-                <tr className="border-b border-border bg-muted text-left">
-                  <th scope="col" className={cell}>
+                <tr className={DATA_TABLE_HEAD_ROW_CLASS}>
+                  <th scope="col" className={DATA_TABLE_HEAD_CELL_CLASS}>
                     ZIP code
                   </th>
-                  <th scope="col" className={`${cell} text-right`}>
+                  <th scope="col" className={DATA_TABLE_HEAD_FIGURE_CLASS}>
                     2BR / month
                   </th>
-                  <th scope="col" className={`${cell} text-right`}>
+                  <th scope="col" className={DATA_TABLE_HEAD_FIGURE_CLASS}>
                     3BR / month
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {safmr.rows.map((row) => (
-                  <tr
-                    key={row.zip}
-                    className="border-b border-border last:border-b-0"
-                  >
-                    <td className="px-4 py-2.5 font-semibold text-foreground">
-                      {row.zip}
+                  <tr key={row.zip} className={DATA_TABLE_ROW_CLASS}>
+                    <td className={DATA_TABLE_LABEL_CELL_CLASS}>
+                      <LedgerFigure>{row.zip}</LedgerFigure>
                     </td>
-                    <td className="px-4 py-2.5 text-right text-foreground">
-                      {usd(row.rent2br)}
+                    <td className={DATA_TABLE_FIGURE_CELL_CLASS}>
+                      <LedgerFigure>{usd(row.rent2br)}</LedgerFigure>
                     </td>
-                    <td className="px-4 py-2.5 text-right text-foreground">
-                      {usd(row.rent3br)}
+                    <td className={DATA_TABLE_FIGURE_CELL_CLASS}>
+                      <LedgerFigure>{usd(row.rent3br)}</LedgerFigure>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </ScrollX>
-          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+          <p className={DATA_NOTE_CLASS}>
             {safmr.rows.length < safmr.zipCount
               ? `${safmr.rows.length} of ${safmr.zipCount} ZIP codes in the ${safmr.areaName}, sampled highest to lowest.`
               : `All ${safmr.zipCount} ZIP codes in the ${safmr.areaName}, highest first.`}
@@ -438,31 +524,28 @@ export function MarketSampleUnderwrite({
   ];
 
   return (
-    <section data-market-sample-underwrite="" className="mt-10">
-      <h2 className="text-2xl font-extrabold text-foreground">
+    <section data-market-sample-underwrite="" className={DATA_SECTION_CLASS}>
+      <SectionHeading>
         What the HUD FMR pencils to
-      </h2>
-      <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+      </SectionHeading>
+      <p className={DATA_TEXT_CLASS}>
         Sample underwrite at a stated {usd(price)} price with the HUD
         3-bedroom FMR as a placeholder rent — not a listing. TrueCap ran its sample deal with{" "}
         {usd(hud.rent3br)}/mo of rent and every other assumption unchanged.
       </p>
-      <dl className="mt-4 grid gap-3 sm:grid-cols-3">
+      <dl className={DATA_FIGURES_CLASS}>
         {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="rounded-xl border border-border bg-card p-4"
-          >
-            <dt className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+          <div key={stat.label} className={DATA_FIGURE_ITEM_CLASS}>
+            <dt className={DATA_FIGURE_LABEL_CLASS}>
               {stat.label}
             </dt>
-            <dd className="mt-1 text-2xl font-extrabold text-foreground">
-              {stat.value}
+            <dd className={DATA_FIGURE_VALUE_CLASS}>
+              <LedgerFigure>{stat.value}</LedgerFigure>
             </dd>
           </div>
         ))}
       </dl>
-      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+      <p className={DATA_NOTE_CLASS}>
         Assumptions: {usd(price)} price, {usd(hud.rent3br)}/mo rent (HUD FMR,
         3 bedrooms), {assumptions.join(", ")}. Change any of them in the
         analyzer and the numbers move with you.
@@ -486,13 +569,13 @@ export function MarketLocalData({
   const licensing = facts?.rentalLicensing ?? null;
   if (!tax && !licensing) return null;
   const source = (s: { url: string; title: string; publisher: string; retrievedAt: string }) => (
-    <dd className="mt-1 text-xs leading-relaxed text-muted-foreground">
+    <dd className="mt-1 text-sm leading-relaxed text-muted-foreground">
       Source:{" "}
       <a
         href={s.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="underline decoration-dotted underline-offset-2 hover:text-foreground"
+        className="tc-link"
       >
         {s.title}
       </a>{" "}
@@ -500,23 +583,23 @@ export function MarketLocalData({
     </dd>
   );
   return (
-    <section data-market-local-data="" className="mt-10 rounded-2xl border border-border bg-card p-6">
-      <h2 className="text-2xl font-extrabold text-foreground">Local data for {city}</h2>
-      <dl className="mt-4 space-y-4">
+    <section data-market-local-data="" className={DATA_SECTION_CLASS}>
+      <SectionHeading>Local data for {city}</SectionHeading>
+      <dl className="mt-6 border-t-2 border-foreground">
         {tax ? (
-          <div>
-            <dt className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+          <div className={DATA_FIGURE_ITEM_CLASS}>
+            <dt className={DATA_FIGURE_LABEL_CLASS}>
               {tax.county} effective property tax rate
             </dt>
-            <dd className="mt-1 text-lg font-extrabold text-foreground">
+            <dd className="mt-1 text-lg font-semibold text-foreground">
               {tax.value}% (tax year {tax.year})
             </dd>
             {source(tax.source)}
           </div>
         ) : null}
         {licensing ? (
-          <div>
-            <dt className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+          <div className={DATA_FIGURE_ITEM_CLASS}>
+            <dt className={DATA_FIGURE_LABEL_CLASS}>
               Rental licensing or registration
             </dt>
             <dd className="mt-1 text-base font-semibold text-foreground">
@@ -535,7 +618,7 @@ export function MarketLocalData({
 export function MarketSources({ data }: { data: MarketPageData }) {
   return (
     <SourceMethodologyBox
-      className="mt-10"
+      className={DATA_SECTION_CLASS}
       dataAsOf={data.dataAsOf}
       sources={data.sources}
       note="HUD figures come from HUD's published tables for the area. The sample underwrite runs TrueCap's sample deal through the analyzer's own math."
@@ -560,21 +643,19 @@ export function MarketVerifyLocally({ city }: { city: string }) {
     },
   ];
   return (
-    <section data-market-verify-locally="" className="mt-10">
-      <h2 className="text-2xl font-extrabold text-foreground">
+    <section data-market-verify-locally="" className={DATA_SECTION_CLASS}>
+      <SectionHeading>
         Three things to verify locally
-      </h2>
-      <ul className="mt-4 space-y-3">
-        {items.map((item) => (
-          <li key={item.title} className="flex gap-3 text-base leading-relaxed">
-            <CheckCircle2 className="mt-1 size-4 shrink-0 text-primary" />
-            <span>
-              <strong className="text-foreground">{item.title}.</strong>{" "}
-              <span className="text-muted-foreground">{item.body}</span>
-            </span>
-          </li>
-        ))}
-      </ul>
+      </SectionHeading>
+      {/* Term-and-detail rows on rules (the lead-in is the term), no icons. */}
+      <RuledList
+        className="mt-6"
+        items={items.map((item) => ({
+          key: item.title,
+          term: <>{item.title}.</>,
+          detail: item.body,
+        }))}
+      />
     </section>
   );
 }
@@ -621,36 +702,32 @@ export function MarketRelatedReading({
     label: post.title,
   }));
   if (glossary.length === 0 && blog.length === 0) return null;
-  const chip =
-    "inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
   return (
-    <section
-      data-market-related-reading=""
-      className="mt-12 border-t border-border pt-6"
-    >
-      <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+    <section data-market-related-reading="" className={DATA_LINK_GROUP_CLASS}>
+      <p className={DATA_LINK_GROUP_LABEL_CLASS}>
         The terms behind the numbers
       </p>
-      <div className="flex flex-wrap gap-2 text-sm">
+      <div className={DATA_LINK_ROW_CLASS}>
         {glossary.map((link) => (
-          <IntentPrefetchLink key={link.href} href={link.href} className={chip}>
+          <IntentPrefetchLink key={link.href} href={link.href} className={DATA_TAG_LINK_CLASS}>
             {link.label}
           </IntentPrefetchLink>
         ))}
       </div>
       {blog.length > 0 ? (
         <>
-          <p className="mb-3 mt-6 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          <p className={cn(DATA_LINK_GROUP_LABEL_CLASS, "mt-6")}>
             Related reading
           </p>
-          <ul className="space-y-1.5 text-sm">
+          {/* A post title is the link; no arrow after it (DESIGN.md chrome). */}
+          <ul className="text-base">
             {blog.map((link) => (
               <li key={link.href}>
                 <IntentPrefetchLink
                   href={link.href}
-                  className="inline-flex min-h-11 items-center font-semibold text-primary hover:underline"
+                  className="tc-link inline-flex min-h-11 items-center"
                 >
-                  {link.label} →
+                  {link.label}
                 </IntentPrefetchLink>
               </li>
             ))}
@@ -675,11 +752,11 @@ export function MarketStateGuideLink({
 }) {
   if (!stateSlug) return null;
   return (
-    <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
+    <p className="mt-6 text-pretty text-base leading-relaxed text-muted-foreground">
       For {stateName} data, see the{" "}
       <IntentPrefetchLink
         href={`/states/${stateSlug}`}
-        className="font-semibold text-primary hover:underline"
+        className="tc-link"
       >
         {stateName} guide
       </IntentPrefetchLink>
@@ -703,12 +780,12 @@ export function MarketNearby({ slug }: { slug: string }) {
   const { stateName, sameState, acrossStateLine } = groups;
   if (sameState.length === 0 && acrossStateLine.length === 0) return null;
   const chips = (markets: MarketLink[]) => (
-    <div className="flex flex-wrap gap-2 text-sm">
+    <div className={DATA_LINK_ROW_CLASS}>
       {markets.map((market) => (
         <IntentPrefetchLink
           key={market.slug}
           href={`/markets/${market.slug}`}
-          className="inline-flex min-h-11 items-center rounded-full border border-border bg-card px-3 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className={DATA_TAG_LINK_CLASS}
         >
           {market.name}, {market.stateCode}
         </IntentPrefetchLink>
@@ -716,10 +793,10 @@ export function MarketNearby({ slug }: { slug: string }) {
     </div>
   );
   return (
-    <section data-market-nearby="" className="mt-12 border-t border-border pt-6">
+    <section data-market-nearby="" className={DATA_LINK_GROUP_CLASS}>
       {sameState.length > 0 ? (
         <div data-market-group="state">
-          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          <p className={DATA_LINK_GROUP_LABEL_CLASS}>
             More {stateName} markets
           </p>
           {chips(sameState)}
@@ -730,7 +807,7 @@ export function MarketNearby({ slug }: { slug: string }) {
           data-market-group="across-state-line"
           className={sameState.length > 0 ? "mt-6" : undefined}
         >
-          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          <p className={DATA_LINK_GROUP_LABEL_CLASS}>
             Across the state line
           </p>
           {chips(acrossStateLine)}
@@ -802,49 +879,52 @@ export function SafeMarketPage(identity: SafeMarketPageIdentity) {
   const mainData = { [MARKET_DATA_ATTRIBUTE]: data.status };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={DATA_PAGE_ROOT_CLASS}>
       <JsonLd data={webpageLd} />
       <JsonLd data={breadcrumbLd} />
       <Header />
-      <main
-        id="main"
-        {...mainData}
-        className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12"
-      >
-        <MarketBreadcrumb city={city} stateName={stateName} stateSlug={stateSlug} />
-        <MarketHero city={city} stateCode={stateCode} data={data} />
+      <main id="main" {...mainData} tabIndex={-1} className={DATA_PAGE_MAIN_CLASS}>
+        <MarketHero
+          city={city}
+          stateCode={stateCode}
+          stateName={stateName}
+          stateSlug={stateSlug}
+          data={data}
+        />
 
-        {data.hud ? (
-          <>
-            <MarketFmrSection city={city} data={data} />
-            <MarketSampleUnderwrite city={city} hud={data.hud} />
-          </>
-        ) : null}
+        <DataPageBody>
+          {data.hud ? (
+            <>
+              <MarketFmrSection city={city} data={data} />
+              <MarketSampleUnderwrite city={city} hud={data.hud} />
+            </>
+          ) : null}
 
-        <MarketLocalData city={city} facts={data.facts} />
+          <MarketLocalData city={city} facts={data.facts} />
 
-        <DataFaq heading={`${city} rental data: common questions`} items={data.faq} />
+          <DataFaq heading={`${city} rental data: common questions`} items={data.faq} />
 
-        <MarketSources data={data} />
+          <MarketSources data={data} />
 
-        <MarketVerifyLocally city={city} />
+          <MarketVerifyLocally city={city} />
 
-        <MarketStateGuideLink stateName={stateName} stateSlug={stateSlug} />
+          <MarketStateGuideLink stateName={stateName} stateSlug={stateSlug} />
 
-        <div className="mt-10">
-          <SeoAnalyzerCta
-            context={`a ${city} property`}
-            handoff={{ address }}
-            utmSource="market"
-            supportingText={`Start with a street address in ${city}, ${stateCode}. Review every labeled starting assumption and replace it with property-specific evidence.`}
-          />
-        </div>
+          <div className={DATA_SECTION_CLASS}>
+            <SeoAnalyzerCta
+              context={`a ${city} property`}
+              handoff={{ address }}
+              utmSource="market"
+              supportingText={`Start with a street address in ${city}, ${stateCode}. Review every labeled starting assumption and replace it with property-specific evidence.`}
+            />
+          </div>
 
-        <CityStrategyGuides citySlug={slug} cityName={city} />
+          <CityStrategyGuides citySlug={slug} cityName={city} />
 
-        {data.hud ? <MarketRelatedReading /> : null}
+          {data.hud ? <MarketRelatedReading /> : null}
 
-        <MarketNearby slug={slug} />
+          <MarketNearby slug={slug} />
+        </DataPageBody>
       </main>
       <SiteFooter />
       <ScrollDepthTracker />

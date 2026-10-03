@@ -22,12 +22,18 @@
 import type { Metadata } from "next";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { notFound } from "next/navigation";
-import { Calculator } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
 import { CityStrategyGuides } from "@/components/marketing/city-strategy-guides";
 import { DataFaq } from "@/components/marketing/data-faq";
 import {
-  MarketBreadcrumb,
+  DATA_LINK_GROUP_CLASS,
+  DATA_LINK_GROUP_LABEL_CLASS,
+  DATA_LINK_ROW_CLASS,
+  DATA_PAGE_MAIN_CLASS,
+  DATA_PAGE_ROOT_CLASS,
+  DATA_SECTION_CLASS,
+  DATA_TAG_LINK_CLASS,
+  DataPageBody,
   MarketFmrSection,
   MarketHero,
   MarketLocalData,
@@ -185,82 +191,83 @@ export default async function MarketCityPage({
   const mainData = { [MARKET_DATA_ATTRIBUTE]: page.status };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={DATA_PAGE_ROOT_CLASS}>
       <JsonLd data={webPageLd} />
       <JsonLd data={breadcrumbLd} />
       <Header />
 
-      <main
-        id="main"
-        {...mainData}
-        className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-12"
-      >
-        <MarketBreadcrumb
+      <main id="main" {...mainData} tabIndex={-1} className={DATA_PAGE_MAIN_CLASS}>
+        {/* The head on PageHero: the H1, then the place line, the byline, the
+            breadcrumb and the one analyze link under it (P2-80). */}
+        <MarketHero
           city={data.name}
+          stateCode={data.stateCode}
           stateName={data.stateName}
           stateSlug={stateSlug}
-        />
-        <MarketHero city={data.name} stateCode={data.stateCode} data={page} />
-
-        {page.hud ? (
-          <>
-            <MarketFmrSection city={data.name} data={page} />
-            <MarketSampleUnderwrite city={data.name} hud={page.hud} />
-          </>
-        ) : null}
-
-        <MarketLocalData city={data.name} facts={page.facts} />
-
-        <DataFaq
-          heading={`${data.name} rental data: common questions`}
-          items={page.faq}
+          data={page}
         />
 
-        <MarketSources data={page} />
+        <DataPageBody>
+          {page.hud ? (
+            <>
+              <MarketFmrSection city={data.name} data={page} />
+              <MarketSampleUnderwrite city={data.name} hud={page.hud} />
+            </>
+          ) : null}
 
-        <MarketVerifyLocally city={data.name} />
+          <MarketLocalData city={data.name} facts={page.facts} />
 
-        <MarketStateGuideLink stateName={data.stateName} stateSlug={stateSlug} />
-
-        <div className="mt-10">
-          <SeoAnalyzerCta
-            context={`a ${data.name} property`}
-            handoff={{ address: `${data.name}, ${data.stateCode}` }}
-            utmSource="market-page"
-            supportingText={`Start with ${data.name} context, then verify the address, rent, property tax, insurance, and every other assumption. Every assumption is labeled and editable.`}
+          <DataFaq
+            heading={`${data.name} rental data: common questions`}
+            items={page.faq}
           />
-        </div>
 
-        {/* Long-tail strategy guides, reachable from their city parent once
-            they are indexable. The helper filters unreleased specialist
-            models and noindexed combo pages (lib/seo/link-policy.ts). */}
-        <CityStrategyGuides citySlug={data.slug} cityName={data.name} />
+          <MarketSources data={page} />
 
-        {page.hud ? <MarketRelatedReading postSlugs={data.relatedPosts} /> : null}
+          <MarketVerifyLocally city={data.name} />
 
-        {/* Related calculators — released only; hidden if the gate empties it. */}
-        {RELATED_TOOLS.length > 0 ? (
-          <section className="mt-12 border-t border-border pt-6">
-            <p className="flex items-center gap-1.5 text-xs uppercase tracking-widest text-muted-foreground font-bold mb-3">
-              <Calculator className="size-3.5" /> Free calculators
-            </p>
-            <div className="flex flex-wrap gap-2 text-sm">
-              {RELATED_TOOLS.map((t) => (
-                <IntentPrefetchLink
-                  key={t.slug}
-                  href={`/tools/${t.slug}`}
-                  className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
-                >
-                  {t.label}
-                </IntentPrefetchLink>
-              ))}
-            </div>
-          </section>
-        ) : null}
+          <MarketStateGuideLink stateName={data.stateName} stateSlug={stateSlug} />
 
-        {/* Up to five other markets: "More {State} markets", then "Across
-            the state line" for a shared HUD FMR area — lib/markets/nearby.ts. */}
-        <MarketNearby slug={data.slug} />
+          <div className={DATA_SECTION_CLASS}>
+            <SeoAnalyzerCta
+              context={`a ${data.name} property`}
+              handoff={{ address: `${data.name}, ${data.stateCode}` }}
+              utmSource="market-page"
+              supportingText={`Start with ${data.name} context, then verify the address, rent, property tax, insurance, and every other assumption. Every assumption is labeled and editable.`}
+            />
+          </div>
+
+          {/* Long-tail strategy guides, reachable from their city parent once
+              they are indexable. The helper filters unreleased specialist
+              models and noindexed combo pages (lib/seo/link-policy.ts). */}
+          <CityStrategyGuides citySlug={data.slug} cityName={data.name} />
+
+          {page.hud ? <MarketRelatedReading postSlugs={data.relatedPosts} /> : null}
+
+          {/* Related calculators — released only; hidden if the gate empties it. */}
+          {RELATED_TOOLS.length > 0 ? (
+            <section className={DATA_LINK_GROUP_CLASS}>
+              <p className={DATA_LINK_GROUP_LABEL_CLASS}>
+                Free calculators
+              </p>
+              <div className={DATA_LINK_ROW_CLASS}>
+                {RELATED_TOOLS.map((t) => (
+                  <IntentPrefetchLink
+                    key={t.slug}
+                    href={`/tools/${t.slug}`}
+                    className={DATA_TAG_LINK_CLASS}
+                  >
+                    {t.label}
+                  </IntentPrefetchLink>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {/* Up to five other markets: "More {State} markets", then "Across
+              the state line" for a shared HUD FMR area — lib/markets/nearby.ts. */}
+          <MarketNearby slug={data.slug} />
+        </DataPageBody>
       </main>
 
       <SiteFooter />

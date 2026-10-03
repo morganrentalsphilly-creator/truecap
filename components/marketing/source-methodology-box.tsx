@@ -14,6 +14,11 @@ import { cn } from "@/lib/utils";
  * <Disclaimer /> (in SiteFooter) carries the not-advice statement; this box
  * does not repeat it (docs/voice.md rule 3).
  *
+ * Set on a rule, not in a tinted box (DESIGN.md: the sources block uses rules
+ * and space; Note's grammar in components/marketing/page-parts.tsx): the 1px
+ * rule, the heading at 16px and 600, the lines at 14px in Ink 2, links in the
+ * site's link style.
+ *
  * The closing line states only what a reader can do with the box: check a
  * sourced figure against the listed page. It does not say the figures were
  * retrieved from those pages on the listed dates, because most market pages'
@@ -43,11 +48,11 @@ export function SourceMethodologyBox({
       data-sources-box=""
       aria-labelledby="sources-heading"
       className={cn(
-        "rounded-xl border border-border bg-muted/20 px-4 py-4 text-xs leading-relaxed text-muted-foreground sm:px-5",
+        "border-t border-border pt-4 text-sm leading-relaxed text-muted-foreground",
         className,
       )}
     >
-      <h2 id="sources-heading" className="text-sm font-bold text-foreground">
+      <h2 id="sources-heading" className="text-base font-semibold text-foreground">
         Sources &amp; methodology
       </h2>
       {dataAsOf ? (
@@ -64,7 +69,7 @@ export function SourceMethodologyBox({
                 href={source.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline decoration-dotted underline-offset-2 hover:text-foreground"
+                className="tc-link"
               >
                 {source.label}
               </a>
@@ -79,7 +84,7 @@ export function SourceMethodologyBox({
           : null}
         <IntentPrefetchLink
           href="/methodology"
-          className="underline decoration-dotted underline-offset-2 hover:text-foreground"
+          className="tc-link"
         >
           See our full methodology
         </IntentPrefetchLink>
