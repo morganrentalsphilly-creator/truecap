@@ -44,13 +44,19 @@ import { STATES } from "@/lib/states";
  * no edit here: the path leaves the sitemap and every registry block, and
  * only a hand-written body link to it fails rule 2.
  *
- * Four pages need the mounted app router, request state or live services
+ * Three pages need the mounted app router, request state or live services
  * while rendering and cannot render in a unit test (NOT_UNIT_RENDERABLE).
  * Their literal hrefs, and those of every component module they import
  * (followed through the import graph), are checked against rule 2 from
  * source; their outbound links do not count toward rule 1 (which only makes
  * it stricter), and the loopback crawl of the built site covers them
  * (seo/scripts/crawl.ts --base).
+ *
+ * /pricing was the fourth. It now reads the session and the Stripe prices
+ * inside Suspense boundaries, so it renders here, but only as far as its
+ * first bytes: the plan cards arrive later in the response. Its rendered
+ * links are checked like any page's, and its source and imports are still
+ * scanned for rule 2 (SOURCE_SCANNED), so the cards' links stay covered.
  */
 
 const ROOT = process.cwd();
@@ -59,7 +65,6 @@ const APP = join(ROOT, "app");
 const NOT_UNIT_RENDERABLE: Record<string, string> = {
   "/": "client components (BillingSuccessBanner) call useRouter/useSearchParams, which need the mounted app router",
   "/analyze": "the analyzer's client components need the mounted app router and the root layout's ActionConfirmProvider",
-  "/pricing": "reads the Supabase session cookie and Stripe display prices",
   "/reviews": "reads live usage counts through unstable_cache",
 };
 
@@ -72,6 +77,9 @@ const ENV_GATED_SITEMAP_PATHS: Record<string, RegExp> = {
   // components/marketing/pricing-value-stack.tsx links it inside `agentProConfigured ? …`.
   "/for-agents": /isAgentProConfigured\(\)\s*\?\s*\[sitemapEntry\(siteUrl,\s*"\/for-agents"\)\]/,
 };
+
+/** Pages whose source is scanned for rule 2: the unrenderable ones, and /pricing for the parts that stream. */
+const SOURCE_SCANNED = [...Object.keys(NOT_UNIT_RENDERABLE), "/pricing"];
 
 type Rendered = { html: string; links: string[]; mainLinks: string[] };
 
@@ -264,7 +272,7 @@ describe("internal link graph (every sitemap page, rendered)", () => {
       if (why) violations.push(`${from} → ${target}: ${why}`);
     };
     for (const [from, page] of rendered) for (const target of page.links) await check(from, target);
-    for (const path of Object.keys(NOT_UNIT_RENDERABLE)) {
+    for (const path of SOURCE_SCANNED) {
       const route = routeFor(path);
       expect(route, path).not.toBeNull();
       const targets = sourceTargets(route!.file);
