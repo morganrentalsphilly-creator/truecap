@@ -17,10 +17,39 @@
 import type { Metadata } from "next";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { notFound } from "next/navigation";
-import { CheckCircle2 } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
+import { ARTICLE_META_LINK, ARTICLE_META_NEXT } from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { DataFaq } from "@/components/marketing/data-faq";
+import { PageHero, RuledList, UnderTitleAnalyzeLink } from "@/components/marketing/page-parts";
+import {
+  DATA_BREADCRUMB_CURRENT_CLASS,
+  DATA_BREADCRUMB_LIST_CLASS,
+  DATA_FIGURES_CLASS,
+  DATA_FIGURE_ITEM_CLASS,
+  DATA_FIGURE_LABEL_CLASS,
+  DATA_LEDE_CLASS,
+  DATA_LINK_GROUP_CLASS,
+  DATA_LINK_GROUP_LABEL_CLASS,
+  DATA_LINK_ROW_CLASS,
+  DATA_NOTE_CLASS,
+  DATA_PAGE_MAIN_CLASS,
+  DATA_PAGE_ROOT_CLASS,
+  DATA_SECTION_CLASS,
+  DATA_TABLE_CLASS,
+  DATA_TABLE_FIGURE_CELL_CLASS,
+  DATA_TABLE_HEAD_CELL_CLASS,
+  DATA_TABLE_HEAD_FIGURE_CLASS,
+  DATA_TABLE_HEAD_ROW_CLASS,
+  DATA_TABLE_LABEL_CELL_CLASS,
+  DATA_TABLE_ROW_CLASS,
+  DATA_TABLE_SCROLL_CLASS,
+  DATA_TAG_LINK_CLASS,
+  DATA_TEXT_CLASS,
+  DataPageBody,
+} from "@/components/marketing/safe-market-page";
+import { SectionHeading } from "@/components/marketing/section";
+import { LedgerFigure } from "@/components/ledger/ledger-parts";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SeoAnalyzerCta } from "@/components/marketing/seo-analyzer-cta";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -145,8 +174,6 @@ export default async function StatePage({
     HUD_FMR_OVERVIEW_SOURCE,
     ...cityDocs,
   ].filter((source) => (seen.has(source.href) ? false : (seen.add(source.href), true)));
-  const cell =
-    "px-4 py-2.5 text-2xs font-bold uppercase tracking-widest text-muted-foreground";
 
   const placeLd = {
     "@context": "https://schema.org",
@@ -192,225 +219,220 @@ export default async function StatePage({
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={DATA_PAGE_ROOT_CLASS}>
       <JsonLd data={placeLd} />
       <JsonLd data={webPageLd} />
       <JsonLd data={breadcrumbLd} />
       <Header />
 
-      <main id="main" className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
-        <nav aria-label="Breadcrumb" className="mb-6 text-xs">
-          <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
-            <li>
-              <IntentPrefetchLink href="/" className="hover:text-foreground">
-                Home
-              </IntentPrefetchLink>
-            </li>
-            <li aria-hidden="true">›</li>
-            <li>
-              <IntentPrefetchLink href="/states" className="hover:text-foreground">
-                States
-              </IntentPrefetchLink>
-            </li>
-            <li aria-hidden="true">›</li>
-            <li className="font-semibold text-foreground">{state.name}</li>
-          </ol>
-        </nav>
-
-        <h1 className="mt-2 text-3xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-5xl">
-          {title}
-        </h1>
-        <BlogByline />
-        {stateFacts ? (
-          <p data-state-summary="" className="mt-5 text-lg leading-relaxed text-foreground">
-            {buildStateSummary(state.name, stateFacts)}
-          </p>
-        ) : null}
-        <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-          {STATE_PAGE_GUIDANCE.intro(state.name)}
-        </p>
-
-        {facts.length > 0 ? (
-          <section
-            data-state-facts=""
-            className="mt-10 rounded-2xl border border-border bg-card p-6"
-          >
-            <h2 className="text-xl font-extrabold text-foreground">
-              {state.name} at a glance
-            </h2>
-            <dl className="mt-4 grid gap-4 sm:grid-cols-3">
-              {facts.map((fact) => (
-                <div key={fact.label}>
-                  <dt className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                    {fact.label}
-                  </dt>
-                  <dd className="mt-1 text-lg font-extrabold text-foreground">
-                    {fact.value}
-                  </dd>
-                  <dd className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                    {fact.note}{" "}
-                    <a
-                      href={fact.source.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline decoration-dotted underline-offset-2 hover:text-foreground"
-                    >
-                      Census table
-                    </a>
-                    .
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-        ) : null}
-
-        <section data-state-hud-cities="" className="mt-10">
-          <h2 className="text-2xl font-extrabold text-foreground">
-            {fmrLabel(year)} by {state.name} city
-          </h2>
-          <p className="mt-2 text-base leading-relaxed text-muted-foreground">
-            {STATE_PAGE_GUIDANCE.fmr(state.name, year)}
-          </p>
-          {/* No minimum width: at 24rem the 3-bedroom figures were cut
-              mid-number at 390px with no cue, and without it the table fits
-              a 320px phone (the column heads wrap to two lines). If it ever
-              overflows, the first column stays pinned and ScrollX shows its
-              "Scroll for more" caption. The pinned cells take the card's
-              background (components/ui/scroll-x.tsx), so the table sits on
-              the card and its header row is the solid band. */}
-          {hudCities.length > 0 ? (
-            <ScrollX cue stickyFirstColumn label="Table" className="mt-4 overflow-x-auto rounded-xl border border-border bg-card">
-              <table className="w-full text-sm">
-                <caption className="sr-only">
-                  {fmrLabel(year)} by {state.name} market city
-                </caption>
-                <thead>
-                  <tr className="border-b border-border bg-muted text-left">
-                    <th scope="col" className={cell}>
-                      City
-                    </th>
-                    <th scope="col" className={`${cell} text-right`}>
-                      2BR / month
-                    </th>
-                    <th scope="col" className={`${cell} text-right`}>
-                      3BR / month
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {hudCities.map((city) => (
-                    <tr
-                      key={city.slug}
-                      className="border-b border-border last:border-b-0"
-                    >
-                      <td className="px-4 py-2.5 font-semibold">
-                        {isLinkablePath(`/markets/${city.slug}`) ? (
-                          <IntentPrefetchLink
-                            href={`/markets/${city.slug}`}
-                            className="inline-flex min-h-11 items-center text-primary hover:underline"
-                            aria-label={describeStateHudCity(city)}
-                          >
-                            {city.name}
-                          </IntentPrefetchLink>
-                        ) : (
-                          city.name
-                        )}
-                      </td>
-                      <td className="px-4 py-2.5 text-right text-foreground">
-                        {usd(city.hud.rent2br)}
-                      </td>
-                      <td className="px-4 py-2.5 text-right text-foreground">
-                        {usd(city.hud.rent3br)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </ScrollX>
-          ) : (
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              TrueCap has no HUD Fair Market Rent for a {state.name} city yet.
-            </p>
-          )}
-          {bespoke.length > 0 ? (
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              More {state.name} city pages:{" "}
-              {bespoke.map((market, index) => (
-                <span key={market.slug}>
-                  {index > 0 ? ", " : ""}
-                  <IntentPrefetchLink
-                    href={`/markets/${market.slug}`}
-                    className="font-semibold text-primary hover:underline"
-                  >
-                    {market.name}
-                  </IntentPrefetchLink>
-                </span>
-              ))}
-              .
+      <main id="main" tabIndex={-1} className={DATA_PAGE_MAIN_CLASS}>
+        {/* The head on PageHero, in the market pages' order: the H1, the
+            byline, the breadcrumb as a meta line (navigation under the H1,
+            never above it), the one analyze link (P2-80: the action in the
+            first screen), then the sourced summary. */}
+        <PageHero title={title}>
+          <div className="mt-2">
+            <BlogByline />
+          </div>
+          <nav aria-label="Breadcrumb" className={ARTICLE_META_NEXT}>
+            <ol className={DATA_BREADCRUMB_LIST_CLASS}>
+              <li>
+                <IntentPrefetchLink href="/" className={ARTICLE_META_LINK}>
+                  Home
+                </IntentPrefetchLink>
+              </li>
+              <li aria-hidden="true">›</li>
+              <li>
+                <IntentPrefetchLink href="/states" className={ARTICLE_META_LINK}>
+                  States
+                </IntentPrefetchLink>
+              </li>
+              <li aria-hidden="true">›</li>
+              <li className={DATA_BREADCRUMB_CURRENT_CLASS}>{state.name}</li>
+            </ol>
+          </nav>
+          <UnderTitleAnalyzeLink />
+          {stateFacts ? (
+            <p data-state-summary="" className={DATA_LEDE_CLASS}>
+              {buildStateSummary(state.name, stateFacts)}
             </p>
           ) : null}
-        </section>
-
-        <DataFaq heading={`${state.name} rental data: common questions`} items={faq} />
-
-        <SourceMethodologyBox
-          className="mt-10"
-          dataAsOf={dataAsOf}
-          sources={sources}
-          note="Census figures describe the whole state; HUD figures describe the FMR area that contains each city."
-        />
-
-        <section data-state-verify-locally="" className="mt-10">
-          <h2 className="text-2xl font-extrabold text-foreground">
-            Three things to verify locally
-          </h2>
-          <ul className="mt-4 space-y-3">
-            {STATE_PAGE_GUIDANCE.verify.map((item) => (
-              <li
-                key={item.title}
-                className="flex gap-3 text-base leading-relaxed"
-              >
-                <CheckCircle2 className="mt-1 size-4 shrink-0 text-primary" />
-                <span>
-                  <strong className="text-foreground">{item.title}.</strong>{" "}
-                  <span className="text-muted-foreground">{item.body}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <div className="mt-10">
-          <SeoAnalyzerCta
-            context={`a ${state.name} property`}
-            utmSource="state-page"
-            supportingText={STATE_PAGE_GUIDANCE.run(state.name)}
-          />
-        </div>
-
-        <section className="mt-12 border-t border-border pt-6">
-          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Other state guides
+          <p className="mt-3 max-w-[68ch] text-pretty text-base leading-relaxed text-muted-foreground">
+            {STATE_PAGE_GUIDANCE.intro(state.name)}
           </p>
-          <div className="flex flex-wrap gap-2 text-sm">
-            {Object.values(STATES)
-              .filter(
-                (candidate) =>
-                  candidate.slug !== state.slug &&
-                  isLinkablePath(`/states/${candidate.slug}`),
-              )
-              .map((candidate) => (
-                <IntentPrefetchLink
-                  key={candidate.slug}
-                  href={`/states/${candidate.slug}`}
-                  className="rounded-full border border-border bg-card px-3 py-1.5 font-semibold text-foreground/80 hover:border-primary/40 hover:text-primary"
-                >
-                  {candidate.name}
-                </IntentPrefetchLink>
-              ))}
+        </PageHero>
+
+        <DataPageBody>
+          {facts.length > 0 ? (
+            <section data-state-facts="" className={DATA_SECTION_CLASS}>
+              <SectionHeading>
+                {state.name} at a glance
+              </SectionHeading>
+              <dl className={DATA_FIGURES_CLASS}>
+                {facts.map((fact) => (
+                  <div key={fact.label} className={DATA_FIGURE_ITEM_CLASS}>
+                    <dt className={DATA_FIGURE_LABEL_CLASS}>
+                      {fact.label}
+                    </dt>
+                    <dd className="mt-1 text-xl font-semibold tabular-nums text-foreground">
+                      {fact.value}
+                    </dd>
+                    <dd className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                      {fact.note}{" "}
+                      <a
+                        href={fact.source.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="tc-link"
+                      >
+                        Census table
+                      </a>
+                      .
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ) : null}
+
+          <section data-state-hud-cities="" className={DATA_SECTION_CLASS}>
+            <SectionHeading>
+              {fmrLabel(year)} by {state.name} city
+            </SectionHeading>
+            <p className={DATA_TEXT_CLASS}>
+              {STATE_PAGE_GUIDANCE.fmr(state.name, year)}
+            </p>
+            {/* No minimum width: at 24rem the 3-bedroom figures were cut
+                mid-number at 390px with no cue, and without it the table fits
+                a 320px phone (the column heads wrap to two lines). If it ever
+                overflows, the first column stays pinned and ScrollX shows its
+                "Scroll for more" caption. The table sits on the paper on
+                rules (DATA_TABLE_*), so the pinned cells take the paper. */}
+            {hudCities.length > 0 ? (
+              <ScrollX cue stickyFirstColumn label="Table" className={DATA_TABLE_SCROLL_CLASS}>
+                <table className={DATA_TABLE_CLASS}>
+                  <caption className="sr-only">
+                    {fmrLabel(year)} by {state.name} market city
+                  </caption>
+                  <thead>
+                    <tr className={DATA_TABLE_HEAD_ROW_CLASS}>
+                      <th scope="col" className={DATA_TABLE_HEAD_CELL_CLASS}>
+                        City
+                      </th>
+                      <th scope="col" className={DATA_TABLE_HEAD_FIGURE_CLASS}>
+                        2BR / month
+                      </th>
+                      <th scope="col" className={DATA_TABLE_HEAD_FIGURE_CLASS}>
+                        3BR / month
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {hudCities.map((city) => (
+                      <tr key={city.slug} className={DATA_TABLE_ROW_CLASS}>
+                        <td className={DATA_TABLE_LABEL_CELL_CLASS}>
+                          {isLinkablePath(`/markets/${city.slug}`) ? (
+                            <IntentPrefetchLink
+                              href={`/markets/${city.slug}`}
+                              className="tc-link -my-2.5 inline-flex min-h-11 items-center"
+                              aria-label={describeStateHudCity(city)}
+                            >
+                              {city.name}
+                            </IntentPrefetchLink>
+                          ) : (
+                            city.name
+                          )}
+                        </td>
+                        <td className={DATA_TABLE_FIGURE_CELL_CLASS}>
+                          <LedgerFigure>{usd(city.hud.rent2br)}</LedgerFigure>
+                        </td>
+                        <td className={DATA_TABLE_FIGURE_CELL_CLASS}>
+                          <LedgerFigure>{usd(city.hud.rent3br)}</LedgerFigure>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </ScrollX>
+            ) : (
+              <p className={DATA_NOTE_CLASS}>
+                TrueCap has no HUD Fair Market Rent for a {state.name} city yet.
+              </p>
+            )}
+            {bespoke.length > 0 ? (
+              <p className="mt-4 text-pretty text-base leading-relaxed text-muted-foreground">
+                More {state.name} city pages:{" "}
+                {bespoke.map((market, index) => (
+                  <span key={market.slug}>
+                    {index > 0 ? ", " : ""}
+                    <IntentPrefetchLink
+                      href={`/markets/${market.slug}`}
+                      className="tc-link"
+                    >
+                      {market.name}
+                    </IntentPrefetchLink>
+                  </span>
+                ))}
+                .
+              </p>
+            ) : null}
+          </section>
+
+          <DataFaq heading={`${state.name} rental data: common questions`} items={faq} />
+
+          <SourceMethodologyBox
+            className={DATA_SECTION_CLASS}
+            dataAsOf={dataAsOf}
+            sources={sources}
+            note="Census figures describe the whole state; HUD figures describe the FMR area that contains each city."
+          />
+
+          <section data-state-verify-locally="" className={DATA_SECTION_CLASS}>
+            <SectionHeading>
+              Three things to verify locally
+            </SectionHeading>
+            {/* Term-and-detail rows on rules (the lead-in is the term), no icons. */}
+            <RuledList
+              className="mt-6"
+              items={STATE_PAGE_GUIDANCE.verify.map((item) => ({
+                key: item.title,
+                term: <>{item.title}.</>,
+                detail: item.body,
+              }))}
+            />
+          </section>
+
+          <div className={DATA_SECTION_CLASS}>
+            <SeoAnalyzerCta
+              context={`a ${state.name} property`}
+              utmSource="state-page"
+              supportingText={STATE_PAGE_GUIDANCE.run(state.name)}
+            />
           </div>
-        </section>
+
+          <section className={DATA_LINK_GROUP_CLASS}>
+            <p className={DATA_LINK_GROUP_LABEL_CLASS}>
+              Other state guides
+            </p>
+            <div className={DATA_LINK_ROW_CLASS}>
+              {Object.values(STATES)
+                .filter(
+                  (candidate) =>
+                    candidate.slug !== state.slug &&
+                    isLinkablePath(`/states/${candidate.slug}`),
+                )
+                .map((candidate) => (
+                  <IntentPrefetchLink
+                    key={candidate.slug}
+                    href={`/states/${candidate.slug}`}
+                    className={DATA_TAG_LINK_CLASS}
+                  >
+                    {candidate.name}
+                  </IntentPrefetchLink>
+                ))}
+            </div>
+          </section>
+        </DataPageBody>
       </main>
 
       <SiteFooter />

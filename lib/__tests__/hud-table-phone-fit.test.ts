@@ -22,6 +22,17 @@ describe("P2-54, P2-79: HUD rent tables fit a phone, and cue the scroll if they 
   // 2026-10-02 with the minimum removed: both fit at 390, 360 and 320px, the
   // column heads wrapping to two lines; the bedroom table (18rem) fits at 360
   // and still overflows at 320, where the pinned column and the caption help.
+  // Wave 5 (template fan-out) moved the tables off their cards and onto rules:
+  // the table and its ScrollX wrapper take the shared DATA_TABLE_* class
+  // strings in components/marketing/safe-market-page.tsx, so the rules below
+  // read those strings as well as the mounts.
+  const TEMPLATE = "components/marketing/safe-market-page.tsx";
+  const classConst = (name: string): string => {
+    const match = new RegExp(`export const ${name} =\\s*"([^"]*)"`).exec(code(TEMPLATE));
+    expect(match, name).not.toBeNull();
+    return match![1]!;
+  };
+
   it.each([
     ["components/marketing/safe-market-page.tsx", 2],
     ["app/states/[slug]/page.tsx", 1],
@@ -31,23 +42,46 @@ describe("P2-54, P2-79: HUD rent tables fit a phone, and cue the scroll if they 
     expect(mounts).toHaveLength(tables);
     for (const [, scroll, table] of mounts) {
       expect(table, "no fixed minimum width").not.toMatch(/\bmin-w-/);
-      expect(table).toMatch(/className="w-full text-sm"/);
+      expect(table).toMatch(/className=\{DATA_TABLE_CLASS\}/);
       expect(scroll).toMatch(/\bcue\b/);
       expect(scroll).toMatch(/\bstickyFirstColumn\b/);
+      expect(scroll).toMatch(/className=\{DATA_TABLE_SCROLL_CLASS\}/);
     }
-    // The pinned header cell is the solid band (scroll-x.tsx sets bg-muted on
-    // it), so the rest of the header row is the same solid band, not 50%.
+    // No half-transparent header band: the head row sits on the paper, on a rule.
     expect(source).not.toContain("bg-muted/50");
   });
 
-  it("the state table sits on the card its pinned cells are filled with", () => {
+  it("the shared table strings set no minimum width", () => {
+    const table = classConst("DATA_TABLE_CLASS");
+    expect(table.split(" ")).toContain("w-full");
+    expect(table).not.toMatch(/\bmin-w-/);
+    for (const name of [
+      "DATA_TABLE_HEAD_ROW_CLASS",
+      "DATA_TABLE_HEAD_CELL_CLASS",
+      "DATA_TABLE_HEAD_FIGURE_CLASS",
+      "DATA_TABLE_ROW_CLASS",
+      "DATA_TABLE_LABEL_CELL_CLASS",
+      "DATA_TABLE_FIGURE_CELL_CLASS",
+      "DATA_TABLE_PRIOR_FIGURE_CELL_CLASS",
+    ]) {
+      const value = classConst(name);
+      expect(value, name).not.toMatch(/\bmin-w-|\bwhitespace-nowrap\b/);
+      // Sentence-case heads at 14px or more (DESIGN.md): no 10 or 11px step, no uppercase.
+      expect(value, name).not.toMatch(/\btext-(?:2xs|3xs|xs)\b|\buppercase\b/);
+    }
+  });
+
+  it("the pinned cells are filled with the paper the tables sit on", () => {
+    // ScrollX fills its pinned cells with the raised card and the band by
+    // default; the tables are on the paper now (no card around the FMR
+    // section or the state table), so the wrapper's class overrides both.
     expect(read("components/ui/scroll-x.tsx")).toContain("[&_table_td:first-child]:bg-card");
-    expect(code("app/states/[slug]/page.tsx")).toMatch(
-      /<ScrollX cue stickyFirstColumn label="Table" className="[^"]*\bbg-card\b/,
-    );
-    // The market tables are inside the FMR section's card already.
-    expect(code("components/marketing/safe-market-page.tsx")).toMatch(
-      /data-market-fmr=""\s+className="[^"]*\bbg-card\b/,
-    );
+    const scroll = classConst("DATA_TABLE_SCROLL_CLASS").split(" ");
+    expect(scroll).toContain("[&_table_td:first-child]:bg-background");
+    expect(scroll).toContain("[&_table_th:first-child]:bg-background");
+    for (const path of [TEMPLATE, "app/states/[slug]/page.tsx"]) {
+      expect(code(path), path).not.toMatch(/\bbg-card\b/);
+      expect(code(path), path).not.toMatch(/\bbg-muted\b/);
+    }
   });
 });
