@@ -39,6 +39,17 @@ export type SharedDealLeadCapture = {
 };
 
 /**
+ * The head of a share whose sender hid the exact address (the Share dialog's
+ * choice; app/s/[token]/page.tsx passes addressIncluded={false}). The page is
+ * named for what it is and says once, plainly, why no address is shown. The
+ * Share dialog quotes the heading to the agent before the link is made
+ * (components/investcalc/share-link-button.tsx).
+ */
+export const HIDDEN_ADDRESS_HEADING = "Rental analysis";
+export const HIDDEN_ADDRESS_NOTE =
+  "The sender kept the property address private.";
+
+/**
  * Whether a client's message is also emailed to the agent. The mode test is
  * the same as notificationsLive() in app/actions/capture-deal-lead.ts, which
  * decides the send, and the mail key is checked because that action's
@@ -159,9 +170,18 @@ export function SharedDealShell({
         className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-28 sm:pb-16"
       >
         <header className="mb-6 sm:mb-8">
+          {/* A share with the address hidden is headed by what it is, with
+              one line saying why there is no address. `values.address` then
+              holds a placeholder the lead form's signature is bound to
+              (app/s/[token]/page.tsx), which is not a heading. */}
           <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground">
-            {values.address}
+            {addressIncluded ? values.address : HIDDEN_ADDRESS_HEADING}
           </h1>
+          {addressIncluded ? null : (
+            <p className="mt-1 text-sm text-muted-foreground">
+              {HIDDEN_ADDRESS_NOTE}
+            </p>
+          )}
           {values.purchasePrice && (
             <p className="text-sm text-muted-foreground mt-1">
               {/* The body already labels an estimated price honestly; this
