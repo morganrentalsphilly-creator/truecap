@@ -368,7 +368,7 @@ const ARRIVED_FAQ: FaqItem[] = [
     question: "Why would I buy a rental directly when I could use Arrived?",
     answer: (
       <>
-        Three reasons: control (you pick the property + market), potentially different direct-ownership tax treatment, and cash-flow control. Direct ownership does not guarantee that every deduction or a 1031 exchange applies; eligibility depends on the property, transaction, and taxpayer, so verify it with licensed tax and legal professionals. Tradeoff: you do the underwriting + management work (or pay a PM).
+        Two reasons: control (you pick the property + market) and cash-flow control. Tradeoff: you do the underwriting + management work (or pay a PM).
       </>
     ),
   },

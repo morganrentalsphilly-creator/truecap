@@ -151,6 +151,9 @@ describe("the comparison pages about financial products", () => {
       expect(text).not.toMatch(/\$100 per share/i);
       expect(text).not.toMatch(/1% AUM/i);
       expect(text).not.toMatch(/\+ tax benefits/i);
+      // Arrived's help center says its investors get the tax benefits of
+      // depreciation, so tax treatment is not a reason to own directly.
+      expect(text).not.toMatch(/direct-ownership tax treatment/i);
     });
 
     it("carries the approved tax sentence and the neutral side-by-side sentence", () => {
@@ -191,6 +194,7 @@ describe("the comparison pages about financial products", () => {
       const taxCell = /feature: "Ownership tax treatment",[^}]*fundrise: "([^"]*)"/.exec(text);
       expect(taxCell?.[1]).toMatch(/^See Fundrise/);
       expect(text).not.toMatch(/fine (?:without|giving up) [^.]{0,40}depreciation/i);
+      expect(text).not.toMatch(/direct-ownership tax treatment/i);
     });
 
     it("links Fundrise's client returns page instead of quoting a return", () => {
