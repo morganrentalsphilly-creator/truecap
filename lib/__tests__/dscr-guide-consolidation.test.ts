@@ -54,6 +54,14 @@ const decode = (html: string) =>
     .replace(/&amp;/g, "&");
 
 /** Visible text of the rendered page: tags and JSON-LD dropped, entities decoded. */
+/**
+ * One visible FAQ row as the article frame's FaqSection renders it: the
+ * question in the summary's one <span> (the disclosure mark, an aria-hidden
+ * svg, follows it), the answer in the row's one <p>.
+ */
+const FAQ_ROW =
+  /<details[^>]*><summary[^>]*><span[^>]*>([^<]*)<\/span><svg aria-hidden="true"[^>]*>(?:<path[^>]*><\/path>)+<\/svg><\/summary><p[^>]*>([\s\S]*?)<\/p><\/details>/g;
+
 const visibleText = (html: string) =>
   decode(
     html
@@ -175,7 +183,7 @@ describe("DSCR guide consolidation: the canonical page", () => {
     );
 
     const visible = [
-      ...html.matchAll(/<details[^>]*><summary[^>]*>([\s\S]*?)<\/summary><p[^>]*>([\s\S]*?)<\/p><\/details>/g),
+      ...html.matchAll(FAQ_ROW),
     ].map((match) => [decode(match[1]), decode(match[2])]);
 
     expect(visible).toEqual(ld);
@@ -336,7 +344,7 @@ describe("DSCR guide consolidation: the canonical page", () => {
     const html = await renderCanonical();
     const text = visibleText(html);
     const faq = new Map(
-      [...html.matchAll(/<details[^>]*><summary[^>]*>([\s\S]*?)<\/summary><p[^>]*>([\s\S]*?)<\/p><\/details>/g)].map(
+      [...html.matchAll(FAQ_ROW)].map(
         (match) => [decode(match[1]), decode(match[2])] as const,
       ),
     );
