@@ -15,8 +15,9 @@
  *      'denied' BEFORE gtag.js loads. So gtag boots in a privacy-safe
  *      mode that doesn't set tracking cookies.
  *   2. This banner shows on first visit (no decision stored).
- *   3. User picks Accept (all consent granted) or Reject (consent
- *      stays denied — gtag still runs but only sends anonymous pings).
+ *   3. User picks Accept (storage and measurement consent granted; ad
+ *      personalization stays denied) or Reject (consent stays denied and
+ *      the Google tags are never loaded).
  *   4. We call gtag('consent', 'update', ...) to flip the consent state
  *      live, and persist the choice to localStorage so subsequent visits
  *      skip the banner.
@@ -69,6 +70,11 @@ function writeStoredConsent(value: ConsentValue): void {
 /**
  * Push the consent update to gtag. Safe no-op if gtag hasn't loaded
  * (dev mode, ad blockers).
+ *
+ * Accept means measurement only: ad_personalization is sent as "denied"
+ * whatever the choice, so accepting never opts a visitor into remarketing
+ * audiences or personalized ads, which neither the banner nor /privacy names.
+ * components/analytics/google-measurement.tsx sends the same values.
  */
 function pushGtagConsent(value: ConsentValue): void {
   try {
@@ -79,7 +85,7 @@ function pushGtagConsent(value: ConsentValue): void {
       ad_storage: value,
       analytics_storage: value,
       ad_user_data: value,
-      ad_personalization: value,
+      ad_personalization: "denied",
     });
   } catch {
     /* never let analytics break the UI */

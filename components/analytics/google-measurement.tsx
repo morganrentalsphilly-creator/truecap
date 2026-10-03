@@ -42,6 +42,13 @@ function GoogleMeasurementInner() {
   // lazyOnload loader has defined window.gtag — so it is a no-op. Without the
   // update here every accepting visitor ran GA4/Ads in denied (cookieless
   // ping) mode for the life of the document and on every later page load.
+  //
+  // MEASUREMENT ONLY: Accept grants storage and conversion measurement
+  // (ad_storage, analytics_storage, ad_user_data). ad_personalization stays
+  // 'denied' in the update, so the Ads tag does not build remarketing
+  // audiences: the banner asks for "analytics + paid-ad measurement" and
+  // /privacy gives the purpose as measuring which ads drive signups. The
+  // banner's own update (cookie-consent-banner.tsx) sends the same four values.
   const [consentGranted, setConsentGranted] = useState(false);
   useEffect(() => {
     const sync = () => setConsentGranted(readStoredAnalyticsConsent() === "granted");
@@ -75,7 +82,7 @@ gtag('consent', 'update', {
   ad_storage: 'granted',
   analytics_storage: 'granted',
   ad_user_data: 'granted',
-  ad_personalization: 'granted'
+  ad_personalization: 'denied'
 });
 (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
