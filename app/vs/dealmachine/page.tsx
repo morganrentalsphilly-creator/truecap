@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "DealMachine vs TrueCap (2026): Find vs Underwrite",
   description:
-    "DealMachine finds leads with property data and a driving-for-dollars app. TrueCap underwrites them. Honest comparison and how the two fit together.",
+    "DealMachine finds leads with property data and a driving-for-dollars app. TrueCap underwrites them. A comparison and how the two fit together.",
   keywords: [
     "dealmachine alternative",
     "dealmachine vs propstream",
@@ -174,7 +174,7 @@ export default function VsDealmachinePage() {
     name: "DealMachine vs TrueCap (2026): Find vs Underwrite",
     url: `${siteUrl}/vs/dealmachine`,
     description:
-      "DealMachine finds leads with property data and a driving-for-dollars app. TrueCap underwrites them. Honest comparison and how the two fit together.",
+      "DealMachine finds leads with property data and a driving-for-dollars app. TrueCap underwrites them. A comparison and how the two fit together.",
     dateModified: lastmodFor("/vs/dealmachine"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };

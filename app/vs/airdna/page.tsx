@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "AirDNA vs TrueCap (2026): STR Data vs Deal Math",
   description:
-    "AirDNA estimates STR revenue. TrueCap underwrites the full deal. Honest comparison for short-term rental investors plus how they fit together.",
+    "AirDNA estimates STR revenue. TrueCap underwrites the full deal. A comparison for short-term rental investors plus how they fit together.",
   keywords: [
     "airdna alternative",
     "airdna vs mashvisor",
@@ -161,7 +161,7 @@ export default function VsAirdnaPage() {
     name: "AirDNA vs TrueCap (2026): STR Data vs Deal Math",
     url: `${siteUrl}/vs/airdna`,
     description:
-      "AirDNA estimates STR revenue. TrueCap underwrites the full deal. Honest comparison for short-term rental investors plus how they fit together.",
+      "AirDNA estimates STR revenue. TrueCap underwrites the full deal. A comparison for short-term rental investors plus how they fit together.",
     dateModified: lastmodFor("/vs/airdna"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };

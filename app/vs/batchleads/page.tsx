@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "BatchLeads vs TrueCap (2026): Leads vs Analysis",
   description:
-    "BatchLeads finds motivated-seller leads. TrueCap underwrites the deals. Honest comparison plus how the two fit together.",
+    "BatchLeads finds motivated-seller leads. TrueCap underwrites the deals. A comparison plus how the two fit together.",
   keywords: [
     "batchleads alternative",
     "batchleads vs propstream",
@@ -164,7 +164,7 @@ export default function VsBatchleadsPage() {
     name: "BatchLeads vs TrueCap (2026): Leads vs Analysis",
     url: `${siteUrl}/vs/batchleads`,
     description:
-      "BatchLeads finds motivated-seller leads. TrueCap underwrites the deals. Honest comparison plus how the two fit together.",
+      "BatchLeads finds motivated-seller leads. TrueCap underwrites the deals. A comparison plus how the two fit together.",
     dateModified: lastmodFor("/vs/batchleads"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };

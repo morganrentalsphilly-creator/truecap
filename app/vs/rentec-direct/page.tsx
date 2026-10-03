@@ -49,7 +49,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Rentec Direct vs TrueCap (2026): PM vs Analysis",
   description:
-    "Rentec Direct runs the rentals you own. TrueCap underwrites the ones you're considering. Honest side-by-side.",
+    "Rentec Direct runs the rentals you own. TrueCap underwrites the ones you're considering. A side-by-side comparison.",
   keywords: [
     "rentec direct alternative",
     "rentec vs buildium",
@@ -169,7 +169,7 @@ export default function VsRentecDirectPage() {
     name: "Rentec Direct vs TrueCap (2026): PM vs Analysis",
     url: `${siteUrl}/vs/rentec-direct`,
     description:
-      "Rentec Direct runs the rentals you own. TrueCap underwrites the ones you're considering. Honest side-by-side.",
+      "Rentec Direct runs the rentals you own. TrueCap underwrites the ones you're considering. A side-by-side comparison.",
     dateModified: lastmodFor("/vs/rentec-direct"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };

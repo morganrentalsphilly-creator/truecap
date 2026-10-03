@@ -53,7 +53,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "RentRedi vs TrueCap (2026): Manage vs Underwrite",
   description:
-    "RentRedi collects rent. TrueCap models pre-purchase cash flow from reviewed assumptions. An honest comparison of where each tool fits.",
+    "RentRedi collects rent. TrueCap models pre-purchase cash flow from reviewed assumptions. A comparison of where each tool fits.",
   keywords: [
     "rentredi alternative",
     "rentredi vs truecap",

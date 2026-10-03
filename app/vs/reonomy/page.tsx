@@ -47,7 +47,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Reonomy vs TrueCap (2026): CRE Data vs Rentals",
   description:
-    "Reonomy is commercial real estate intelligence (owner, debt, tenants). TrueCap is residential underwriting. Different asset classes — honest comparison.",
+    "Reonomy is commercial real estate intelligence (owner, debt, tenants). TrueCap is residential underwriting. Different asset classes.",
   keywords: [
     "reonomy alternative",
     "reonomy vs propstream",
@@ -153,7 +153,7 @@ export default function VsReonomyPage() {
     name: "Reonomy vs TrueCap (2026): CRE Data vs Rentals",
     url: `${siteUrl}/vs/reonomy`,
     description:
-      "Reonomy is commercial real estate intelligence (owner, debt, tenants). TrueCap is residential underwriting. Different asset classes — honest comparison.",
+      "Reonomy is commercial real estate intelligence (owner, debt, tenants). TrueCap is residential underwriting. Different asset classes.",
     dateModified: lastmodFor("/vs/reonomy"),
     publisher: { "@id": `${siteUrl}/#organization` },
   };

@@ -52,7 +52,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Avail vs TrueCap (2026): Manage vs Underwrite",
   description:
-    "Avail manages your rentals after closing. TrueCap underwrites them before. Honest side-by-side of when each fits, plus how the two fit together.",
+    "Avail manages your rentals after closing. TrueCap underwrites them before. A side-by-side of when each fits, plus how the two fit together.",
   keywords: [
     "avail alternative",
     "avail vs truecap",
