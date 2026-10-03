@@ -29,14 +29,12 @@ import { notifyCookieConsentChanged } from "@/lib/use-cookie-banner";
 import {
   COOKIE_CHOICE_RESET_EVENT,
   COOKIE_CONSENT_STORAGE_KEY,
+  HIDE_ON_PATHS,
   pushGtagConsent,
 } from "@/components/marketing/cookie-consent-banner";
 
 /** Cookies the Google Ads tag writes once ad storage is granted. */
 const GOOGLE_ADS_COOKIE_PREFIX = "_gcl_";
-
-/** Mirror of the banner's HIDE_ON_PATHS: no banner there, so no control. */
-const HIDE_ON_PATHS = ["/embed"];
 
 /**
  * Expire every `_gcl_*` cookie this document can see. The tag sets them on
@@ -92,6 +90,7 @@ export function resetCookieChoice(): void {
 
 export function CookieChoicesButton({ className }: { className?: string }) {
   const pathname = usePathname() ?? "/";
+  // The banner's own list: no banner there, so no control.
   if (HIDE_ON_PATHS.some((p) => pathname.startsWith(p))) return null;
   return (
     <button type="button" onClick={resetCookieChoice} className={className}>

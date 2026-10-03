@@ -42,7 +42,7 @@ import { notifyCookieConsentChanged } from "@/lib/use-cookie-banner";
  * (embedded iframe on a third-party site — the partner owns their
  * own consent UX) or visually disruptive.
  */
-const HIDE_ON_PATHS = ["/embed"];
+export const HIDE_ON_PATHS = ["/embed"];
 
 const STORAGE_KEY = "truecap_cookie_consent_v1";
 /** The same key, for the footer's "Cookie choices" control. */
