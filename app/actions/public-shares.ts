@@ -396,7 +396,7 @@ export async function copyPublicShareToAccountAction(
       ok: false,
       code: "ADDRESS_HIDDEN",
       message:
-        "The sharer kept the property address private. Run the assumptions with a property you choose instead.",
+        "The sender kept the property address private. Run the assumptions with a property you choose instead.",
     };
   }
 
