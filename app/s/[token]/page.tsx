@@ -23,6 +23,9 @@ import { notFound } from "next/navigation";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import { resolvePublicShare } from "@/lib/public-share";
+import { isWellFormedShareToken } from "@/lib/share-token";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
+import { SHARE_CARD_IMAGE } from "@/lib/og/share-card";
 import { getPublicAgentBranding } from "@/lib/agent-share";
 import { getPublicDealComps } from "@/lib/public-deal-comps";
 import {
@@ -52,7 +55,7 @@ const opaqueShareReadRateLimit = createIpRateLimit({
   maxPerWindow: 300,
 });
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // Never resolve the private snapshot for metadata. Link unfurlers cache OG
   // fields outside TrueCap's access boundary, so the address/title belongs
   // only in the authorized page body.
@@ -60,6 +63,11 @@ export async function generateMetadata(): Promise<Metadata> {
   // social titles take no template, so they carry the brand themselves.
   const title = "Shared rental analysis";
   const socialTitle = `${title} | TrueCap`;
+  // og:url is the link itself and nothing more: the token is read from the
+  // path (no database call, so metadata stamps no view) and echoed only when
+  // it has the minted shape, never as free text.
+  const { token } = await params;
+  const url = isWellFormedShareToken(token) ? `/s/${token}` : undefined;
   return {
     title,
     description:
@@ -72,13 +80,21 @@ export async function generateMetadata(): Promise<Metadata> {
       nosnippet: true,
     },
     openGraph: {
+      ...OPEN_GRAPH_BASE,
+      type: "website",
       title: socialTitle,
       description: "Shared via TrueCap.",
+      ...(url ? { url } : {}),
+      // The one deal-free card every share link shows (app/og/share): the
+      // same image for every link, with no address, number or sender on it,
+      // served outside /s/ so robots.txt does not put it off limits.
+      images: [SHARE_CARD_IMAGE],
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: socialTitle,
       description: "Shared via TrueCap.",
+      images: [SHARE_CARD_IMAGE.url],
     },
   };
 }
