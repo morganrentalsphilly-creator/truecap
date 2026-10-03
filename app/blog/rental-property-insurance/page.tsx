@@ -10,12 +10,23 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Umbrella } from "lucide-react";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
@@ -136,38 +147,36 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8 sm:mb-10">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · {READING_TIME_MIN} min read
-          </p>
-          <BlogByline />
-          <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            {DESCRIPTION}
-          </p>
-        </header>
+      <ArticleMain>
+        <article>
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              · {READING_TIME_MIN} min read
+            </p>
+            <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
+              {DESCRIPTION}
+            </p>
+          </header>
 
-        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+          <ArticleBody>
           <p>
             Insurance is a property-specific input, not a safe national average.
             The seller&apos;s policy, an online estimate, and a quote for a
@@ -179,28 +188,28 @@ export default function BlogPost() {
             coverage and exclusions, and how a supported premium flows through{" "}
             <Link
               href="/blog/piti-explained-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               PITI
             </Link>{" "}
             into{" "}
             <Link
               href="/blog/how-to-calculate-noi-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               NOI
             </Link>
             , cash flow, and{" "}
             <Link
               href="/glossary/dscr"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               DSCR
             </Link>
             .
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Landlord insurance is not homeowners insurance
           </h2>
           <p>
@@ -229,7 +238,7 @@ export default function BlogPost() {
             </li>
           </ul>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             What a landlord policy actually covers
           </h2>
           <p>
@@ -263,7 +272,7 @@ export default function BlogPost() {
             activities.{" "}
             <a
               href="https://www.fema.gov/flood-insurance"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               FEMA notes that most homeowners insurance does not cover flood
               damage
@@ -273,7 +282,7 @@ export default function BlogPost() {
             agent answer material questions in writing.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Why a national cost range is not enough
           </h2>
           <p>
@@ -307,7 +316,7 @@ export default function BlogPost() {
             early enough to evaluate coverage and contingencies.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             How to screen before a quote arrives
           </h2>
           <p>
@@ -321,7 +330,7 @@ export default function BlogPost() {
             When you run an address in{" "}
             <Link
               href="/"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               TrueCap
             </Link>
@@ -331,7 +340,7 @@ export default function BlogPost() {
             soon as you have one.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Where the premium actually lands in the underwrite
           </h2>
           <p>
@@ -348,7 +357,7 @@ export default function BlogPost() {
               directly lowers your{" "}
               <Link
                 href="/glossary/cap-rate"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cap rate
               </Link>{" "}
@@ -363,7 +372,7 @@ export default function BlogPost() {
             model, that cuts monthly cash flow by the same ~$167 and lowers{" "}
             <Link
               href="/glossary/dscr"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               DSCR
             </Link>
@@ -372,7 +381,7 @@ export default function BlogPost() {
             written coverage calculation and threshold.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Five insurance checks before relying on an underwrite
           </h2>
           <ol>
@@ -386,7 +395,7 @@ export default function BlogPost() {
               form includes them. FEMA notes that{" "}
               <a
                 href="https://www.fema.gov/flood-insurance"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 homes in high-risk flood areas with mortgages from
                 government-backed lenders are required to have flood
@@ -420,7 +429,7 @@ export default function BlogPost() {
             you prepay more than a year of coverage,{" "}
             <a
               href="https://www.irs.gov/publications/p527"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               IRS Publication 527 has you deduct only the part of the premium
               that applies to each year
@@ -429,7 +438,7 @@ export default function BlogPost() {
             method, use, and other facts; review it with the{" "}
             <Link
               href="/blog/schedule-e-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Schedule E guide
             </Link>{" "}
@@ -437,35 +446,32 @@ export default function BlogPost() {
             evidence and reserve review as{" "}
             <Link
               href="/blog/capex-maintenance-reserves-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               CapEx and maintenance reserves
             </Link>
             .
           </p>
+          </ArticleBody>
 
-          <h2 className="text-2xl sm:text-3xl">FAQ</h2>
-          {FAQS.map((f, i) => (
-            <details
-              key={i}
-              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
-            >
-              <summary className="cursor-pointer font-bold text-foreground">
-                {f.q}
-              </summary>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                {f.a}
-              </p>
-            </details>
-          ))}
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
 
+          <ArticleBody className="mt-10">
           <p className="text-sm text-muted-foreground">
-            <Umbrella className="inline w-4 h-4 mr-1 align-text-bottom" />
             This is general educational information, not insurance advice.
             Coverage, exclusions, and pricing vary by carrier, state, and
             property — confirm specifics with a licensed insurance agent before
             you buy.
           </p>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -482,39 +488,38 @@ export default function BlogPost() {
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <NewsletterSignup variant="expanded" source="blog" />
-        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Related:{" "}
             <Link
               href="/blog/piti-explained-rental-property"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               PITI explained →
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/how-to-calculate-noi-rental-property"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               How to calculate NOI →
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/capex-maintenance-reserves-rental-property"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               CapEx &amp; reserves →
             </Link>
           </p>
         </footer>
-      </main>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
