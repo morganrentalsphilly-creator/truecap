@@ -24,6 +24,10 @@
  *      `app_metadata.tc_first_touch = { source, section, v: 1 }`.
  *   4. seo/scripts/signups.ts counts organic sign-ups by section into the
  *      private seo_conversions_daily table, read only by /admin/seo.
+ *   5. When a subscription Checkout Session is created, the stored SOURCE
+ *      (never the section) is copied into the Stripe subscription's metadata
+ *      as `first_touch_source` (lib/first-touch-server.ts
+ *      `firstTouchSubscriptionMetadata`, called by app/actions/billing.ts).
  *
  * Pure module: no DOM access except through the injected `CookieJar`, no
  * dependencies (it ships in the global client bundle via the PostHog

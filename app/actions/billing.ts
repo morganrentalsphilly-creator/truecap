@@ -19,6 +19,7 @@ import {
 } from "@/lib/stripe/plan-prices";
 import { verifyCheckoutReturnCandidate } from "@/lib/stripe/checkout-return";
 import { captureServerEvent } from "@/lib/posthog-server";
+import { firstTouchSubscriptionMetadata } from "@/lib/first-touch-server";
 import { stripePriceMatchesCatalog } from "@/lib/public-pricing";
 import { resolvePostAnalysisOfferCoupon } from "@/lib/post-analysis-offer";
 import {
@@ -136,6 +137,8 @@ function buildSubscriptionCheckoutSessionParams(args: {
   intent: SubscriptionCheckoutIntent;
   customerId: string;
   siteUrl: string;
+  /** `user.app_metadata` of the buyer; only its first-touch source is read. */
+  appMetadata: unknown;
 }): Stripe.Checkout.SessionCreateParams {
   const { intent, customerId, siteUrl } = args;
   return withTrueCapCheckoutBranding({
@@ -189,6 +192,10 @@ function buildSubscriptionCheckoutSessionParams(args: {
         supabase_user_id: intent.user_id,
         app: "truecap",
         plan_slug: intent.plan_slug,
+        // Coarse acquisition source stored at sign-up (one of nine enum
+        // tokens, or the key is absent). Stays in Stripe: no click id, URL
+        // or campaign text, and nothing here is sent to Google.
+        ...firstTouchSubscriptionMetadata(args.appMetadata),
       },
       ...(intent.trial_days > 0
         ? { trial_period_days: intent.trial_days }
@@ -699,6 +706,7 @@ export async function createCheckoutSessionAction(
                 intent: existingIntent,
                 customerId: existingIntent.stripe_customer_id,
                 siteUrl,
+                appMetadata: user.app_metadata,
               }),
               {
                 idempotencyKey: `truecap-subscription-checkout:${existingIntent.id}`,
@@ -1102,7 +1110,12 @@ export async function createCheckoutSessionAction(
     }
 
     const session = await stripe.checkout.sessions.create(
-      buildSubscriptionCheckoutSessionParams({ intent, customerId, siteUrl }),
+      buildSubscriptionCheckoutSessionParams({
+        intent,
+        customerId,
+        siteUrl,
+        appMetadata: user.app_metadata,
+      }),
       {
         // Stable for this durable intent only. An ambiguous retry returns the
         // same hosted Session; a later legitimate subscription gets a new
