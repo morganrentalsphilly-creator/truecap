@@ -408,8 +408,8 @@ export default function VsExcelPage() {
               >
                 how to calculate DSCR
               </IntentPrefetchLink>
-              . When you want those numbers produced from an address instead of
-              typed in, the{" "}
+              . When you want those numbers produced from an address, the asking
+              price and a bedroom count instead of a sheet of typed inputs, the{" "}
               <Link
                 href="/analyze" prefetch={false}
                 className="tc-link"

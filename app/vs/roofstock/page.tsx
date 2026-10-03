@@ -477,7 +477,8 @@ export default function VsRoofstockPage() {
               >
                 cash-on-cash return
               </IntentPrefetchLink>{" "}
-              from the address. For the full workflow, our guide on{" "}
+              from an address, the asking price and a bedroom count. For the full
+              workflow, our guide on{" "}
               <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
@@ -504,7 +505,8 @@ export default function VsRoofstockPage() {
           heading={<>Underwrite the next listing on your own assumptions.</>}
           lede={
             <>
-              Free covers the core underwrite and plain read-only share links. Pro
+              Free covers the core underwrite and plain read-only share links.
+              Your first complete decision also includes the Offer Ceiling. Pro
               adds 10-year cash-flow and equity projections, sensitivity, Offer
               Ceiling, co-branding, and included PDFs. New one-time PDF purchases
               are temporarily unavailable. No card to start.

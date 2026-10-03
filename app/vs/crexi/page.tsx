@@ -336,8 +336,8 @@ export default function VsCrexiPage() {
               >
                 cap rate
               </IntentPrefetchLink>
-              , DSCR, and cash flow from an address — no CRE model required. Our
-              guide on{" "}
+              , DSCR, and cash flow from an address, the asking price and a bedroom
+              count — no CRE model required. Our guide on{" "}
               <IntentPrefetchLink
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
                 className="tc-link"
@@ -362,6 +362,7 @@ export default function VsCrexiPage() {
           lede={
             <>
               TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
+              Your first complete decision also includes the Offer Ceiling.
               Pro adds 10-year cash-flow and equity projections, sensitivity,
               the Offer Ceiling, co-branded share links and PDF reports; see
               live pricing for current terms. No card to start.

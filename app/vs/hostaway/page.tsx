@@ -351,7 +351,8 @@ export default function VsHostawayPage() {
               </IntentPrefetchLink>{" "}
               covers the STR-specific adjustments — seasonality, cleaning, and
               turnover. When you want cap rate, DSCR and cash flow computed from an
-              address instead of by hand, run the full{" "}
+              address, the asking price and a bedroom count instead of by hand, run
+              the full{" "}
               <Link
                 href="/analyze" prefetch={false}
                 className="tc-link"
@@ -376,6 +377,7 @@ export default function VsHostawayPage() {
           lede={
             <>
               TrueCap free covers cap rate, CoC, DSCR, and monthly cash flow.
+              Your first complete decision also includes the Offer Ceiling.
               Pro adds 10-year cash-flow and equity projections, sensitivity, the
               Offer Ceiling, co-branded share links, and PDF reports; see live
               pricing for current terms. No card to start.

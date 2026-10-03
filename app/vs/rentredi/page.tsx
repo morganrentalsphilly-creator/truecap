@@ -408,7 +408,8 @@ export default function VsRentRediPage() {
           lede={
             <>
               TrueCap free covers cap rate, CoC, DSCR, monthly cash flow
-              and plain read-only share links. Pro adds co-branding, 10-year
+              and plain read-only share links. Your first complete decision also includes the Offer Ceiling.
+              Pro adds co-branding, 10-year
               cash-flow and equity projections, sensitivity, Offer Ceiling,
               saved-deal comparison, and included PDFs. New one-time PDF checkout
               is temporarily unavailable. No card to start.

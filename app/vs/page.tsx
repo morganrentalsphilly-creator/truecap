@@ -584,7 +584,7 @@ export default function VsHubPage() {
           heading="Stop comparison-shopping. Run your next deal."
           headingId="vs-close-heading"
           lede={keepTogether(
-            "The fastest way to know whether TrueCap fits your workflow is to paste an address and see the analysis. 60 seconds, no signup, no card.",
+            "The fastest way to know whether TrueCap fits your workflow is to enter an address, the asking price and a bedroom count and see the analysis. 60 seconds, no signup, no card.",
           )}
           actions={
             <ActionRow>

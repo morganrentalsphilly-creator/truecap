@@ -355,8 +355,8 @@ export default function VsMashvisorPage() {
               you to look.
             </p>
             <p>
-              Once the heatmap points you somewhere, the per-deal math is one
-              address away: our{" "}
+              Once the heatmap points you somewhere, the per-deal math takes an
+              address, the asking price and a bedroom count: our{" "}
               <Link
                 href="/analyze" prefetch={false}
                 className="tc-link"
@@ -388,7 +388,8 @@ export default function VsMashvisorPage() {
           lede={
             <>
               TrueCap free covers cap rate, CoC, DSCR, monthly cash flow, and
-              plain read-only share links. Pro adds co-branding, 10-year cash-flow
+              plain read-only share links. Your first complete decision also includes the Offer Ceiling.
+              Pro adds co-branding, 10-year cash-flow
               and equity projections, sensitivity, Offer Ceiling, saved-deal
               comparison, and included PDFs. No card to start.
             </>
