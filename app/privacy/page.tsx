@@ -20,8 +20,14 @@ import Link from "next/link";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { Header } from "@/components/investcalc/header";
 import { FIRST_TOUCH_COOKIE } from "@/lib/first-touch";
-import { ANONYMOUS_DECISION_GRANT_COOKIE } from "@/lib/anonymous-decision-grant";
-import { CHECKOUT_RETURN_COOKIE } from "@/lib/stripe/checkout-return-cookie";
+import {
+  ANONYMOUS_DECISION_GRANT_COOKIE,
+  ANONYMOUS_DECISION_GRANT_DAYS,
+} from "@/lib/anonymous-decision-grant";
+import {
+  CHECKOUT_RETURN_COOKIE,
+  CHECKOUT_RETURN_COOKIE_MAX_AGE_SECONDS,
+} from "@/lib/stripe/checkout-return-cookie";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -126,12 +132,15 @@ export default function PrivacyPage() {
               Supabase Auth; its name begins with <code>sb-</code>), plus analytics and
               advertising storage only according to the choice you make in our cookie
               banner. You can reject nonessential analytics. If you accept, the Google Ads
-              tag sets <code>_gcl_au</code> (kept up to 90 days) and we set{" "}
-              <code>{FIRST_TOUCH_COOKIE}</code>, described below. A few short-lived
-              first-party cookies are set only when you use the feature they belong to:{" "}
-              <code>{ANONYMOUS_DECISION_GRANT_COOKIE}</code> (your free first decision),{" "}
-              <code>truecap_compare_ids</code> (the deals you picked to compare), and{" "}
-              <code>{CHECKOUT_RETURN_COOKIE}</code> (returning from checkout). Your cookie
+              tag sets cookies whose names begin with <code>_gcl_</code>:{" "}
+              <code>_gcl_au</code> (kept up to 90 days) and, when you arrive from an ad,{" "}
+              <code>_gcl_aw</code>; and we set <code>{FIRST_TOUCH_COOKIE}</code>, described
+              below. A few first-party cookies are set only when you use the feature they
+              belong to: <code>{ANONYMOUS_DECISION_GRANT_COOKIE}</code> (your free first
+              decision, kept up to {ANONYMOUS_DECISION_GRANT_DAYS} days),{" "}
+              <code>truecap_compare_ids</code> (the deals you picked to compare, kept up to
+              1 hour), and <code>{CHECKOUT_RETURN_COOKIE}</code> (returning from checkout,
+              kept up to {CHECKOUT_RETURN_COOKIE_MAX_AGE_SECONDS / 60} minutes). Your cookie
               choice itself is stored in your browser&apos;s local storage, not in a cookie.
               If you accept analytics cookies, the first-party cookie{" "}
               <code>{FIRST_TOUCH_COOKIE}</code> (kept up to 90 days) records a broad
@@ -211,8 +220,9 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong>Cloudflare</strong> — Turnstile, the automated-abuse check on the
-              sign-in, sign-up, and password-reset forms. It is a security check, so it loads
-              on those pages whatever your cookie choice.{" "}
+              sign-in, sign-up, and password-reset forms and on the password section of your
+              profile. It is a security check, so it loads on those pages whatever your
+              cookie choice.{" "}
               <a href="https://www.cloudflare.com/privacypolicy/" className="text-primary hover:underline">Privacy</a>
             </li>
             <li>
