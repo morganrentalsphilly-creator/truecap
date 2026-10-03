@@ -373,7 +373,7 @@ const FUNDRISE_FAQ: FaqItem[] = [
     question: "Why would I buy a rental directly when I could just put money in Fundrise?",
     answer: (
       <>
-        Three reasons: control (you pick the property + financing), potentially different direct-ownership tax treatment, and cash-flow control. Direct ownership does not guarantee that every deduction or a 1031 exchange applies; eligibility depends on the property, transaction, and taxpayer, so verify it with licensed tax and legal professionals. Tradeoff: real work or paying a PM.
+        Two reasons: control (you pick the property + financing) and cash-flow control. Tradeoff: real work or paying a PM.
       </>
     ),
   },
