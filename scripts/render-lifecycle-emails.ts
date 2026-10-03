@@ -28,9 +28,9 @@
  *
  * Environment (read from the shell that runs the script, never from a file):
  *   EMAIL_POSTAL_ADDRESS  Printed in every footer. Unset: the address slot is
- *                         empty and the report says the 34 marketing emails
- *                         would not send (the trial_day10 billing notice
- *                         keeps its own rule).
+ *                         empty and the report says none of the 35 emails
+ *                         would send (the trial_day10 billing notice
+ *                         included).
  *   SHARE_LINK_SECRET     Signs the unsubscribe link. Set it to the production
  *                         value, together with --user, to get a link that
  *                         works on the live site for that one account. Unset:
@@ -216,7 +216,7 @@ async function main() {
         postalAddress: postalAddress ? "set in the environment" : "EMAIL_POSTAL_ADDRESS is not set",
         wouldSend: postalAddress
           ? "all"
-          : "only the trial_day10 billing notice (when its own conditions hold)",
+          : "none: no lifecycle email is sent or scheduled while EMAIL_POSTAL_ADDRESS is unset",
         listUnsubscribeHeaders: headers,
         emails: report,
       },
@@ -235,7 +235,7 @@ async function main() {
   console.log(
     postalAddress
       ? "Postal address: taken from EMAIL_POSTAL_ADDRESS."
-      : "Postal address: EMAIL_POSTAL_ADDRESS is not set, so the slot is empty. With it unset, none of the 34 marketing emails is sent; the trial_day10 billing notice keeps its own rule.",
+      : "Postal address: EMAIL_POSTAL_ADDRESS is not set, so the slot is empty. With it unset, none of the 35 emails is sent; the trial_day10 billing notice carries no unsubscribe link.",
   );
   if (failures > 0) {
     console.error(`${failures} email(s) failed the footer check.`);
