@@ -17,15 +17,28 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -129,28 +142,24 @@ export default function SeventyPercentRulePost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -158,7 +167,8 @@ export default function SeventyPercentRulePost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               Every flip and every BRRRR deal is won or lost at the offer. Pay
               too much and no amount of hustle on the rehab earns it back — the
               spread you needed was gone before you got the keys. The 70% rule is
@@ -173,19 +183,13 @@ export default function SeventyPercentRulePost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What the 70% rule actually says
-            </h2>
+          <ArticleBody>
+            <h2>What the 70% rule actually says</h2>
             <p>
               The rule calculates a <strong>70%-rule price screen</strong>—a
               screening boundary intended to leave room for modeled costs and profit:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                70%-rule price screen = (ARV × 0.70) − Repair costs
-              </code>
-            </div>
+            <ToolFormula formula="70%-rule price screen = (ARV × 0.70) − Repair costs" />
             <p>
               <strong>ARV</strong> is the after-repair value: what the property
               will sell for once it&apos;s fixed up, not what it&apos;s worth
@@ -195,11 +199,7 @@ export default function SeventyPercentRulePost() {
               house you expect to be worth $300,000 renovated that needs $45,000
               of work:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                70%-rule price screen = (0.70 × $300,000) − $45,000 = $165,000
-              </code>
-            </div>
+            <ToolFormula formula="70%-rule price screen = (0.70 × $300,000) − $45,000 = $165,000" />
             <p>
               So the rule screens the price at $165,000 — not because that&apos;s
               what the seller wants or what the property is worth in its current
@@ -208,7 +208,7 @@ export default function SeventyPercentRulePost() {
               your profit. (The free{" "}
               <Link
                 href="/tools/arv-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 ARV calculator
               </Link>{" "}
@@ -217,23 +217,21 @@ export default function SeventyPercentRulePost() {
               screen. Already have the ARV? The free{" "}
               <Link
                 href="/tools/70-percent-rule-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 70% rule calculator
               </Link>{" "}
               shows the 70%-rule price screen at 60/65/70/75% side by side.)
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Where the other 30% goes
-            </h2>
+            <h2>Where the other 30% goes</h2>
             <p>
               The 30% you held back isn&apos;t profit — it&apos;s profit plus
               every cost the formula doesn&apos;t name. On a $300,000 ARV, that
               spread is $90,000 (ARV × 0.30), and it has to stretch over four
               things:
             </p>
-            <ul className="list-disc pl-6 space-y-1">
+            <ul>
               <li>
                 <strong>Buying costs</strong> — closing costs, lender points, and
                 inspections on the purchase.
@@ -262,16 +260,14 @@ export default function SeventyPercentRulePost() {
               moves off 70%.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              A full worked flip
-            </h2>
+            <h2>A full worked flip</h2>
             <p>
               Numbers make the 30% concrete. Buy the house at the $165,000 price
               screen, put $45,000 into it, and sell it six months later at the
               $300,000 ARV. Here is the whole ledger:
             </p>
-            <ScrollX label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
+            <ArticleTable label="Data table" stickyFirstColumn={false}>
+              <table className="[&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
                 <thead>
                   <tr>
                     <th className="text-left">Line</th>
@@ -321,7 +317,7 @@ export default function SeventyPercentRulePost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
             <p>
               That $52,200 is about 17% of ARV — a healthy flip. Watch how the
               $90,000 spread split: roughly $37,800 went to buying, holding, and
@@ -332,7 +328,7 @@ export default function SeventyPercentRulePost() {
               the rehab: $19,500 of selling costs, paid on the finished value.{" "}
               <Link
                 href="/blog/hard-money-vs-dscr-loan"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Hard money
               </Link>{" "}
@@ -345,9 +341,7 @@ export default function SeventyPercentRulePost() {
               profit shows up at closing as $50,000.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              ARV: the input that matters most
-            </h2>
+            <h2>ARV: the input that matters most</h2>
             <p>
               Of the two inputs, ARV is the one people fudge — usually upward,
               because a higher ARV justifies a higher offer and makes the deal you
@@ -365,10 +359,10 @@ export default function SeventyPercentRulePost() {
               The workhorse method is price per finished square foot. Say three
               renovated comps nearby sold like this:
             </p>
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
+                  <tr>
                     <th className="text-left">Comp</th>
                     <th className="text-right">Sold price</th>
                     <th className="text-right">Size</th>
@@ -396,7 +390,7 @@ export default function SeventyPercentRulePost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
             <p>
               They cluster around $210/sqft. Your subject is 1,450 finished square
               feet, so 1,450 × $210 ≈ $304,500 — round down to $300,000 to stay
@@ -408,9 +402,7 @@ export default function SeventyPercentRulePost() {
               ignoring that ceiling.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The rehab number: the other half of the equation
-            </h2>
+            <h2>The rehab number: the other half of the equation</h2>
             <p>
               ARV sets the top of the deal; the repair estimate sets how much of
               it you keep. Get the rehab wrong and the 70% rule faithfully hands
@@ -429,23 +421,21 @@ export default function SeventyPercentRulePost() {
               find after demolition, not before. The{" "}
               <Link
                 href="/tools/rehab-cost-estimator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 rehab cost estimator
               </Link>{" "}
               and the full{" "}
               <Link
                 href="/blog/how-to-estimate-rehab-costs"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 framework for pricing a scope
               </Link>{" "}
               are worth using before you ever plug a number into the rule.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Why 70% isn&apos;t always the right number
-            </h2>
+            <h2>Why 70% isn&apos;t always the right number</h2>
             <p>
               The single biggest mistake with the 70% rule is treating the 70 as
               a law of physics. It&apos;s a stand-in for a specific bundle of
@@ -456,10 +446,10 @@ export default function SeventyPercentRulePost() {
               house as on a $400,000 one — so on cheap houses those fixed costs
               eat a much bigger share of a much smaller spread.
             </p>
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
+                  <tr>
                     <th className="text-left">Situation</th>
                     <th className="text-left">What&apos;s different</th>
                     <th className="text-right">Screen as % of ARV</th>
@@ -493,7 +483,7 @@ export default function SeventyPercentRulePost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
             <p>
               <em>
                 *Higher isn&apos;t permission to overpay — it&apos;s a warning
@@ -506,15 +496,13 @@ export default function SeventyPercentRulePost() {
               defending the 70 out of habit.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The BRRRR version: the 75% refinance tie-in
-            </h2>
+            <h2>The BRRRR version: the 75% refinance tie-in</h2>
             <p>
               Buy-and-hold investors use the same skeleton with a different
               destination. In a{" "}
               <Link
                 href="/blog/brrrr-method-explained"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 BRRRR deal
               </Link>{" "}
@@ -524,14 +512,14 @@ export default function SeventyPercentRulePost() {
               (for a conforming cash-out refinance of an investment property,{" "}
               <a
                 href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Freddie Mac allows up to 75% on one unit and 70% on 2-4 units
               </a>
               ), eligible value, seasoning (
               <a
                 href="https://selling-guide.fanniemae.com/sel/b2-1.3-03/cash-out-refinance-transactions"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Fannie Mae generally requires six months on title
               </a>
@@ -556,14 +544,14 @@ export default function SeventyPercentRulePost() {
               the rehab or drag the timeline and you leave more cash in — the{" "}
               <Link
                 href="/blog/brrrr-method-explained"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 BRRRR workflow guide
               </Link>{" "}
               explains which inputs a complete model needs. And if the{" "}
               <Link
                 href="/blog/how-to-refinance-a-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 refinanced rental
               </Link>{" "}
@@ -571,37 +559,39 @@ export default function SeventyPercentRulePost() {
               was a flip you forgot to sell. Pressure-test it as a{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 hold on cap rate and DSCR
               </Link>{" "}
               before you commit.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The honest version: solve the price backward
-            </h2>
+            <h2>The honest version: solve the price backward</h2>
             <p>
               The 70% rule is triage, not underwriting. A more complete backward
               solve starts from ARV and subtracts modeled costs plus the profit
               you require, leaving the price as the remainder:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                Backward-solve price = ARV − selling − holding − buying − rehab −
-                required profit
-              </code>
-            </div>
+            <ToolFormula
+              formula={
+                <>
+                  Backward-solve price = ARV − selling − holding − buying − rehab −
+                  required profit
+                </>
+              }
+            />
             <p>
               Plug in the flip&apos;s actual figures — $19,500 selling, $15,000
               holding, $3,300 buying, $45,000 rehab, and a $50,000 target profit:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                Backward-solve price = $300,000 − $19,500 − $15,000 − $3,300 −
-                $45,000 − $50,000 = $167,200
-              </code>
-            </div>
+            <ToolFormula
+              formula={
+                <>
+                  Backward-solve price = $300,000 − $19,500 − $15,000 − $3,300 −
+                  $45,000 − $50,000 = $167,200
+                </>
+              }
+            />
             <p>
               That lands within about $2,000 of the 70% rule&apos;s $165,000 —
               which is the point. On a textbook deal the rule and the real math
@@ -612,21 +602,20 @@ export default function SeventyPercentRulePost() {
               the full solve before you sign.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
+          </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The bottom line
-            </h2>
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
+
+          <ArticleBody className="mt-16">
+            <h2>The bottom line</h2>
             <p>
               The 70% rule earns its place because it compresses a real
               underwriting model into one line you can run in your head on a
@@ -641,13 +630,13 @@ export default function SeventyPercentRulePost() {
               screen and the backward solve to commit. The free{" "}
               <Link
                 href="/tools/70-percent-rule-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 70% rule calculator
               </Link>{" "}
               runs the 70%-rule price screen from your ARV and repair budget.
               The{" "}
-              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="tc-link">
                 TrueCap analyzer
               </Link>{" "}
               does not model a flip. It screens the finished property as a
@@ -656,7 +645,7 @@ export default function SeventyPercentRulePost() {
               costs, comps, and financing terms before recording a decision; the
               70%-rule price screen is not a recommended offer.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -672,13 +661,12 @@ export default function SeventyPercentRulePost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
