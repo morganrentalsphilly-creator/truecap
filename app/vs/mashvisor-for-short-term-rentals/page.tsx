@@ -176,7 +176,7 @@ const NICHE_FAQ: FaqItem[] = [
       <>
         Yes. TrueCap free covers cap rate, CoC, DSCR, and cash flow on every
         analysis. Pull Mashvisor&apos;s projected monthly STR revenue, replace
-        TrueCap&apos;s area benchmark with it, and review every operating
+        TrueCap&apos;s HUD rent benchmark with it, and review every operating
         assumption. Pro adds a 10-year cash-flow and equity projection plus
         sensitivity.
       </>

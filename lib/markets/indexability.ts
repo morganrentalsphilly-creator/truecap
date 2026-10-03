@@ -262,7 +262,7 @@ export const STATE_PAGE_GUIDANCE = {
   intro: (stateName: string) =>
     `This page collects ${stateName} data from two federal sources: the Census Bureau's American Community Survey for home values, real estate taxes paid and the share of homes that are rented, and HUD's Fair Market Rent for each ${stateName} city TrueCap covers. Use them to set your first assumptions, then verify the parcel before you offer.`,
   fmr: (stateName: string, year: number) =>
-    `${fmrLabel(year)} is set for the county or metro area that contains each city. ${FMR_DEFINITION} It is an area benchmark for a 2-bedroom or 3-bedroom unit, not what a specific unit rents for: compare it with current leases for the address. When you enter a supported ${stateName} address, TrueCap fills rent from the HUD figure as a placeholder labeled HUD FMR, so you can see it and replace it with the property's own leases.`,
+    `${fmrLabel(year)} is set for the county or metro area that contains each city. ${FMR_DEFINITION} It is an area benchmark for a 2-bedroom or 3-bedroom unit, not what a specific unit rents for: compare it with current leases for the address. When you enter a supported ${stateName} address, TrueCap fills rent with a HUD benchmark as a placeholder (ZIP-level when available, otherwise the HUD Fair Market Rent area; when an address has no county match, a statewide HUD figure, labeled as such), so you can see it and replace it with the property's own leases.`,
   verify: [
     {
       title: "Property tax bill",

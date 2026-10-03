@@ -594,9 +594,9 @@ export default function MethodologyPage() {
               &ldquo;living for free&rdquo; scenario.
             </li>
             <li>
-              <strong>Multi-family rent estimation:</strong> HUD FMR is per-unit
-              by bedroom count, not per-property. For 2-4 unit properties we sum
-              the per-unit FMR estimates.
+              <strong>Multi-family rent estimation:</strong> HUD&apos;s figures are
+              per unit by bedroom count, not per property. For 2-4 unit
+              properties we sum the per-unit HUD benchmarks.
             </li>
             <li>
               <strong>Non-US addresses:</strong> Google Places autocomplete is

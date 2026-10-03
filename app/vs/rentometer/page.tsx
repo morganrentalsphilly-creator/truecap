@@ -294,7 +294,7 @@ const RENTOMETER_FAQ: FaqItem[] = [
         built from recent nearby rental comps, and its Pro plan adds a
         Deal Worksheet for cash flow and cash-on-cash return.
         TrueCap is a full underwriting calculator that starts from an
-        editable HUD Fair Market Rent area benchmark and runs the downstream
+        editable HUD rent benchmark and runs the downstream
         math (cap rate, CoC, DSCR, cash flow). If you want a rent
         estimate from nearby comps, Rentometer can complement
         the underwrite. Verify either source with property-specific evidence.
@@ -305,8 +305,10 @@ const RENTOMETER_FAQ: FaqItem[] = [
     question: "Does TrueCap give me a rent estimate like Rentometer?",
     answer: (
       <>
-        Not by default. TrueCap pre-fills rent using an editable HUD Fair
-        Market Rent area benchmark for the relevant bedroom count. It is a
+        Not by default. TrueCap pre-fills rent using an editable HUD rent
+        benchmark for the relevant bedroom count: ZIP-level when available,
+        otherwise the HUD Fair Market Rent area; when an address has no
+        county match, a statewide HUD figure, labeled as such. It is a
         housing-program benchmark, not a property-specific rent opinion
         or lender approval input. The optional comps lookup (one free lookup;
         Pro includes 50 per month) adds a rent estimate from nearby
