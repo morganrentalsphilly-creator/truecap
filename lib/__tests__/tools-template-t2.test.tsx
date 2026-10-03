@@ -6,6 +6,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import { RehabEstimatorCard } from "@/components/investcalc/rehab-estimator-card";
+import { ArvCalculatorWidget } from "@/components/tools/arv-calculator-widget";
+import { ClosingCostCalculatorWidget } from "@/components/tools/closing-cost-calculator-widget";
+import { SeventyPercentRuleWidget } from "@/components/tools/seventy-percent-rule-widget";
 
 /**
  * The template fan-out for the second group of calculator pages (audit rows
@@ -75,11 +78,156 @@ describe("the rehab estimator has two renderings of one estimate", () => {
       expect(card).toContain(`placeholder="${placeholder}"`);
     }
     expect(tool.match(/<input\b[^>]*class="[^"]*\bh-12\b/g)).toHaveLength(3);
+    // P2-48: each number field states the range lib/rehab-estimator.ts
+    // clamps it to, so the browser marks a negative or absurd entry. The
+    // estimate itself was never negative: the clamp is in the estimator.
+    const estimator = read("lib/rehab-estimator.ts");
+    expect(estimator).toContain("const sqft = Math.max(0, Number(inputs.sqft) || 0);");
+    expect(estimator).toContain("const baths = Math.max(1, Number(inputs.bathCount) || 1);");
+    expect(estimator).toContain("const ctgPct = Math.max(0, Math.min(50, inputs.contingencyPct ?? 10));");
+    expect(tool).toMatch(/<input\b[^>]*\smin="0" step="50"[^>]*placeholder="1850"/);
+    expect(tool).toMatch(/<input\b[^>]*\smin="1" step="0\.5"[^>]*placeholder="2"/);
+    expect(tool).toMatch(/<input\b[^>]*\smin="0" max="50" step="1"[^>]*placeholder="10"/);
     // The total is the calculator result: one polite live region.
     expect(tool.match(/aria-live="polite"/g)).toHaveLength(1);
     // Same words. The card prints its title and its switch first; the tool
     // rendering puts the switch after the fields.
     const words = (html: string) => textOf(html).split(" ").sort().join(" ");
     expect(words(tool)).toBe(words(card));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The five pages and the three widgets in components/tools
+// ---------------------------------------------------------------------------
+
+const PAGES = [
+  "70-percent-rule-calculator",
+  "arv-calculator",
+  "closing-cost-calculator",
+  "rehab-cost-estimator",
+  "rental-property-spreadsheet",
+] as const;
+
+const WIDGETS = [
+  ["components/tools/seventy-percent-rule-widget.tsx", SeventyPercentRuleWidget],
+  ["components/tools/arv-calculator-widget.tsx", ArvCalculatorWidget],
+  ["components/tools/closing-cost-calculator-widget.tsx", ClosingCostCalculatorWidget],
+] as const;
+
+/** Source with comments removed, so a comment can neither pass nor trip a rule. */
+const code = (path: string) =>
+  read(path)
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/.*$/gm, "");
+
+describe("the second group of calculator pages is on the calculator template", () => {
+  it.each(PAGES)("/tools/%s: hero with the tool beside the H1, one analyzer link under it", (slug) => {
+    const source = code(`app/tools/${slug}/page.tsx`);
+    // PageHero prints the page's one H1; the page writes none of its own.
+    expect(source.match(/<PageHero\b/g)).toHaveLength(1);
+    expect(source).not.toMatch(/<h1\b/);
+    expect(source).toMatch(/\baside=\{/);
+    // P2-80: the one short "Analyze a deal free" link, as the hero's action.
+    expect(source.match(/<UnderTitleAnalyzeLink \/>/g)).toHaveLength(1);
+    expect(source).toContain("actions={<UnderTitleAnalyzeLink />}");
+    // Nothing above the H1, and the hub link has no arrow.
+    expect(source).not.toContain("←");
+    expect(source).toMatch(/<main id="main" tabIndex=\{-1\}/);
+  });
+
+  it.each(PAGES)("/tools/%s: no card chrome, icons or legacy type left in the page", (slug) => {
+    const source = code(`app/tools/${slug}/page.tsx`);
+    expect(source).not.toContain("lucide-react");
+    expect(source).not.toMatch(/prose-slate|rounded-2xl|rounded-xl|rounded-full|shadow-|bg-primary text-primary-foreground/);
+    expect(source).not.toMatch(/\btext-(?:xs|2xs|3xs)\b|\buppercase\b|tracking-widest/);
+    expect(source).not.toContain("text-primary font-semibold hover:underline");
+    expect(source).toContain("<ArticleBody>");
+  });
+
+  it.each(PAGES)("/tools/%s: the FAQ is ruled rows under the page's own single FAQPage node", (slug) => {
+    const source = code(`app/tools/${slug}/page.tsx`);
+    expect(source).not.toMatch(/<details\b/);
+    const faq = /<FaqSection\b[^>]*\/>/.exec(source)?.[0] ?? "";
+    expect(faq).toContain('variant="inline"');
+    expect(faq).toContain("items={FAQS}");
+    // The page builds faqLd from FAQS and mounts it; the section must not
+    // emit a second FAQPage node for the same rows.
+    expect(faq).toContain("structuredData={false}");
+    expect(source.match(/<JsonLd data=\{faqLd\} \/>/g)).toHaveLength(1);
+    expect(source.match(/"@type": "FAQPage"/g)).toHaveLength(1);
+  });
+
+  it("each page closes once, and the closing cost page (which has no ask of its own) not at all", () => {
+    for (const slug of PAGES) {
+      const closes = code(`app/tools/${slug}/page.tsx`).match(/<CloseSection\b/g) ?? [];
+      expect(closes, slug).toHaveLength(slug === "closing-cost-calculator" ? 0 : 1);
+    }
+  });
+
+  it("the spreadsheet's two download links keep the file and the download attribute", () => {
+    const source = code("app/tools/rental-property-spreadsheet/page.tsx");
+    expect(source).toContain('const DOWNLOAD_PATH = "/downloads/truecap-rental-property-analyzer.xlsx";');
+    const links = [...source.matchAll(/<a\s+href=\{DOWNLOAD_PATH\}\s+download\s+className=\{cn\(buttonVariants\(\{ size: "cta" \}\), "mt-6 w-full sm:w-auto"\)\}\s*>\s*Download the spreadsheet\s*<\/a>/g)];
+    expect(links).toHaveLength(2);
+    // e2e/audit-free-tools.spec.ts takes the first link named "download":
+    // the hero's, which comes before any other link whose text says so.
+    expect(source.indexOf("Download the spreadsheet")).toBeLessThan(source.indexOf("<ArticleBody>"));
+  });
+
+  it.each(WIDGETS)("%s is set on ToolFrame with the shared field and no card or icon", (path, Widget) => {
+    const source = code(path);
+    expect(source).not.toContain("lucide-react");
+    expect(source).not.toMatch(/bg-card|rounded-2xl|rounded-xl|shadow-|tracking-widest|\buppercase\b|\btext-(?:xs|2xs|3xs)\b/);
+    expect(source).not.toMatch(/--metric-(?:positive|negative)/);
+    expect(source).toContain("<ToolNumberField");
+    const html = renderToStaticMarkup(createElement(Widget));
+    expect(html).toMatch(/^<section class="@container min-w-0 border-t-2 border-foreground pt-5"/);
+    // One key figure in DM Mono over the double rule.
+    expect(html.match(/class="ledger-rule /g)).toHaveLength(1);
+    // Every field is the 48px field with 16px text.
+    const inputs = html.match(/<input\b[^>]*>/g) ?? [];
+    expect(inputs.length).toBeGreaterThan(0);
+    for (const input of inputs) expect(input).toMatch(/class="[^"]*\bh-12\b[^"]*\btext-base\b/);
+    // One polite status line reads the result; the figure block adds no
+    // second live region.
+    expect(html.match(/aria-live="polite"/g)).toHaveLength(1);
+    expect(html).toMatch(/<span class="sr-only" role="status" aria-live="polite" aria-atomic="true">/);
+  });
+
+  it("the input ids the 70% rule and closing cost fields had are the ones they have", () => {
+    const rule = renderToStaticMarkup(createElement(SeventyPercentRuleWidget));
+    for (const id of ["seventypct-arv", "seventypct-repairs", "seventypct-multiplier"]) {
+      expect(rule, id).toMatch(new RegExp(`<input\\b[^>]*\\sid="${id}"`));
+    }
+    const closing = renderToStaticMarkup(createElement(ClosingCostCalculatorWidget));
+    for (const id of ["cc-price", "cc-down", "cc-orig", "cc-title", "cc-record", "cc-transfer", "cc-ins", "cc-tax", "cc-appr", "cc-inspect"]) {
+      expect(closing, id).toMatch(new RegExp(`<input\\b[^>]*\\sid="${id}"`));
+    }
+  });
+
+  it("the closing cost handoff is the plain button with one line under it", () => {
+    // It was a 14px text link between a sparkle and an arrow: "Run the full
+    // analysis with these numbers — cash flow, cash-to-close, returns —
+    // free". The same words, split where the first dash was.
+    const source = code("components/tools/closing-cost-calculator-widget.tsx");
+    expect(source).not.toMatch(/\b(?:Sparkles|ArrowUpRight)\b/);
+    const html = renderToStaticMarkup(createElement(ClosingCostCalculatorWidget));
+    const anchors = [...html.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/g)].filter(([, attrs]) =>
+      /\shref="\/analyze\?/.test(attrs),
+    );
+    expect(anchors).toHaveLength(1);
+    const [, attrs, inner] = anchors[0];
+    expect(textOf(inner)).toBe("Run the full analysis with these numbers");
+    expect(inner).not.toContain("<svg");
+    expect(attrs).toMatch(/class="[^"]*\bmin-h-12\b[^"]*\bw-full\b[^"]*\bsm:w-auto\b/);
+    expect(attrs).toContain('target="_top"');
+    expect(attrs).toContain('aria-describedby="cc-handoff-note"');
+    expect(/<p id="cc-handoff-note"[^>]*>([\s\S]*?)<\/p>/.exec(html)?.[1]).toBe(
+      "cash flow, cash-to-close, returns — free",
+    );
+    // The handoff still carries the purchase price and nothing else.
+    expect(source).toContain("? { purchasePrice: validated.purchasePrice.value }");
+    expect(source).toContain('{ utmSource: "closing-cost-calculator" }');
   });
 });

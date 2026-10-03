@@ -170,6 +170,9 @@ export function RehabEstimatorCard({
           a number.
         </p>
 
+        {/* min and max say what estimateRehab already does with these three
+            numbers (square feet at least 0, baths at least 1, contingency 0
+            to 50): the browser's own range hint, no new message. */}
         <div className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-x-4 gap-y-5 @sm:grid-cols-3">
           <div className="min-w-0">
             <Label htmlFor={sqftId} className={TOOL_LABEL_CLASS}>
@@ -180,6 +183,7 @@ export function RehabEstimatorCard({
                 id={sqftId}
                 type="number"
                 inputMode="numeric"
+                min={0}
                 step="50"
                 value={sqftInput}
                 onChange={(e) => setSqftInput(e.target.value)}
@@ -197,6 +201,7 @@ export function RehabEstimatorCard({
                 id={bathId}
                 type="number"
                 inputMode="decimal"
+                min={1}
                 step="0.5"
                 value={bathInput}
                 onChange={(e) => setBathInput(e.target.value)}
@@ -214,6 +219,8 @@ export function RehabEstimatorCard({
                 id={contingencyId}
                 type="number"
                 inputMode="numeric"
+                min={0}
+                max={50}
                 step="1"
                 value={contingency}
                 onChange={(e) => setContingency(e.target.value)}
