@@ -27,6 +27,7 @@ import {
 import type { StripeDisplayPriceDetails } from "@/lib/stripe/display-prices";
 import { cn } from "@/lib/utils";
 import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
+import { OpenCheckoutChoice } from "@/components/billing/open-checkout-choice";
 
 type BillingPlan = {
   slug: "pro_monthly" | "pro_annual" | "agent_pro_monthly" | "agent_pro_annual";
@@ -72,6 +73,14 @@ function currentStatusLabel(currentSubscription: CurrentSubscription): string | 
 export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) {
   const { toast } = useToast();
   const [pendingPlan, setPendingPlan] = useState<string | null>(null);
+  // Set when the server found the buyer's own open Checkout Session for
+  // another plan or billing period: the requested plan's card then offers
+  // that checkout or a fresh one, in place of its Subscribe button.
+  const [openCheckout, setOpenCheckout] = useState<{
+    requestedPlanSlug: BillingPlan["slug"];
+    openPlanSlug: BillingPlan["slug"];
+    resumeUrl: string;
+  } | null>(null);
   const [isPortalPending, startPortalTransition] = useTransition();
   const [isCancelPending, startCancelTransition] = useTransition();
 
@@ -149,7 +158,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
     })();
   };
 
-  const handleCheckout = (planSlug: BillingPlan["slug"]) => {
+  const handleCheckout = (planSlug: BillingPlan["slug"], startOver = false) => {
     // The switch-vs-checkout fork: a live subscriber picking the other plan
     // switches (proration), everyone else starts a checkout. The server
     // action has a matching ALREADY_SUBSCRIBED guard as the enforcement layer.
@@ -160,9 +169,20 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
     setPendingPlan(planSlug);
     void (async () => {
       try {
-        const result = await createCheckoutSessionAction({ planSlug });
+        const result = await createCheckoutSessionAction(
+          startOver ? { planSlug, startOver: true } : { planSlug },
+        );
         setPendingPlan(null);
         if (!result.ok) {
+          if (result.code === "CHECKOUT_OPEN_OTHER_PLAN") {
+            setOpenCheckout({
+              requestedPlanSlug: planSlug,
+              openPlanSlug: result.openPlanSlug,
+              resumeUrl: result.resumeUrl,
+            });
+            return;
+          }
+          setOpenCheckout(null);
           // Server-side guard tripped (e.g. subscription exists but this
           // component's props were stale) — route to the portal rather
           // than dead-ending with an error toast.
@@ -385,6 +405,17 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                     </li>
                   ))}
                 </ul>
+                {openCheckout?.requestedPlanSlug === plan.slug ? (
+                  <OpenCheckoutChoice
+                    openPlanSlug={openCheckout.openPlanSlug}
+                    requestedPlanSlug={plan.slug}
+                    pending={isPending}
+                    onResume={() => {
+                      window.location.href = openCheckout.resumeUrl;
+                    }}
+                    onStartOver={() => handleCheckout(plan.slug, true)}
+                  />
+                ) : (
                 <Button
                   type="button"
                   className="w-full rounded-xl"
@@ -403,6 +434,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                       ? "Switch to this plan"
                       : "Subscribe"}
                 </Button>
+                )}
                 {/* This button opens Stripe checkout — a direct paid CTA that
                     carried no risk reversal at all. */}
                 {!isCurrent && !needsBillingRecovery ? (

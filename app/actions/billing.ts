@@ -52,6 +52,11 @@ const checkoutSchema = z.object({
   // against a whitelist → env coupon id, so a client can never inject an
   // arbitrary Stripe coupon into checkout.
   offer: z.string().max(40).optional(),
+  // Set only by the "start over with this plan" action the buyer sees after
+  // CHECKOUT_OPEN_OTHER_PLAN. It lets this request expire the buyer's own
+  // open Checkout Session for different terms; it is ignored when the open
+  // checkout already matches the request (that one is resumed).
+  startOver: z.boolean().optional(),
 });
 
 const switchPlanSchema = z.object({
@@ -84,6 +89,17 @@ export type BillingActionResult =
         | "CHECKOUT_IN_PROGRESS"
         | "SERVER_ERROR";
       message: string;
+    }
+  | {
+      // The buyer already has an open Checkout Session for other terms
+      // (another plan or billing period). Nothing was changed: the caller
+      // offers `resumeUrl` (that Session) or repeats the request with
+      // `startOver: true`, which expires it and opens a new one.
+      ok: false;
+      code: "CHECKOUT_OPEN_OTHER_PLAN";
+      message: string;
+      openPlanSlug: PaidPlanSlug;
+      resumeUrl: string;
     };
 
 function getSiteUrl(): string {
@@ -744,12 +760,102 @@ export async function createCheckoutSessionAction(
         throw new Error("stale checkout-intent could not be reconciled");
       }
       if (!configurationMatches) {
-        return {
-          ok: false,
-          code: "CHECKOUT_IN_PROGRESS",
-          message:
-            "Another checkout with different pricing or trial terms is already open. Finish or let it expire before starting this offer.",
-        };
+        // An OPEN intent for other terms (a "creating" one returned, threw or
+        // continued above). Stripe keeps a hosted Session open for 24 hours,
+        // so refusing here locked a buyer who went back and picked another
+        // plan or billing period out of checkout for a day. Resolve Stripe
+        // truth first, then let the buyer choose: resume that Session, or
+        // start over, which expires it before a new intent is reserved. The
+        // old Session is never reused for the changed terms.
+        if (!existingIntent.stripe_checkout_session_id) {
+          throw new Error(
+            "open checkout-intent is missing its Stripe Session id",
+          );
+        }
+        let otherSession = await stripe.checkout.sessions.retrieve(
+          existingIntent.stripe_checkout_session_id,
+          { expand: ["line_items.data.price", "discounts.coupon"] },
+        );
+        if (otherSession.status === "open") {
+          if (
+            !isReusableSubscriptionCheckoutSession({
+              session: otherSession,
+              intent: existingIntent,
+            })
+          ) {
+            // Never expire or hand out a Session that is not provably the
+            // one this ledger row created.
+            Sentry.captureMessage(
+              "billing: open Checkout Session for other terms failed intent binding",
+              {
+                level: "error",
+                tags: {
+                  feature: "billing-checkout",
+                  guard: "other-terms-session-binding",
+                },
+                extra: { intentId: existingIntent.id },
+              },
+            );
+            return {
+              ok: false,
+              code: "SERVER_ERROR",
+              message:
+                "We couldn't safely resume your existing checkout. Please contact support.",
+            };
+          }
+          if (parsed.data.startOver !== true) {
+            return {
+              ok: false,
+              code: "CHECKOUT_OPEN_OTHER_PLAN",
+              message:
+                "A checkout you started earlier is still open. Resume it, or start over with this plan.",
+              openPlanSlug: existingIntent.plan_slug,
+              resumeUrl: otherSession.url!,
+            };
+          }
+          const openSessionId = otherSession.id;
+          try {
+            otherSession = await stripe.checkout.sessions.expire(openSessionId);
+          } catch (expireError) {
+            // Completion may win the expire request. Retrieve Stripe truth;
+            // any other error/status remains fail-closed.
+            const currentSession =
+              await stripe.checkout.sessions.retrieve(openSessionId);
+            if (currentSession.status === "open") throw expireError;
+            otherSession = currentSession;
+          }
+        }
+        if (otherSession.status === "complete") {
+          // The buyer paid on the earlier Session (possibly while it was
+          // being expired). Honour it; never open a second checkout.
+          await completeSubscriptionCheckoutIntentFromWebhook(
+            admin,
+            otherSession,
+          );
+          return {
+            ok: false,
+            code: "ALREADY_SUBSCRIBED",
+            message:
+              "This checkout is already complete. Your subscription is being activated.",
+          };
+        }
+        if (otherSession.status === "expired") {
+          // Marks the intent expired and releases its Pack-credit
+          // reservation: the same transition the checkout.session.expired
+          // webhook makes, so the later webhook is a no-op.
+          await expireSubscriptionCheckoutIntentFromWebhook(
+            admin,
+            otherSession,
+          );
+          acquisition = await acquireSubscriptionCheckoutIntent(
+            admin,
+            acquireInput,
+          );
+          continue;
+        }
+        throw new Error(
+          "open checkout-intent for other terms could not be reconciled",
+        );
       }
       if (existingIntent.status === "creating") {
         return {

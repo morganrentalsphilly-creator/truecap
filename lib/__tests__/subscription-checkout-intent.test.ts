@@ -326,6 +326,83 @@ describe("subscription Checkout atomicity contract", () => {
     );
   });
 
+  it("offers resume or start over for an OPEN intent with other terms, and expires the old Session before reserving a new intent", () => {
+    const loopStart = billing.indexOf(
+      "for (let attempt = 0; !acquisition.acquired && attempt < 3; attempt += 1)",
+    );
+    const loopEnd = billing.indexOf("if (!acquisition.acquired) {", loopStart);
+    const loop = billing.slice(loopStart, loopEnd);
+    expect(loopStart).toBeGreaterThan(-1);
+    expect(loopEnd).toBeGreaterThan(loopStart);
+
+    // The stale "creating" branch above is unchanged and still comes first.
+    const creatingBranch = indexOfPattern(
+      loop,
+      /if\s*\(\s*!configurationMatches\s*&&\s*existingIntent\.status\s*===\s*"creating"\s*\)/,
+    );
+    const openBranch = indexOfPattern(
+      loop,
+      /if\s*\(\s*!configurationMatches\s*\)\s*\{/,
+      creatingBranch + 1,
+    );
+    const stripeTruth = indexOfPattern(
+      loop,
+      /let otherSession = await stripe\.checkout\.sessions\.retrieve\(\s*existingIntent\.stripe_checkout_session_id,/,
+      openBranch,
+    );
+    const binding = indexOfPattern(
+      loop,
+      /isReusableSubscriptionCheckoutSession\(\{\s*session: otherSession,\s*intent: existingIntent,\s*\}\)/,
+      stripeTruth,
+    );
+    const choice = loop.indexOf("if (parsed.data.startOver !== true) {", binding);
+    const offered = loop.indexOf('code: "CHECKOUT_OPEN_OTHER_PLAN"', choice);
+    const expire = indexOfPattern(
+      loop,
+      /otherSession = await stripe\.checkout\.sessions\.expire\(openSessionId\)/,
+      offered,
+    );
+    const raceRead = indexOfPattern(
+      loop,
+      /await stripe\.checkout\.sessions\.retrieve\(openSessionId\);\s*if \(currentSession\.status === "open"\) throw expireError;/,
+      expire,
+    );
+    const honourPaid = indexOfPattern(
+      loop,
+      /if \(otherSession\.status === "complete"\) \{[\s\S]*?completeSubscriptionCheckoutIntentFromWebhook\(\s*admin,\s*otherSession,?\s*\)[\s\S]*?code: "ALREADY_SUBSCRIBED"/,
+      raceRead,
+    );
+    const intentExpired = indexOfPattern(
+      loop,
+      /expireSubscriptionCheckoutIntentFromWebhook\(\s*admin,\s*otherSession,?\s*\)/,
+      honourPaid,
+    );
+    const reserve = indexOfPattern(
+      loop,
+      /acquisition = await acquireSubscriptionCheckoutIntent\(\s*admin,\s*acquireInput,?\s*\);\s*continue;/,
+      intentExpired,
+    );
+
+    expect(creatingBranch).toBeGreaterThan(-1);
+    expect(openBranch).toBeGreaterThan(creatingBranch);
+    expect(stripeTruth).toBeGreaterThan(openBranch);
+    expect(binding).toBeGreaterThan(stripeTruth);
+    expect(choice).toBeGreaterThan(binding);
+    expect(offered).toBeGreaterThan(choice);
+    expect(expire).toBeGreaterThan(offered);
+    expect(raceRead).toBeGreaterThan(expire);
+    expect(honourPaid).toBeGreaterThan(raceRead);
+    expect(intentExpired).toBeGreaterThan(honourPaid);
+    expect(reserve).toBeGreaterThan(intentExpired);
+
+    // The open-intent branch no longer refuses the buyer for up to 24 hours.
+    expect(loop).not.toContain("Finish or let it expire before starting this offer");
+    // An intent that is being created right now still asks for a moment.
+    expect(loop).toContain(
+      "Another checkout with different pricing or trial terms is already being prepared.",
+    );
+  });
+
   it("keeps the ledger unavailable to browser-authenticated roles", () => {
     expect(migration).toContain("force row level security");
     expect(migration).toContain(
