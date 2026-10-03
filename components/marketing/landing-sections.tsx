@@ -31,7 +31,7 @@ import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { HOMEPAGE_WALKTHROUGH_ID } from "@/components/marketing/marketing-hero";
 import { PlanCard, type PlanCardAnswer } from "@/components/marketing/plan-card";
-import { MEMO_SHOT, ProductShot } from "@/components/marketing/product-shot";
+import { ClientPdfCover } from "@/components/marketing/client-pdf-cover";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { Note } from "@/components/marketing/page-parts";
 import { Section, SectionHeading } from "@/components/marketing/section";
@@ -734,11 +734,11 @@ export function DataSourcesSection() {
 // ───────────────────────────────────────── What the client receives
 /**
  * What the agent's client receives (DESIGN.md "Homepage structure" 4): the
- * co-branding facts (the /for-agents list, lib/client-receives.ts) beside a
- * capture shown as a document. The capture is the /sample-decision-memo
- * page (public/product/manifest.json), so it is captioned as the sample page:
- * it is not the share page or the PDF the client receives, and the caption
- * must not say so until a real co-branded capture replaces it.
+ * co-branding facts (the /for-agents list, lib/client-receives.ts) beside
+ * page 1 of the real PDF report, shown as a document. The picture, its alt
+ * text and its caption live in ClientPdfCover, shared with /for-agents: the
+ * cover is rendered from the sample deal with no branding, so the caption
+ * says what branding changes and does not call it an agent's report.
  */
 export function ClientReceivesSection() {
   return (
@@ -761,21 +761,7 @@ export function ClientReceivesSection() {
             ))}
           </dl>
         </div>
-        <ProductShot
-          shot={MEMO_SHOT}
-          frame="document"
-          sizes="(min-width: 1024px) 480px, 100vw"
-          alt="TrueCap's sample decision memo page for the sample deal: the decision at asking, the Offer Ceiling with its targets, cash flow, cap rate, cash-on-cash and DSCR, what could break the decision, and what to verify next"
-          caption={
-            <>
-              The sample decision memo page, computed from the free sample deal. The share link and PDF your client receives are laid out differently.{" "}
-              <IntentPrefetchLink href="/sample-decision-memo" className="tc-link -my-3 inline-block py-3 font-medium">
-                Read the full sample memo
-              </IntentPrefetchLink>
-            </>
-          }
-          className="lg:pt-2"
-        />
+        <ClientPdfCover className="lg:pt-2" />
       </div>
     </Section>
   );
