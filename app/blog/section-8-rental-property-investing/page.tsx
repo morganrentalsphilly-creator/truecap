@@ -198,8 +198,8 @@ export default function Section8RentalPost() {
               <Link href="/analyze" prefetch={false} className="tc-link">
                 TrueCap analyzer
               </Link>
-              , which returns the NOI, cap rate, DSCR and cash flow from one
-              address.
+              , which returns the NOI, cap rate, DSCR and cash flow from an
+              address, the asking price and a bedroom count.
             </p>
             <p>
               In this hypothetical, an $800 scheduled HAP is larger than the $680 principal-and-interest payment. That does not prove the property services its full debt or operating costs: taxes, insurance, association dues, maintenance, vacancy, tenant collections, contract timing, and possible abatement still matter. Use the example only to test a scenario with written PHA inputs.

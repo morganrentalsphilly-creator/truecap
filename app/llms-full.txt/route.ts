@@ -142,7 +142,7 @@ export async function GET() {
     "## About",
     "",
     PRODUCT_POSITIONING,
-    `One address. Four answers: ${FOUR_ACQUISITION_ANSWERS.join("; ")}.`,
+    `An address, the asking price and a bedroom count. Four answers: ${FOUR_ACQUISITION_ANSWERS.join("; ")}.`,
     `Free: ${planFacts.free}`,
     `Single Deal: ${planFacts.singleDeal}`,
     `Pro: ${planFacts.pro}`,

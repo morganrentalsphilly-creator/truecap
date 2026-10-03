@@ -251,8 +251,9 @@ export default async function BlogTopicHubPage({
           headingId="topic-cta-heading"
           lede={
             <>
-              Reading is step one. Paste an address into TrueCap and get cap rate, cash-on-cash,
-              DSCR, cash flow, and a Buy Box fit in 60 seconds — free.
+              Reading is step one. Enter an address, the asking price and a bedroom count in
+              TrueCap and get cap rate, cash-on-cash, DSCR, cash flow, and a Buy Box fit in
+              60 seconds — free.
             </>
           }
           actions={

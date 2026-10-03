@@ -119,7 +119,7 @@ const HERO_TERMS = ["Cash flow", "Cap rate", "Cash-on-cash", "DSCR", "Buy Box fi
 const PROMISES: { title: string; body: string }[] = [
   {
     title: "Save time",
-    body: "First-pass numbers from the address in about 60 seconds, at the showing, on your phone. HUD rent and a FRED rate benchmark fill in as labeled starting values; you enter the property tax bill and the client's financing.",
+    body: "First-pass numbers from the address, the asking price and a bedroom count in about 60 seconds, at the showing, on your phone. HUD rent and a FRED rate benchmark fill in as labeled starting values; you enter the property tax bill and the client's financing.",
   },
   {
     title: "Improve the client experience",
@@ -427,8 +427,9 @@ export default async function ForAgentsPage() {
             <Link href="/analyze" prefetch={false} className="tc-link">
               TrueCap analyzer
             </Link>{" "}
-            for cap rate and DSCR from one address. They land on a single,
-            well-cited page instead of a long email reply.
+            for cap rate and DSCR from an address, the asking price and a
+            bedroom count. They land on a single, well-cited page instead of a
+            long email reply.
           </p>
         </Section>
 

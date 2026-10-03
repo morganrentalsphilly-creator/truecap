@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     absolute: "Rental Property Calculator & Max Offer | TrueCap",
   },
   description:
-    "Analyze a rental property from an address, edit every assumption, and see cash flow, cap rate, DSCR, cash-on-cash return, and a target-based Offer Ceiling.",
+    "Analyze a rental property from an address, the asking price and a bedroom count. See cash flow, cap rate, DSCR, cash-on-cash return and an Offer Ceiling.",
   keywords: [
     "rental property analysis",
     "investment property calculator",
@@ -73,7 +73,7 @@ export const metadata: Metadata = {
     // resurfaces stale phrasing on brand queries.
     title: "Rental Property Calculator & Max Offer | TrueCap",
     description:
-      "Analyze a rental property from an address, edit every assumption, and see cash flow, cap rate, DSCR, cash-on-cash return, and a target-based Offer Ceiling.",
+      "Analyze a rental property from an address, the asking price and a bedroom count. See cash flow, cap rate, DSCR, cash-on-cash return and an Offer Ceiling.",
     url: "/",
     type: "website",
     // Re-declare images because page-level openGraph fully replaces the
@@ -92,7 +92,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Rental Property Calculator & Max Offer | TrueCap",
     description:
-      "Analyze a rental property from an address, edit every assumption, and see cash flow, cap rate, DSCR, cash-on-cash return, and a target-based Offer Ceiling.",
+      "Analyze a rental property from an address, the asking price and a bedroom count. See cash flow, cap rate, DSCR, cash-on-cash return and an Offer Ceiling.",
     images: ["/og/home"],
   },
 };
