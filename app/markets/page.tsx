@@ -13,8 +13,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
-import { MapPin } from "lucide-react";
 import { Header } from "@/components/investcalc/header";
+import { ARTICLE_META } from "@/components/marketing/article";
+import { PageHero } from "@/components/marketing/page-parts";
+import {
+  DATA_LINK_GROUP_LABEL_CLASS,
+  DATA_LINK_ROW_CLASS,
+  DATA_PAGE_MAIN_CLASS,
+  DATA_PAGE_ROOT_CLASS,
+  DATA_SUBHEADING_CLASS,
+  DATA_TAG_LINK_CLASS,
+} from "@/components/marketing/safe-market-page";
+import { Section, SectionHeading } from "@/components/marketing/section";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { BESPOKE_MARKETS, MARKET_CITIES } from "@/lib/markets/cities";
@@ -95,123 +107,132 @@ export default function MarketsIndexPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={DATA_PAGE_ROOT_CLASS}>
       <JsonLd data={collectionLd} />
       <BreadcrumbSchema items={[{ name: "Markets", path: "/markets" }]} />
       <Header />
 
-      <main id="main" className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12">
-        <p className="flex items-center gap-1.5 text-2xs uppercase tracking-widest text-primary font-bold">
-          <MapPin className="size-3.5" /> Markets
-        </p>
-        <h1 className="mt-2 text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight">
-          Rental property markets
-        </h1>
-        <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-          Browse {ALL.length}+ city guides. Each one separates public context,
-          like HUD rent benchmarks, from the property-specific evidence you
-          still need to verify. TrueCap doesn&apos;t publish city-level cap
-          rates, prices, taxes, neighborhood picks, or investment verdicts.
-        </p>
-
-        <section className="mt-10 rounded-2xl bg-primary p-6 sm:p-8 text-primary-foreground">
-          <h2 className="text-xl sm:text-2xl font-extrabold mb-2">
-            Already have an address?
-          </h2>
-          <p className="text-sm sm:text-base opacity-90 mb-5">
-            Skip the list. Enter a supported address and asking price, review
-            the labeled starting assumptions, and get cap rate, cash flow, and
-            DSCR. Every assumption is editable.
-          </p>
-          {/* The hub names itself as the city and state templates do
-              (market-page, state-page). It travels as from, not utm_source:
-              this is a hop inside the site. Nothing reads the value. */}
-          <Link
-            href="/analyze?from=markets-hub" prefetch={false}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary-foreground px-4 font-bold text-primary transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          >
-            Run a deal free →
-          </Link>
-        </section>
-
-        <nav aria-label="Jump to market directory group" className="mt-10">
-          <p className="mb-2 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
-            Browse states alphabetically
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {marketGroups.map((group) => (
-              <a
-                key={group.slug}
-                href={`#markets-${group.slug}`}
-                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-border bg-card px-4 text-sm font-bold text-foreground/80 transition-colors hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+      <main id="main" tabIndex={-1} className={DATA_PAGE_MAIN_CLASS}>
+        {/* The hero carries the page's action: the "Already have an address?"
+            ask sits in the hero's wide column from 1024px and directly under
+            the lede on phones, on the 2px ink rule with one marketing button
+            (no blue panel, no arrow). "Markets", the old eyebrow's word, is
+            the meta line under the H1. */}
+        <PageHero
+          title="Rental property markets"
+          aside={
+            <section aria-labelledby="markets-ask-heading" className="border-t-2 border-foreground pt-6">
+              <h2 id="markets-ask-heading" className={DATA_SUBHEADING_CLASS}>
+                Already have an address?
+              </h2>
+              <p className="mt-2 max-w-[56ch] text-pretty text-base leading-relaxed text-muted-foreground">
+                Skip the list. Enter a supported address and asking price, review
+                the labeled starting assumptions, and get cap rate, cash flow, and
+                DSCR. Every assumption is editable.
+              </p>
+              {/* The hub names itself as the city and state templates do
+                  (market-page, state-page). It travels as from, not utm_source:
+                  this is a hop inside the site. Nothing reads the value. */}
+              <Link
+                href="/analyze?from=markets-hub" prefetch={false}
+                className={cn(buttonVariants({ size: "cta" }), "mt-5")}
               >
-                {group.label}
-              </a>
-            ))}
-          </div>
-        </nav>
+                Run a deal free
+              </Link>
+            </section>
+          }
+        >
+          <p className={ARTICLE_META}>
+            Markets
+          </p>
+          <p className="mt-4 max-w-[52ch] text-pretty text-lg leading-normal text-foreground">
+            Browse {ALL.length}+ city guides. Each one separates public context,
+            like HUD rent benchmarks, from the property-specific evidence you
+            still need to verify. TrueCap doesn&apos;t publish city-level cap
+            rates, prices, taxes, neighborhood picks, or investment verdicts.
+          </p>
+        </PageHero>
 
-        <div className="mt-12 space-y-14" data-market-directory="grouped">
-          {marketGroups.map((group) => {
-            const rangeHeadingId = `markets-${group.slug}-heading`;
-            return (
-              <section
-                key={group.slug}
-                id={`markets-${group.slug}`}
-                aria-labelledby={rangeHeadingId}
-                className="scroll-mt-24"
-              >
-                <h2
-                  id={rangeHeadingId}
-                  className="mb-6 border-b border-border pb-3 text-2xl font-extrabold text-foreground"
+        {/* The directory: the jump links as 2px tags, then one block per
+            alphabet range, each state a ruled list of city links (rules and
+            space, no pills, no arrows). The hero's bottom rule opens it. */}
+        <Section rule="none" rhythm="tight">
+          <nav aria-label="Jump to market directory group">
+            <p className={DATA_LINK_GROUP_LABEL_CLASS}>
+              Browse states alphabetically
+            </p>
+            <div className={DATA_LINK_ROW_CLASS}>
+              {marketGroups.map((group) => (
+                <a
+                  key={group.slug}
+                  href={`#markets-${group.slug}`}
+                  className={cn(DATA_TAG_LINK_CLASS, "justify-center px-4")}
                 >
-                  States {group.label}
-                </h2>
+                  {group.label}
+                </a>
+              ))}
+            </div>
+          </nav>
 
-                <div className="space-y-8">
-                  {group.states.map(({ stateName, entries }) => {
-                    const stateSlug = stateSlugByName.get(stateName);
-                    const stateHeadingId = `market-state-${stateSlug ?? stateName.toLowerCase().replaceAll(" ", "-")}`;
+          <div className="mt-12 space-y-16" data-market-directory="grouped">
+            {marketGroups.map((group) => {
+              const rangeHeadingId = `markets-${group.slug}-heading`;
+              return (
+                <section
+                  key={group.slug}
+                  id={`markets-${group.slug}`}
+                  aria-labelledby={rangeHeadingId}
+                  className="border-t-2 border-foreground pt-6"
+                >
+                  <SectionHeading id={rangeHeadingId}>
+                    States {group.label}
+                  </SectionHeading>
 
-                    return (
-                      <section key={stateName} aria-labelledby={stateHeadingId}>
-                        <h3
-                          id={stateHeadingId}
-                          className="mb-2 text-lg font-extrabold text-foreground"
-                        >
-                          {stateSlug ? (
-                            <IntentPrefetchLink
-                              href={`/states/${stateSlug}`}
-                              className="inline-flex min-h-11 min-w-11 items-center rounded-md px-1 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                            >
-                              {stateName}
-                              <span className="sr-only"> investing guide</span>
-                            </IntentPrefetchLink>
-                          ) : (
-                            stateName
-                          )}
-                        </h3>
-                        <ul className="grid gap-1 sm:grid-cols-2 lg:grid-cols-3">
-                          {entries.map((city) => (
-                            <li key={city.slug}>
+                  <div className="mt-6 space-y-8">
+                    {group.states.map(({ stateName, entries }) => {
+                      const stateSlug = stateSlugByName.get(stateName);
+                      const stateHeadingId = `market-state-${stateSlug ?? stateName.toLowerCase().replaceAll(" ", "-")}`;
+
+                      return (
+                        <section key={stateName} aria-labelledby={stateHeadingId}>
+                          <h3
+                            id={stateHeadingId}
+                            className="border-b border-border text-lg font-semibold text-foreground"
+                          >
+                            {stateSlug ? (
                               <IntentPrefetchLink
-                                href={`/markets/${city.slug}`}
-                                data-market-city-link=""
-                                className="inline-flex min-h-11 min-w-11 w-full items-center rounded-lg px-3 text-sm font-semibold text-foreground/80 transition-colors hover:bg-muted hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                                href={`/states/${stateSlug}`}
+                                className="tc-link inline-flex min-h-11 min-w-11 items-center"
                               >
-                                {city.name} →
+                                {stateName}
+                                <span className="sr-only"> investing guide</span>
                               </IntentPrefetchLink>
-                            </li>
-                          ))}
-                        </ul>
-                      </section>
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          })}
-        </div>
+                            ) : (
+                              <span className="inline-flex min-h-11 items-center">{stateName}</span>
+                            )}
+                          </h3>
+                          <ul className="grid sm:grid-cols-2 sm:gap-x-12 lg:grid-cols-3">
+                            {entries.map((city) => (
+                              <li key={city.slug} className="border-b border-rule-soft">
+                                <IntentPrefetchLink
+                                  href={`/markets/${city.slug}`}
+                                  data-market-city-link=""
+                                  className="tc-link inline-flex min-h-11 min-w-11 w-full items-center text-base"
+                                >
+                                  {city.name}
+                                </IntentPrefetchLink>
+                              </li>
+                            ))}
+                          </ul>
+                        </section>
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        </Section>
       </main>
 
       <SiteFooter />
