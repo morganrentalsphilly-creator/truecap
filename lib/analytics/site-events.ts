@@ -19,7 +19,26 @@ export type SiteEventProps = {
   analysis_completed: { verdict: string; has_ceiling: boolean };
   sample_viewed: { source: "hero" | "analyzer" | "link" };
   signup_started: { method: "email" | "google" };
+  /**
+   * What this counts, by method:
+   *  - "email": the sign-up form was SUBMITTED and accepted
+   *    (components/auth/sign-up-form.tsx fires it when signUpAction returns
+   *    ok). With email confirmation on, that is before the confirmation link
+   *    is clicked, so it includes accounts that are never confirmed. It is
+   *    sent from the browser, so it is also missing wherever analytics is
+   *    not mounted (sign-up URLs carrying `next=`, see lib/sensitive-url.ts).
+   *  - "google": a new Google account was created (app/auth/callback/route.ts,
+   *    server-side, once per account). Google accounts are confirmed.
+   *
+   * It is NOT the same number as the `signup_completed` rows in
+   * seo_conversions (seo/scripts/signups.ts, read by the SEO dashboard):
+   * those are built from auth.users and count CONFIRMED accounts with a
+   * first-touch record only. Expect this event to read higher for email
+   * sign-ups. The name is kept because the dashboards, the SEO control
+   * plane's event_name check and docs/analytics.md all read it.
+   */
   signup_completed: { method: "email" | "google" };
+  /** Fires together with `signup_completed`, so it counts the same thing. */
   trial_started: { method?: "email" | "google" };
   checkout_started: { plan: string; interval: "monthly" | "annual" };
   checkout_completed: { plan: string; interval?: "monthly" | "annual" | "unknown" };
