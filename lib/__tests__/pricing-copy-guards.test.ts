@@ -123,9 +123,14 @@ describe("no-card product evaluation", () => {
       /Pro deals and \{PRODUCT_EVALUATION_COMPARISON_LIMIT\} comparison\./,
     );
     expect(signup).toContain(
-      "Complete {PRODUCT_EVALUATION_DEAL_LIMIT} Pro deal analyses and",
+      "Complete {PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and",
     );
     expect(signup).toContain("{PRODUCT_EVALUATION_COMPARISON_LIMIT} full comparison.");
+    // Row P1-07: the sign-up box says what the trial counts. The ledger holds
+    // one row per distinct set of inputs (lib/evaluation-resource-key.ts).
+    expect(signup).toMatch(
+      /full comparison\. A rerun with\s+changed inputs counts as a new analysis\./,
+    );
     for (const source of [plans, signup]) {
       expect(source).not.toMatch(
         /\b(?:one|two|three|four|five)\s+(?:complete\s+|full\s+)?(?:Pro\s+deal|comparison)/i,
