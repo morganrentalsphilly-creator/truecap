@@ -20,7 +20,7 @@ import {
  *    hashes the whole validated form), so the surfaces say "Pro analyses" and
  *    that a rerun with changed inputs counts as a new one.
  *  - P1-38: the no-signup exact Offer Ceiling is bound to the inputs first run.
- *  - P1-39: the listing price lookup needs a paid plan and its refusal is shown.
+ *  - P1-39: the listing price lookup needs Pro or Agent Pro and its refusal is shown.
  *  - P1-58 / P2-119: two agent FAQ answers.
  *  - P1-71: the range sentence is true for a deal that misses its targets.
  *  - P2-156: the blurred Pro preview is hidden from assistive technology.
@@ -156,8 +156,11 @@ describe("listing paste says who gets the price (P1-39)", () => {
     const input = flat(read("components/investcalc/listing-link-input.tsx"));
     expect(input).toContain("{priceLookupRefused ? (");
     expect(input).toContain(
-      "Filling the asking price and property facts from a listing link needs a paid plan.",
+      "Filling the asking price and property facts from a listing link needs a Pro or Agent Pro subscription.",
     );
+    // A one-time purchase is not a subscription and is still refused, so the
+    // line names the plans instead of saying "a paid plan".
+    expect(input).not.toContain("needs a paid plan");
     expect(input).toContain('href="/pricing"');
   });
 

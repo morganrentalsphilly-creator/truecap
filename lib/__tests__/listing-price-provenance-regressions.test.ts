@@ -88,14 +88,17 @@ describe("listing-price provenance regressions", () => {
 
   it("describes listing-link enrichment without claiming to scrape the listing", () => {
     expect(listingLink).toContain("TrueCap extracts the address");
-    // The price lookup runs only for a paid subscription
-    // (app/actions/property-comps.ts proOnly), so the help text names it.
-    expect(listingLink).toContain(
-      "a signed-in lookup on a paid plan can also fill the active\n        asking price",
+    // The price lookup runs only for a Pro or Agent Pro subscription
+    // (app/actions/property-comps.ts proOnly), so the help text names the
+    // plans. Whitespace is flattened so a re-wrap cannot hide the old sentence.
+    const flatListing = listingLink.replace(/\s+/g, " ");
+    expect(flatListing).toContain(
+      "a signed-in lookup on Pro or Agent Pro can also fill the active asking price",
     );
-    expect(listingLink).not.toContain(
+    expect(flatListing).not.toContain(
       "a signed-in lookup can also fill the active asking price",
     );
+    expect(flatListing).not.toContain("lookup on a paid plan");
     expect(listingLink).toContain("other values remain labeled estimates");
     expect(listingLink).toContain(
       "It never imports\n        listing photos, seller claims, or the actual tax bill",
