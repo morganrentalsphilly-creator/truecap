@@ -37,6 +37,14 @@ function mapAuthError(message: string): string {
   if (/rate ?limit|too many/.test(m)) {
     return "Too many attempts in a row. Wait a minute and try again.";
   }
+  if (m.includes("captcha")) {
+    // Supabase checks the captcha before the credentials, so this says
+    // nothing about the account. Its own strings ("captcha protection: request
+    // disallowed (timeout-or-duplicate)", "captcha verification process
+    // failed") are not for a customer. The form has already asked the widget
+    // for a new token by the time this is on screen.
+    return "Couldn't verify you're human. Wait for the check to finish, then try again. If it keeps failing, reload the page.";
+  }
   if (m.startsWith("password should")) {
     // Supabase's policy sentence ("Password should be at least 12 characters"
     // / "…contain at least one …") is already human; keep it but make it a
