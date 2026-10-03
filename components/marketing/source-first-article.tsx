@@ -28,6 +28,7 @@ import {
   ArticleEnd,
   ArticleMain,
   ArticlePage,
+  UnderTitleAnalyzeLink,
 } from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
@@ -207,6 +208,7 @@ export function SourceFirstArticle({
             })}
           </p>
           <BlogByline />
+          <UnderTitleAnalyzeLink />
           <p className={ARTICLE_LEDE}>{article.description}</p>
         </header>
 
