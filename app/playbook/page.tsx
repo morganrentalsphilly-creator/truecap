@@ -110,7 +110,7 @@ const STEPS = [
     paragraphs: [
       "The Offer Ceiling is the highest price that still meets your targets under the assumptions shown.",
       "The solver works backward from the selected cash-flow, cash-on-cash, cap-rate, DSCR, and price constraints that apply. TrueCap Pro computes this boundary on each compatible analysis and includes it in Pro reports.",
-      "If the Offer Ceiling is below asking, the page reports the gap. That comparison does not tell you to make, submit, or avoid an offer. Verify rent, property costs, condition, financing, title, and local requirements, then decide with the advisers relevant to your situation.",
+      "If the Offer Ceiling is below asking, the page reports the gap. Verify rent, property costs, condition, financing, title, and local requirements, then decide with the advisers relevant to your situation.",
     ],
     action:
       "Calculate the Offer Ceiling, record its target profile, and verify the assumptions that could move it.",
