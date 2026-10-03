@@ -71,9 +71,11 @@ describe("customer-facing decision vocabulary", () => {
     // screen the deal; Agent Pro — win investor clients). Those two phrases
     // are allowed on exactly these marketing surfaces; the product UI still
     // names the number Offer Ceiling only.
+    // 2026-10-03: the sign-up side panel no longer says "walk-away price"
+    // (its headline now reads the same for an agent and an investor), so
+    // that page left the list.
     expect(violations).toEqual([
       "app/about/page.tsx: walk-away price",
-      "app/auth/sign-up/page.tsx: walk-away price",
       "app/home-authed/page.tsx: Max Offer",
       "app/page.tsx: Max Offer",
       "app/pricing/page.tsx: what to offer",
