@@ -1,6 +1,6 @@
 # TrueCap branded email templates
 
-Five HTML email templates for Supabase Auth, designed to match the TrueCap brand.
+Five HTML email templates for Supabase Auth, in the TrueCap site's colours.
 All templates are responsive, tested in the major email clients, and use only
 inline styles so they render correctly in Gmail / Apple Mail / Outlook.
 
@@ -18,6 +18,13 @@ dashboard, so a change here reaches nobody until the templates are pasted
 again (step 1 below). Changed on 2026-10-02: the footer line of all five
 templates now reads "TrueCap · Rental property underwriting", and the invite
 template's opening sentence was shortened.
+Changed on 2026-10-03: all five templates moved from the old purple and slate
+to the site's colours (`DESIGN.md`): paper `#efece8` behind a raised card
+`#f6f5f2`, ink `#1b1b1b`, Ink 2 `#51504c` for secondary text, soft rule
+`#d8d5d0`, band `#e9e6e0` behind the one-time code, and Signal Blue `#0066ba`
+for the button and links. The card's drop shadow is gone. Only colours
+changed; the wording and the template variables are the same. Paste all five
+again for the change to reach an inbox.
 
 ## Install
 
