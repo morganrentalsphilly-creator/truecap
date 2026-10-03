@@ -569,7 +569,6 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
                 </li>
               ))}
             </ul>
-
           </ArticleBody>
 
           {/* faqSchema above is the one FAQPage node for these rows. */}
