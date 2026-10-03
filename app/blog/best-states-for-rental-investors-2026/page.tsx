@@ -9,13 +9,24 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -93,26 +104,22 @@ export default function BestStatesPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -120,7 +127,8 @@ export default function BestStatesPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               &quot;Best state&quot; depends on what you&apos;re actually
               optimizing for. Pure cash flow? Appreciation tailwind? After-tax
               return? Landlord-friendly eviction law? Lowest insurance exposure?
@@ -129,10 +137,8 @@ export default function BestStatesPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The framework — pick your axis first
-            </h2>
+          <ArticleBody>
+            <h2>The framework — pick your axis first</h2>
             <p>
               Before picking a state, pick what you&apos;re optimizing for. The
               states that produce the highest cash flow are mostly NOT the
@@ -147,7 +153,7 @@ export default function BestStatesPost() {
                 <strong>
                   <Link
                     href="/glossary/cap-rate"
-                    className="text-primary font-semibold hover:underline"
+                    className="tc-link"
                   >
                     Cap rate
                   </Link>{" "}
@@ -159,7 +165,7 @@ export default function BestStatesPost() {
                 <strong>
                   <Link
                     href="/glossary/appreciation-rate"
-                    className="text-primary font-semibold hover:underline"
+                    className="tc-link"
                   >
                     Appreciation
                   </Link>{" "}
@@ -173,14 +179,14 @@ export default function BestStatesPost() {
                 (or absence of it) +{" "}
                 <Link
                   href="/glossary/property-tax"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   property tax
                 </Link>{" "}
                 +{" "}
                 <Link
                   href="/glossary/insurance"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   insurance
                 </Link>
@@ -199,29 +205,27 @@ export default function BestStatesPost() {
               value, it divides Census ACS 2024 median real estate taxes paid (
               <a
                 href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 table B25103
               </a>
               ) by median home value (
               <a
                 href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25077.dat"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 table B25077
               </a>
               ). Both tables cover owner-occupied homes only.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Tier 1 — Cash flow leaders
-            </h2>
+            <h2>Tier 1 — Cash flow leaders</h2>
             <p>
               Cash-flow-oriented states — test each listing against the 1% rule
               (gross monthly rent ≥ 1% of price):
             </p>
 
-            <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
+            <h3>
               1. Indiana (Indianapolis + smaller cities)
             </h3>
             <p>
@@ -232,7 +236,7 @@ export default function BestStatesPost() {
               gross assessed value (Indiana Constitution Article 10), but the{" "}
               <a
                 href="https://www.in.gov/dlgf/files/240429-Fact-Sheet-Circuit-Breaker-Caps.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Indiana DLGF&apos;s property tax caps fact sheet
               </a>{" "}
@@ -242,7 +246,7 @@ export default function BestStatesPost() {
               out-of-state PM market.{" "}
               <a
                 href="https://fred.stlouisfed.org/series/ATNHPIUS26900Q"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 FHFA&apos;s Indianapolis-area house price index
               </a>{" "}
@@ -253,20 +257,20 @@ export default function BestStatesPost() {
               <strong>Indianapolis rental market data:</strong>{" "}
               <Link
                 href="/markets/indianapolis"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 /markets/indianapolis
               </Link>
               {" · "}
               <Link
                 href="/states/indiana"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Indiana rental market data
               </Link>
             </p>
 
-            <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
+            <h3>
               2. Ohio (Cleveland + Cincinnati + Columbus)
             </h3>
             <p>
@@ -279,7 +283,7 @@ export default function BestStatesPost() {
               tax is{" "}
               <a
                 href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 about 1.2% of median home value (Census ACS 2024)
               </a>{" "}
@@ -292,20 +296,20 @@ export default function BestStatesPost() {
               <strong>Cleveland rental market data:</strong>{" "}
               <Link
                 href="/markets/cleveland"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 /markets/cleveland
               </Link>
               {" · "}
               <Link
                 href="/states/ohio"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Ohio rental market data
               </Link>
             </p>
 
-            <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
+            <h3>
               3. Missouri (Kansas City + St. Louis)
             </h3>
             <p>
@@ -316,7 +320,7 @@ export default function BestStatesPost() {
               a{" "}
               <a
                 href="https://stc.mo.gov/wp-content/uploads/sites/5/2024/08/Order-of-STC-to-Jackson-County-Regarding-2023-and-2024-Assessments.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Missouri State Tax Commission order correcting 2023 and 2024
                 residential assessments
@@ -327,20 +331,20 @@ export default function BestStatesPost() {
               <strong>Kansas City rental market data:</strong>{" "}
               <Link
                 href="/markets/kansas-city"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 /markets/kansas-city
               </Link>
               {" · "}
               <Link
                 href="/states/missouri"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Missouri rental market data
               </Link>
             </p>
 
-            <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
+            <h3>
               4. Michigan (Detroit metro)
             </h3>
             <p>
@@ -355,20 +359,20 @@ export default function BestStatesPost() {
               <strong>Detroit rental market data:</strong>{" "}
               <Link
                 href="/markets/detroit"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 /markets/detroit
               </Link>
               {" · "}
               <Link
                 href="/states/michigan"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Michigan rental market data
               </Link>
             </p>
 
-            <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
+            <h3>
               5. Tennessee (Memphis + Nashville)
             </h3>
             <p>
@@ -383,24 +387,22 @@ export default function BestStatesPost() {
               <strong>Memphis rental market data:</strong>{" "}
               <Link
                 href="/markets/memphis"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 /markets/memphis
               </Link>
               {" · "}
               <Link
                 href="/states/tennessee"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Tennessee rental market data
               </Link>
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Tier 2 — Balanced cash + appreciation
-            </h2>
+            <h2>Tier 2 — Balanced cash + appreciation</h2>
 
-            <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
+            <h3>
               6. North Carolina (Charlotte + Raleigh)
             </h3>
             <p>
@@ -409,7 +411,7 @@ export default function BestStatesPost() {
               appreciation tailwind (the{" "}
               <a
                 href="https://www2.census.gov/programs-surveys/popest/datasets/2020-2025/metro/totals/cbsa-est2025-alldata.csv"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 MSA added more than 50,000 residents a year in 2022–2025, per
                 Census estimates
@@ -418,14 +420,14 @@ export default function BestStatesPost() {
               County, median real estate taxes run{" "}
               <a
                 href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 about 0.68% of median home value (Census ACS 2024)
               </a>{" "}
               for owner-occupied homes; rentals can pay more.{" "}
               <a
                 href="https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_105/GS_105-286.html"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 N.C. General Statute 105-286
               </a>{" "}
@@ -437,20 +439,20 @@ export default function BestStatesPost() {
               <strong>Charlotte rental market data:</strong>{" "}
               <Link
                 href="/markets/charlotte"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 /markets/charlotte
               </Link>
               {" · "}
               <Link
                 href="/states/north-carolina"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 North Carolina rental market data
               </Link>
             </p>
 
-            <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
+            <h3>
               7. Georgia (Atlanta + secondary cities)
             </h3>
             <p>
@@ -460,7 +462,7 @@ export default function BestStatesPost() {
               Census ACS 2024 puts median real estate taxes at{" "}
               <a
                 href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 about 0.86% of median home value in Fulton County
               </a>{" "}
@@ -471,31 +473,29 @@ export default function BestStatesPost() {
               <strong>Atlanta rental market data:</strong>{" "}
               <Link
                 href="/markets/atlanta"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 /markets/atlanta
               </Link>
               {" · "}
               <Link
                 href="/states/georgia"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Georgia rental market data
               </Link>
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Tier 3 — Appreciation leaders (low cap, growth bet)
-            </h2>
+            <h2>Tier 3 — Appreciation leaders (low cap, growth bet)</h2>
 
-            <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
+            <h3>
               8. Arizona (Phoenix)
             </h3>
             <p>
               Phoenix combines very low property tax (Census ACS 2024:{" "}
               <a
                 href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 median taxes about 0.40% of median home value in Maricopa
                 County
@@ -504,7 +504,7 @@ export default function BestStatesPost() {
               tax (
               <a
                 href="https://azdor.gov/forms/individual/form-140-x-y-tables"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 a 2.5% flat rate for tax year 2023 and beyond, per the Arizona
                 Department of Revenue
@@ -512,7 +512,7 @@ export default function BestStatesPost() {
               ), and strong net in-migration (
               <a
                 href="https://www2.census.gov/programs-surveys/popest/datasets/2020-2025/metro/totals/cbsa-est2025-alldata.csv"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 about 300,000 net migrants and 354,000 added residents from July
                 2020 to July 2025, per Census estimates
@@ -524,7 +524,7 @@ export default function BestStatesPost() {
               STR-permissive at state level: under{" "}
               <a
                 href="https://www.azleg.gov/ars/9/00500-39.htm"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 A.R.S. 9-500.39
               </a>
@@ -535,20 +535,20 @@ export default function BestStatesPost() {
               <strong>Phoenix rental market data:</strong>{" "}
               <Link
                 href="/markets/phoenix"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 /markets/phoenix
               </Link>
               {" · "}
               <Link
                 href="/states/arizona"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Arizona rental market data
               </Link>
             </p>
 
-            <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
+            <h3>
               9. Florida (Tampa + Orlando + Jacksonville)
             </h3>
             <p>
@@ -563,20 +563,20 @@ export default function BestStatesPost() {
               <strong>Tampa rental market data:</strong>{" "}
               <Link
                 href="/markets/tampa"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 /markets/tampa
               </Link>
               {" · "}
               <Link
                 href="/states/florida"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Florida rental market data
               </Link>
             </p>
 
-            <h3 className="text-xl font-extrabold text-foreground mt-8 mb-2">
+            <h3>
               10. Texas (Dallas-Fort Worth + Houston)
             </h3>
             <p>
@@ -584,7 +584,7 @@ export default function BestStatesPost() {
               growth = the obvious appreciation thesis. The catch: Texas has the{" "}
               <a
                 href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 eighth-highest ratio of median property tax to median home value
                 among the 50 states
@@ -595,7 +595,7 @@ export default function BestStatesPost() {
               districts (MUDs) can owe an extra district property tax (see{" "}
               <a
                 href="https://www.tceq.texas.gov/downloads/water-districts/guidance/gi-043.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TCEQ&apos;s guide to Texas water districts
               </a>
@@ -608,34 +608,32 @@ export default function BestStatesPost() {
               <strong>Dallas and Houston rental market data:</strong>{" "}
               <Link
                 href="/markets/dallas"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 /markets/dallas
               </Link>{" "}
               ·{" "}
               <Link
                 href="/markets/houston"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 /markets/houston
               </Link>
               {" · "}
               <Link
                 href="/states/texas"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Texas rental market data
               </Link>
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Honorable mentions
-            </h2>
+            <h2>Honorable mentions</h2>
             <p>
               <strong>
                 <Link
                   href="/states/pennsylvania"
-                  className="text-foreground hover:text-primary hover:underline"
+                  className="tc-link"
                 >
                   Pennsylvania
                 </Link>{" "}
@@ -646,7 +644,7 @@ export default function BestStatesPost() {
               North Philly while South Philly is appreciation-leaning. See the{" "}
               <Link
                 href="/markets/philadelphia"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Philadelphia rental market data
               </Link>
@@ -656,7 +654,7 @@ export default function BestStatesPost() {
               <strong>
                 <Link
                   href="/states/alabama"
-                  className="text-foreground hover:text-primary hover:underline"
+                  className="tc-link"
                 >
                   Alabama
                 </Link>{" "}
@@ -668,7 +666,7 @@ export default function BestStatesPost() {
               tax is{" "}
               <a
                 href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 about 0.38% of median home value, second-lowest among states
                 after Hawaii
@@ -677,7 +675,7 @@ export default function BestStatesPost() {
               is assessed at a higher ratio: the{" "}
               <a
                 href="https://www.revenue.alabama.gov/property-tax/property-tax-assessment"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Alabama Department of Revenue&apos;s assessment classes
               </a>{" "}
@@ -689,7 +687,7 @@ export default function BestStatesPost() {
               <strong>
                 <Link
                   href="/states/oklahoma"
-                  className="text-foreground hover:text-primary hover:underline"
+                  className="tc-link"
                 >
                   Oklahoma
                 </Link>{" "}
@@ -698,7 +696,7 @@ export default function BestStatesPost() {
               — a cash-flow market with low entry prices (Census ACS 2024{" "}
               <a
                 href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25077.dat"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 median home value: $244,000 in Oklahoma County and $259,100 in
                 Tulsa County, vs $360,600 nationally
@@ -707,7 +705,7 @@ export default function BestStatesPost() {
               norm in Oklahoma City and Tulsa (Census ACS 2024:{" "}
               <a
                 href="https://www2.census.gov/programs-surveys/acs/summary_file/2024/table-based-SF/data/1YRData/acsdt1y2024-b25103.dat"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 about 0.94% and 0.90% of median home value, vs 0.89%
                 nationally
@@ -715,9 +713,7 @@ export default function BestStatesPost() {
               ); rentals can pay more.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              States to be cautious about
-            </h2>
+            <h2>States to be cautious about</h2>
             <p>
               <strong>California</strong> — state and local rent, termination,
               notice, registration, and just-cause rules can depend on the
@@ -746,9 +742,7 @@ export default function BestStatesPost() {
               statewide label does not establish expense or legal risk.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              How to actually pick
-            </h2>
+            <h2>How to actually pick</h2>
             <p>
               Don&apos;t pick a state in the abstract. Pick a strategy first,
               then pick the state. Three common matches:
@@ -777,7 +771,7 @@ export default function BestStatesPost() {
               through{" "}
               <Link
                 href="/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap
               </Link>{" "}
@@ -786,7 +780,7 @@ export default function BestStatesPost() {
               Enter the current local property-tax bill or a reviewed rate and
               verify every assumption before using the underwrite.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -838,13 +832,12 @@ export default function BestStatesPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
