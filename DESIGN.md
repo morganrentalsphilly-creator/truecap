@@ -522,32 +522,34 @@ a screenshot:
  Start sending deals that        │═════════════════════════════════════════════════
  already pencil.                 │                        At asking  At the Offer Ceiling
                                  │ Price                  $265,000        $236,000
- Paste the rental listing. In    │─────────────────────────────────────────────────
- about 60 seconds, see whether   │▒Cash flow after reserves  $554/mo       $750/mo▒
- it clears your client's Buy Box,│▒ Target ≥ $750/mo                binding target▒
- the highest price that still    │ DSCR  Target ≥ 1.25           1.52           1.75
- does (the Offer Ceiling), and   │ Meets the Buy Box               No            Yes
- what could break the deal. …    │─────────────────────────────────────────────────
+ Paste the rental listing. See   │─────────────────────────────────────────────────
+ whether it clears your client's │▒Cash flow after reserves  $554/mo       $750/mo▒
+ Buy Box, the highest price that │▒ Target ≥ $750/mo                binding target▒
+ still does (the Offer Ceiling), │ DSCR  Target ≥ 1.25           1.52           1.75
+ and what could break the deal.  │ Meets the Buy Box               No            Yes
+ Send it co-branded with Pro.    │─────────────────────────────────────────────────
                                  │ Offer Ceiling                        $236,000
+ Buying for your own portfolio? Same analyzer, your own Buy Box. For investors
  [ Address or listing link ][Analyze a deal free]                    ════════
  See the sample deal             │ $29,000 below asking. Binding target: cash flow ≥ $750/mo.
  Free. No account. Your first full decision is included.
- ──────────────────────────────
- Buying for your own portfolio? Same analyzer, your own Buy Box. For investors
 ```
 
 - **Grid:** 5/7 columns from 1024px, headline and form left, the ledger in the
-  wider column. Below 1024px the ledger follows the investor cue; at 375×812
-  and 390×844 the cue sits above the fold and the ledger's head starts at it.
+  wider column. The investor cue sits above the address form at every width,
+  with no rule (founder ruling, 2026-10-03, audit row P1-01), so the cookie
+  banner cannot cover it on a short phone. Below 1024px the ledger follows
+  the risk line.
   As built, the display size eases from 1024px (see Typography) so the
-  investor cue clears the one-line cookie banner in a 1095×760 window, and the
+  form stays in the first screen of a 1095×760 window, and the
   ledger's figure columns step down to 9rem between 1024 and 1279px. In that
   band the hero's address field and button each give up 4px of inline padding
   a side (12px and 16px), so the placeholder fits a field that is 187px wide
-  at 1024px. The form is not stacked there: 58px more height puts the cue
-  under the banner at 1095×760.
-- **Copy:** the copy pass's H1, subhead, CTA, sample link, risk line and
-  investor cue, unchanged. The arrow suffixes go ("See the sample deal", "For
+  at 1024px. The form is not stacked there: stacking adds 58px of height
+  in a 1095×760 window.
+- **Copy:** the copy pass's H1, CTA, sample link, risk line and investor
+  cue, unchanged. The subhead changed on 2026-10-03: it carries no time
+  figure and ends "Send it co-branded with Pro." The arrow suffixes go ("See the sample deal", "For
   investors"). The ledger's caption calls it the sample deal, never
   "synthetic" (`docs/voice.md` bans that word as internal vocabulary).
 - **Implementation:** a server render of the real sample-deal calculation at
