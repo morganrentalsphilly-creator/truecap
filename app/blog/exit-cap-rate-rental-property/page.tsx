@@ -18,15 +18,28 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -126,29 +139,27 @@ export default function ExitCapRatePost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>
               Exit cap rate: how to pick the number that sets your sale price
               (2026)
             </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -156,7 +167,8 @@ export default function ExitCapRatePost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               Every projection of what a rental returns five or ten years out
               rests on a number that often gets picked in seconds and never
               revisited: the exit cap rate. It&apos;s the cap rate you assume
@@ -173,16 +185,14 @@ export default function ExitCapRatePost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What the exit cap rate is
-            </h2>
+          <ArticleBody>
+            <h2>What the exit cap rate is</h2>
             <p>
               Start with the cap rate you already know. The{" "}
               <strong>going-in cap rate</strong> (or entry cap rate) is year-one{" "}
               <Link
                 href="/blog/how-to-calculate-noi-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 net operating income
               </Link>{" "}
@@ -193,11 +203,7 @@ export default function ExitCapRatePost() {
               have today; you assume it, and then you use it to turn a future
               year&apos;s NOI into a sale price:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                Projected sale price = Exit-year NOI ÷ Exit cap rate
-              </code>
-            </div>
+            <ToolFormula formula="Projected sale price = Exit-year NOI ÷ Exit cap rate" />
             <p>
               It goes by several names that all mean the same thing —{" "}
               <strong>terminal cap rate</strong> and{" "}
@@ -213,23 +219,21 @@ export default function ExitCapRatePost() {
               side of the trade first, the{" "}
               <Link
                 href="/blog/how-to-calculate-cap-rate"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 guide to calculating cap rate
               </Link>{" "}
               walks the going-in version step by step, and the free{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>{" "}
               does it live on a real address.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Why it matters more than any other input
-            </h2>
+            <h2>Why it matters more than any other input</h2>
             <p>
               On a buy-and-hold deal, the money comes from two places: the cash
               flow you collect each year, and the lump sum you net when you sell.
@@ -255,9 +259,7 @@ export default function ExitCapRatePost() {
               scrutiny and usually gets the least.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              A worked example: the $300K duplex
-            </h2>
+            <h2>A worked example: the $300K duplex</h2>
             <p>
               Take a $300,000 duplex bought with 25% down ($75,000) plus about
               $9,000 in closing costs, so <strong>$84,000 of cash in</strong>. The
@@ -276,10 +278,10 @@ export default function ExitCapRatePost() {
               7% cost of sale and the loan payoff, and the five-year internal rate
               of return on your $84,000:
             </p>
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
+                  <tr>
                     <th className="text-left">Exit cap rate</th>
                     <th className="text-right">Sale price</th>
                     <th className="text-right">Net proceeds</th>
@@ -313,7 +315,7 @@ export default function ExitCapRatePost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
             <p>
               Read down that table slowly, because it&apos;s the whole point of
               the article. The property is identical in every row — same rent,
@@ -337,16 +339,14 @@ export default function ExitCapRatePost() {
               of this drives the exit, rebuild the year-one NOI line in the{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>
               , then grow it to your exit year the way the example above does.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What actually moves exit cap rates
-            </h2>
+            <h2>What actually moves exit cap rates</h2>
             <p>
               If the exit cap is that important, it&apos;s worth knowing what
               pushes it around. Three forces do most of the work. First and
@@ -355,14 +355,14 @@ export default function ExitCapRatePost() {
               rise, buyers demand higher yields and cap rates drift up. The{" "}
               <a
                 href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&fq=Annual&fas=avg&cosd=2019-01-01"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 2022–23 rate climb
               </a>{" "}
               (
               <a
                 href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2026-01-01"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 30-year mortgage rates were still near 7% in September 2026
               </a>
@@ -382,9 +382,7 @@ export default function ExitCapRatePost() {
               precisely — it&apos;s to refuse to assume the market bails you out.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              How to pick a number you can defend
-            </h2>
+            <h2>How to pick a number you can defend</h2>
             <p>
               Three rules keep you honest. <strong>One: exit cap ≥ going-in
               cap.</strong> Make your default assumption that the cap rate you
@@ -407,7 +405,7 @@ export default function ExitCapRatePost() {
               seller&apos;s{" "}
               <Link
                 href="/blog/rental-property-pro-forma-explained"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 pro forma
               </Link>
@@ -420,7 +418,7 @@ export default function ExitCapRatePost() {
               heart of the difference between{" "}
               <Link
                 href="/blog/cash-on-cash-vs-irr"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cash-on-cash and IRR
               </Link>{" "}
@@ -428,9 +426,7 @@ export default function ExitCapRatePost() {
               it.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The residential caveat that matters
-            </h2>
+            <h2>The residential caveat that matters</h2>
             <p>
               One honest wrinkle for TrueCap&apos;s core audience. Cap-rate pricing
               is really a commercial and 5+ unit convention. When you sell a single-family rental or a 2–4 unit, the buyer may
@@ -438,14 +434,14 @@ export default function ExitCapRatePost() {
               appraises the property on{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b4-1.3-08/comparable-sales"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 <strong>comparable sales</strong>
               </a>{" "}
               (plus a{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 gross-rent-multiplier check on 2–4 units
               </a>
@@ -455,7 +451,7 @@ export default function ExitCapRatePost() {
               reason about in a{" "}
               <Link
                 href="/blog/cash-flow-vs-appreciation"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cash-flow-versus-appreciation
               </Link>{" "}
@@ -464,7 +460,7 @@ export default function ExitCapRatePost() {
               requires an appraisal whose income approach is{" "}
               <a
                 href="https://mf.freddiemac.com/docs/chapters/mf_guide_ch_60.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 built on a cap rate
               </a>{" "}
@@ -472,10 +468,8 @@ export default function ExitCapRatePost() {
               applies with full force.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Five ways people get the exit cap wrong
-            </h2>
-            <ul className="list-disc pl-6 space-y-2">
+            <h2>Five ways people get the exit cap wrong</h2>
+            <ul>
               <li>
                 <strong>Assuming compression to hit a target.</strong> Typing an
                 exit cap below your entry cap so the IRR clears your hurdle is the
@@ -507,21 +501,20 @@ export default function ExitCapRatePost() {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
+          </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The bottom line
-            </h2>
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
+
+          <ArticleBody className="mt-16">
+            <h2>The bottom line</h2>
             <p>
               The exit cap rate is the highest-leverage guess in any hold model —
               a number you can&apos;t look up that nonetheless controls most of
@@ -531,7 +524,7 @@ export default function ExitCapRatePost() {
               never let a compressing exit cap rescue a deal that doesn&apos;t work
               on its own. Do that and your projected return becomes a statement
               about the building instead of a bet on interest rates. Let the{" "}
-              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="tc-link">
                 TrueCap analyzer
               </Link>{" "}
               carry your NOI and financing assumptions through to cash flow, cap
@@ -541,7 +534,7 @@ export default function ExitCapRatePost() {
               expenses, and comparable sales on any specific property before you
               rely on a projected exit.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -569,13 +562,12 @@ export default function ExitCapRatePost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
