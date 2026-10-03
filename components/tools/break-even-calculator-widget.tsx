@@ -165,9 +165,10 @@ export function BreakEvenCalculatorWidget() {
         >
           <legend className="sr-only">Break-even inputs</legend>
           {/* Two fields a row on a phone, so the result and the action stay
-              near the first screen; in the two-column layout the field
-              column is narrow and they stack. */}
-          <div className="grid grid-cols-2 items-start gap-x-4 gap-y-5 @lg:grid-cols-1">
+              near the first screen, and again once the frame is 672px wide;
+              between the two the field column is too narrow for a pair and
+              they stack. */}
+          <div className="grid grid-cols-2 items-start gap-x-4 gap-y-5 @lg:grid-cols-1 @2xl:grid-cols-2">
             <ToolNumberField
               id="be-down"
               label="Down payment"
