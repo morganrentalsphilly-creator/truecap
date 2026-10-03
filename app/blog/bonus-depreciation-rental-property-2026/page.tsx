@@ -14,15 +14,28 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { Note } from "@/components/marketing/page-parts";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -160,64 +173,62 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8 sm:mb-10">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            Published{" "}
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · materially updated{" "}
-            {new Date(MODIFIED_AT).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-            · {READING_TIME_MIN} min read
-          </p>
-          <BlogByline />
-          <p className="mt-2 text-sm text-muted-foreground">
-            IRS sources verified {FACT_CHECKED_AT}
-          </p>
-          <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            Current IRS guidance{" "}
-            <a
-              href={IRS_BONUS_GUIDANCE}
-              className="text-primary font-semibold hover:underline"
-            >
-              restored 100% bonus depreciation
-            </a>{" "}
-            for eligible property acquired and placed in service after January
-            19, 2025. The
-            building itself usually does not qualify; certain shorter-life
-            components can. Dates, classification, and loss limitations all
-            matter.
-          </p>
-        </header>
+      <ArticleMain>
+        <article>
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              Published{" "}
+              {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              · materially updated{" "}
+              {new Date(MODIFIED_AT).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+              · {READING_TIME_MIN} min read
+            </p>
+            <BlogByline />
+            <p className="mt-2 text-sm text-muted-foreground">
+              IRS sources verified {FACT_CHECKED_AT}
+            </p>
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
+              Current IRS guidance{" "}
+              <a
+                href={IRS_BONUS_GUIDANCE}
+                className="tc-link"
+              >
+                restored 100% bonus depreciation
+              </a>{" "}
+              for eligible property acquired and placed in service after January
+              19, 2025. The
+              building itself usually does not qualify; certain shorter-life
+              components can. Dates, classification, and loss limitations all
+              matter.
+            </p>
+          </header>
 
-        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+          <ArticleBody>
           <p>
             The 2026 federal bonus-depreciation rate is{" "}
             <a
               href={IRS_PUBLICATION_946}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               <strong>100%</strong> for eligible property acquired and placed in
               service after January 19, 2025
@@ -232,14 +243,14 @@ export default function BlogPost() {
             estate investors before you act on it.
           </p>
 
-          <div className="not-prose my-6 rounded-xl border border-primary/25 bg-primary/5 p-4 text-sm leading-relaxed text-foreground">
+          <Note className="not-prose my-8">
             <strong>Source verification:</strong> factual rules on this page
             were checked on {FACT_CHECKED_AT} against current IRS guidance and
             Publications 946, 925, and 544. This is educational information, not
             individualized tax advice.
-          </div>
+          </Note>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             What changed: 100% was restored
           </h2>
           <p>
@@ -249,7 +260,7 @@ export default function BlogPost() {
             placed in service after January 19, 2025. See the IRS
             <a
               href={IRS_BONUS_GUIDANCE}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               {" "}
               implementation guidance
@@ -257,25 +268,25 @@ export default function BlogPost() {
             .
           </p>
           <p>The date boundary is essential:</p>
-          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
+          <ArticleTable label="Data table" stickyFirstColumn={false}>
+            <table className="[&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left p-3 font-bold text-foreground">
+                <tr>
+                  <th>
                     Property timing
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     General federal rule
                   </th>
                 </tr>
               </thead>
-              <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
+              <tbody>
                 <tr>
                   <td>Acquired before Jan. 20, 2025</td>
                   <td>
                     <a
                       href={IRS_PUBLICATION_946}
-                      className="text-primary font-semibold hover:underline"
+                      className="tc-link"
                     >
                       Prior phase-down rules
                     </a>{" "}
@@ -283,28 +294,28 @@ export default function BlogPost() {
                   </td>
                 </tr>
                 <tr>
-                  <td className="font-bold text-foreground">
+                  <td className="font-semibold text-foreground">
                     Acquired and placed in service after Jan. 19, 2025
                   </td>
-                  <td className="font-bold text-foreground">
+                  <td className="font-semibold text-foreground">
                     100% for eligible property
                   </td>
                 </tr>
               </tbody>
             </table>
-          </ScrollX>
+          </ArticleTable>
           <p>
             Acquisition can involve{" "}
             <a
               href={IRS_NOTICE_2026_11}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               binding-contract and related rules
             </a>
             , and &ldquo;placed in service&rdquo; generally means{" "}
             <a
               href={IRS_PUBLICATION_946}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               ready and available for its assigned use
             </a>
@@ -312,14 +323,14 @@ export default function BlogPost() {
             adviser resolve borderline dates.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             How depreciation works (and why bonus matters)
           </h2>
           <p>
             Residential rental buildings{" "}
             <a
               href={IRS_PUBLICATION_527}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               depreciate straight-line over <strong>27.5 years</strong>
             </a>
@@ -329,7 +340,7 @@ export default function BlogPost() {
             building class can differ. Bonus depreciation{" "}
             <a
               href={IRS_PUBLICATION_946}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               does not apply to the 27.5-year building shell itself
             </a>
@@ -351,7 +362,7 @@ export default function BlogPost() {
               <strong>$60K</strong> —{" "}
               <a
                 href={IRS_PUBLICATION_527}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 15-year land improvements
               </a>{" "}
@@ -361,7 +372,7 @@ export default function BlogPost() {
               <strong>$60K</strong> —{" "}
               <a
                 href={IRS_PUBLICATION_527}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 5-year personal property
               </a>{" "}
@@ -380,7 +391,7 @@ export default function BlogPost() {
           <p>
             <a
               href={IRS_PUBLICATION_946}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               IRS Publication 946
             </a>{" "}
@@ -393,7 +404,7 @@ export default function BlogPost() {
             the 20-year test.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Strategy 1: Cost segregation</h2>
+          <h2>Strategy 1: Cost segregation</h2>
           <p>
             A cost segregation study analyzes whether parts of a property should
             be classified separately from the building. A sound study documents
@@ -424,7 +435,7 @@ export default function BlogPost() {
               possible{" "}
               <a
                 href={IRS_PUBLICATION_946}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Form 3115
               </a>{" "}
@@ -437,14 +448,14 @@ export default function BlogPost() {
             cost of obtaining and defending the classification.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Strategy 2: Short-term-rental activity rules
           </h2>
           <p>
             Most rental real estate is{" "}
             <a
               href={IRS_PUBLICATION_925}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               &ldquo;passive activity&rdquo; under IRC §469
             </a>
@@ -457,7 +468,7 @@ export default function BlogPost() {
             rules.{" "}
             <a
               href={IRS_PUBLICATION_925}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               IRS Publication 925
             </a>{" "}
@@ -471,7 +482,7 @@ export default function BlogPost() {
               One test is{" "}
               <a
                 href={IRS_PUBLICATION_925}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 more than 500 hours
               </a>{" "}
@@ -481,7 +492,7 @@ export default function BlogPost() {
               Another is{" "}
               <a
                 href={IRS_PUBLICATION_925}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 more than 100 hours
               </a>{" "}
@@ -496,7 +507,7 @@ export default function BlogPost() {
             automatic way to erase salary income.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Strategy 3: Real estate professional status (REPS)
           </h2>
           <p>
@@ -512,7 +523,7 @@ export default function BlogPost() {
               <strong>50% test:</strong>{" "}
               <a
                 href={IRS_PUBLICATION_925}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 more than half your total personal services
               </a>{" "}
@@ -523,7 +534,7 @@ export default function BlogPost() {
               <strong>750-hour test:</strong>{" "}
               <a
                 href={IRS_PUBLICATION_925}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 more than 750 hours/year
               </a>{" "}
@@ -549,7 +560,7 @@ export default function BlogPost() {
               Married filing jointly —{" "}
               <a
                 href={USC_26_469}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 only ONE spouse needs to meet the test
               </a>
@@ -560,7 +571,7 @@ export default function BlogPost() {
             </li>
           </ul>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Depreciation recapture — the back end
           </h2>
           <p>
@@ -572,7 +583,7 @@ export default function BlogPost() {
           <p>
             <a
               href={IRS_PUBLICATION_544}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               IRS Publication 544
             </a>{" "}
@@ -588,7 +599,7 @@ export default function BlogPost() {
               <strong>1031 exchange.</strong> Roll the gain into a qualifying{" "}
               <a
                 href={IRS_PUBLICATION_544}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 like-kind replacement property
               </a>
@@ -596,7 +607,7 @@ export default function BlogPost() {
               reclassified assets require transaction-specific review.{" "}
               <Link
                 href="/blog/1031-exchange-basics"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Read the 1031 overview
               </Link>
@@ -614,7 +625,7 @@ export default function BlogPost() {
             </li>
           </ul>
 
-          <h2 className="text-2xl sm:text-3xl">Bottom-line decision tree</h2>
+          <h2>Bottom-line decision tree</h2>
           <p>For property placed in service in 2026:</p>
           <ol>
             <li>Confirm the acquisition and placed-in-service dates.</li>
@@ -644,41 +655,37 @@ export default function BlogPost() {
             Related reading:{" "}
             <Link
               href="/blog/rental-property-tax-deductions"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Rental property tax deductions
             </Link>
             ,{" "}
             <Link
               href="/blog/1031-exchange-basics"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               1031 exchange basics
             </Link>
             ,{" "}
             <Link
               href="/blog/short-term-rental-underwriting-playbook"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               STR underwriting playbook
             </Link>
             .
           </p>
+          </ArticleBody>
 
-          <h2 className="text-2xl sm:text-3xl">FAQ</h2>
-          {FAQS.map((f, i) => (
-            <details
-              key={i}
-              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
-            >
-              <summary className="cursor-pointer font-bold text-foreground">
-                {f.q}
-              </summary>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                {f.a}
-              </p>
-            </details>
-          ))}
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
         </article>
         <PostSources
           sources={[
@@ -715,9 +722,6 @@ export default function BlogPost() {
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <NewsletterSignup variant="expanded" source="blog" />
-        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -728,10 +732,12 @@ export default function BlogPost() {
             professional for taxpayer-specific analysis.
           </p>
         </footer>
-      </main>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
