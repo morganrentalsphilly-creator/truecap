@@ -16,8 +16,12 @@
  *   tinted box.
  * - CloseSection: the page's closing ask on the heavy rule (FinalCta's
  *   grammar), stacked for buttons or split for a block such as a price table.
+ * - UnderTitleAnalyzeLink: the one short "Analyze a deal free" text link
+ *   under a content page's H1 (audit row P2-80), also exported from
+ *   components/marketing/article.tsx for blog posts.
  */
 
+import Link from "next/link";
 import { Fragment, isValidElement, type ComponentProps, type ReactNode } from "react";
 import { PAGE_CONTAINER, Section, SectionHeading } from "@/components/marketing/section";
 import { cn } from "@/lib/utils";
@@ -48,7 +52,7 @@ export function PageHero({
 }: {
   title: ReactNode;
   lede?: ReactNode;
-  /** An ActionRow, or the page's own form. */
+  /** An ActionRow, the page's own form, or <UnderTitleAnalyzeLink /> on a content page. */
   actions?: ReactNode;
   /** The risk line under the actions ("Free. No card."). */
   note?: ReactNode;
@@ -89,6 +93,26 @@ export function PageHero({
         {aside ? <div className="min-w-0 lg:pt-1.5">{aside}</div> : null}
       </div>
     </section>
+  );
+}
+
+/**
+ * The one short analyzer link under a content page's H1 (audit row P2-80): a
+ * plain text link, never a button. It is set like the homepage hero's "See
+ * the sample deal" link (Signal Blue, underlined, 16px in a 44px-tall target)
+ * and, like every /analyze link, never prefetches the analyzer. Takes no
+ * props: on a PageHero page pass it as `actions` (its 4px top margin folds
+ * into the slot's); in a post header it goes directly after <BlogByline />,
+ * before the lede, so a long lede does not push it below the first phone
+ * screen. One per page (lib/__tests__/passive-conversion-cta.test.ts).
+ */
+export function UnderTitleAnalyzeLink() {
+  return (
+    <p className="mt-1 text-base">
+      <Link href="/analyze" prefetch={false} className="tc-link inline-flex min-h-11 items-center font-medium">
+        Analyze a deal free
+      </Link>
+    </p>
   );
 }
 

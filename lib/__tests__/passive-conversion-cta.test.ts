@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { BLOG_POSTS } from "@/lib/blog-posts";
@@ -62,13 +62,15 @@ describe("sitewide passive-conversion CTA", () => {
 
       // Contextual prose links may cite the analyzer, but a second imperative
       // analyzer button/link would compete with the one shared conversion CTA.
-      // Match JSX Link blocks instead of one particular class list so a visual
-      // restyle cannot silently reintroduce the duplicate. "/analyze" is the
-      // analyzer's home now; "/" and "/#main" are kept so a stale link is
-      // still counted.
+      // Match JSX link blocks (<Link>, <IntentPrefetchLink> or <a>) instead of
+      // one particular class list so a visual restyle cannot silently
+      // reintroduce the duplicate. "/analyze" is the analyzer's home now; "/"
+      // and "/#main" are kept so a stale link is still counted. The one
+      // allowed imperative link is the shared <UnderTitleAnalyzeLink />
+      // (checked below), which holds no href in a post's source.
       const directAnalyzerLinks =
         source.match(
-          /<Link\b[^>]*href=\{?["']\/(?:#main|analyze(?:\?[^"']*)?)?["']\}?[^>]*>[\s\S]{0,800}?<\/Link>/g,
+          /<(Link|IntentPrefetchLink|a)\b[^>]*href=\{?["']\/(?:#main|analyze(?:\?[^"']*)?)?["']\}?[^>]*>[\s\S]{0,800}?<\/\1>/g,
         ) ?? [];
       const duplicateCallsToAction = directAnalyzerLinks.filter((link) => {
         const text = link
@@ -88,6 +90,51 @@ describe("sitewide passive-conversion CTA", () => {
     for (const calculator of CALCULATOR_REGISTRY) {
       const path = `app/tools/${calculator.slug}/page.tsx`;
       expect(read(path).match(/<ToolsConversionCta\b/g), path).toHaveLength(1);
+    }
+  });
+
+  it("accepts exactly the shared under-H1 analyze link: one plain /analyze text link, once per page file", () => {
+    // The part (audit row P2-80): one next/link to /analyze that never
+    // prefetches, reading "Analyze a deal free", not set as a button.
+    const parts = read("components/marketing/page-parts.tsx");
+    const start = parts.indexOf("export function UnderTitleAnalyzeLink() {");
+    expect(start).toBeGreaterThan(-1);
+    const part = parts.slice(start, parts.indexOf("\n}\n", start));
+    const links = part.match(/<Link\b[^>]*>[\s\S]*?<\/Link>/g) ?? [];
+    expect(links).toHaveLength(1);
+    const link = links[0] ?? "";
+    expect(link).toMatch(/\shref="\/analyze"\s/);
+    expect(link).toMatch(/\sprefetch=\{false\}\s/);
+    expect(link.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()).toBe("Analyze a deal free");
+    expect(part).not.toMatch(/buttonVariants|bg-primary|rounded-|<form|<input|<button/);
+    // Blog posts take it from the frame, which re-exports this one part.
+    expect(read("components/marketing/article.tsx")).toContain(
+      'export { UnderTitleAnalyzeLink } from "@/components/marketing/page-parts";',
+    );
+
+    // Every mount is the propless tag, at most one per page file, and in a
+    // post it sits in the post's own <header> (under the H1, never in the body).
+    const walk = (dir: string): string[] =>
+      readdirSync(join(process.cwd(), dir), { withFileTypes: true }).flatMap((entry) =>
+        entry.isDirectory()
+          ? entry.name === "node_modules" || entry.name === "__tests__"
+            ? []
+            : walk(`${dir}/${entry.name}`)
+          : entry.name.endsWith(".tsx")
+            ? [`${dir}/${entry.name}`]
+            : [],
+      );
+    for (const path of [...walk("app"), ...walk("components")]) {
+      // Comments removed: a doc comment naming the part is not a mount.
+      const source = read(path).replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+      const mounts = [...source.matchAll(/<UnderTitleAnalyzeLink\b[^>]*>/g)];
+      if (mounts.length === 0) continue;
+      expect(mounts, path).toHaveLength(1);
+      expect(mounts[0][0], path).toBe("<UnderTitleAnalyzeLink />");
+      if (path.startsWith("app/blog/")) {
+        const before = source.slice(0, mounts[0].index);
+        expect(before.lastIndexOf("<header"), `${path}: in the post header`).toBeGreaterThan(before.lastIndexOf("</header>"));
+      }
     }
   });
 
