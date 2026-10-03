@@ -10,7 +10,11 @@ import { z } from "zod";
 import { Camera, Check, KeyRound, Loader2, Mail, Upload, X } from "lucide-react";
 import "react-easy-crop/react-easy-crop.css";
 import { updateProfileAction } from "@/app/actions/profile";
-import { CaptchaWidget, captchaEnabled } from "@/components/auth/captcha-widget";
+import {
+  CaptchaWidget,
+  captchaEnabled,
+  type CaptchaWidgetHandle,
+} from "@/components/auth/captcha-widget";
 import { requestPasswordResetAction } from "@/app/actions/auth";
 import { createBrowserSupabaseClient } from "@/lib/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -188,6 +192,7 @@ export function ProfileForm({
   const [resetSent, setResetSent] = useState(false);
   const [resetCaptchaToken, setResetCaptchaToken] = useState<string | null>(null);
   const [resetCaptchaUnavailable, setResetCaptchaUnavailable] = useState(false);
+  const resetCaptchaRef = useRef<CaptchaWidgetHandle>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -371,24 +376,30 @@ export function ProfileForm({
     // Supabase enforces captcha on resetPasswordForEmail project-wide, so this
     // signed-in surface needs a token too. Without one the send was rejected
     // and the user saw a raw "no captcha_token found" error.
-    const result = await requestPasswordResetAction({
-      email: initialEmail,
-      captchaToken: resetCaptchaToken ?? undefined,
-    });
-    setIsSendingReset(false);
-    if (!result.ok) {
-      toast({
-        title: "Couldn't send reset link",
-        description: result.message,
-        variant: "destructive",
+    try {
+      const result = await requestPasswordResetAction({
+        email: initialEmail,
+        captchaToken: resetCaptchaToken ?? undefined,
       });
-      return;
+      if (!result.ok) {
+        toast({
+          title: "Couldn't send reset link",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      setResetSent(true);
+      toast({
+        title: "Reset link sent",
+        description: `Check ${initialEmail} for the link to set a new password.`,
+      });
+    } finally {
+      setIsSendingReset(false);
+      // A token works once: it is spent with the request, whatever the
+      // outcome, so a retry after a failed send waits for a new one.
+      resetCaptchaRef.current?.reset();
     }
-    setResetSent(true);
-    toast({
-      title: "Reset link sent",
-      description: `Check ${initialEmail} for the link to set a new password.`,
-    });
   };
 
   const onSubmit = async (values: ProfileFormValues) => {
@@ -611,6 +622,7 @@ export function ProfileForm({
             <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
             {!resetSent ? (
               <CaptchaWidget
+                ref={resetCaptchaRef}
                 onToken={setResetCaptchaToken}
                 onUnavailable={() => setResetCaptchaUnavailable(true)}
               />
