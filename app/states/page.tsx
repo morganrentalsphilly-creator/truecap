@@ -8,6 +8,9 @@
 import type { Metadata } from "next";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { Header } from "@/components/investcalc/header";
+import { PageHero, UnderTitleAnalyzeLink } from "@/components/marketing/page-parts";
+import { DATA_PAGE_MAIN_CLASS, DATA_PAGE_ROOT_CLASS } from "@/components/marketing/safe-market-page";
+import { Section } from "@/components/marketing/section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { STATES, STATE_COUNT } from "@/lib/states";
@@ -61,44 +64,57 @@ export default function StatesIndexPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={DATA_PAGE_ROOT_CLASS}>
       <JsonLd data={itemListLd} />
       <BreadcrumbSchema items={[{ name: "States", path: "/states" }]} />
       <Header />
 
-      <main id="main" className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-12">
-        <h1 className="mt-2 text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight">
-          Rental-property verification by state
-        </h1>
-        <p className="mt-5 text-lg leading-relaxed text-muted-foreground max-w-2xl">
-          {STATE_COUNT} state guides for collecting property-specific tax,
-          insurance, legal, condition, expense, rent, and financing evidence.
-          These guides don&apos;t publish statewide tax rates, eviction
-          timelines, or landlord rankings.
-        </p>
+      <main id="main" tabIndex={-1} className={DATA_PAGE_MAIN_CLASS}>
+        {/* The hero's action is the one short analyzer link under the H1
+            (P2-80): this page had no analyzer link outside the header and
+            the footer. */}
+        <PageHero
+          title="Rental-property verification by state"
+          lede={
+            <p>
+              {STATE_COUNT} state guides for collecting property-specific tax,
+              insurance, legal, condition, expense, rent, and financing evidence.
+              These guides don&apos;t publish statewide tax rates, eviction
+              timelines, or landlord rankings.
+            </p>
+          }
+          actions={<UnderTitleAnalyzeLink />}
+        />
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {linkableStates(Object.values(STATES))
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .map((s) => (
-              <IntentPrefetchLink
-                key={s.slug}
-                href={`/states/${s.slug}`}
-                className="block rounded-2xl border border-border bg-card p-5 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
-              >
-                <p className="text-2xs uppercase tracking-widest text-primary font-bold">
-                  {s.abbr} · Verification guide
-                </p>
-                <p className="mt-1 text-lg font-extrabold text-foreground">
-                  {s.name}
-                </p>
-                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                  Parcel tax · insurance · controlling law · condition · rent ·
-                  financing
-                </p>
-              </IntentPrefetchLink>
-            ))}
-        </div>
+        {/* The directory as a ruled list of whole-row links (the /vs hub's
+            grammar), not a grid of cards: the state's name leads the row in
+            the link style, the lines under it are its meta. The hero's bottom rule
+            opens the section. */}
+        <Section rule="none" rhythm="tight">
+          <ul className="grid grid-cols-[minmax(0,1fr)] border-t-2 border-foreground sm:grid-cols-2 sm:gap-x-12 lg:grid-cols-3">
+            {linkableStates(Object.values(STATES))
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((s) => (
+                <li key={s.slug} className="flex min-w-0 flex-col border-b border-rule-soft">
+                  <IntentPrefetchLink
+                    href={`/states/${s.slug}`}
+                    className="flex flex-1 flex-col py-4"
+                  >
+                    <p className="tc-link text-lg font-semibold">
+                      {s.name}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {s.abbr} · Verification guide
+                    </p>
+                    <p className="mt-1 text-pretty text-sm leading-relaxed text-muted-foreground">
+                      Parcel tax · insurance · controlling law · condition · rent ·
+                      financing
+                    </p>
+                  </IntentPrefetchLink>
+                </li>
+              ))}
+          </ul>
+        </Section>
       </main>
 
       <SiteFooter />
