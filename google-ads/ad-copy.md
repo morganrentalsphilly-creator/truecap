@@ -25,7 +25,6 @@ places:
 | Co-branding | Pro and Agent Pro | `custom_branding` in `lib/entitlements-catalog.ts` |
 | Offer Ceiling on a first deal | exact, no account | `mao.anonymousLimit` in `lib/entitlements-catalog.ts` |
 | Share links | open with no sign-in, read-only, can be revoked, address hidden unless included | the share-link answer in `lib/agent-faqs.ts` |
-| Time to a first answer | about 60 seconds | the lede on `app/for-agents/page.tsx` and `app/for-investors/page.tsx` |
 
 Re-read every line of this file whenever `lib/public-pricing.ts` changes, and
 whenever one of the other files in the table changes a limit named here. Then
@@ -83,7 +82,7 @@ Rental analysis for agents
 Screen listings for clients
 Fits the client's Buy Box?
 The client's Offer Ceiling
-In about 60 seconds
+Labeled, editable assumptions
 Cap rate, CoC, DSCR, cash flow
 A miss names the criterion
 Co-branded memos on Agent Pro
@@ -97,7 +96,7 @@ First deal needs no account
 Descriptions
 
 ```text
-Paste the listing address. See if it clears your client's Buy Box, and the Offer Ceiling.
+Add the address, price and rent. See the client's Buy Box fit and the Offer Ceiling.
 With Agent Pro, send a co-branded share link or PDF. The link lets the client rerun it.
 Agent Pro is $59.99 a month or $590 a year. Cancel anytime from your profile.
 The first full decision needs no account or card. Every assumption is labeled.
@@ -154,7 +153,7 @@ Headlines
 ```text
 Rental property analyzer
 Know your Offer Ceiling
-A rental, in about 60 seconds
+Your inputs, published math
 Does it meet your Buy Box?
 Cap rate, CoC, DSCR, cash flow
 Deal score from 0 to 100
@@ -172,7 +171,7 @@ The math is published
 Descriptions
 
 ```text
-Paste a listing address. See cash flow, cap rate, cash-on-cash, DSCR and a Deal score.
+Enter the address, price and rent. See cash flow, cap rate, CoC, DSCR and a Deal score.
 The Offer Ceiling is the highest price that still meets your targets.
 Rent starts from a HUD figure, the rate from FRED. Replace both with your own.
 First full decision needs no account. A new account adds 3 Pro deals in 21 days, no card.
@@ -195,7 +194,7 @@ Offer Ceiling for a rental
 See the gap to asking price
 Every assumption is editable
 Each input shows its source
-A rental, in about 60 seconds
+Your inputs, published math
 First deal needs no account
 Trial: 3 Pro deals in 21 days
 Pro is $29.99 a month

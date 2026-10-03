@@ -255,3 +255,8 @@ figures, it uses the earlier brand colors, and its button reads "Try the free
 calculator →": the word does not match the `free` switch as it stands, and
 the arrow is one `DESIGN.md` bars on buttons. Check it against the current
 product before using it.
+
+Do not upload it, or `instagram-posts/30_try_free.png`, until the founder
+rules on the speed claim and the address-only promise (report rows P2-19 and
+P1-14): the image says "60s from address" and the post says "4 minutes".
+`ad-copy.md` states no time and no address-only result for the same reason.
