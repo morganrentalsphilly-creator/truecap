@@ -31,8 +31,10 @@ web
 
 ### Jobs to be done
 
-1. Save time at the showing: paste the listing and know within about a minute
-   whether it fits the client [brief].
+1. Save time at the showing: paste the listing and know whether it fits the
+   client [brief]. No customer copy states how long an analysis takes: no
+   timing has been measured with a person on a phone, so the "60 seconds"
+   figure is retired [founder answer, 2026-10-03].
 2. Send only deals that already fit the client's Buy Box, and say why a deal
    does not: the criterion it misses and by how much [brief][copy pass].
 3. Defend the numbers: every figure carries a visible source and every
@@ -142,7 +144,13 @@ recommended option, accepted by the founder 2026-10-03].
   primary CTA reads "Analyze a deal free" on the homepage and /for-agents
   (investor and SEO surfaces may read "Analyze a property free") [founder
   answer, 2026-10-03]; the investor cue is
-  visible in the homepage hero's first screen at desktop and at 390px; "For
+  visible in the homepage hero's first screen at desktop and at 390px, and
+  sits above the address form so the cookie banner cannot cover it on a short
+  phone [founder answer, 2026-10-03]; the hero says "Send it co-branded with
+  Pro." because co-branding is a Pro and Agent Pro feature [founder answer,
+  2026-10-03]; /for-agents and /for-investors open with the homepage's own
+  one-field address form, with no other field and no landing template
+  [founder answer, 2026-10-03]; "For
   investors" stays in the header; the homepage URL, the title-tag core phrase
   ("Rental Property Calculator & Max Offer | TrueCap") and the topical nouns
   (rental listing, Buy Box, Offer Ceiling, cash flow, cap rate, CoC, DSCR) do
