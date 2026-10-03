@@ -24,15 +24,27 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -162,38 +174,36 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={blogPostingLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8 sm:mb-10">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · {READING_TIME_MIN} min read
-          </p>
-          <BlogByline />
-          <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            {DESCRIPTION}
-          </p>
-        </header>
+      <ArticleMain>
+        <article>
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              · {READING_TIME_MIN} min read
+            </p>
+            <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
+              {DESCRIPTION}
+            </p>
+          </header>
 
-        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+          <ArticleBody>
           <p>
             &ldquo;Is a duplex a good investment&rdquo; is the wrong question by
             one word. A duplex is not one investment; it is two, and which one
@@ -204,7 +214,7 @@ export default function BlogPost() {
             The gap is not marginal. Conventional financing{" "}
             <a
               href="https://singlefamily.fanniemae.com/media/20786/display"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               requires <strong>25% down</strong> on a 2-4 unit investment
               purchase
@@ -213,21 +223,21 @@ export default function BlogPost() {
             rental — while the same building owner-occupied takes{" "}
             <a
               href="https://singlefamily.fanniemae.com/media/20786/display"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               <strong>5% down</strong> conventional
             </a>{" "}
             or{" "}
             <a
               href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               3.5% FHA
             </a>
             , at primary-residence pricing: Fannie Mae&apos;s current matrix{" "}
             <a
               href="https://singlefamily.fanniemae.com/media/9391/display"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               adds a 2.125%-of-loan price adjustment
             </a>{" "}
@@ -252,7 +262,7 @@ export default function BlogPost() {
               the 30-year fixed on a primary residence ran{" "}
               <a
                 href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2026-07-01"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 roughly 6.65-6.875%
               </a>
@@ -263,7 +273,7 @@ export default function BlogPost() {
               average has since{" "}
               <a
                 href="https://fred.stlouisfed.org/graph/fredgraph.csv?id=MORTGAGE30US&cosd=2026-07-01"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 risen to 7.03% (September 24, 2026)
               </a>
@@ -273,7 +283,7 @@ export default function BlogPost() {
             </em>
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             The building we are underwriting
           </h2>
           <p>
@@ -282,33 +292,33 @@ export default function BlogPost() {
             in{" "}
             <Link
               href="/markets/philadelphia"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Philadelphia
             </Link>{" "}
             and{" "}
             <Link
               href="/markets/kansas-city"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Kansas City
             </Link>
             . Both paths below use identical property facts, so every difference
             in the results comes from the financing.
           </p>
-          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
+          <ArticleTable label="Data table" stickyFirstColumn={false}>
+            <table className="[&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left p-3 font-bold text-foreground">
+                <tr>
+                  <th>
                     Input
                   </th>
-                  <th className="text-right p-3 font-bold text-foreground">
+                  <th className="text-right">
                     Value
                   </th>
                 </tr>
               </thead>
-              <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
+              <tbody>
                 <tr>
                   <td>Purchase price</td>
                   <td className="font-mono text-right">$400,000</td>
@@ -327,7 +337,7 @@ export default function BlogPost() {
                   <td>
                     <Link
                       href="/glossary/property-tax"
-                      className="text-primary font-semibold hover:underline"
+                      className="tc-link"
                     >
                       Property tax
                     </Link>{" "}
@@ -339,7 +349,7 @@ export default function BlogPost() {
                   <td>
                     <Link
                       href="/glossary/insurance"
-                      className="text-primary font-semibold hover:underline"
+                      className="tc-link"
                     >
                       Insurance
                     </Link>
@@ -350,14 +360,14 @@ export default function BlogPost() {
                   <td>
                     <Link
                       href="/glossary/vacancy"
-                      className="text-primary font-semibold hover:underline"
+                      className="tc-link"
                     >
                       Vacancy
                     </Link>{" "}
                     / maintenance / management /{" "}
                     <Link
                       href="/glossary/capex"
-                      className="text-primary font-semibold hover:underline"
+                      className="tc-link"
                     >
                       capex
                     </Link>
@@ -366,7 +376,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </ScrollX>
+          </ArticleTable>
           <p>
             $3,200 on $400,000 is a <strong>9.6% gross yield</strong>. Hold that
             number — it is the reason a duplex can survive a 25% down payment
@@ -374,7 +384,7 @@ export default function BlogPost() {
             on any two-unit you are shown.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Path A: the duplex as a pure rental
           </h2>
           <p>
@@ -382,22 +392,22 @@ export default function BlogPost() {
             $300,000 and principal and interest are <strong>$2,046.53</strong> a
             month.
           </p>
-          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[480px] text-sm">
+          <ArticleTable label="Data table">
+            <table className="min-w-[480px]">
               <thead>
-                <tr className="border-b border-border bg-muted">
-                  <th className="text-left p-3 font-bold text-foreground">
+                <tr>
+                  <th>
                     Line
                   </th>
-                  <th className="text-right p-3 font-bold text-foreground">
+                  <th className="text-right">
                     Annual
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     Notes
                   </th>
                 </tr>
               </thead>
-              <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
+              <tbody>
                 <tr>
                   <td>Gross scheduled rent</td>
                   <td className="font-mono text-right">$38,400</td>
@@ -433,16 +443,16 @@ export default function BlogPost() {
                   <td className="font-mono text-right">−$1,920</td>
                   <td>Roof, HVAC, water heaters</td>
                 </tr>
-                <tr className="bg-muted/30">
-                  <td className="font-bold">
+                <tr>
+                  <td className="font-semibold">
                     <Link
                       href="/glossary/noi"
-                      className="text-primary font-semibold hover:underline"
+                      className="tc-link"
                     >
                       NOI
                     </Link>
                   </td>
-                  <td className="font-mono text-right font-bold">$21,232</td>
+                  <td className="font-mono text-right font-medium">$21,232</td>
                   <td>44.7% expense ratio</td>
                 </tr>
                 <tr>
@@ -450,40 +460,40 @@ export default function BlogPost() {
                   <td className="font-mono text-right">−$24,558</td>
                   <td>$2,046.53 × 12</td>
                 </tr>
-                <tr className="bg-muted/30">
-                  <td className="font-bold">
+                <tr>
+                  <td className="font-semibold">
                     <Link
                       href="/glossary/monthly-cash-flow"
-                      className="text-primary font-semibold hover:underline"
+                      className="tc-link"
                     >
                       Cash flow
                     </Link>
                   </td>
-                  <td className="font-mono text-right font-bold">−$3,326</td>
+                  <td className="font-mono text-right font-medium">−$3,326</td>
                   <td>−$277/mo</td>
                 </tr>
               </tbody>
             </table>
-          </ScrollX>
+          </ArticleTable>
           <p>
             That produces a <strong>5.31% </strong>
             <Link
               href="/glossary/cap-rate"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               cap rate
             </Link>
             , a{" "}
             <Link
               href="/glossary/dscr"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               DSCR
             </Link>{" "}
             of <strong>0.86</strong>, and a{" "}
             <Link
               href="/glossary/cash-on-cash-return"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               cash-on-cash return
             </Link>{" "}
@@ -494,31 +504,31 @@ export default function BlogPost() {
             Check yours in the free{" "}
             <Link
               href="/analyze" prefetch={false}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               TrueCap analyzer
             </Link>{" "}
             before you pay for an appraisal.
           </p>
           <p>And the cash to get there:</p>
-          <ScrollX label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
+          <ArticleTable label="Data table" stickyFirstColumn={false}>
+            <table className="[&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
               <thead>
-                <tr className="border-b border-border bg-muted/40">
-                  <th className="text-left p-3 font-bold text-foreground">
+                <tr>
+                  <th>
                     Bucket
                   </th>
-                  <th className="text-right p-3 font-bold text-foreground">
+                  <th className="text-right">
                     Amount
                   </th>
                 </tr>
               </thead>
-              <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
+              <tbody>
                 <tr>
                   <td>
                     <Link
                       href="/glossary/down-payment"
-                      className="text-primary font-semibold hover:underline"
+                      className="tc-link"
                     >
                       Down payment
                     </Link>{" "}
@@ -538,21 +548,21 @@ export default function BlogPost() {
                   <td>Make-ready, two units</td>
                   <td className="font-mono text-right">$8,000</td>
                 </tr>
-                <tr className="bg-muted/30">
-                  <td className="font-bold">Cash actually spent</td>
-                  <td className="font-mono text-right font-bold">$122,461</td>
+                <tr>
+                  <td className="font-semibold">Cash actually spent</td>
+                  <td className="font-mono text-right font-medium">$122,461</td>
                 </tr>
                 <tr>
                   <td>Reserves (6 × $2,613 PITIA)</td>
                   <td className="font-mono text-right">$15,679</td>
                 </tr>
-                <tr className="bg-muted/30">
-                  <td className="font-bold">Total cash required</td>
-                  <td className="font-mono text-right font-bold">$138,140</td>
+                <tr>
+                  <td className="font-semibold">Total cash required</td>
+                  <td className="font-mono text-right font-medium">$138,140</td>
                 </tr>
               </tbody>
             </table>
-          </ScrollX>
+          </ArticleTable>
           <p>
             $138,140 to lose $277 a month. That is not a broken example — it is
             what a 9.6%-gross-yield duplex does at a 7.25% investment rate with
@@ -561,7 +571,7 @@ export default function BlogPost() {
             reserve line is money you show rather than spend; the{" "}
             <Link
               href="/blog/how-much-money-to-buy-a-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               full five-bucket cash-to-close breakdown
             </Link>{" "}
@@ -574,7 +584,7 @@ export default function BlogPost() {
             Ten points above the minimum.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Path B: the same duplex, owner-occupied
           </h2>
           <p>
@@ -582,7 +592,7 @@ export default function BlogPost() {
             prices at 6.75%, and the lender{" "}
             <a
               href="https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               counts 75% of the appraiser&apos;s market rent on the other unit
             </a>{" "}
@@ -596,22 +606,22 @@ export default function BlogPost() {
             0.8% is $253.33, taxes are $366.67 and insurance $200 — PITIA of{" "}
             <strong>$3,284.68</strong>.
           </p>
-          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[480px] text-sm">
+          <ArticleTable label="Data table">
+            <table className="min-w-[480px]">
               <thead>
-                <tr className="border-b border-border bg-muted">
-                  <th className="text-left p-3 font-bold text-foreground">
+                <tr>
+                  <th>
                     Line
                   </th>
-                  <th className="text-right p-3 font-bold text-foreground">
+                  <th className="text-right">
                     Monthly
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     Notes
                   </th>
                 </tr>
               </thead>
-              <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
+              <tbody>
                 <tr>
                   <td>Principal + interest</td>
                   <td className="font-mono text-right">$2,464.68</td>
@@ -627,9 +637,9 @@ export default function BlogPost() {
                   <td className="font-mono text-right">$566.67</td>
                   <td></td>
                 </tr>
-                <tr className="bg-muted/30">
-                  <td className="font-bold">PITIA</td>
-                  <td className="font-mono text-right font-bold">$3,284.68</td>
+                <tr>
+                  <td className="font-semibold">PITIA</td>
+                  <td className="font-mono text-right font-medium">$3,284.68</td>
                   <td></td>
                 </tr>
                 <tr>
@@ -642,14 +652,14 @@ export default function BlogPost() {
                   <td className="font-mono text-right">$304.00</td>
                   <td>19% of $1,600; you self-manage</td>
                 </tr>
-                <tr className="bg-muted/30">
-                  <td className="font-bold">Effective housing cost</td>
-                  <td className="font-mono text-right font-bold">$1,988.68</td>
+                <tr>
+                  <td className="font-semibold">Effective housing cost</td>
+                  <td className="font-mono text-right font-medium">$1,988.68</td>
                   <td>What the duplex costs you to live in</td>
                 </tr>
               </tbody>
             </table>
-          </ScrollX>
+          </ArticleTable>
           <p>
             Cash required: $20,000 down, $10,500 of closing costs, $4,921 of
             prepaids and escrow setup, $3,000 to make the rental unit ready —{" "}
@@ -658,7 +668,7 @@ export default function BlogPost() {
             shrink the reserve line: Fannie Mae{" "}
             <a
               href="https://selling-guide.fanniemae.com/sel/b3-4.1-01/minimum-reserve-requirements"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               requires six months of reserves on a two- to four-unit principal
               residence
@@ -668,7 +678,7 @@ export default function BlogPost() {
             <Link
               href="/analyze?strategy=house-hack"
               prefetch={false}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               analyzer in House Hack mode
             </Link>
@@ -690,14 +700,14 @@ export default function BlogPost() {
             that trade is worth it is the subject of the{" "}
             <Link
               href="/blog/house-hack-underwriting-guide"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               house-hack underwriting guide
             </Link>
             ; the occupancy rules and the one-year exit are in{" "}
             <Link
               href="/blog/house-hacking-explained"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               house hacking explained
             </Link>
@@ -709,14 +719,14 @@ export default function BlogPost() {
             FHA (with a{" "}
             <a
               href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               credit score of 580 or higher
             </a>
             ) takes the down payment to $14,000 and finances the{" "}
             <a
               href="https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               1.75% upfront premium
             </a>{" "}
@@ -724,7 +734,7 @@ export default function BlogPost() {
             $2,547.42 — plus{" "}
             <a
               href="https://www.hud.gov/sites/dfiles/OCHCO/documents/2023-05hsgml.pdf"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               annual MIP at 0.55%
             </a>{" "}
@@ -736,7 +746,7 @@ export default function BlogPost() {
             Fannie Mae-backed two- to four-unit loan{" "}
             <a
               href="https://servicing-guide.fanniemae.com/svc/b-8.1-04/termination-conventional-mortgage-insurance"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               can be cancelled at your request
             </a>{" "}
@@ -744,7 +754,7 @@ export default function BlogPost() {
             ends automatically at the midpoint of the loan term. The{" "}
             <a
               href="https://www.hud.gov/news/hud-no-25-145"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               2026 FHA two-unit limit
             </a>{" "}
@@ -752,20 +762,20 @@ export default function BlogPost() {
             above this example&apos;s $386,000 base loan.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">The year-2 problem</h2>
+          <h2>The year-2 problem</h2>
           <p>
             Here is the part the pros-and-cons posts never reach. You live
             there for twelve months, which satisfies{" "}
             <a
               href="https://www.hud.gov/sites/default/files/Housing/documents/40001-hsgh-Update-18.pdf"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               FHA&apos;s one-year occupancy intent
             </a>{" "}
             and{" "}
             <a
               href="https://singlefamily.fanniemae.com/media/document/docx/legal-documents/form-3170-instructions"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               any one-year covenant in your conventional loan documents
             </a>
@@ -781,25 +791,25 @@ export default function BlogPost() {
             70% of original value at which Fannie Mae lets you cancel PMI on a
             two- to four-unit loan — for <strong>$32,616</strong>.
           </p>
-          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[520px] text-sm">
+          <ArticleTable label="Data table">
+            <table className="min-w-[520px]">
               <thead>
-                <tr className="border-b border-border bg-muted">
-                  <th className="text-left p-3 font-bold text-foreground">
+                <tr>
+                  <th>
                     Structure
                   </th>
-                  <th className="text-right p-3 font-bold text-foreground">
+                  <th className="text-right">
                     Loan
                   </th>
-                  <th className="text-right p-3 font-bold text-foreground">
+                  <th className="text-right">
                     Debt service
                   </th>
-                  <th className="text-right p-3 font-bold text-foreground">
+                  <th className="text-right">
                     Cash flow
                   </th>
                 </tr>
               </thead>
-              <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
+              <tbody>
                 <tr>
                   <td>5% down, owner-occ loan (year 2)</td>
                   <td className="font-mono text-right">$380,000</td>
@@ -826,7 +836,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </ScrollX>
+          </ArticleTable>
           <p>
             <strong>−$949 a month.</strong> The loan that made the purchase
             possible makes the rental unprofitable. And rent growth will not
@@ -844,7 +854,7 @@ export default function BlogPost() {
             appraisal supports 75% LTV,{" "}
             <a
               href="https://singlefamily.fanniemae.com/media/20786/display"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Fannie Mae&apos;s refinance limit
             </a>{" "}
@@ -855,7 +865,7 @@ export default function BlogPost() {
             five years before the sale, when the{" "}
             <a
               href="https://www.irs.gov/publications/p523"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               home-sale exclusion
             </a>{" "}
@@ -864,7 +874,7 @@ export default function BlogPost() {
             a good rental because you stopped living in it.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Duplex vs a same-priced single-family
           </h2>
           <p>
@@ -876,28 +886,28 @@ export default function BlogPost() {
             down payment: 20% conventional, or 15% if you{" "}
             <a
               href="https://selling-guide.fanniemae.com/sel/b7-1-01/provision-mortgage-insurance"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               accept mortgage insurance
             </a>
             .
           </p>
-          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[520px] text-sm">
+          <ArticleTable label="Data table">
+            <table className="min-w-[520px]">
               <thead>
-                <tr className="border-b border-border bg-muted">
-                  <th className="text-left p-3 font-bold text-foreground">
+                <tr>
+                  <th>
                     Metric
                   </th>
-                  <th className="text-right p-3 font-bold text-foreground">
+                  <th className="text-right">
                     Duplex
                   </th>
-                  <th className="text-right p-3 font-bold text-foreground">
+                  <th className="text-right">
                     Single-family
                   </th>
                 </tr>
               </thead>
-              <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
+              <tbody>
                 <tr>
                   <td>Gross rent</td>
                   <td className="font-mono text-right">$38,400</td>
@@ -943,18 +953,18 @@ export default function BlogPost() {
                   <td className="font-mono text-right">0.86</td>
                   <td className="font-mono text-right">0.63</td>
                 </tr>
-                <tr className="bg-muted/30">
-                  <td className="font-bold">Down payment to break even</td>
-                  <td className="font-mono text-right font-bold">
+                <tr>
+                  <td className="font-semibold">Down payment to break even</td>
+                  <td className="font-mono text-right font-medium">
                     $140,600 (35%)
                   </td>
-                  <td className="font-mono text-right font-bold">
+                  <td className="font-mono text-right font-medium">
                     $200,000 (50%)
                   </td>
                 </tr>
               </tbody>
             </table>
-          </ScrollX>
+          </ArticleTable>
           <p>
             The duplex wins on every income measure, and the last row is the one
             that matters: it reaches break-even cash flow with{" "}
@@ -964,7 +974,7 @@ export default function BlogPost() {
             $20,000 of down payment in under three years. Both are in{" "}
             <Link
               href="/blog/negative-leverage-real-estate"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               negative leverage
             </Link>{" "}
@@ -974,7 +984,7 @@ export default function BlogPost() {
             Run your own pair — the{" "}
             <Link
               href="/analyze" prefetch={false}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               TrueCap analyzer
             </Link>{" "}
@@ -984,14 +994,14 @@ export default function BlogPost() {
             change the rules,{" "}
             <Link
               href="/blog/single-family-vs-multi-family-rental"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               single-family vs multi-family
             </Link>{" "}
             goes further than this post does.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             What a duplex structurally gives you
           </h2>
           <h3>Shared fixed costs — about $1,800 a year</h3>
@@ -1028,7 +1038,7 @@ export default function BlogPost() {
             The expected vacancy rate is the same — assume{" "}
             <Link
               href="/blog/vacancy-rate-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               6-8% either way
             </Link>{" "}
@@ -1044,7 +1054,7 @@ export default function BlogPost() {
             origination fee, and one entry in your{" "}
             <Link
               href="/glossary/ltv"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               LTV
             </Link>{" "}
@@ -1052,7 +1062,7 @@ export default function BlogPost() {
             Mae&apos;s reserve escalator and its{" "}
             <a
               href="https://selling-guide.fanniemae.com/sel/b2-2-03/multiple-financed-properties-same-borrower"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               ten-financed-property limit
             </a>{" "}
@@ -1062,7 +1072,7 @@ export default function BlogPost() {
             slots.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             What it structurally costs you
           </h2>
           <ol>
@@ -1077,7 +1087,7 @@ export default function BlogPost() {
               five units are not valued by capitalizing NOI.{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Fannie Mae requires an income approach for 2-4 units
               </a>
@@ -1113,7 +1123,7 @@ export default function BlogPost() {
               against the actual{" "}
               <Link
                 href="/blog/capex-maintenance-reserves-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 component-by-component replacement schedule
               </Link>{" "}
@@ -1121,7 +1131,7 @@ export default function BlogPost() {
             </li>
           </ol>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             So: is a duplex a good investment?
           </h2>
           <p>Four decision rules, in the order they bind.</p>
@@ -1147,7 +1157,7 @@ export default function BlogPost() {
               are buying appreciation and a{" "}
               <Link
                 href="/glossary/dscr"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 DSCR
               </Link>{" "}
@@ -1155,7 +1165,7 @@ export default function BlogPost() {
               1.2 in a{" "}
               <Link
                 href="/markets/cleveland"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cash-flow market
               </Link>
@@ -1177,48 +1187,42 @@ export default function BlogPost() {
             </li>
           </ol>
           <p>
-            More on the strategy fork — BRRRR, <Link href="/blog/section-8-rental-property-investing" className="text-primary font-semibold hover:underline">Section 8</Link>, house hacking, and how
+            More on the strategy fork — BRRRR, <Link href="/blog/section-8-rental-property-investing" className="tc-link">Section 8</Link>, house hacking, and how
             each one changes the same building — in the{" "}
             <Link
               href="/blog/topics/strategy"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               investing strategies guide
             </Link>
             . For the financing side, the{" "}
             <Link
               href="/blog/how-much-down-payment-investment-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               down payment tiers
             </Link>{" "}
             and{" "}
             <Link
               href="/tools/mortgage-payment-calculator"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               payment calculator
             </Link>{" "}
             will size the two paths against your own numbers in a couple of
             minutes.
           </p>
+          </ArticleBody>
 
-          <div className="not-prose"></div>
-
-          <h2 className="text-2xl sm:text-3xl">FAQ</h2>
-          {FAQS.map((f, i) => (
-            <details
-              key={i}
-              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
-            >
-              <summary className="cursor-pointer font-bold text-foreground">
-                {f.q}
-              </summary>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                {f.a}
-              </p>
-            </details>
-          ))}
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
         </article>
         <PostSources
           sources={[
@@ -1283,32 +1287,31 @@ export default function BlogPost() {
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <NewsletterSignup variant="expanded" source="blog" />
-        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Related:{" "}
             <Link
               href="/blog/single-family-vs-multi-family-rental"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               Single-family vs multi-family rental →
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/house-hack-underwriting-guide"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               House hack underwriting: does it beat renting? →
             </Link>
           </p>
         </footer>
-      </main>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
