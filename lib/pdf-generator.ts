@@ -30,6 +30,24 @@ import {
 } from "@/lib/financial-presentation";
 import { isSpecialistStrategyEnabled } from "@/lib/feature-flags";
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
+import { CANONICAL_SITE_URL } from "@/lib/site-url";
+
+/** Where the report's two kinds of link point. A PDF leaves the site, so both
+ *  are absolute and always the production address. */
+const PDF_SITE_URL = CANONICAL_SITE_URL;
+const PDF_METHODOLOGY_URL = `${CANONICAL_SITE_URL}/methodology`;
+
+/**
+ * The Disclaimer on the report's last page: the site's one Disclaimer,
+ * word for word (docs/voice.md "The disclaimer"; DISCLAIMER_TEXT in
+ * components/marketing/disclaimer.tsx). It is COPIED here, not imported: that
+ * module renders a client link component, and this file has to stay free of
+ * React and the DOM so the report can be built on the server.
+ * lib/__tests__/pdf-disclaimer-and-links.test.ts fails if the two strings
+ * ever differ, so change the wording there first and then here.
+ */
+export const PDF_DISCLAIMER_TEXT =
+  "TrueCap models a deal from the assumptions you see and can edit. It is not an appraisal, a lender decision, or investment advice. Our articles and guides are general information, not tax, legal or investment advice; confirm the specifics with a qualified professional. The math is published in our Methodology.";
 
 export interface ReportData {
   generatedAt: Date;
@@ -742,10 +760,12 @@ function drawHeader(
   // Footer-left text. Priority:
   //   1) Company name when branded
   //   2) "Made with TrueCap — usetruecap.com" default when unbranded
-  //      (viral attribution — only on non-white-labeled reports, so a
-  //      Pro user's branded lender packet stays fully their own).
+  //      (the credit prints only on reports with no company name; a
+  //      co-branded report's footer carries the company instead). The
+  //      credit is a real link to the site.
   // The "Prepared by [Name]" attribution was removed per design.
   let footerLeft = "Made with TrueCap — usetruecap.com";
+  const footerIsCredit = !branding?.companyName?.trim();
   if (branding?.companyName?.trim()) {
     footerLeft = branding.companyName.trim();
   }
@@ -755,6 +775,7 @@ function drawHeader(
   footerLeft = truncateToWidth(doc, footerLeft, SAFE.w / 3);
 
   doc.text(footerLeft, M.left, footerTextY);
+  if (footerIsCredit) linkOverText(doc, footerLeft, M.left, footerTextY, PDF_SITE_URL);
   doc.text(
     "Confidential — for the named recipient only",
     PAGE.w / 2,
@@ -764,6 +785,22 @@ function drawHeader(
   doc.text(`Page ${pageNum} of ${totalPages}`, PAGE.w - M.right, footerTextY, {
     align: "right",
   });
+}
+
+/**
+ * Make text that was just drawn at (x, baseline y) a link. Call it while the
+ * font and size the text was drawn in are still set: the clickable box is
+ * measured from them. It draws nothing, so the page looks the same.
+ */
+function linkOverText(
+  doc: jsPDF,
+  text: string,
+  x: number,
+  y: number,
+  url: string,
+) {
+  const size = doc.getFontSize();
+  doc.link(x, y - size, doc.getTextWidth(text), size * 1.3, { url });
 }
 
 function sectionTitle(
@@ -1174,7 +1211,7 @@ function pageCover(
     doc.text(m[0], mx, py);
     doc.setCharSpace(0);
     // MAX OFFER picks up the BRAND colour, not a hardcoded TrueCap blue — on
-    // a white-label pack this cell was another company's blue sitting between
+    // a co-branded pack this cell was another company's blue sitting between
     // three neutral ones, for no reason a reader could infer.
     setText(
       doc,
@@ -1275,6 +1312,10 @@ function pageCover(
   ]
     .map((s) => s?.trim())
     .filter((s): s is string => Boolean(s));
+  // True when the agent saved any contact detail or a company name: the
+  // line under "Prepared by" is then theirs, not the TrueCap credit.
+  const hasBrandingDetails =
+    contactBits.length > 0 || Boolean(branding?.companyName?.trim());
   if (!branding?.companyName?.trim()) {
     // Unbranded: the "Prepared by TrueCap" line carries the attribution;
     // add the site so the cover still points somewhere.
@@ -1284,7 +1325,13 @@ function pageCover(
     setText(doc, COLOR.sub);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
-    doc.text(contactBits.join("   ·   "), M.left, footY + 22);
+    const contactLine = contactBits.join("   ·   ");
+    doc.text(contactLine, M.left, footY + 22);
+    // The unbranded credit's site address is a real link. A branded cover's
+    // contact details stay as the agent typed them, unlinked.
+    if (!hasBrandingDetails && contactLine === "usetruecap.com") {
+      linkOverText(doc, contactLine, M.left, footY + 22, PDF_SITE_URL);
+    }
   }
 
   setText(doc, COLOR.muted);
@@ -4273,14 +4320,17 @@ function pageDisclosures(
   );
   y += rowH + 24;
 
-  y = sectionTitle(
-    doc,
+  // The methodology line is a link to the published methodology on every
+  // report, branded or not: it is where a reader checks the math.
+  const methodologyLine =
     d.methodologyLabel ??
-      `${TRUECAP_UNDERWRITING_STANDARD_NAME} v${d.methodologyVersion ?? TRUECAP_UNDERWRITING_STANDARD_VERSION}`,
-    y,
-    undefined,
-    themeColor,
-  );
+    `${TRUECAP_UNDERWRITING_STANDARD_NAME} v${d.methodologyVersion ?? TRUECAP_UNDERWRITING_STANDARD_VERSION}`;
+  const methodologyLineY = y;
+  y = sectionTitle(doc, methodologyLine, y, undefined, themeColor);
+  // sectionTitle leaves the title's own font and size set.
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(15);
+  linkOverText(doc, methodologyLine, M.left, methodologyLineY, PDF_METHODOLOGY_URL);
   y = drawParagraph(
     doc,
     `Returns are computed from the purchase price, financing terms, rents, and operating expenses entered for this property. The 10-year projection ${d.tenYearProjectionVersion != null ? `uses projection method v${d.tenYearProjectionVersion}` : "comes from a recorded legacy snapshot whose projection method version was not stored"}; scheduled-rent percentage costs move with projected rent while fixed-dollar costs use expense growth, and the loan follows its stated schedule. NOI and lender-style DSCR exclude the CapEx reserve; cash flow includes it. PMI/MIP, when modeled, is included in cash flow but excluded from lender-style DSCR.`,
@@ -4347,14 +4397,31 @@ function pageDisclosures(
   y += 8;
 
   y = sectionTitle(doc, "Disclaimer", y, undefined, themeColor);
-  y = drawParagraph(
-    doc,
-    "This report is provided for informational purposes only and does not constitute financial, investment, tax, or legal advice. Projections are estimates based on the inputs and assumptions stated above and are not guarantees of future performance. Rents, expenses, interest rates, market conditions, and tax law can change. Independently verify all figures and consult licensed professionals before making any investment decision.",
-    M.left,
-    y,
-    SAFE.w,
-    { color: COLOR.sub },
-  );
+  // The site's Disclaimer, word for word, with its "Methodology" a link as
+  // it is on the site.
+  const disclaimerSize = 9.5;
+  const disclaimerLeading = 1.45;
+  const disclaimerTop = y;
+  drawParagraph(doc, PDF_DISCLAIMER_TEXT, M.left, y, SAFE.w, {
+    size: disclaimerSize,
+    leading: disclaimerLeading,
+    color: COLOR.sub,
+  });
+  // drawParagraph leaves its font set, so the same wrap gives the word's line
+  // and its offset on that line.
+  const disclaimerLines = doc.splitTextToSize(PDF_DISCLAIMER_TEXT, SAFE.w) as string[];
+  const linkWord = "Methodology";
+  const linkLine = disclaimerLines.findIndex((line) => line.includes(linkWord));
+  if (linkLine >= 0) {
+    const line = disclaimerLines[linkLine]!;
+    linkOverText(
+      doc,
+      linkWord,
+      M.left + doc.getTextWidth(line.slice(0, line.lastIndexOf(linkWord))),
+      disclaimerTop + linkLine * disclaimerSize * disclaimerLeading,
+      PDF_METHODOLOGY_URL,
+    );
+  }
 }
 
 // ===================== Public API =====================
@@ -4420,8 +4487,8 @@ async function buildInvestmentPDFDocument(
   // Document metadata. Without a Title a viewer shows the raw filename in its
   // tab and window chrome, and assistive tech has no document name to announce
   // — on a file the user forwards to a lender, that is the first thing they
-  // see. Author follows the white-label: a branded pack is the agent's
-  // document, not TrueCap's.
+  // see. Author follows the branding: a co-branded pack is the agent's
+  // document, so it names the agent's company.
   doc.setProperties({
     title: `Investment Analysis — ${d.property.address}`,
     subject: `Rental underwriting for ${d.property.address}`,
@@ -4447,7 +4514,7 @@ async function buildInvestmentPDFDocument(
   }
   // Fall back to the TrueCap mark ONLY for unbranded reports. A branded
   // report with no uploaded logo must NOT show TrueCap's logo (it would
-  // undercut the white-label) — drawHeader / pageCover render the company
+  // undercut the co-branding) — drawHeader / pageCover render the company
   // NAME as a text wordmark instead when logoData is null but branding exists.
   const isBranded = Boolean(
     branding?.companyName?.trim() ||
