@@ -30,7 +30,7 @@ google-ads/
 The copy says only what the code does today:
 
 - The first complete decision needs no account and no card. A new account
-  adds a 21-day trial with 3 Pro deals and 1 comparison, still no card
+  adds a 21-day trial with 3 Pro analyses and 1 comparison, still no card
   (`lib/product-access.ts`, `lib/product-facts.ts`).
 - Pro is $29.99 a month or $300 a year. Agent Pro is $59.99 a month or $590 a
   year (`lib/public-pricing.ts`).
@@ -51,7 +51,7 @@ The copy leaves these out, each for a reason in the code:
 | A report described as ready for a lender | TrueCap is "not an appraisal, a lender decision, or investment advice" (`docs/voice.md`, the disclaimer). |
 | Property tax filled in for you | `PROPERTY_TAX_FACTS.notAutoFilled` in `lib/product-facts.ts`: property tax is the user's own input. |
 | A client portal or white-label output | `agent_portal` and `embed_whitelabel` are `shipped: false`; the output is co-branded, and TrueCap's name stays on it. |
-| A trial of the roster or of co-branding | The trial is Pro deal analyses and a comparison only (`evaluationFeatures` in `lib/entitlements.ts`). |
+| A trial of the roster or of co-branding | The trial is Pro analyses and a comparison only (`evaluationFeatures` in `lib/entitlements.ts`). |
 | A count of users or deals, a rating, a quote | There is no verified testimonial or rating, and the deals-analyzed counter was removed (`PRODUCT.md`, "Evidence on Hand"). |
 | A buy or avoid recommendation | The result is a screening result, not advice (`lib/verdict-display.ts`). |
 | Superlatives | `docs/voice.md`. |
@@ -256,7 +256,9 @@ calculator →": the word does not match the `free` switch as it stands, and
 the arrow is one `DESIGN.md` bars on buttons. Check it against the current
 product before using it.
 
-Do not upload it, or `instagram-posts/30_try_free.png`, until the founder
-rules on the speed claim and the address-only promise (report rows P2-19 and
-P1-14): the image says "60s from address" and the post says "4 minutes".
-`ad-copy.md` states no time and no address-only result for the same reason.
+Do not upload it, or `instagram-posts/30_try_free.png`. The founder ruled on
+2026-10-03 that no time figure is published (report row P2-19) and that the
+promise names an address, the asking price and a bedroom count (row P1-14):
+the image says "60s from address" and the post says "4 minutes". Redraw or
+retire both. `ad-copy.md` states no time and no address-only result for the
+same reason.

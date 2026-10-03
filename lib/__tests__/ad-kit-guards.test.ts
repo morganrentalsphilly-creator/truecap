@@ -40,10 +40,21 @@ describe("the Google Ads kit matches the live catalog", () => {
   });
 
   it("states no time to a result and no address-only result", () => {
-    // Report rows P2-19 (one speed statement everywhere) and P1-14 (an address
-    // alone produces no numbers without an account) wait on the founder.
+    // Report rows P2-19 and P1-14. The founder ruled on 2026-10-03: no time
+    // figure is published, and the promise names an address, the asking price
+    // and a bedroom count.
     const copy = readFileSync(join(ROOT, "google-ads/ad-copy.md"), "utf8");
     expect(copy).not.toMatch(/\b\d+\s*(?:s|secs?|seconds?|mins?|minutes?)\b/i);
     expect(copy).not.toMatch(/Paste (?:a|the) listing address\. See\b/i);
+  });
+
+  it("counts the trial in Pro analyses, not Pro deals", () => {
+    // Row P1-07, founder answer 17 of 2026-10-03: the site says "Pro
+    // analyses" (a rerun with changed inputs counts as a new one), and the kit
+    // and its check script say the same.
+    for (const file of ["google-ads/ad-copy.md", "google-ads/README.md"]) {
+      expect(readFileSync(join(ROOT, file), "utf8"), file).not.toMatch(/\bPro deals?\b|Pro deal analyses/i);
+    }
+    expect(readFileSync(join(ROOT, "google-ads/ad-copy.md"), "utf8")).toContain("3 Pro analyses");
   });
 });
