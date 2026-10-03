@@ -17,18 +17,31 @@
  */
 
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_META_NEXT,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
+import { Note, RuledList } from "@/components/marketing/page-parts";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -73,8 +86,8 @@ export const metadata: Metadata = {
   },
 };
 
-/** Inline source link inside the not-prose table and tool cards. */
-const SOURCE_LINK = "font-semibold text-primary hover:underline";
+/** Inline source link inside the table and the tool entries. */
+const SOURCE_LINK = "tc-link";
 
 /** Pinned verbatim by lib/__tests__/public-underwriting-claims-guard.test.ts. */
 const TRUECAP_BENCHMARKS_STRENGTH =
@@ -410,37 +423,34 @@ export default function BestDealCheckAlternativesPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleSchema} />
       <JsonLd data={breadcrumbSchema} />
       <JsonLd data={itemListSchema} />
       <JsonLd data={faqSchema} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="mb-2">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-        </div>
-
+      <ArticleMain>
         <article>
-          <header className="mb-8 sm:mb-10">
-            <div className="text-2xs uppercase tracking-widest text-primary font-bold mb-3">
-              Ranking · {READING_TIME_MIN} min read
-            </div>
-            <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
-              {TITLE_PLAIN}
-            </h1>
-            <p className="mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE_PLAIN}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              · Ranking · {READING_TIME_MIN} min read
+            </p>
+            <p className={ARTICLE_META_NEXT}>
+              Published {PUBLISHED_AT} · Updated {MODIFIED_AT}
+            </p>
+            <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               DealCheck is a good product — that&apos;s why it&apos;s the tool
               people search for alternatives <em>to</em>. Maybe the{" "}
               <a
                 href="https://dealcheck.io/pricing/"
-                className="font-semibold text-primary hover:underline"
+                className="tc-link"
               >
                 15-property cap
               </a>{" "}
@@ -451,17 +461,10 @@ export default function BestDealCheckAlternativesPost() {
               vendor&apos;s own pricing page (October 2026) and an honest note
               on when sticking with DealCheck is the right call.
             </p>
-            <p className="mt-4 text-xs text-muted-foreground">
-              Published {PUBLISHED_AT} · Updated {MODIFIED_AT}
-            </p>
-            <BlogByline />
           </header>
 
-          <section className="mb-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">
-              Quick answer
-            </h2>
-            <p className="text-sm sm:text-base leading-relaxed text-foreground">
+          <Note title="Quick answer" className="mb-16">
+            <p className="text-foreground">
               For a no-account preliminary rental screen,{" "}
               <strong>TrueCap</strong> (that&apos;s us) exposes core rental
               metrics and labeled starting assumptions before signup.{" "}
@@ -474,117 +477,84 @@ export default function BestDealCheckAlternativesPost() {
               <strong>spreadsheet</strong> is still the most flexible option if
               you maintain your own model.
             </p>
-          </section>
+          </Note>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
+          <ArticleBody>
             <h2>The alternatives at a glance</h2>
 
-            <ScrollX label="Data table" className="not-prose mb-8 overflow-x-auto rounded-2xl border border-border bg-card">
-              <table className="w-full text-sm">
-                <thead className="bg-muted/40">
-                  <tr className="text-left">
-                    <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                      Tool
-                    </th>
-                    <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                      Pricing (October 2026)
-                    </th>
-                    <th className="py-3 px-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
-                      Best for
-                    </th>
+            <ArticleTable label="Data table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Tool</th>
+                    <th>Pricing (October 2026)</th>
+                    <th>Best for</th>
                   </tr>
                 </thead>
                 <tbody>
                   {TABLE_ROWS.map((row) => (
-                    <tr
-                      key={row.name}
-                      className="border-t border-border align-top"
-                    >
-                      <td className="py-3 px-3 text-sm font-semibold text-foreground whitespace-nowrap">
-                        {row.name}
-                      </td>
-                      <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
-                        {row.pricing}
-                      </td>
-                      <td className="py-3 px-3 text-xs leading-relaxed text-foreground/85">
-                        {row.bestFor}
-                      </td>
+                    <tr key={row.name}>
+                      <td>{row.name}</td>
+                      <td>{row.pricing}</td>
+                      <td>{row.bestFor}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
 
             <h2>The 7 alternatives, ranked</h2>
 
             {TOOLS.map((t) => (
-              <div
-                key={t.name}
-                className="not-prose mb-8 rounded-2xl border border-border bg-card p-5 sm:p-6"
-              >
-                <div className="flex items-start justify-between gap-4 mb-3">
-                  <div>
-                    <div className="text-2xs font-bold uppercase tracking-widest text-primary mb-1.5">
-                      #{t.rank} · {t.bestFor}
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-extrabold text-foreground leading-tight">
-                      {t.name}
-                    </h3>
-                  </div>
-                  <Link
-                    href={t.url}
-                    className="shrink-0 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
-                  >
-                    Side-by-side
-                    <ArrowUpRight className="size-3" />
-                  </Link>
-                </div>
-                {t.disclosure ? (
-                  <p className="mb-4 rounded-lg border border-primary/15 bg-primary/5 px-3 py-2.5 text-xs leading-relaxed text-muted-foreground">
-                    {t.disclosure}
-                  </p>
-                ) : null}
-                <p className="text-sm text-muted-foreground mb-4">
-                  <strong className="text-foreground">Pricing:</strong>{" "}
-                  {t.pricing}
+              <Fragment key={t.name}>
+                <h3>{t.name}</h3>
+                <p className="text-base text-muted-foreground">
+                  #{t.rank} · {t.bestFor}
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <p className="text-3xs font-bold uppercase tracking-widest text-[var(--brand-green)] mb-2">
-                      Where it wins
-                    </p>
-                    <ul className="space-y-1.5 text-sm text-foreground">
-                      {t.strengths.map((p, i) => (
-                        <li key={i} className="flex gap-2">
-                          <span className="text-[var(--brand-green)] shrink-0">
-                            +
-                          </span>
-                          <span>{p}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div>
-                    <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
-                      Trade-offs
-                    </p>
-                    <ul className="space-y-1.5 text-sm text-foreground">
-                      {t.tradeoffs.map((p, i) => (
-                        <li key={i} className="flex gap-2">
-                          <span className="text-muted-foreground/60 shrink-0">
-                            −
-                          </span>
-                          <span>{p}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-                <div className="rounded-lg bg-primary/5 border border-primary/15 px-3 py-2.5 text-sm">
-                  <strong className="text-primary">Pick if:</strong>{" "}
-                  <span className="text-foreground">{t.pickIf}</span>
-                </div>
-              </div>
+                <p>
+                  <Link href={t.url} className="tc-link inline-flex min-h-11 items-center">
+                    Side-by-side
+                  </Link>
+                </p>
+                {t.disclosure ? <Note className="not-prose my-6">{t.disclosure}</Note> : null}
+                <p>
+                  <strong>Pricing:</strong> {t.pricing}
+                </p>
+                <RuledList
+                  className="not-prose my-6"
+                  items={[
+                    {
+                      term: "Where it wins",
+                      detail: (
+                        <ul className="space-y-1.5 text-foreground">
+                          {t.strengths.map((p, i) => (
+                            <li key={i} className="flex gap-2">
+                              <span className="shrink-0 text-muted-foreground">+</span>
+                              <span>{p}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ),
+                    },
+                    {
+                      term: "Trade-offs",
+                      detail: (
+                        <ul className="space-y-1.5 text-foreground">
+                          {t.tradeoffs.map((p, i) => (
+                            <li key={i} className="flex gap-2">
+                              <span className="shrink-0 text-muted-foreground">−</span>
+                              <span>{p}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ),
+                    },
+                  ]}
+                />
+                <p>
+                  <strong>Pick if:</strong> {t.pickIf}
+                </p>
+              </Fragment>
             ))}
 
             <h2>When to stick with DealCheck</h2>
@@ -601,36 +571,26 @@ export default function BestDealCheckAlternativesPost() {
               full{" "}
               <Link
                 href="/vs/dealcheck"
-                className="font-semibold text-primary hover:underline"
+                className="tc-link"
               >
                 TrueCap vs DealCheck comparison
               </Link>{" "}
               marks the rows DealCheck wins, because it wins several.
             </p>
 
-            <h2>FAQ</h2>
-            <div className="not-prose space-y-3">
-              {FAQ_ITEMS.map((item) => (
-                <details
-                  key={item.q}
-                  className="group rounded-xl border border-border bg-card p-4 sm:p-5"
-                >
-                  <summary className="cursor-pointer list-none flex items-start justify-between gap-3 font-bold text-sm sm:text-base text-foreground">
-                    <span>{item.q}</span>
-                    <span
-                      aria-hidden
-                      className="mt-1 size-5 shrink-0 rounded-full border border-border text-muted-foreground text-xs leading-none flex items-center justify-center transition-transform group-open:rotate-45"
-                    >
-                      +
-                    </span>
-                  </summary>
-                  <div className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                    {item.a}
-                  </div>
-                </details>
-              ))}
-            </div>
+          </ArticleBody>
 
+          {/* faqSchema above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQ_ITEMS}
+            structuredData={false}
+            contact={null}
+          />
+
+          <ArticleBody className="mt-16">
             <h2>Try the free alternative first</h2>
             <p>
               The cheapest way to compare is to run one of your real deals
@@ -639,111 +599,105 @@ export default function BestDealCheckAlternativesPost() {
               metric via the{" "}
               <Link
                 href="/tools/gross-rent-multiplier-calculator"
-                className="font-semibold text-primary hover:underline"
+                className="tc-link"
               >
                 GRM calculator
               </Link>
               ,{" "}
               <Link
                 href="/tools/mortgage-payment-calculator"
-                className="font-semibold text-primary hover:underline"
+                className="tc-link"
               >
                 mortgage payment calculator
               </Link>
               , or{" "}
               <Link
                 href="/blog/brrrr-method-explained"
-                className="font-semibold text-primary hover:underline"
+                className="tc-link"
               >
                 BRRRR workflow guide
               </Link>
               . The full walkthrough is in our guide to{" "}
               <Link
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
-                className="font-semibold text-primary hover:underline"
+                className="tc-link"
               >
                 underwriting a rental in 60 seconds
               </Link>
               .
             </p>
-            <p className="not-prose"></p>
-          </div>
-
-          <PostSources
-            sources={[
-              {
-                title: "DealCheck, Plans & Pricing",
-                url: "https://dealcheck.io/pricing/",
-              },
-              {
-                title: "BiggerPockets, Membership types (Pro monthly and annual prices, 7-day free trial)",
-                url: "https://www.biggerpockets.com/membership-types",
-              },
-              {
-                title: "Stessa, Pricing",
-                url: "https://www.stessa.com/pricing/",
-              },
-              {
-                title: "Mashvisor, Pricing",
-                url: "https://www.mashvisor.com/pricing",
-              },
-              {
-                title: "RentCast, Plans & Pricing",
-                url: "https://www.rentcast.io/pricing",
-              },
-              {
-                title: "Rentometer, Plans & Pricing",
-                url: "https://www.rentometer.com/pricing",
-              },
-              {
-                title: "BiggerPockets, Real Estate Investment Calculators",
-                url: "https://www.biggerpockets.com/investment-calculators",
-              },
-              {
-                title: "BiggerPockets, Rental Property Calculator",
-                url: "https://www.biggerpockets.com/rental-property-calculator",
-              },
-              {
-                title: "BiggerPockets, Pro membership",
-                url: "https://www.biggerpockets.com/pro-membership",
-              },
-              {
-                title: "Stessa, Investment Property Marketplace",
-                url: "https://www.stessa.com/investment-property-marketplace/",
-              },
-              {
-                title: "Stessa Help Center, Stessa Investment Properties",
-                url: "https://support.stessa.com/en/articles/10779191-stessa-investment-properties",
-              },
-              {
-                title: "Rentometer, Rent estimates and comps (home page)",
-                url: "https://www.rentometer.com/",
-              },
-              {
-                title: "BiggerPockets, FilePlace (member-shared real estate files)",
-                url: "https://www.biggerpockets.com/files",
-              },
-              {
-                title: "FRED, 30-Year Fixed Rate Mortgage Average in the United States (MORTGAGE30US)",
-                url: "https://fred.stlouisfed.org/series/MORTGAGE30US",
-              },
-            ]}
-          />
-
-          <div className="mt-10">
-            <NewsletterSignup />
-          </div>
-          <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
-
-          <div className="mt-10">
-            <RelatedBlogPosts currentSlug={SLUG} limit={3} />
-          </div>
+          </ArticleBody>
         </article>
-      </main>
 
-      <BlogStickyCta />
+        <PostSources
+          sources={[
+            {
+              title: "DealCheck, Plans & Pricing",
+              url: "https://dealcheck.io/pricing/",
+            },
+            {
+              title: "BiggerPockets, Membership types (Pro monthly and annual prices, 7-day free trial)",
+              url: "https://www.biggerpockets.com/membership-types",
+            },
+            {
+              title: "Stessa, Pricing",
+              url: "https://www.stessa.com/pricing/",
+            },
+            {
+              title: "Mashvisor, Pricing",
+              url: "https://www.mashvisor.com/pricing",
+            },
+            {
+              title: "RentCast, Plans & Pricing",
+              url: "https://www.rentcast.io/pricing",
+            },
+            {
+              title: "Rentometer, Plans & Pricing",
+              url: "https://www.rentometer.com/pricing",
+            },
+            {
+              title: "BiggerPockets, Real Estate Investment Calculators",
+              url: "https://www.biggerpockets.com/investment-calculators",
+            },
+            {
+              title: "BiggerPockets, Rental Property Calculator",
+              url: "https://www.biggerpockets.com/rental-property-calculator",
+            },
+            {
+              title: "BiggerPockets, Pro membership",
+              url: "https://www.biggerpockets.com/pro-membership",
+            },
+            {
+              title: "Stessa, Investment Property Marketplace",
+              url: "https://www.stessa.com/investment-property-marketplace/",
+            },
+            {
+              title: "Stessa Help Center, Stessa Investment Properties",
+              url: "https://support.stessa.com/en/articles/10779191-stessa-investment-properties",
+            },
+            {
+              title: "Rentometer, Rent estimates and comps (home page)",
+              url: "https://www.rentometer.com/",
+            },
+            {
+              title: "BiggerPockets, FilePlace (member-shared real estate files)",
+              url: "https://www.biggerpockets.com/files",
+            },
+            {
+              title: "FRED, 30-Year Fixed Rate Mortgage Average in the United States (MORTGAGE30US)",
+              url: "https://fred.stlouisfed.org/series/MORTGAGE30US",
+            },
+          ]}
+        />
+
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
+        <RelatedBlogPosts currentSlug={SLUG} limit={3} />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
