@@ -77,8 +77,8 @@ describe("P1-12: the formula claims match what /methodology publishes", () => {
   });
 
   it("every core formula /tools names has its own heading under 'The core formulas' on /methodology", () => {
-    // Anchor on the two h2 elements, not on the phrase: the lead box above
-    // also says "The core formulas are published and versioned."
+    // Anchor on the two h2 elements, not on the phrase: the short version
+    // above also says "The core formulas are published and versioned."
     const start = methodologyHtml.indexOf(">The core formulas</h2>");
     const end = methodologyHtml.indexOf(">Decision thresholds and Offer Ceiling</h2>");
     expect(start).toBeGreaterThan(-1);
