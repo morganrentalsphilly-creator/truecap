@@ -9,15 +9,27 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -123,28 +135,24 @@ export default function HowToReadARentRollPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-        <div className="mb-2">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-        </div>
-        <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+        <header className={ARTICLE_HEADER}>
+          <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+          <p className={ARTICLE_META}>
+            <Link href="/blog" className={ARTICLE_META_LINK}>
+              Blog
+            </Link>{" "}
+            ·{" "}
+            {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+              timeZone: "UTC",
               year: "numeric",
               month: "short",
               day: "numeric",
@@ -152,7 +160,8 @@ export default function HowToReadARentRollPost() {
             · {READING_TIME} min read
           </p>
           <BlogByline />
-          <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+          <UnderTitleAnalyzeLink />
+          <p className={ARTICLE_LEDE}>
             A rent roll is where a seller&apos;s story meets the leases. It is the
             one page that tells you what a rental actually collects this month —
             not the market rent a listing advertises, not the stabilized number on
@@ -166,10 +175,8 @@ export default function HowToReadARentRollPost() {
           </p>
         </header>
 
-        <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            What a rent roll actually is
-          </h2>
+        <ArticleBody>
+          <h2>What a rent roll actually is</h2>
           <p>
             A rent roll is the income half of a property&apos;s books at a single
             moment in time. The expense half lives in the operating statement; the
@@ -189,9 +196,7 @@ export default function HowToReadARentRollPost() {
             rent roll, line by line.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            A worked example: a 2026 fourplex
-          </h2>
+          <h2>A worked example: a 2026 fourplex</h2>
           <p>
             Here is the rent roll for a fourplex listed at <strong>$520,000</strong>.
             Market rent in this submarket is about $1,400 for the 2-bedroom units
@@ -199,88 +204,64 @@ export default function HowToReadARentRollPost() {
             very different numbers out of it.
           </p>
 
-          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose my-6 overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
+          <ArticleTable label="Data table">
+            <table>
               <thead>
-                <tr className="bg-muted text-left">
-                  <th className="border border-border px-3 py-2 font-bold text-foreground">
-                    Unit
-                  </th>
-                  <th className="border border-border px-3 py-2 font-bold text-foreground">
-                    Type
-                  </th>
-                  <th className="border border-border px-3 py-2 font-bold text-foreground">
-                    Lease ends
-                  </th>
-                  <th className="border border-border px-3 py-2 font-bold text-foreground">
-                    Rent / mo
-                  </th>
-                  <th className="border border-border px-3 py-2 font-bold text-foreground">
-                    Deposit
-                  </th>
-                  <th className="border border-border px-3 py-2 font-bold text-foreground">
-                    Status
-                  </th>
+                <tr>
+                  <th>Unit</th>
+                  <th>Type</th>
+                  <th>Lease ends</th>
+                  <th>Rent / mo</th>
+                  <th>Deposit</th>
+                  <th>Status</th>
                 </tr>
               </thead>
-              <tbody className="text-muted-foreground">
+              <tbody>
                 <tr>
-                  <td className="border border-border px-3 py-2">1</td>
-                  <td className="border border-border px-3 py-2">2BR / 1BA</td>
-                  <td className="border border-border px-3 py-2">
-                    Month-to-month
-                  </td>
-                  <td className="border border-border px-3 py-2">$1,150</td>
-                  <td className="border border-border px-3 py-2">$1,000</td>
-                  <td className="border border-border px-3 py-2">
-                    Occupied (since 2019)
-                  </td>
+                  <td>1</td>
+                  <td>2BR / 1BA</td>
+                  <td>Month-to-month</td>
+                  <td>$1,150</td>
+                  <td>$1,000</td>
+                  <td>Occupied (since 2019)</td>
                 </tr>
                 <tr>
-                  <td className="border border-border px-3 py-2">2</td>
-                  <td className="border border-border px-3 py-2">2BR / 1BA</td>
-                  <td className="border border-border px-3 py-2">2026-11-30</td>
-                  <td className="border border-border px-3 py-2">$1,375</td>
-                  <td className="border border-border px-3 py-2">$1,375</td>
-                  <td className="border border-border px-3 py-2">Occupied</td>
+                  <td>2</td>
+                  <td>2BR / 1BA</td>
+                  <td>2026-11-30</td>
+                  <td>$1,375</td>
+                  <td>$1,375</td>
+                  <td>Occupied</td>
                 </tr>
                 <tr>
-                  <td className="border border-border px-3 py-2">3</td>
-                  <td className="border border-border px-3 py-2">1BR / 1BA</td>
-                  <td className="border border-border px-3 py-2">2027-02-28</td>
-                  <td className="border border-border px-3 py-2">$1,050</td>
-                  <td className="border border-border px-3 py-2">$1,050</td>
-                  <td className="border border-border px-3 py-2">Occupied</td>
+                  <td>3</td>
+                  <td>1BR / 1BA</td>
+                  <td>2027-02-28</td>
+                  <td>$1,050</td>
+                  <td>$1,050</td>
+                  <td>Occupied</td>
                 </tr>
                 <tr>
-                  <td className="border border-border px-3 py-2">4</td>
-                  <td className="border border-border px-3 py-2">2BR / 1BA</td>
-                  <td className="border border-border px-3 py-2">—</td>
-                  <td className="border border-border px-3 py-2">
-                    $0 ($1,400 ask)
-                  </td>
-                  <td className="border border-border px-3 py-2">$0</td>
-                  <td className="border border-border px-3 py-2">
-                    Vacant / listed
-                  </td>
+                  <td>4</td>
+                  <td>2BR / 1BA</td>
+                  <td>—</td>
+                  <td>$0 ($1,400 ask)</td>
+                  <td>$0</td>
+                  <td>Vacant / listed</td>
                 </tr>
-                <tr className="bg-muted font-semibold text-foreground">
-                  <td className="border border-border px-3 py-2">Total</td>
-                  <td className="border border-border px-3 py-2">4 units</td>
-                  <td className="border border-border px-3 py-2">
-                    3 of 4 occupied
-                  </td>
-                  <td className="border border-border px-3 py-2">$3,575</td>
-                  <td className="border border-border px-3 py-2">$3,425</td>
-                  <td className="border border-border px-3 py-2">75% occ.</td>
+                <tr className="font-semibold">
+                  <td>Total</td>
+                  <td>4 units</td>
+                  <td>3 of 4 occupied</td>
+                  <td>$3,575</td>
+                  <td>$3,425</td>
+                  <td>75% occ.</td>
                 </tr>
               </tbody>
             </table>
-          </ScrollX>
+          </ArticleTable>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            The bottom line is three numbers, not one
-          </h2>
+          <h2>The bottom line is three numbers, not one</h2>
           <p>
             The easiest rent-roll mistake to make is reading one total when
             there are really three. Pull all three from the table above:
@@ -333,9 +314,7 @@ export default function HowToReadARentRollPost() {
             were one easy win.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            The five places a rent roll misleads
-          </h2>
+          <h2>The five places a rent roll misleads</h2>
           <p>
             <strong>1. &quot;Market&quot; rent dressed up as in-place rent.</strong>{" "}
             The oldest trick is listing the asking rent for a vacant or
@@ -345,7 +324,7 @@ export default function HowToReadARentRollPost() {
             against{" "}
             <Link
               href="/blog/how-to-estimate-rent-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               an independent market-rent estimate
             </Link>{" "}
@@ -362,7 +341,7 @@ export default function HowToReadARentRollPost() {
             Fold a realistic{" "}
             <Link
               href="/blog/vacancy-rate-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               economic vacancy assumption
             </Link>{" "}
@@ -397,15 +376,13 @@ export default function HowToReadARentRollPost() {
             behind it. Confirm the total moves to you on the settlement statement.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            From rent roll to underwrite
-          </h2>
+          <h2>From rent roll to underwrite</h2>
           <p>
             The rent roll feeds the top of your income statement. The build-up to
             effective gross income (EGI) — the number that drives{" "}
             <Link
               href="/blog/how-to-calculate-noi-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               NOI
             </Link>
@@ -433,7 +410,7 @@ export default function HowToReadARentRollPost() {
             today for work you have not done yet. Send the EGI into the free{" "}
             <Link
               href="/analyze" prefetch={false}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               TrueCap analyzer
             </Link>{" "}
@@ -444,7 +421,7 @@ export default function HowToReadARentRollPost() {
             One fast sanity check ties the rent roll straight to price. The{" "}
             <Link
               href="/tools/gross-rent-multiplier-calculator"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               gross rent multiplier
             </Link>{" "}
@@ -456,9 +433,7 @@ export default function HowToReadARentRollPost() {
             verified rent roll is what tells you which one you are paying for.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            How to verify a rent roll
-          </h2>
+          <h2>How to verify a rent roll</h2>
           <p>
             A rent roll is a seller&apos;s representation until you prove it.
             Because value moves directly with income, every overstated line is
@@ -490,14 +465,14 @@ export default function HowToReadARentRollPost() {
               closing. Verify any{" "}
               <Link
                 href="/blog/section-8-rental-property-investing"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 housing-voucher (Section 8) payments
               </Link>{" "}
               against the housing authority&apos;s contract, since{" "}
               <a
                 href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-J/section-982.451"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 part of that rent comes from the agency, not the tenant
               </a>
@@ -511,16 +486,14 @@ export default function HowToReadARentRollPost() {
             and discover the gap from your own bank account.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            Single-family and small multifamily
-          </h2>
+          <h2>Single-family and small multifamily</h2>
           <p>
             A single-family rental still has a rent roll — it is just one line, and
             the discipline is the same: confirm the lease and that the rent is
             genuinely being collected. The rent roll earns its keep on{" "}
             <Link
               href="/blog/single-family-vs-multi-family-rental"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               2-4 unit and small multifamily
             </Link>
@@ -534,7 +507,7 @@ export default function HowToReadARentRollPost() {
             The rent roll is the factual sibling of the{" "}
             <Link
               href="/blog/rental-property-pro-forma-explained"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               pro forma
             </Link>
@@ -543,21 +516,20 @@ export default function HowToReadARentRollPost() {
             to execute — not a price you agree to pay up front.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            FAQ
-          </h2>
-          {FAQS.map((f) => (
-            <div key={f.q}>
-              <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                {f.q}
-              </h3>
-              <p>{f.a}</p>
-            </div>
-          ))}
+        </ArticleBody>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            Verify the income, then underwrite it
-          </h2>
+        {/* faqLd above is the one FAQPage node for these rows. */}
+        <FaqSection
+          id="faq"
+          variant="inline"
+          heading="FAQ"
+          items={FAQS}
+          structuredData={false}
+          contact={null}
+        />
+
+        <ArticleBody className="mt-16">
+          <h2>Verify the income, then underwrite it</h2>
           <p>
             A rent roll decides whether the income you are buying is real. Read all
             three numbers — gross potential, contract, collected — split the gap
@@ -566,46 +538,46 @@ export default function HowToReadARentRollPost() {
             you can actually prove into the{" "}
             <Link
               href="/analyze" prefetch={false}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               TrueCap analyzer
             </Link>
             , sanity-check the price with the{" "}
             <Link
               href="/tools/gross-rent-multiplier-calculator"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               GRM calculator
             </Link>
             , and run the whole deal — cash flow, cap rate, DSCR, projections, and a
             Buy Box fit — through the{" "}
-            <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+            <Link href="/analyze" prefetch={false} className="tc-link">
               TrueCap analyzer
             </Link>
             . Related reading:{" "}
             <Link
               href="/blog/rental-property-pro-forma-explained"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               how to read a pro forma
             </Link>
             ,{" "}
             <Link
               href="/blog/how-to-estimate-rent-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               how to estimate rent
             </Link>
             , and{" "}
             <Link
               href="/blog/vacancy-rate-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               what vacancy rate to assume
             </Link>
             .
           </p>
-        </div>
+        </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -617,13 +589,12 @@ export default function HowToReadARentRollPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
