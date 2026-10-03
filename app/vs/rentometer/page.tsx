@@ -74,7 +74,7 @@ type Row = { feature: string; truecap: string; rentometer: string; winner: Verdi
 
 const MATRIX: Row[] = [
   { feature: "Rent estimate from address",      truecap: "Editable HUD rent benchmark; optional rent-comp lookup",                 rentometer: "Comp-driven rent estimate (their core product)",                  winner: "rentometer" },
-  { feature: "Comp data access",                 truecap: "One free sale/rent comp lookup; Pro includes 50 per month",               rentometer: "Rental-comp product with plan-specific limits",                    winner: "rentometer" },
+  { feature: "Comp data access",                 truecap: "One free sale/rent comp lookup; Pro includes up to 50 per month",               rentometer: "Rental-comp product with plan-specific limits",                    winner: "rentometer" },
   { feature: "Full deal underwrite",             truecap: "Free core metrics; Pro adds 10-year projections",                         rentometer: "Deal Worksheet on Rentometer Pro: cash flow, cash-on-cash and gross yield", winner: "tie" },
   { feature: "Operating expense modeling",       truecap: "Editable tax, insurance, maintenance, management, and reserve inputs",    rentometer: "Editable operating expenses, taxes and insurance in the Pro Deal Worksheet", winner: "tie" },
   { feature: "Mortgage / financing analysis",    truecap: "Full mortgage model with an editable FRED rate benchmark",               rentometer: "Editable financing terms in the Pro Deal Worksheet",              winner: "tie" },
@@ -311,7 +311,7 @@ const RENTOMETER_FAQ: FaqItem[] = [
         county match, a statewide HUD figure, labeled as such. It is a
         housing-program benchmark, not a property-specific rent opinion
         or lender approval input. The optional comps lookup (one free lookup;
-        Pro includes 50 per month) adds a rent estimate from nearby
+        Pro includes up to 50 per month) adds a rent estimate from nearby
         properties. Rentometer&apos;s comp-based estimates can provide a
         separate source to evaluate.
       </>

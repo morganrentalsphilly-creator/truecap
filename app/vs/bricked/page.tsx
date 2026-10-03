@@ -499,7 +499,7 @@ const BRICKED_FAQ: FaqItem[] = [
         3-day free trial and there is no free tier (as of October 2026).
         TrueCap&apos;s core analyzer is free with no
         analysis cap and no account required. Pro adds advanced analysis and
-        reporting with published limits, including 50 comp lookups per month and
+        reporting with published limits, including up to 50 comp lookups per month and
         comparison of up to four saved deals. PDF reports are included with Pro.
         See TrueCap&apos;s live pricing page for current rates and terms.
       </>
