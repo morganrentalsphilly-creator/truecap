@@ -56,6 +56,12 @@ describe("contrast on the states that carry the verdict", () => {
     expect(contrast("#596877", "#FFFFFF")).toBeGreaterThanOrEqual(4.5);
     const glossary = read("app/glossary/page.tsx");
     expect(glossary).not.toContain("tracking-widest text-muted-foreground/60");
+    // The permalink is now a sentence-case tc-link with a 44px target: pin
+    // the new markup so the uppercase arrow label cannot come back.
+    expect(glossary).not.toContain("PERMALINK");
+    expect(glossary).toMatch(
+      /className="tc-link[^"]*min-h-11 min-w-11[^"]*"\s*>\s*Permalink/,
+    );
   });
 });
 
