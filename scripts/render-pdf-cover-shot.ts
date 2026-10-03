@@ -9,8 +9,14 @@
  * targets, no branding and no person, exactly as the server action builds a
  * report: buildCanonicalReportData, then generateInvestmentPDFBlob. Page 1 is
  * rasterised with poppler's `pdftoppm` (brew install poppler) and written to
- * public/product/pdf-cover.webp at 1240 px wide. Nothing is drawn, cropped or
- * retouched: the image is the cover page as the PDF renders it.
+ * public/product/pdf-cover.webp at 1240 px wide.
+ *
+ * One input differs from the fixture: its address label. The fixture's
+ * internal address is replaced with the customer-facing one ("Sample
+ * property", docs/voice.md term map), the same relabelling the product's
+ * screens apply to the sample. Every number, the targets and the layout are
+ * the fixture's and the generator's. Nothing else changes: the page is not
+ * drawn over, cropped or retouched after the PDF renders it.
  *
  * Run it from the repository root (the generator reads the logo from
  * public/). No server, no database and no network are involved. Re-run it
@@ -38,13 +44,19 @@ import {
 const OUT = path.resolve("public/product/pdf-cover.webp");
 /** Twice the widest layout slot (the homepage column is 480 CSS px). */
 const WIDTH = 1240;
+/**
+ * The address the picture prints. docs/voice.md retires the fixture's internal
+ * label from customer copy, and a test cannot read text inside an image, so
+ * the label is set here. City, state and ZIP are the fixture's.
+ */
+const COVER_ADDRESS = "Sample property, Philadelphia, PA 19140, USA";
 
 async function main() {
   const { buildCanonicalReportData } = await import("@/lib/report-data-builder");
   const { generateInvestmentPDFBlob } = await import("@/lib/pdf-generator");
 
   const report = buildCanonicalReportData({
-    values: SAMPLE_DEAL_VALUES,
+    values: { ...SAMPLE_DEAL_VALUES, address: COVER_ADDRESS },
     maxOfferTarget: SAMPLE_DEAL_MAO_TARGET,
     maxOfferTargetSource: SAMPLE_DEAL_TARGET_PROFILE.source,
     generatedAt: new Date(`${SAMPLE_DEAL_ANALYSIS_DATE}T12:00:00.000Z`),

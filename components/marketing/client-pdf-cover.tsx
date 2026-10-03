@@ -10,7 +10,10 @@ import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link"
  * scripts/render-pdf-cover-shot.ts. It renders the report for the sample deal
  * (lib/sample-deal.ts) through lib/pdf-generator.ts, the generator behind
  * Export PDF, with no branding and no person named, and rasterises page 1.
- * Nothing is drawn or retouched, so the caption may call it the PDF's cover.
+ * The script replaces the fixture's internal address label with the
+ * customer-facing one ("Sample property", docs/voice.md) and changes nothing
+ * else; the page is not drawn over or retouched, so the caption may call it
+ * the PDF's cover.
  * It is not a co-branded cover: say what branding changes in words (the
  * cover's logo or company wordmark, theme color and "Prepared by" block, all
  * in pageCover) and never caption it as an agent's report.
@@ -47,8 +50,8 @@ export function ClientPdfCover({
       </div>
       <figcaption className="mt-2.5 text-sm text-muted-foreground">
         The cover of the PDF report, rendered from the sample deal with no branding set. With
-        branding set up, the cover carries your logo or company name and your brand color in
-        place of TrueCap&apos;s, and the Prepared by block shows your contact details.{" "}
+        branding set up, the cover carries the logo or company name and the brand color you
+        saved in place of TrueCap&apos;s, and the Prepared by block shows your contact details.{" "}
         <IntentPrefetchLink
           href="/sample-decision-memo"
           className="tc-link -my-3 inline-block py-3 font-medium"
