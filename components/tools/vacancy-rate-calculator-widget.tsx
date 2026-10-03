@@ -130,9 +130,10 @@ export function VacancyRateCalculatorWidget() {
       <div className="grid grid-cols-[minmax(0,1fr)] gap-x-8 gap-y-6 @lg:grid-cols-2">
         <div className="min-w-0 space-y-5">
           {/* Rent and days share a row on a phone, so the result and the
-              action stay near the first screen; in the two-column layout
-              the field column is narrow and they stack. */}
-          <div className="grid grid-cols-2 items-start gap-x-4 gap-y-5 @lg:grid-cols-1">
+              action stay near the first screen, and again once the frame is
+              672px wide; between the two the field column is too narrow for
+              a pair and they stack. */}
+          <div className="grid grid-cols-2 items-start gap-x-4 gap-y-5 @lg:grid-cols-1 @2xl:grid-cols-2">
             <ToolNumberField
               id="vr-rent"
               label="Monthly rent"
