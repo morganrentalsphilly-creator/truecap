@@ -105,6 +105,14 @@ describe("no-signup decision binding is said on the page (P1-38)", () => {
     expect(ANONYMOUS_DECISION_INPUT_BOUND_NOTE).toContain(
       "restoring the original inputs brings the exact figure back",
     );
+    // A changed-input rerun can also read "No feasible downside case" or
+    // "No feasible range", so the note must not promise a range.
+    expect(ANONYMOUS_DECISION_INPUT_BOUND_NOTE).toContain(
+      "shows a range at most, not the exact figure",
+    );
+    expect(ANONYMOUS_DECISION_INPUT_BOUND_NOTE).not.toContain(
+      "shows the Offer Ceiling as a range",
+    );
     const toast = anonymousDecisionUsedDescription();
     expect(toast).toContain("tied to the inputs you first ran");
     expect(toast).toContain("Restore the original inputs to get it back");
