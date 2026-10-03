@@ -15,15 +15,28 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -127,28 +140,24 @@ export default function ReturnOnEquityPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -156,7 +165,8 @@ export default function ReturnOnEquityPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               It&apos;s easy to track the return on the cash you put in the day
               you bought and never revisit it. But a rental you have owned for
               years isn&apos;t financed by that old down payment anymore — it is
@@ -169,7 +179,7 @@ export default function ReturnOnEquityPost() {
               Mac&apos;s 30-year fixed average was{" "}
               <a
                 href="https://www.freddiemac.com/pmms"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 7.03% on Sept. 24, 2026
               </a>
@@ -178,20 +188,13 @@ export default function ReturnOnEquityPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The formula
-            </h2>
+          <ArticleBody>
+            <h2>The formula</h2>
             <p>
               Return on equity divides the total return a property throws off in
               a year by the equity you have in it at the start of that year:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                ROE = (Cash flow + Principal paydown + Appreciation) ÷ Current
-                equity
-              </code>
-            </div>
+            <ToolFormula formula="ROE = (Cash flow + Principal paydown + Appreciation) ÷ Current equity" />
             <p>
               Two of those pieces are easy to miss.{" "}
               <strong>Principal paydown</strong> is the slice of each mortgage
@@ -215,15 +218,13 @@ export default function ReturnOnEquityPost() {
               forecast.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              ROE vs cash-on-cash: same idea, different denominator
-            </h2>
+            <h2>ROE vs cash-on-cash: same idea, different denominator</h2>
             <p>
               This is the confusion worth clearing first, because the two metrics
               look almost identical in year one and then diverge completely.{" "}
               <Link
                 href="/blog/how-to-calculate-cash-on-cash-return"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Cash-on-cash return
               </Link>{" "}
@@ -241,16 +242,14 @@ export default function ReturnOnEquityPost() {
               three that tracks the return on the equity you could actually move.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              A worked example: the deal that gets lazy
-            </h2>
+            <h2>A worked example: the deal that gets lazy</h2>
             <p>
               Take a $250,000 single-family rental, 25% down ($62,500), financing
               $187,500 at 7% over 30 years. Principal and interest run about
               $1,247 a month, or $14,969 a year (check it on the{" "}
               <Link
                 href="/tools/mortgage-payment-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 mortgage payment calculator
               </Link>
@@ -258,7 +257,7 @@ export default function ReturnOnEquityPost() {
               expenses{" "}
               <Link
                 href="/blog/how-to-calculate-noi-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 net operating income
               </Link>{" "}
@@ -266,7 +265,7 @@ export default function ReturnOnEquityPost() {
               is thin: roughly $1,130 a year, about $94 a month, for a first-year{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cash-on-cash return
               </Link>{" "}
@@ -287,11 +286,11 @@ export default function ReturnOnEquityPost() {
               watch what happens as that slice thickens:
             </p>
 
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
-                    <th className="text-left">Start of year</th>
+                  <tr>
+                    <th>Start of year</th>
                     <th className="text-right">Market value</th>
                     <th className="text-right">Your equity</th>
                     <th className="text-right">Total return</th>
@@ -328,7 +327,7 @@ export default function ReturnOnEquityPost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
 
             <p>
               Look at what the table is doing. The dollar return nearly doubles —
@@ -342,9 +341,7 @@ export default function ReturnOnEquityPost() {
               faster than the property could put it to work.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What actually drives the decay
-            </h2>
+            <h2>What actually drives the decay</h2>
             <p>
               The engine is leverage, and it is worth seeing precisely. Split the
               return into its cash-and-paydown part and its appreciation part.
@@ -364,7 +361,7 @@ export default function ReturnOnEquityPost() {
               This is the same force behind{" "}
               <Link
                 href="/blog/negative-leverage-real-estate"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 negative leverage
               </Link>
@@ -376,9 +373,7 @@ export default function ReturnOnEquityPost() {
               leveraged bet you originally made.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The number that should worry you: cash-on-equity
-            </h2>
+            <h2>The number that should worry you: cash-on-equity</h2>
             <p>
               Total ROE still looks respectable at 12% in year ten, but a big share
               of that is paper appreciation and forced savings, not money in your
@@ -393,16 +388,14 @@ export default function ReturnOnEquityPost() {
               has gone slack.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The decision ROE surfaces — and its honest cost
-            </h2>
+            <h2>The decision ROE surfaces — and its honest cost</h2>
             <p>
               A declining ROE is a prompt, not a verdict. It tells you the equity
               in this property may be underemployed, which points at three moves:
               refinance and pull cash out to redeploy, sell and{" "}
               <Link
                 href="/blog/1031-exchange-basics"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 1031 exchange
               </Link>{" "}
@@ -411,7 +404,7 @@ export default function ReturnOnEquityPost() {
               equity; a cash-out refinance to{" "}
               <a
                 href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 75%
               </a>{" "}
@@ -430,7 +423,7 @@ export default function ReturnOnEquityPost() {
               than the lazy equity was ever costing you — the exact trap covered in{" "}
               <Link
                 href="/blog/cash-out-refinance-vs-heloc-rental"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cash-out refinance vs HELOC
               </Link>
@@ -443,7 +436,7 @@ export default function ReturnOnEquityPost() {
               the return on the freed capital — before you act. The full{" "}
               <Link
                 href="/blog/how-to-refinance-a-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 refinance walkthrough
               </Link>{" "}
@@ -454,7 +447,7 @@ export default function ReturnOnEquityPost() {
               equity. A cash-out refinance typically caps at{" "}
               <a
                 href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 75% loan-to-value on a one-unit investment property (70% for two
                 to four units)
@@ -471,9 +464,7 @@ export default function ReturnOnEquityPost() {
               getting the money out.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              How to actually use it
-            </h2>
+            <h2>How to actually use it</h2>
             <p>
               Compute ROE once a year on every property you own, not just at
               purchase. Pull today&apos;s realistic market value, subtract your
@@ -494,7 +485,7 @@ export default function ReturnOnEquityPost() {
               many years,{" "}
               <Link
                 href="/blog/cash-on-cash-vs-irr"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 IRR
               </Link>{" "}
@@ -503,21 +494,20 @@ export default function ReturnOnEquityPost() {
               broker&apos;s opinion, not the number that flatters the deal.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
+          </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The bottom line
-            </h2>
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
+
+          <ArticleBody className="mt-16">
+            <h2>The bottom line</h2>
             <p>
               Cash-on-cash return tells you how your original down payment is
               doing; return on equity tells you how the equity you hold{" "}
@@ -528,7 +518,7 @@ export default function ReturnOnEquityPost() {
               quietly becomes paper appreciation rather than spendable cash. That
               is the signal to check whether your equity is still working or just
               sitting. The full{" "}
-              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="tc-link">
                 TrueCap analyzer
               </Link>{" "}
               runs cash flow, cap rate, DSCR, and multi-year projections on any
@@ -536,7 +526,7 @@ export default function ReturnOnEquityPost() {
               deciding what to do with the equity in an old one, you can see the
               return on the dollars that are actually at work.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -552,13 +542,12 @@ export default function ReturnOnEquityPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
