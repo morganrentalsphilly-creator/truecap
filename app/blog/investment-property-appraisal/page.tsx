@@ -17,13 +17,25 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -124,29 +136,27 @@ export default function InvestmentPropertyAppraisalPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>
               Investment property appraisals: how they work — and what to do
               when the value comes in low (2026)
             </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -154,7 +164,8 @@ export default function InvestmentPropertyAppraisalPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               A financed rental deal usually comes with one number the
               investor doesn&apos;t control: the appraisal. You can negotiate the price,
               shop the rate, and pad the rehab budget, but the appraised value
@@ -170,8 +181,8 @@ export default function InvestmentPropertyAppraisalPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <ArticleBody>
+            <h2>
               Where appraisals ambush a rental deal
             </h2>
             <p>
@@ -184,14 +195,14 @@ export default function InvestmentPropertyAppraisalPost() {
               the appraisal <em>is</em> the deal: the cash-out loan is a{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b2-1.2-01/loan-value-ltv-ratios"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 straight percentage of appraised value
               </a>
               , so at the{" "}
               <a
                 href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 conventional cash-out maximums (75% of value on one unit, 70% on two to four)
               </a>{" "}
@@ -200,14 +211,14 @@ export default function InvestmentPropertyAppraisalPost() {
               the{" "}
               <Link
                 href="/blog/how-to-calculate-arv"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 ARV guide
               </Link>
               .) The exception: Fannie Mae&apos;s{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b4-1.4-10/value-acceptance"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 value acceptance
               </a>{" "}
@@ -219,21 +230,21 @@ export default function InvestmentPropertyAppraisalPost() {
               The lender orders the appraisal,{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b4-1.1-03/appraiser-selection-criteria"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 directly or through an appraisal management company
               </a>
               , and{" "}
               <a
                 href="https://www.consumerfinance.gov/ask-cfpb/what-are-appraisals-and-why-do-i-need-to-look-at-them-en-167/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 may require you to pay for it
               </a>
               , but you don&apos;t pick the appraiser, by design.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               The paperwork: 1004, 1025, and the 1007 rent schedule
             </h2>
             <p>
@@ -242,7 +253,7 @@ export default function InvestmentPropertyAppraisalPost() {
               Report (URAR). Under the{" "}
               <a
                 href="https://sf.freddiemac.com/docs/pdf/fact-sheet/uad-redesign-timeline.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Fannie Mae and Freddie Mac redesign timeline
               </a>
@@ -253,7 +264,7 @@ export default function InvestmentPropertyAppraisalPost() {
               approach</strong>:{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b4-1.3-08/comparable-sales"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 at least three recent closed sales
               </a>
@@ -262,7 +273,7 @@ export default function InvestmentPropertyAppraisalPost() {
               appraisal is the rent opinion:{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b3-3.8-02/rental-income-subject-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 when rental income from the property is used to qualify for a Fannie Mae loan, the lender must obtain
               </a>{" "}
@@ -271,7 +282,7 @@ export default function InvestmentPropertyAppraisalPost() {
               opines on the subject&apos;s market rent (for{" "}
               <a
                 href="https://sf.freddiemac.com/faqs/uad-and-forms-redesign"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 appraisals submitted to Fannie Mae or Freddie Mac from November 2, 2026
               </a>
@@ -280,7 +291,7 @@ export default function InvestmentPropertyAppraisalPost() {
               rent estimate the way the{" "}
               <Link
                 href="/blog/how-to-estimate-rent-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 rent estimation guide
               </Link>{" "}
@@ -295,14 +306,14 @@ export default function InvestmentPropertyAppraisalPost() {
               comparison approach but{" "}
               <a
                 href="https://guide.freddiemac.com/ci/okcsFattach/get/1001329_5"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 adds an income section: rental comps for each unit type
               </a>{" "}
               and a{" "}
               <Link
                 href="/blog/gross-rent-multiplier-explained"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 gross rent multiplier
               </Link>{" "}
@@ -315,14 +326,14 @@ export default function InvestmentPropertyAppraisalPost() {
               sales comps say $260,000, the appraiser reconciles,{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b4-1.3-11/valuation-analysis-and-reconciliation"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 reporting which approach got the most weight
               </a>{" "}
               (Fannie Mae{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 won&apos;t accept an appraisal that relies solely on the income approach
               </a>
@@ -335,14 +346,14 @@ export default function InvestmentPropertyAppraisalPost() {
               appraiser.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               Why the 1007 can cost you more than the value
             </h2>
             <p>
               On a{" "}
               <Link
                 href="/blog/how-to-calculate-dscr#dscr-loans"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 DSCR loan
               </Link>
@@ -368,20 +379,20 @@ export default function InvestmentPropertyAppraisalPost() {
               Check where your deal sits in the{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>{" "}
               before the appraisal does it for you.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               The lower-of rule: worked gap math
             </h2>
             <p>
               <a
                 href="https://selling-guide.fanniemae.com/sel/b2-1.2-01/loan-value-ltv-ratios"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Purchase loans are sized against the <strong>lower</strong> of the contract price and the appraised value
               </a>
@@ -399,7 +410,7 @@ export default function InvestmentPropertyAppraisalPost() {
               payment drops about $61 a month (run variations through the{" "}
               <Link
                 href="/tools/mortgage-payment-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 mortgage payment calculator
               </Link>
@@ -410,7 +421,7 @@ export default function InvestmentPropertyAppraisalPost() {
               denominator.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               The low-appraisal playbook, in order
             </h2>
             <p>
@@ -428,7 +439,7 @@ export default function InvestmentPropertyAppraisalPost() {
               likely. <strong>Third, file a reconsideration of value.</strong>{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b4-1.3-12/appraisal-quality-matters"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 An ROV goes through the lender and works only on facts
               </a>
@@ -452,7 +463,7 @@ export default function InvestmentPropertyAppraisalPost() {
               gap, because you&apos;re promising exactly that.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               Appraisal-proofing your underwriting
             </h2>
             <p>
@@ -468,7 +479,7 @@ export default function InvestmentPropertyAppraisalPost() {
               refinance, the{" "}
               <Link
                 href="/blog/how-to-refinance-a-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 refinance guide
               </Link>{" "}
@@ -481,10 +492,10 @@ export default function InvestmentPropertyAppraisalPost() {
               an ROV becomes necessary.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               Five mistakes investors make with appraisals
             </h2>
-            <ul className="list-disc pl-6 space-y-2">
+            <ul>
               <li>
                 <strong>Treating the appraisal as the market&apos;s verdict on
                 the investment.</strong> It&apos;s a collateral opinion for
@@ -514,7 +525,7 @@ export default function InvestmentPropertyAppraisalPost() {
                 <strong>Forgetting the appraisal expires.</strong>{" "}
                 <a
                   href="https://selling-guide.fanniemae.com/sel/b4-1.2-04/appraisal-age-and-use-requirements"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   Under Fannie Mae rules an appraisal is good for four months
                 </a>
@@ -526,19 +537,20 @@ export default function InvestmentPropertyAppraisalPost() {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
+            </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            {/* faqLd above is the one FAQPage node for these rows. */}
+            <FaqSection
+              id="faq"
+              variant="inline"
+              heading="FAQ"
+              items={FAQS}
+              structuredData={false}
+              contact={null}
+            />
+
+            <ArticleBody className="mt-16">
+            <h2>
               The bottom line
             </h2>
             <p>
@@ -549,7 +561,7 @@ export default function InvestmentPropertyAppraisalPost() {
               cash-out proceeds, at{" "}
               <a
                 href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 roughly 70–85 cents per appraised dollar, depending on your loan-to-value
               </a>
@@ -561,7 +573,7 @@ export default function InvestmentPropertyAppraisalPost() {
               walk — and let the contingency do the job you kept it for. Run
               the full picture — price, rent, financing, and the DSCR your
               lender will compute — through the{" "}
-              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="tc-link">
                 TrueCap analyzer
               </Link>{" "}
               before the appraisal is ordered, so the referee&apos;s number is
@@ -569,7 +581,7 @@ export default function InvestmentPropertyAppraisalPost() {
               DSCR tiers vary by lender and program — verify terms on your
               specific deal.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -633,13 +645,12 @@ export default function InvestmentPropertyAppraisalPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
