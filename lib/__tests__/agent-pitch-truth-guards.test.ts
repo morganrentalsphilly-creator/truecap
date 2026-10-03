@@ -143,7 +143,12 @@ describe("what the agent pitch says the client receives", () => {
     // The image is produced from the sample deal by the PDF generator, with
     // no branding, and the file the component points at exists.
     const script = read("scripts/render-pdf-cover-shot.ts");
-    expect(script).toContain("values: SAMPLE_DEAL_VALUES");
+    // The fixture's numbers with the customer-facing address label: the
+    // internal label is retired from customer copy (docs/voice.md), and the
+    // voice check cannot read inside an image.
+    expect(script).toContain("values: { ...SAMPLE_DEAL_VALUES, address: COVER_ADDRESS }");
+    expect(script).toContain('const COVER_ADDRESS = "Sample property, Philadelphia, PA 19140, USA"');
+    expect(script).not.toMatch(/Synthetic Sample/);
     expect(script).toContain("buildCanonicalReportData");
     expect(script).toContain('generateInvestmentPDFBlob(report, null, "personal")');
     expect(script).toContain("public/product/pdf-cover.webp");
