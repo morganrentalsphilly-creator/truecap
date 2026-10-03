@@ -16,15 +16,28 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -146,38 +159,36 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8 sm:mb-10">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · {READING_TIME_MIN} min read
-          </p>
-          <BlogByline />
-          <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            {DESCRIPTION}
-          </p>
-        </header>
+      <ArticleMain>
+        <article>
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              · {READING_TIME_MIN} min read
+            </p>
+            <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
+              {DESCRIPTION}
+            </p>
+          </header>
 
-        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+          <ArticleBody>
           <p>
             Gross yield, gross rent multiplier, and cap rate are three ways of
             quoting the exact same thing: how much income a building produces
@@ -193,7 +204,7 @@ export default function BlogPost() {
             identical gross yields sit 22% apart on cap rate.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">The three metrics, defined</h2>
+          <h2>The three metrics, defined</h2>
           <p>
             <strong>Gross yield</strong> is annual gross rent divided by
             purchase price. A property renting for $28,800 a year at a $250,000
@@ -213,7 +224,7 @@ export default function BlogPost() {
             It divides <em>net operating income</em> by price:{" "}
             <Link
               href="/blog/how-to-calculate-noi-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               NOI
             </Link>{" "}
@@ -222,18 +233,18 @@ export default function BlogPost() {
             Cap rate answers a question the other two can&apos;t: what does this
             building actually earn?
           </p>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-            <div className="text-sm sm:text-base font-mono">
-              <strong>Gross yield</strong> = annual rent ÷ price
-            </div>
-            <div className="text-sm sm:text-base font-mono mt-2">
-              <strong>GRM</strong> = price ÷ annual rent&nbsp;&nbsp;(= 1 ÷ gross
-              yield)
-            </div>
-            <div className="text-sm sm:text-base font-mono mt-2">
-              <strong>Cap rate</strong> = NOI ÷ price
-            </div>
-          </div>
+          <ToolFormula
+            formula={
+              <>
+                <span>Gross yield</span> = annual rent ÷ price
+                <br />
+                <span>GRM</span> = price ÷ annual rent&nbsp;&nbsp;(= 1 ÷ gross
+                yield)
+                <br />
+                <span>Cap rate</span> = NOI ÷ price
+              </>
+            }
+          />
           <p>
             One more piece of vocabulary before the math: international listings
             (UK, Australia, much of Europe) quote <strong>net yield</strong>,
@@ -244,7 +255,7 @@ export default function BlogPost() {
             between the two is{" "}
             <a
               href="https://www.census.gov/content/dam/Census/library/visualizations/2021/econ/2021-RHFS-Infographic-tagged.pdf"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               typically 40-50% of the number
             </a>
@@ -254,7 +265,7 @@ export default function BlogPost() {
             improvements.)
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">All three on one duplex</h2>
+          <h2>All three on one duplex</h2>
           <p>
             Take a $250,000 duplex renting for $1,200 a side — $2,400/month,
             $28,800 a year. The screening metrics take five seconds:
@@ -279,7 +290,7 @@ export default function BlogPost() {
             through the free{" "}
             <Link
               href="/analyze" prefetch={false}
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               TrueCap analyzer
             </Link>{" "}
@@ -293,21 +304,23 @@ export default function BlogPost() {
             and the 6.4% is the entire operating reality of the property.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">The bridge formula</h2>
+          <h2>The bridge formula</h2>
           <p>
             You can move between the gross quotes and the cap rate with one
             approximation:
           </p>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-            <div className="text-sm sm:text-base font-mono">
-              cap rate ≈ (1 − operating-expense ratio) × gross yield
-            </div>
-          </div>
+          <ToolFormula
+            formula={
+              <>
+                cap rate ≈ (1 − operating-expense ratio) × gross yield
+              </>
+            }
+          />
           <p>
             Check it against the duplex: (1 − 0.446) × 11.5% = 6.4%. Exact. The{" "}
             <Link
               href="/blog/50-percent-rule-rentals"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               50% rule
             </Link>{" "}
@@ -315,7 +328,7 @@ export default function BlogPost() {
             under half its collected rent on operating costs (in the{" "}
             <a
               href="https://www.census.gov/content/dam/Census/library/visualizations/2021/econ/2021-RHFS-Infographic-tagged.pdf"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Census/HUD 2021 Rental Housing Finance Survey
             </a>
@@ -327,28 +340,28 @@ export default function BlogPost() {
             roughly a 6% cap. It&apos;s triage math, not underwriting — but it
             converts any listing quote into any other in your head.
           </p>
-          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[560px] text-sm">
+          <ArticleTable label="Data table">
+            <table className="min-w-[560px]">
               <thead>
-                <tr className="border-b border-border bg-muted">
-                  <th className="text-left p-3 font-bold text-foreground">
+                <tr>
+                  <th>
                     Monthly rent ÷ price
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     Gross yield
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     GRM
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     Cap @ 50% expenses
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     Cap @ 40% expenses
                   </th>
                 </tr>
               </thead>
-              <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0 [&_td]:font-mono">
+              <tbody className="[&_td]:font-mono">
                 <tr>
                   <td>0.50%</td>
                   <td>6%</td>
@@ -393,7 +406,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </ScrollX>
+          </ArticleTable>
           <p>
             Read across any row and you&apos;re looking at one property quoted
             four ways. The familiar screening rules fall out of the table: the
@@ -402,14 +415,14 @@ export default function BlogPost() {
             different bars — the{" "}
             <Link
               href="/blog/2-percent-rule-vs-1-percent-rule"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               full comparison
             </Link>{" "}
             works that math.)
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Where the gross quotes lie: the identical-twin trap
           </h2>
           <p>
@@ -420,22 +433,22 @@ export default function BlogPost() {
             twin sits in a high-tax jurisdiction paying $7,200 a year instead of
             $3,750.
           </p>
-          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[560px] text-sm">
+          <ArticleTable label="Data table">
+            <table className="min-w-[560px]">
               <thead>
-                <tr className="border-b border-border bg-muted">
-                  <th className="text-left p-3 font-bold text-foreground">
+                <tr>
+                  <th>
                     Metric
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     Duplex A · low-tax
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     Duplex B · high-tax
                   </th>
                 </tr>
               </thead>
-              <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0 [&_td]:font-mono">
+              <tbody className="[&_td]:font-mono">
                 <tr>
                   <td>Gross yield</td>
                   <td>11.5%</td>
@@ -463,7 +476,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </ScrollX>
+          </ArticleTable>
           <p>
             Gross yield and GRM score these buildings as identical. The cap rate
             says Duplex B earns $3,450 a year less — a 22% haircut on NOI.
@@ -476,7 +489,7 @@ export default function BlogPost() {
             management entirely.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             So which metric should you use?
           </h2>
           <h3>Screening a list: GRM or gross yield</h3>
@@ -488,7 +501,7 @@ export default function BlogPost() {
             gross at{" "}
             <a
               href="https://fred.stlouisfed.org/series/MORTGAGE30US"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               today&apos;s ~7% mortgage rates
             </a>{" "}
@@ -497,14 +510,14 @@ export default function BlogPost() {
             The{" "}
             <Link
               href="/tools/gross-rent-multiplier-calculator"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               GRM calculator
             </Link>{" "}
             runs either direction, and the{" "}
             <Link
               href="/blog/gross-rent-multiplier-explained"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               GRM deep dive
             </Link>{" "}
@@ -520,7 +533,7 @@ export default function BlogPost() {
             by market and asset class;{" "}
             <Link
               href="/blog/what-is-a-good-cap-rate"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               our benchmarks post
             </Link>{" "}
@@ -537,7 +550,7 @@ export default function BlogPost() {
             enters, you graduate to cash-on-cash return and DSCR, which is{" "}
             <Link
               href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               its own three-way comparison
             </Link>
@@ -546,7 +559,7 @@ export default function BlogPost() {
             <em>your deal</em> on the building.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Three rules for reading quoted yields
           </h2>
           <p>
@@ -571,23 +584,17 @@ export default function BlogPost() {
             should buy it — at your rate, your down payment, your reserves — is
             a levered question the screening metrics were never built to answer.
           </p>
+          </ArticleBody>
 
-          <div className="not-prose"></div>
-
-          <h2 className="text-2xl sm:text-3xl">FAQ</h2>
-          {FAQS.map((f, i) => (
-            <details
-              key={i}
-              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
-            >
-              <summary className="cursor-pointer font-bold text-foreground">
-                {f.q}
-              </summary>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                {f.a}
-              </p>
-            </details>
-          ))}
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
         </article>
         <PostSources
           sources={[
@@ -606,32 +613,31 @@ export default function BlogPost() {
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <NewsletterSignup variant="expanded" source="blog" />
-        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Related:{" "}
             <Link
               href="/blog/gross-rent-multiplier-explained"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               Gross rent multiplier explained →
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/what-is-a-good-cap-rate"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               What is a good cap rate? →
             </Link>
           </p>
         </footer>
-      </main>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
