@@ -32,6 +32,10 @@ const GOOGLE_ADS_ID = "AW-8236119484";
  * the right behavior (no spurious events fired). */
 const LABELS: Record<ConversionKey, string | null> = {
   calc_completed: null, // e.g. "AbC_DeFgHi-jKlM_NoP"
+  // No label yet. When one is set: the only caller is the email sign-up form,
+  // at the same moment as the `signup_completed` site event, so it would
+  // count SUBMITTED email sign-ups (unconfirmed included) and no Google
+  // sign-ups. See lib/analytics/site-events.ts.
   signup: null, // e.g. "AbC_DeFgHi-jKlM_NoP"
   paid_subscribed: "BCFeCPrZlqwcEIri_9JD", // Purchase conversion (AW-8236119484)
   pdf_exported: null,
