@@ -22,6 +22,7 @@
  */
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import type { ListingImportMissingField } from "@/lib/hero-handoff";
 import { SUPPORTED_LISTING_SITES_TEXT } from "./supported-listing-sites";
@@ -44,6 +45,9 @@ type ListingLinkInputProps = {
   } | null;
   /** Continue at the first input the listing could not provide. */
   onFocusMissingField?: (path: string) => void;
+  /** The signed-in listing lookup was refused because the account has no
+   *  paid plan (free and trial accounts). Shown where the price is needed. */
+  priceLookupRefused?: boolean;
 };
 
 function formatMissingFields(fields: ListingImportMissingField[]) {
@@ -62,6 +66,7 @@ export function ListingLinkInput({
   onSubmit,
   importStatus,
   onFocusMissingField,
+  priceLookupRefused = false,
 }: ListingLinkInputProps) {
   const urlInputRef = useRef<HTMLInputElement | null>(null);
   // Focus follows the toggle, but ONLY on user-driven transitions (tracked
@@ -121,6 +126,21 @@ export function ListingLinkInput({
           Continue with {firstMissingField.label}
         </button>
       ) : null}
+      {priceLookupRefused ? (
+        <p
+          data-listing-lookup-refused=""
+          className="mt-2 text-xs leading-relaxed text-muted-foreground"
+        >
+          Filling the asking price and property facts from a listing link needs
+          a paid plan. On this account, type them in.{" "}
+          <Link
+            href="/pricing"
+            className="inline-flex min-h-11 items-center font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          >
+            See plans
+          </Link>
+        </p>
+      ) : null}
     </div>
   ) : null;
 
@@ -155,8 +175,8 @@ export function ListingLinkInput({
         className="mt-0.5 text-2xs text-muted-foreground"
       >
         {SUPPORTED_LISTING_SITES_TEXT}: TrueCap extracts the address. When
-        available, a signed-in lookup can also fill the active asking price and
-        property facts; other values remain labeled estimates. It never imports
+        available, a signed-in lookup on a paid plan can also fill the active
+        asking price and property facts; other values remain labeled estimates. It never imports
         listing photos, seller claims, or the actual tax bill. Review every
         value before relying on it.
       </p>
