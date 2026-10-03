@@ -12,12 +12,23 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Scale } from "lucide-react";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
@@ -137,38 +148,36 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8 sm:mb-10">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · {READING_TIME_MIN} min read
-          </p>
-          <BlogByline />
-          <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            {DESCRIPTION}
-          </p>
-        </header>
+      <ArticleMain>
+        <article>
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              · {READING_TIME_MIN} min read
+            </p>
+            <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
+              {DESCRIPTION}
+            </p>
+          </header>
 
-        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+          <ArticleBody>
           <p>
             &quot;Should I put my rental in an LLC?&quot; is probably the
             most-asked question new investors have after their first deal — and
@@ -180,7 +189,7 @@ export default function BlogPost() {
             loan-document issue that must be reviewed before recording a deed.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">What an LLC actually does</h2>
+          <h2>What an LLC actually does</h2>
           <p>
             An LLC can provide a <strong>liability-separation layer</strong>,
             but it does not guarantee that a claim stays inside the entity.
@@ -194,14 +203,14 @@ export default function BlogPost() {
             single-member LLC is, by default, a{" "}
             <a
               href="https://www.irs.gov/businesses/small-businesses-self-employed/single-member-limited-liability-companies"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               &quot;disregarded entity&quot;
             </a>{" "}
             for federal taxes — your rental income and expenses land on{" "}
             <Link
               href="/blog/schedule-e-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Schedule E
             </Link>{" "}
@@ -209,7 +218,7 @@ export default function BlogPost() {
             multi-member LLC, by default,{" "}
             <a
               href="https://www.irs.gov/businesses/small-businesses-self-employed/llc-filing-as-a-corporation-or-partnership"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               files a partnership return
             </a>{" "}
@@ -217,7 +226,7 @@ export default function BlogPost() {
             LLC-specific tax cut — the{" "}
             <Link
               href="/blog/rental-property-tax-deductions"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               deductions
             </Link>{" "}
@@ -225,7 +234,7 @@ export default function BlogPost() {
             is selling something.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             The due-on-sale trap (read this before you transfer anything)
           </h2>
           <p>
@@ -241,7 +250,7 @@ export default function BlogPost() {
             The federal <strong>Garn-St. Germain Act</strong>{" "}
             <a
               href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title12-section1701j-3&num=0&edition=prelim"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               protects a list of transfers
             </a>{" "}
@@ -249,7 +258,7 @@ export default function BlogPost() {
             into a living trust. But{" "}
             <a
               href="https://www.ecfr.gov/current/title-12/chapter-I/part-191/section-191.5"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               the federal regulation
             </a>{" "}
@@ -282,21 +291,21 @@ export default function BlogPost() {
             </li>
           </ul>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Financing changes inside an LLC
           </h2>
           <p>
             Conventional loans sold to Fannie Mae{" "}
             <a
               href="https://selling-guide.fanniemae.com/sel/b2-2-01/general-borrower-eligibility-requirements"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               go to individuals, not LLCs
             </a>
             . To hold title in an LLC you generally use a{" "}
             <Link
               href="/blog/how-to-calculate-dscr#dscr-loans"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               DSCR loan
             </Link>
@@ -307,7 +316,7 @@ export default function BlogPost() {
             transferring later.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             The 2026 Corporate Transparency Act reversal
           </h2>
           <p>
@@ -317,14 +326,14 @@ export default function BlogPost() {
             FinCEN. That changed. A FinCEN{" "}
             <a
               href="https://www.federalregister.gov/documents/2025/03/26/2025-05199/beneficial-ownership-information-reporting-requirement-revision-and-deadline-extension"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               interim final rule issued in <strong>March 2025</strong>
             </a>
             ,{" "}
             <a
               href="https://www.federalregister.gov/documents/2026/08/14/2026-16576/beneficial-ownership-information-reporting-requirement-revision"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               made final in a rule effective August 14, 2026
             </a>
@@ -340,7 +349,7 @@ export default function BlogPost() {
             states have their own rules.{" "}
             <a
               href="https://dos.ny.gov/beneficial-owner-disclosure"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               New York&apos;s LLC disclosure law
             </a>
@@ -350,19 +359,19 @@ export default function BlogPost() {
             — which is exactly why most older articles on it are now wrong.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Anonymity and structure</h2>
+          <h2>Anonymity and structure</h2>
           <p>
             A few states,{" "}
             <a
               href="https://sos.wyo.gov/Forms/WyoBiz/Wyoming_Limited_Liability_Company_Act_and_Close_LLC_Supplement.pdf"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Wyoming
             </a>{" "}
             and{" "}
             <a
               href="https://delcode.delaware.gov/title6/c018/sc02/index.html"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Delaware
             </a>{" "}
@@ -375,13 +384,13 @@ export default function BlogPost() {
             portfolios; overkill for a first duplex.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">The cost and the discipline</h2>
+          <h2>The cost and the discipline</h2>
           <p>
             An LLC isn&apos;t free or zero-maintenance: formation fees, annual
             report/franchise fees (California&apos;s{" "}
             <a
               href="https://www.ftb.ca.gov/file/business/types/limited-liability-company/index.html"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               $800/yr minimum
             </a>{" "}
@@ -393,7 +402,7 @@ export default function BlogPost() {
             argument, depending on state law and the facts.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">So when is it worth it?</h2>
+          <h2>So when is it worth it?</h2>
           <p>A reasonable framework:</p>
           <ul>
             <li>
@@ -413,7 +422,7 @@ export default function BlogPost() {
             Think of it as layers: your first line of defense is a solid{" "}
             <Link
               href="/blog/rental-property-insurance"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               landlord and umbrella insurance
             </Link>{" "}
@@ -422,15 +431,13 @@ export default function BlogPost() {
             with qualified local professionals.
           </p>
 
-          <div className="not-prose"></div>
-
           <p>
             Your ownership structure doesn&apos;t change whether a property is a
             good deal — but the financing it forces (DSCR vs conventional) does.
             Run the numbers in{" "}
             <Link
               href="/"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               TrueCap
             </Link>{" "}
@@ -438,35 +445,32 @@ export default function BlogPost() {
             LLC-held property shows up in your cash flow and{" "}
             <Link
               href="/glossary/dscr"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               DSCR
             </Link>{" "}
             before you commit.
           </p>
+          </ArticleBody>
 
-          <h2 className="text-2xl sm:text-3xl">FAQ</h2>
-          {FAQS.map((f, i) => (
-            <details
-              key={i}
-              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
-            >
-              <summary className="cursor-pointer font-bold text-foreground">
-                {f.q}
-              </summary>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                {f.a}
-              </p>
-            </details>
-          ))}
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
 
+          <ArticleBody className="mt-10">
           <p className="text-sm text-muted-foreground">
-            <Scale className="inline w-4 h-4 mr-1 align-text-bottom" />
             General educational information, not legal or tax advice. Entity
             choice, asset-protection law, and reporting rules vary by state and
             change often — work with a qualified attorney and CPA for your
             situation.
           </p>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -519,39 +523,38 @@ export default function BlogPost() {
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <NewsletterSignup variant="expanded" source="blog" />
-        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Related:{" "}
             <Link
               href="/blog/rental-property-insurance"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               Rental property insurance →
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/schedule-e-rental-property"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               Schedule E walkthrough →
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/how-to-calculate-dscr#dscr-loans"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               DSCR loans explained →
             </Link>
           </p>
         </footer>
-      </main>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
