@@ -531,6 +531,7 @@ a screenshot:
                                  │ Offer Ceiling                        $236,000
  Buying for your own portfolio? Same analyzer, your own Buy Box. For investors
  [ Address or listing link ][Analyze a deal free]                    ════════
+ A listing link fills in the address. You enter the asking price and bedrooms; …
  See the sample deal             │ $29,000 below asking. Binding target: cash flow ≥ $750/mo.
  Free. No account. Your first full decision is included.
 ```
@@ -552,6 +553,11 @@ a screenshot:
   figure and ends "Send it co-branded with Pro." The arrow suffixes go ("See the sample deal", "For
   investors"). The ledger's caption calls it the sample deal, never
   "synthetic" (`docs/voice.md` bans that word as internal vocabulary).
+  One line sits after the form and before the sample link in the hero
+  placement (`HERO_LISTING_EXPECTATION` in
+  `components/marketing/hero-address-form.tsx`, founder answer 17,
+  2026-10-03): it says a listing link fills in the address only. It is
+  outside the form, so it cannot move the field or the button.
 - **Implementation:** a server render of the real sample-deal calculation at
   build time. The page calls `calculateSampleDealOutcome()` (the same
   `calculateAnalysis` and `calculateMaxAllowableOffer` the app uses) and renders
