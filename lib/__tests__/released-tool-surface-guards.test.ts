@@ -157,7 +157,10 @@ describe("tool social cards say only what the tool does", () => {
     // amount is fixed text. A card saying "Editable ... Replace each line
     // with your own bid" promised a control the page does not have.
     const page = read("app/tools/rehab-cost-estimator/page.tsx");
-    expect(page).toContain("<RehabEstimatorCard />");
+    // The page mounts the card in its "tool" rendering (the calculator
+    // template); the variant changes the markup, not the inputs: it takes no
+    // other prop, so no per-item amount reaches the estimator from here.
+    expect(page).toContain('<RehabEstimatorCard variant="tool" />');
     // Code only: the estimator's header comment mentions overrides it does
     // not implement, and the card's own comment explains this rule.
     const code = (path: string) =>
@@ -235,7 +238,7 @@ describe("copy about the rehab estimator matches its controls", () => {
   });
 
   it("the estimator's own surfaces do not call its defaults or lines editable", () => {
-    expect(read("app/tools/rehab-cost-estimator/page.tsx")).toContain("<RehabEstimatorCard />");
+    expect(read("app/tools/rehab-cost-estimator/page.tsx")).toContain('<RehabEstimatorCard variant="tool" />');
     if (takesPerLineAmounts()) return;
     for (const file of [
       CARD,

@@ -1,11 +1,34 @@
+/**
+ * /tools/rehab-cost-estimator, on the calculator page template (DESIGN.md
+ * "Components"; the 1% rule calculator is the reference). The estimator sits
+ * beside the H1 in PageHero: it is the card the signed-in analyzer also
+ * mounts, in its "tool" rendering (the analyzer keeps the default). The guide
+ * runs in a 68ch reading column (ArticleBody), the FAQ is ruled rows
+ * (FaqSection; the page keeps its own FAQPage node), and the page closes once
+ * on the heavy rule (CloseSection).
+ */
+
 import type { Metadata } from "next";
 import Link from "next/link";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
-import { ArrowUpRight, Check } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
 import { RehabEstimatorCard } from "@/components/investcalc/rehab-estimator-card";
 import { ToolsConversionCta } from "@/components/marketing/tools-conversion-cta";
 import { ToolEmbedInvite } from "@/components/marketing/tool-embed-invite";
+import {
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ArticleBody,
+} from "@/components/marketing/article";
+import { FaqSection } from "@/components/marketing/faq-section";
+import {
+  ActionRow,
+  CloseSection,
+  PageHero,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/page-parts";
+import { Section } from "@/components/marketing/section";
+import { buttonVariants } from "@/components/ui/button";
 
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { ToolBreadcrumbSchema } from "@/components/marketing/tool-breadcrumb-schema";
@@ -87,40 +110,42 @@ export default function RehabEstimatorPage() {
   });
 
   return (
-    <>
+    // relative + overflow-x-clip, as on the homepage: clips any sideways bleed
+    // from a descendant without making a scroll container (sticky header ok).
+    <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
       <ToolBreadcrumbSchema toolPath="/tools/rehab-cost-estimator" toolName="Rehab cost estimator" />
       <JsonLd data={faqLd} />
       <JsonLd data={appLd} />
 
-      <div className="min-h-screen bg-background">
-        <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-          <header className="mb-6 sm:mb-8">
-            <IntentPrefetchLink href="/tools" className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground">
-              ← Free tools
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        {/* The estimator in the first screen: from 1024px it sits beside the
+            H1. The hub link is the visible half of the breadcrumb schema and
+            sits under the H1, never above it. The hero's action is the one
+            short analyzer link under the H1 (P2-80). */}
+        <PageHero
+          title="Rehab cost estimator"
+          lede="Planning defaults for common rehab work items: interior paint and flooring by the square foot, baths per bath, and kitchens, roofs, HVAC, electrical and plumbing as flat amounts. Switch items on or off and set the square footage, bath count and contingency. Use it for early scope and budget triage before committing to detailed contractor bids."
+          actions={<UnderTitleAnalyzeLink />}
+          aside={<RehabEstimatorCard variant="tool" />}
+        >
+          <p className={ARTICLE_META}>
+            <IntentPrefetchLink href="/tools" className={ARTICLE_META_LINK}>
+              Free tools
             </IntentPrefetchLink>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight">
-              Rehab Cost Estimator
-            </h1>
-            <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
-              Planning defaults for common rehab work items: interior paint
-              and flooring by the square foot, baths per bath, and kitchens,
-              roofs, HVAC, electrical and plumbing as flat amounts. Switch
-              items on or off and set the square footage, bath count and
-              contingency. Use it for early scope and budget triage before
-              committing to detailed contractor bids.
-            </p>
-          </header>
+          </p>
+        </PageHero>
 
-          <RehabEstimatorCard />
-
-          <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] mt-10 sm:mt-12 [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground">
+        {/* rule="none": PageHero's bottom rule already separates the head. */}
+        <Section rule="none">
+          <article className="max-w-[68ch]">
+            <ArticleBody>
             <p>
               <strong>Educational guide:</strong> This page estimates renovation
               scope only. TrueCap does not currently expose integrated flip or
               BRRRR lifecycle modeling.
             </p>
-            <h2 className="text-2xl sm:text-3xl">Why an estimator at all?</h2>
+            <h2>Why an estimator at all?</h2>
             <p>
               You can&apos;t screen a property that needs work without a renovation
               number. You also can&apos;t get a real contractor bid on every
@@ -135,10 +160,10 @@ export default function RehabEstimatorPage() {
               percentage (10-20% is common) and you have a directional planning
               figure to screen with — replace it with local contractor bids
               before you commit. For how these defaults are built, read{" "}
-              <IntentPrefetchLink href="/blog/how-to-estimate-rehab-costs" className="font-semibold text-primary hover:underline">how to estimate rehab costs</IntentPrefetchLink>.
+              <IntentPrefetchLink href="/blog/how-to-estimate-rehab-costs" className="tc-link">how to estimate rehab costs</IntentPrefetchLink>.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">How to use the estimator</h2>
+            <h2>How to use the estimator</h2>
             <ol>
               <li>
                 <strong>Set the sqft and bath count.</strong> Defaults to
@@ -159,11 +184,11 @@ export default function RehabEstimatorPage() {
                 Carry the total into your own project ledger; TrueCap does
                 not currently offer integrated BRRRR or fix-and-flip models.
                 New to the strategy? Start with{" "}
-                <IntentPrefetchLink href="/blog/brrrr-method-explained" className="font-semibold text-primary hover:underline">the BRRRR method explained</IntentPrefetchLink>.
+                <IntentPrefetchLink href="/blog/brrrr-method-explained" className="tc-link">the BRRRR method explained</IntentPrefetchLink>.
               </li>
             </ol>
 
-            <h2 className="text-2xl sm:text-3xl">Cost categories explained</h2>
+            <h2>Cost categories explained</h2>
             <h3>Cosmetic ($3-15/sqft)</h3>
             <p>
               The cheap stuff that makes a rental show well: interior paint,
@@ -198,7 +223,7 @@ export default function RehabEstimatorPage() {
               one structural surprise.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">Common rehab budgeting mistakes</h2>
+            <h2>Common rehab budgeting mistakes</h2>
             <h3>1. Skipping contingency</h3>
             <p>
               Every rehab has at least one surprise. Plumbing was wrong, the
@@ -227,62 +252,77 @@ export default function RehabEstimatorPage() {
               market and the contractor.
             </p>
 
-            <h2 className="text-2xl sm:text-3xl">Frequently asked questions</h2>
-            <div className="space-y-4">
-              {FAQS.map((f) => (
-                <details key={f.q} className="bg-card border border-border rounded-lg p-4 group">
-                  <summary className="font-semibold text-foreground cursor-pointer list-none flex items-start justify-between gap-3">
-                    <span>{f.q}</span>
-                    <span className="text-muted-foreground text-xl leading-none group-open:rotate-45 transition-transform">+</span>
-                  </summary>
-                  <p className="text-sm text-muted-foreground leading-relaxed mt-3">{f.a}</p>
-                </details>
-              ))}
-            </div>
-          </article>
+            </ArticleBody>
 
-          <section className="mt-10 sm:mt-12 rounded-2xl bg-primary text-primary-foreground p-6 sm:p-8">
-            <h2 className="text-xl sm:text-2xl font-extrabold mb-2">Carry the estimate into a reviewed project ledger</h2>
-            <p className="text-sm sm:text-base opacity-90 mb-4">
+            {/* The analyzer CTA where the guide hands off to TrueCap, inside
+                the article, so the page closes once, on the CloseSection
+                below. */}
+            <ToolsConversionCta calculatorName="Rehab estimator" hook="Use the rental analyzer to screen a stabilized hold after renovation, and keep construction-period contributions, financing, and sale or refinance costs in a separate project ledger." />
+
+            {/* The page's FAQPage node is faqLd above, built from the same
+                FAQS, so the section emits none of its own. */}
+            <FaqSection
+              id="rehab-faq"
+              variant="inline"
+              heading="Frequently asked questions"
+              items={FAQS}
+              structuredData={false}
+            />
+          </article>
+        </Section>
+
+        <CloseSection
+          heading="Carry the estimate into a reviewed project ledger"
+          headingId="rehab-close-heading"
+          lede={
+            <>
               The rehab number is one input. Keep acquisition financing,
               construction carry, draws, lease-up, refinance or sale proceeds,
               and every capital contribution in a separate dated ledger. Use
               TrueCap&apos;s analyzer only for the stabilized rental case.
-            </p>
-            <ul className="text-sm space-y-1.5 mb-5 opacity-90">
-              {[
-                "Line-item rehab range by scope of work",
-                "Separate dated ledger for construction-period cash flows",
-                "Contractor bids and contingency replace the early estimate",
-                "Stabilized-rental screen after renovation",
-                "Free to start",
-              ].map((line) => (
-                <li key={line} className="flex items-start gap-2">
-                  <Check className="w-4 h-4 mt-0.5 shrink-0" />
-                  <span>{line}</span>
-                </li>
-              ))}
-            </ul>
-            <Link href="/analyze" prefetch={false} className="inline-flex items-center gap-2 bg-primary-foreground text-primary px-4 py-2.5 rounded-xl font-bold hover:opacity-90 transition-opacity">
-              Open the rental analyzer
-              <ArrowUpRight className="w-4 h-4" />
-            </Link>
-          </section>
+            </>
+          }
+          actions={
+            <>
+              <ul className="border-t-2 border-foreground">
+                {[
+                  "Line-item rehab range by scope of work",
+                  "Separate dated ledger for construction-period cash flows",
+                  "Contractor bids and contingency replace the early estimate",
+                  "Stabilized-rental screen after renovation",
+                  "Free to start",
+                ].map((line) => (
+                  <li
+                    key={line}
+                    className="border-b border-rule-soft py-3 text-pretty text-base"
+                  >
+                    {line}
+                  </li>
+                ))}
+              </ul>
+              <ActionRow className="mt-6">
+                <Link href="/analyze" prefetch={false} className={buttonVariants({ size: "cta" })}>
+                  Open the rental analyzer
+                </Link>
+              </ActionRow>
+            </>
+          }
+        />
 
-          {/* Backlink engine — quiet, collapsed, renders nothing if this
+        {/* The tail shares the reading column. Each block spaces itself from
+            the one above (mt-12); the first one, directly under the close,
+            takes the close's own bottom space instead. */}
+        <Section rule="none" rhythm="tight" containerClassName="pt-0 sm:pt-0">
+          <div className="max-w-[68ch] [&>*:first-child]:mt-0">
+            {/* Backlink engine — quiet, collapsed, renders nothing if this
+                tool has no embeddable widget. See the component header. */}
+            <ToolEmbedInvite slug="rehab-cost-estimator" />
 
-              tool has no embeddable widget. See the component header. */}
-
-          <ToolEmbedInvite slug="rehab-cost-estimator" />
-
-
-          <ToolsConversionCta calculatorName="Rehab estimator" hook="Use the rental analyzer to screen a stabilized hold after renovation, and keep construction-period contributions, financing, and sale or refinance costs in a separate project ledger." />
-
-          <RelatedContent kind="tool" slug="rehab-cost-estimator" title="Rehab Cost Estimator" className="mt-10" />
-
-        </main>
-        <SiteFooter />
-      </div>
-    </>
+            <RelatedContent kind="tool" slug="rehab-cost-estimator" title="Rehab Cost Estimator" className="mt-12" />
+          </div>
+        </Section>
+      </main>
+      <SiteFooter />
+    </div>
   );
 }
