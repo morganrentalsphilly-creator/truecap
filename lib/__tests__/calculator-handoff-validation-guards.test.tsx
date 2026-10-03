@@ -351,7 +351,15 @@ describe("P2-48: the ARV and 70% rule calculators reject negative and absurd inp
   ])("%s withholds the result while a field is in error and never prints a negative price", (path) => {
     const source = code(path);
     expect(source).toContain("if (hasErrors) return null;");
-    expect(source).toContain('role="alert"');
+    // The error line is announced. A widget on the calculator parts hands
+    // each field's message to the shared ToolNumberField, which prints it
+    // with role="alert"; a widget with its own fields prints it itself.
+    if (source.includes("ToolNumberField")) {
+      expect(source).toMatch(/\berror=\{errors\.\w+\}/);
+      expect(code("components/tools/tool-number-field.tsx")).toContain('role="alert"');
+    } else {
+      expect(source).toContain('role="alert"');
+    }
     expect(source).toContain('role="status"');
     // The rule's own "no price" case (repairs above the allowance) shows the
     // placeholder beside the sentence that explains it, not "-$722,044".

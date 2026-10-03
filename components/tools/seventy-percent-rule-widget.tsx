@@ -15,14 +15,27 @@
  * expensive light-rehab houses can justify 72-75%. The contextual
  * warnings reuse the same thresholds as the ARV widget so the two
  * pages never disagree about the same deal.
+ *
+ * Set on the calculator parts (components/tools/tool-parts.tsx), like the 1%
+ * rule widget: the frame opens on the 2px ink rule with no card, the fields
+ * are the shared ToolNumberField, the price screen is the key figure in DM
+ * Mono over the double rule, in ink, and the ladder is rows on rules. Only a
+ * warning takes the caution color. The frame's grid reads its own width
+ * (@container), so the widget lays out the same in the tool page's hero
+ * column and in the /embed iframe.
  */
 
 import { useMemo, useState } from "react";
 import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
+import {
+  LedgerFigure,
+  LedgerTotal,
+  LedgerVerdict,
+} from "@/components/ledger/ledger-parts";
+import { ToolNumberField } from "@/components/tools/tool-number-field";
+import { ToolFrame } from "@/components/tools/tool-parts";
 import { buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 import { computeRuleMaxOffer } from "@/components/tools/max-offer-math";
@@ -41,8 +54,9 @@ const fmt = (n: number) =>
 
 // What the fields accept, as on the ARV calculator (the two widgets share the
 // rule's arithmetic). A negative or out-of-range value gets a visible,
-// announced error under its field and the result is withheld; the arithmetic
-// is unchanged for every value inside these bounds.
+// announced error under its field (ToolNumberField: aria-invalid, and the
+// message with role="alert") and the result is withheld; the arithmetic is
+// unchanged for every value inside these bounds.
 const PRICE_MAX = 100_000_000;
 
 /** Blank is not an error: no ARV yet shows the empty state, blank repairs are $0. */
@@ -51,16 +65,6 @@ const optionalFieldError = (
   bounds: ToolNumberBounds,
 ): string | null =>
   raw.trim() === "" ? null : validateToolNumber(raw, bounds).error;
-
-/** The error line under a field; role="alert" so it is read when it appears. */
-function FieldError({ id, error }: { id: string; error: string | null }) {
-  if (!error) return null;
-  return (
-    <p id={id} role="alert" className="mt-1.5 text-sm text-destructive-text">
-      {error}
-    </p>
-  );
-}
 
 export type SeventyPercentRuleRawInputs = {
   arv: string;
@@ -135,49 +139,35 @@ export function SeventyPercentRuleWidget() {
   );
 
   return (
-    <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-7">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+    // The page and the /embed iframe both show an H1 naming the calculator,
+    // so the widget's own heading is for the outline only.
+    <ToolFrame aria-labelledby="seventypct-heading">
+      <h2 id="seventypct-heading" className="sr-only">
+        70% rule calculator
+      </h2>
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-x-8 gap-y-6 @lg:grid-cols-2">
         {/* Inputs */}
-        <div className="space-y-4">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-            70% Rule Calculator
-          </h2>
-
+        <div className="min-w-0 space-y-5">
           <div>
-            <Label
-              htmlFor="seventypct-arv"
-              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
-            >
-              After-repair value (ARV)
-            </Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                $
-              </span>
-              <Input
-                id="seventypct-arv"
-                type="number"
-                inputMode="numeric"
-                min={0}
-                max={PRICE_MAX}
-                value={arv}
-                onChange={(e) => setArv(e.target.value)}
-                aria-invalid={errors.arv ? true : undefined}
-                aria-describedby={errors.arv ? "seventypct-arv-error" : undefined}
-                className={cn(
-                  "pl-7 border-input bg-background",
-                  errors.arv && "border-destructive",
-                )}
-              />
-            </div>
-            <FieldError id="seventypct-arv-error" error={errors.arv} />
-            <p className="text-xs text-muted-foreground mt-1.5">
+            <ToolNumberField
+              id="seventypct-arv"
+              label="After-repair value (ARV)"
+              prefix="$"
+              min={0}
+              max={PRICE_MAX}
+              value={arv}
+              onChange={(e) => setArv(e.target.value)}
+              error={errors.arv}
+            />
+            {/* Under the field, not in its hint slot: the line carries a
+                link, and the field's hint takes a string. */}
+            <p className="mt-1.5 text-pretty text-sm text-muted-foreground">
               What the property sells for <em>after</em> the rehab. Don&apos;t
               have it? Build it from sold comps with the{" "}
               <IntentPrefetchLink
                 href="/tools/arv-calculator"
                 target="_top"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 ARV calculator
               </IntentPrefetchLink>
@@ -185,73 +175,30 @@ export function SeventyPercentRuleWidget() {
             </p>
           </div>
 
-          <div>
-            <Label
-              htmlFor="seventypct-repairs"
-              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
-            >
-              Repair costs
-            </Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                $
-              </span>
-              <Input
-                id="seventypct-repairs"
-                type="number"
-                inputMode="numeric"
-                min={0}
-                max={PRICE_MAX}
-                value={repairs}
-                onChange={(e) => setRepairs(e.target.value)}
-                aria-invalid={errors.repairs ? true : undefined}
-                aria-describedby={
-                  errors.repairs ? "seventypct-repairs-error" : undefined
-                }
-                className={cn(
-                  "pl-7 border-input bg-background",
-                  errors.repairs && "border-destructive",
-                )}
-              />
-            </div>
-            <FieldError id="seventypct-repairs-error" error={errors.repairs} />
-          </div>
+          <ToolNumberField
+            id="seventypct-repairs"
+            label="Repair costs"
+            prefix="$"
+            min={0}
+            max={PRICE_MAX}
+            value={repairs}
+            onChange={(e) => setRepairs(e.target.value)}
+            error={errors.repairs}
+          />
 
           <div>
-            <Label
-              htmlFor="seventypct-multiplier"
-              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1 block"
-            >
-              Rule multiplier
-            </Label>
-            <div className="relative">
-              <Input
-                id="seventypct-multiplier"
-                type="number"
-                inputMode="decimal"
-                step="1"
-                min={0}
-                max={100}
-                value={multiplier}
-                onChange={(e) => setMultiplier(e.target.value)}
-                aria-invalid={errors.multiplier ? true : undefined}
-                aria-describedby={
-                  errors.multiplier ? "seventypct-multiplier-error" : undefined
-                }
-                className={cn(
-                  "pr-8 border-input bg-background",
-                  errors.multiplier && "border-destructive",
-                )}
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-                %
-              </span>
-            </div>
-            <FieldError
-              id="seventypct-multiplier-error"
+            <ToolNumberField
+              id="seventypct-multiplier"
+              label="Rule multiplier"
+              suffix="%"
+              min={0}
+              max={100}
+              step={1}
+              value={multiplier}
+              onChange={(e) => setMultiplier(e.target.value)}
               error={errors.multiplier}
             />
-            <p className="text-xs text-muted-foreground mt-1.5">
+            <p className="mt-1.5 text-pretty text-sm text-muted-foreground">
               70% is the classic center. Cheap houses (&lt;~$150k ARV) push
               toward 60&ndash;65%; expensive houses with light rehabs can
               justify 72&ndash;75%.
@@ -259,10 +206,12 @@ export function SeventyPercentRuleWidget() {
           </div>
         </div>
 
-        {/* Output */}
-        <div className="bg-[var(--background)] rounded-xl border border-border p-5 sm:p-6 flex flex-col justify-between">
+        {/* Output: on one column it opens on the rule under the fields. */}
+        <div className="min-w-0 border-t border-border pt-5 @lg:border-t-0 @lg:pt-0">
           {/* One polite status line when the result changes, for screen
-              readers; the visible figures below stay as they were. */}
+              readers; the visible figures below stay as they were. The
+              figure block is therefore not ToolResult, whose own live
+              region would read the result a second time. */}
           <span
             className="sr-only"
             role="status"
@@ -278,94 +227,101 @@ export function SeventyPercentRuleWidget() {
                   : "No feasible price screen at this multiplier."}
           </span>
           {hasErrors ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-pretty text-base leading-relaxed text-muted-foreground">
               Fix the highlighted inputs to calculate the price screen.
             </p>
           ) : result === null ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-pretty text-base leading-relaxed text-muted-foreground">
               Enter the after-repair value to see the 70%-rule price screen.
             </p>
           ) : (
             <>
-              <div>
-                <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  70%-rule price screen ({result.mult}%)
-                </div>
-                <div
-                  className={cn(
-                    "font-mono text-4xl sm:text-5xl font-extrabold mt-1 tabular-nums",
-                    result.mao > 0
-                      ? "text-[var(--metric-positive)]"
-                      : "text-[var(--metric-negative)]",
-                  )}
-                >
+              <p className="text-sm leading-snug font-semibold text-foreground">
+                70%-rule price screen ({result.mult}%)
+              </p>
+              {/* The key figure in DM Mono over the double rule, in ink: a
+                  price screen is not a pass or a miss, so it takes no color.
+                  The color sits on the line, not on LedgerTotal (see
+                  ToolResult). */}
+              <p
+                className={cn(
+                  "mt-3 wrap-anywhere",
+                  result.mao > 0 ? "text-foreground" : "text-muted-foreground",
+                )}
+              >
+                <LedgerTotal className="text-key-sm sm:text-key">
                   {/* No price when repairs use up the whole allowance: the
                       sentence below says so, and the figure is a placeholder,
                       never a negative price. */}
                   {result.mao > 0 ? fmt(result.mao) : "—"}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {result.mult}% of ARV − repairs, rounded down to a $500 step.
-                </p>
-              </div>
+                </LedgerTotal>
+              </p>
+              <p className="mt-4 text-pretty text-sm text-muted-foreground">
+                {result.mult}% of ARV − repairs, rounded down to a $500 step.
+              </p>
 
               {result.mao <= 0 ? (
-                <p className="text-xs font-semibold text-[var(--metric-negative)] mt-4">
-                  At this multiplier the repairs consume the entire allowable
-                  price — the rule produces no feasible price screen for this
-                  deal as entered.
+                <p className="mt-2 max-w-[46ch] text-pretty text-base leading-relaxed">
+                  <LedgerVerdict pass={false}>
+                    At this multiplier the repairs consume the entire allowable
+                    price — the rule produces no feasible price screen for this
+                    deal as entered.
+                  </LedgerVerdict>
                 </p>
               ) : (
-                <p className="text-xs text-muted-foreground mt-4">
+                <p className="mt-2 max-w-[46ch] text-pretty text-base leading-relaxed text-muted-foreground">
                   The {fmt(result.spread)} between your all-in cost and the
                   resale price is{" "}
-                  <strong className="text-foreground">not all profit</strong> —
+                  <strong className="font-semibold text-foreground">not all profit</strong> —
                   buying, holding, and selling costs come out first.
                 </p>
               )}
 
               {result.mao > 0 && result.arv < 150_000 && (
-                <p className="text-xs font-semibold text-caution-text mt-3">
-                  Sub-$150k ARV: fixed costs (title, permits, utilities,
-                  insurance) eat a big share of a small spread — many flippers
-                  drop the multiplier to 60&ndash;65% here.
+                <p className="mt-3 max-w-[46ch] text-pretty text-sm">
+                  <LedgerVerdict pass={false}>
+                    Sub-$150k ARV: fixed costs (title, permits, utilities,
+                    insurance) eat a big share of a small spread — many flippers
+                    drop the multiplier to 60&ndash;65% here.
+                  </LedgerVerdict>
                 </p>
               )}
               {result.mao > 0 && result.arv > 600_000 && (
-                <p className="text-xs font-semibold text-muted-foreground mt-3">
+                <p className="mt-3 max-w-[46ch] text-pretty text-sm font-semibold text-muted-foreground">
                   $600k+ ARV with a light rehab can justify 72&ndash;75% — but a
                   thinner margin needs a tighter rehab number and a faster exit.
                 </p>
               )}
 
-              <div className="text-xs mt-5 pt-4 border-t border-border">
-                <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
+              {/* The ladder on rules: the label opens it, each multiplier is
+                  a row, the figures in DM Mono so they compare down the
+                  column. The chosen multiplier's row is the one in 600. */}
+              <div className="mt-6">
+                <p className="border-b border-border pb-2 text-sm font-semibold text-foreground">
                   Price screen at other multipliers
-                </div>
+                </p>
                 {result.ladder.map((step) => (
                   <div
                     key={step.pct}
-                    className="flex justify-between py-0.5 gap-3"
+                    className="flex justify-between gap-3 border-b border-rule-soft py-2 text-sm"
                   >
                     <span
                       className={cn(
                         step.pct === result.mult
-                          ? "font-bold text-foreground"
+                          ? "font-semibold text-foreground"
                           : "text-muted-foreground",
                       )}
                     >
                       {step.pct}% of ARV
                     </span>
-                    <span
+                    <LedgerFigure
                       className={cn(
-                        "tabular-nums shrink-0",
-                        step.pct === result.mult
-                          ? "font-bold text-foreground"
-                          : "text-foreground",
+                        "shrink-0 text-foreground",
+                        step.pct === result.mult && "font-semibold",
                       )}
                     >
                       {step.mao > 0 ? fmt(step.mao) : "no feasible ceiling"}
-                    </span>
+                    </LedgerFigure>
                   </div>
                 ))}
               </div>
@@ -393,6 +349,6 @@ export function SeventyPercentRuleWidget() {
         The 70%-rule price screen is a rule of thumb and does not carry over.
         Enter the price you are evaluating.
       </p>
-    </div>
+    </ToolFrame>
   );
 }
