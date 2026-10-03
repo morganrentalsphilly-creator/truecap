@@ -179,7 +179,7 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             <p className={ARTICLE_LEDE}>{DESCRIPTION}</p>
           </header>
 
-          <Note title="TL;DR">
+          <Note title="TL;DR" titleAs="h2">
             <p>
               All three now overlap during acquisition.{" "}
               <strong>DealCheck</strong> and <strong>TrueCap</strong> are

@@ -166,7 +166,7 @@ export default function ThreeWayComparisonPost() {
             <p className={ARTICLE_LEDE}>{DESCRIPTION}</p>
           </header>
 
-          <Note title="TL;DR">
+          <Note title="TL;DR" titleAs="h2">
             <p>
               <strong>Stessa</strong> now spans acquisition and operations: its{" "}
               <a href="https://www.stessa.com/investment-property-marketplace/" className="tc-link">

@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { Children, isValidElement, type ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -47,6 +47,24 @@ describe("page parts", () => {
     expect(html).toContain(`${NOTE_OPEN}">`);
     expect(html).not.toContain("border-t-2");
     expect(html).toContain('<div class="text-pretty text-base leading-relaxed text-muted-foreground mt-1">Body</div>');
+  });
+
+  it("sets a Note's title as a paragraph by default and as a heading on request, with the same classes", () => {
+    expect(renderToStaticMarkup(<Note title="Boundary.">Body</Note>)).toContain('<p class="text-base font-semibold">Boundary.</p>');
+    const heading = renderToStaticMarkup(<Note title="Quick answer" titleAs="h2">Body</Note>);
+    expect(heading).toContain('<h2 class="text-base font-semibold">Quick answer</h2>');
+    expect(heading).not.toContain("<p ");
+    // Only the title's element differs.
+    expect(heading.replace(/<(\/?)h2/g, "<$1p")).toBe(renderToStaticMarkup(<Note title="Quick answer">Body</Note>));
+    // The 13 comparison posts whose note opens the post ("Quick answer",
+    // "TL;DR") were headings before the article frame; they are again.
+    const posts = readdirSync(join(process.cwd(), "app/blog"), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => `app/blog/${entry.name}/page.tsx`)
+      .filter((path) => existsSync(join(process.cwd(), path)));
+    const mounts = posts.flatMap((path) => read(path).match(/<Note title="(?:Quick answer|TL;DR)"[^>]*>/g) ?? []);
+    expect(mounts).toHaveLength(13);
+    for (const mount of mounts) expect(mount).toContain(' titleAs="h2"');
   });
 
   it("drops the Note's rule straight after FAQ rows, which already close on the same rule (every /vs page)", () => {

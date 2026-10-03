@@ -418,7 +418,7 @@ export default function BestFreeRentalPropertyCalculator2026Post() {
             </p>
           </header>
 
-          <Note title="Quick answer" className="mb-6">
+          <Note title="Quick answer" titleAs="h2" className="mb-6">
             <p className="text-foreground">
               <strong>TrueCap</strong> offers unlimited core rental analyses without signup. A free account adds one comps lookup and creation of read-only share links; recipients can view without an account. <strong>DealCheck Starter</strong> includes{" "}
               <a

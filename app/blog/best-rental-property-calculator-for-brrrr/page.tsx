@@ -367,7 +367,7 @@ export default function BestRentalPropertyCalculatorForBrrrrPost() {
             </p>
           </header>
 
-          <Note title="Quick answer" className="mb-16">
+          <Note title="Quick answer" titleAs="h2" className="mb-16">
             <p className="text-foreground">
               For BRRRR investors specifically, TrueCap currently supplies
               separate rehab, ARV, and stabilized-rental tools plus a DSCR

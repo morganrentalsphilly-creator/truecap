@@ -485,7 +485,7 @@ export default function BestRentalPropertyCalculator2026Post() {
             </p>
           </header>
 
-          <Note title="Quick answer" className="mb-16">
+          <Note title="Quick answer" titleAs="h2" className="mb-16">
             <p className="text-foreground">
               For investors who want address-first acquisition screening:{" "}
               <strong>TrueCap</strong> (a no-account preliminary screen, paid

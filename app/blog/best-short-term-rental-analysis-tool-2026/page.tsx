@@ -372,7 +372,7 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
             </p>
           </header>
 
-          <Note title="Quick answer" className="mb-16">
+          <Note title="Quick answer" titleAs="h2" className="mb-16">
             <p className="text-foreground">
               STR investors need two tools: one for revenue projection (<strong>AirDNA</strong> or <strong>Mashvisor</strong>) and one for underwriting (<strong>TrueCap</strong>, <strong>DealCheck</strong>, or a spreadsheet). PMS platforms (<strong>Hostfully</strong>, <strong>Hostaway</strong>, <strong>Guesty</strong>) come after the deal closes — they don&apos;t underwrite. The combined stack is the workflow.
             </p>
