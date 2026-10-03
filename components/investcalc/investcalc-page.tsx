@@ -3752,7 +3752,7 @@ export function InvestCalcPage({
           description: r.message,
           action: (
             <ToastAction
-              altText="See Pro plans with 50 lookups per month"
+              altText="See Pro plans with up to 50 lookups per month"
               onClick={() => {
                 router.push("/pricing");
               }}

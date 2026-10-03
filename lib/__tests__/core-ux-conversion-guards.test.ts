@@ -219,6 +219,15 @@ describe("free-tier walls answer with a next step", () => {
       'if (r.code === "ENTITLEMENT_REQUIRED" || r.code === "CAP_REACHED") {',
     );
     expect(comps).toContain("See plans");
+    // Row P1-10: no plan lifts a monthly cap, so a capped account is sent to
+    // support, and only the free-lookup wall opens /pricing.
+    const flat = comps.replace(/\s+/g, " ");
+    expect(flat).toMatch(
+      /r\.code === "CAP_REACHED" \? \( <ToastAction altText="Email TrueCap support about the monthly comps limit"/,
+    );
+    expect(flat).toContain('"mailto:hello@usetruecap.com?subject=Monthly%20comps%20limit"');
+    expect(flat.match(/window\.location\.assign\("\/pricing"\)/g)).toHaveLength(1);
+    expect(comps).toContain('altText="See Pro plans with up to 50 comps lookups per month"');
   });
 
   it("decision-first results pitch the Offer Ceiling once, not twice", () => {
