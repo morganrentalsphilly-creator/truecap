@@ -183,6 +183,42 @@ test("at 375px the header is one row and the hero CTA is in the first viewport",
   await expect(signIn).toHaveAttribute("href", "/auth/login");
 });
 
+// Audit row P1-01 (founder ruling, 2026-10-03): the investor cue sits above
+// the address form. Under the form it was covered by the cookie bar at these
+// browser sizes (cue top 589px, bar top 568 to 606px).
+for (const size of [
+  { width: 390, height: 664 },
+  { width: 375, height: 629 },
+]) {
+  test(`at ${size.width}x${size.height} the investor cue is above the hero form and clear of the cookie bar`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(size);
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+
+    const cue = page.locator('[data-hero-investor-cue=""]');
+    await expect(cue).toContainText("Buying for your own portfolio? Same analyzer, your own Buy Box.");
+    await expect(cue.getByRole("link", { name: "For investors", exact: true })).toHaveAttribute(
+      "href",
+      "/for-investors",
+    );
+    const cueBox = await cue.boundingBox();
+    const formBox = await page.locator('form[data-hero-address-form=""]').boundingBox();
+    expect(cueBox).not.toBeNull();
+    expect(formBox).not.toBeNull();
+    const cueBottom = cueBox!.y + cueBox!.height;
+    expect(cueBottom).toBeLessThanOrEqual(formBox!.y);
+    expect(cueBottom).toBeLessThanOrEqual(560);
+
+    const cookieBar = page.locator('[data-cookie-consent-banner=""]');
+    if (await cookieBar.isVisible()) {
+      const barBox = await cookieBar.boundingBox();
+      expect(barBox).not.toBeNull();
+      expect(cueBottom).toBeLessThanOrEqual(barBox!.y);
+    }
+  });
+}
+
 // 2026-09 design pass (DESIGN.md "The ledger as the hero"): the hero is the
 // sample deal's Verdict Ledger set as HTML from the engine, so the largest
 // paint is text and no hero image is preloaded.

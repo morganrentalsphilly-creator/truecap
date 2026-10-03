@@ -6,9 +6,10 @@
  * Desktop: a 5/7 grid from 1024px, headline and the address form on the
  * left, the ledger in the wider column. The display size eases between 900
  * and 1280px (--text-display) so the headline keeps to four lines and the
- * investor cue stays in the first screen of a 1095x760 window. Phones: one
- * column in reading order, so the investor cue sits above the fold at 390px
- * and the ledger starts under it.
+ * form stays in the first screen of a 1095x760 window. The investor cue sits
+ * ABOVE the address form at every width (founder ruling, 2026-10-03), so the
+ * cookie banner cannot cover it on a short phone. Phones: one column in
+ * reading order, and the ledger starts under the risk line.
  *
  * SERVER COMPONENT. The ledger is set from the engine's own sample-deal output
  * at build time (lib/sample-deal-ledger.ts) and ships as HTML: no screenshot,
@@ -52,15 +53,14 @@ export function MarketingHero() {
           </h1>
           <p className="mt-4 max-w-[46ch] text-pretty text-lg leading-normal text-foreground sm:mt-5">
             {newHomepagePositioningEnabled
-              ? "Paste the rental listing. In about 60 seconds, see whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded."
+              ? "Paste the rental listing. See whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded with Pro."
               : "Enter an address, the asking price and a bedroom count for a first-pass screen with labeled, editable assumptions. Pro adds the Offer Ceiling: the highest price that still meets your targets."}
           </p>
           {/* Phones only: the ledger's verdict in one sentence, before the
               form, so a phone's first screen shows the answer and not only the
               claim (the full ledger starts under the fold there). Set from the
               same engine output as the ledger. It takes the metrics strip's
-              place below 640px, which keeps the investor cue above the fold
-              with the cookie banner up. */}
+              place below 640px. */}
           {ledger ? (
             // Short phones (under 700px tall, e.g. 375x667) drop the line: there
             // the primary CTA has to clear the cookie banner, and the line is
@@ -95,29 +95,32 @@ export function MarketingHero() {
             </p>
           ) : null}
 
-          {/* The one primary action; its secondary is the sample-deal link. */}
-          <HeroAddressForm />
-
-          {/* The full risk reversal stays next to the primary action at every
-              viewport: paid mobile traffic must not have to infer account or
-              card requirements. */}
-          <p className="text-sm text-muted-foreground">
-            Free. No account. Your first full decision is included.
-          </p>
           {/* The investor cue (2026-09 agent-first pass): the hero addresses
               the agent, so the investor buying for their own portfolio gets
-              one unmissable line in the first screen, on desktop and at
-              390px, pointing at the investor hub. */}
-          <p
-            data-hero-investor-cue=""
-            className="mt-4 border-t border-rule-soft pt-2.5 text-base"
-          >
+              one unmissable line pointing at the investor hub. It sits ABOVE
+              the form (audit row P1-01): under the form it was covered by
+              the cookie banner at 390x664, 393x659, 375x667 and 375x629. No
+              rule and 12px margins, so at 375x629 the primary button still
+              ends above the banner. */}
+          <p data-hero-investor-cue="" className="mt-3 text-base">
             Buying for your own portfolio? Same analyzer, your own Buy Box.{" "}
             {/* A 44px tap target from padding that the negative margin takes
                 back out of the line box, so the cue keeps its body leading. */}
             <Link href="/for-investors" className="tc-link -my-3 inline-block py-3">
               For investors
             </Link>
+          </p>
+
+          {/* The one primary action; its secondary is the sample-deal link.
+              mt-3 on phones (the form's own default is mt-5): the cue above
+              it is the gap. From 640px the form keeps its sm:mt-7. */}
+          <HeroAddressForm className="mt-3" />
+
+          {/* The full risk reversal stays next to the primary action at every
+              viewport: paid mobile traffic must not have to infer account or
+              card requirements. */}
+          <p className="text-sm text-muted-foreground">
+            Free. No account. Your first full decision is included.
           </p>
         </div>
 
