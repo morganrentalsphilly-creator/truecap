@@ -479,3 +479,31 @@ describe("P1-37: the feed credits TrueCap, not a team", () => {
     expect(description).toMatch(/from TrueCap\.$/);
   });
 });
+
+describe("P2-56: /methodology is set from the rollout parts", () => {
+  // DESIGN.md chrome rules: no card around a list, no uppercase label, no
+  // icon beside a link, no pill. The page is PageHero, a prose-ledger body
+  // and one CloseSection; its formulas print between rules (ToolFormula).
+  const source = withoutComments(read("app/methodology/page.tsx"));
+
+  it("uses the shared parts and none of the old page grammar", () => {
+    for (const part of ["<PageHero", "<ArticleBody>", "<CloseSection", "<ToolFormula"]) {
+      expect(source, part).toContain(part);
+    }
+    expect(source).not.toMatch(/lucide-react/);
+    expect(source).not.toMatch(/\buppercase\b|\brounded-(?:xl|2xl|full)\b|\bprose-slate\b|brand-blue-light/);
+    expect(source.match(/<h1\b/g)).toBeNull();
+    expect(source.match(/<CloseSection\b/g)).toHaveLength(1);
+  });
+
+  it("renders one H1, the version in the line under the lede, and the three closing links", () => {
+    const html = mainOf(renderToStaticMarkup(MethodologyPage()));
+    expect(html.match(/<h1\b/g)).toHaveLength(1);
+    expect(text(html.slice(0, html.indexOf("</section>")))).toMatch(
+      /^Methodology\s?The formulas, .* before relying on an output\.\s?TrueCap Underwriting Standard v\d+(?:\.\d+)*$/,
+    );
+    const close = html.slice(html.indexOf(">Try it</h2>"));
+    expect([...close.matchAll(/<a\b[^>]*href="([^"]+)"/g)].map((m) => m[1])).toEqual(["/analyze", "/tools", "/glossary"]);
+    for (const link of close.match(/<a\b[^>]*>/g)!) expect(link).toContain("min-h-12");
+  });
+});
