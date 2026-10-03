@@ -8,13 +8,24 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -96,26 +107,22 @@ export default function SpotBadRentalPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -123,14 +130,15 @@ export default function SpotBadRentalPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               Seven red flags that tell you a rental may not pencil — before
               you spend hours running the full underwrite. A quick triage you
               can run in your head in the time it takes to load the listing.
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
+          <ArticleBody>
             <p>
               Many experienced investors build a mental triage filter. They
               glance at a listing, look at five numbers, and either move on or
@@ -142,7 +150,7 @@ export default function SpotBadRentalPost() {
               Here are seven red flags to run through, in this order.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               1. Gross rent is below 0.7% of price (the &quot;reverse 1%
               rule&quot;)
             </h2>
@@ -150,17 +158,17 @@ export default function SpotBadRentalPost() {
               The classic{" "}
               <Link
                 href="/glossary/1-percent-rule"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 1% rule
               </Link>{" "}
               says monthly rent should be at least 1% of purchase price.
               That&apos;s gotten harder to hit since 2020: FHFA&apos;s{" "}
-              <a href="https://fred.stlouisfed.org/series/HPIPONM226S" className="text-primary font-semibold hover:underline">
+              <a href="https://fred.stlouisfed.org/series/HPIPONM226S" className="tc-link">
                 purchase-only house price index
               </a>{" "}
               rose about 59% from January 2020 to June 2026, while the{" "}
-              <a href="https://fred.stlouisfed.org/series/CUSR0000SEHA" className="text-primary font-semibold hover:underline">
+              <a href="https://fred.stlouisfed.org/series/CUSR0000SEHA" className="tc-link">
                 CPI for rent of primary residence
               </a>{" "}
               rose about 33% through August 2026. But under 0.7% in a typical
@@ -177,27 +185,27 @@ export default function SpotBadRentalPost() {
               you&apos;re making it.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               2. The parcel&apos;s property tax is above 2% of value
             </h2>
             <p>
               <Link
                 href="/glossary/property-tax"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Property tax
               </Link>{" "}
               is a recurring cost set by the local assessment and tax rate, not
               by the deal, and it{" "}
-              <a href="https://www.consumerfinance.gov/ask-cfpb/why-did-my-monthly-mortgage-payment-go-up-or-change-en-213/" className="text-primary font-semibold hover:underline">
+              <a href="https://www.consumerfinance.gov/ask-cfpb/why-did-my-monthly-mortgage-payment-go-up-or-change-en-213/" className="tc-link">
                 can change from year to year
               </a>
               . In Illinois and New Jersey, the{" "}
-              <a href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25103&g=010XX00US$0400000" className="text-primary font-semibold hover:underline">
+              <a href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25103&g=010XX00US$0400000" className="tc-link">
                 median real estate tax bill
               </a>{" "}
               on owner-occupied homes is about 1.9% of the{" "}
-              <a href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US$0400000" className="text-primary font-semibold hover:underline">
+              <a href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US$0400000" className="tc-link">
                 median home value
               </a>
               , and in Texas about 1.3% (Census ACS 2024) — and rates vary by
@@ -210,13 +218,13 @@ export default function SpotBadRentalPost() {
               tax office for the specific parcel. The seller&apos;s last bill
               may not reflect the post-sale or post-reassessment amount — in
               some jurisdictions a{" "}
-              <a href="https://selling-guide.fanniemae.com/sel/b3-6-03/monthly-housing-expense-subject-property" className="text-primary font-semibold hover:underline">
+              <a href="https://selling-guide.fanniemae.com/sel/b3-6-03/monthly-housing-expense-subject-property" className="tc-link">
                 transfer of ownership typically results in a reassessment
               </a>
               .
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               3. The listing photos are aggressively staged but exclude a room
             </h2>
             <p>
@@ -233,7 +241,7 @@ export default function SpotBadRentalPost() {
               from sold comps and your own numbers rather than the marketing.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               4. The HOA amount or condition is unresolved
             </h2>
             <p>
@@ -251,7 +259,7 @@ export default function SpotBadRentalPost() {
               tell you to proceed or terminate.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               5. Building systems and recent capital work are undocumented
             </h2>
             <p>
@@ -267,7 +275,7 @@ export default function SpotBadRentalPost() {
               instead of assuming a universal percentage or generic repair band.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               6. Marketing urgency is substituting for evidence
             </h2>
             <p>
@@ -282,13 +290,13 @@ export default function SpotBadRentalPost() {
               listing language.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               7. Model DSCR is based on unverified financing or NOI
             </h2>
             <p>
               <Link
                 href="/glossary/dscr"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 DSCR
               </Link>{" "}
@@ -299,7 +307,7 @@ export default function SpotBadRentalPost() {
               the{" "}
               <Link
                 href="/blog/how-to-calculate-dscr#dscr-loans"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 DSCR loans guide
               </Link>
@@ -312,7 +320,7 @@ export default function SpotBadRentalPost() {
               or an instruction to buy, pass, or change leverage.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               The 60-second test in practice
             </h2>
             <p>
@@ -327,7 +335,7 @@ export default function SpotBadRentalPost() {
               Open{" "}
               <Link
                 href="/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap
               </Link>
@@ -340,7 +348,7 @@ export default function SpotBadRentalPost() {
               deeper review time where the evidence can be obtained and the
               unresolved risks are material.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -377,13 +385,12 @@ export default function SpotBadRentalPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
