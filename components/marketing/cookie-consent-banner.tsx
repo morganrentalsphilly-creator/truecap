@@ -45,6 +45,15 @@ import { notifyCookieConsentChanged } from "@/lib/use-cookie-banner";
 const HIDE_ON_PATHS = ["/embed"];
 
 const STORAGE_KEY = "truecap_cookie_consent_v1";
+/** The same key, for the footer's "Cookie choices" control. */
+export const COOKIE_CONSENT_STORAGE_KEY = STORAGE_KEY;
+
+/**
+ * Dispatched by the footer's "Cookie choices" control
+ * (components/marketing/cookie-choices-button.tsx) after it has cleared the
+ * stored decision. The banner listens for it and asks again.
+ */
+export const COOKIE_CHOICE_RESET_EVENT = "truecap:cookie-choice-reset";
 
 type ConsentValue = "granted" | "denied";
 
@@ -76,7 +85,7 @@ function writeStoredConsent(value: ConsentValue): void {
  * audiences or personalized ads, which neither the banner nor /privacy names.
  * components/analytics/google-measurement.tsx sends the same values.
  */
-function pushGtagConsent(value: ConsentValue): void {
+export function pushGtagConsent(value: ConsentValue): void {
   try {
     if (typeof window === "undefined") return;
     const gtag = window.gtag;
@@ -105,6 +114,17 @@ export function CookieConsentBanner() {
 
   useEffect(() => {
     setDecision(readStoredConsent() ?? "pending");
+  }, []);
+
+  // The footer's "Cookie choices" control clears the stored decision and
+  // dispatches this event; show the banner again so the visitor can choose.
+  // A separate event from COOKIE_CONSENT_EVENT on purpose: re-reading storage
+  // on that one would reopen the banner right after a choice in a browser
+  // whose storage is blocked.
+  useEffect(() => {
+    const reopen = () => setDecision("pending");
+    window.addEventListener(COOKIE_CHOICE_RESET_EVENT, reopen);
+    return () => window.removeEventListener(COOKIE_CHOICE_RESET_EVENT, reopen);
   }, []);
 
   // Focus the banner the moment it becomes visible. It's a role="dialog"

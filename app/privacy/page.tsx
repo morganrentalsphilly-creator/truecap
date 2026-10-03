@@ -244,6 +244,11 @@ export default function PrivacyPage() {
               with the subject &ldquo;Delete my account.&rdquo;
             </li>
             <li>Opt out of marketing emails (unsubscribe link in every marketing email).</li>
+            <li>
+              Change your cookie choice: use Cookie choices in the site footer. It clears
+              the stored choice, withdraws consent for Google measurement, deletes the
+              Google Ads and first-touch cookies, and shows the banner again.
+            </li>
           </ul>
           <p>
             If you&apos;re in the EU/UK (GDPR) or California (CCPA), you have additional rights
