@@ -11,12 +11,24 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { PostSources } from "@/components/blog/post-sources";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
@@ -136,323 +148,321 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8 sm:mb-10">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · {READING_TIME_MIN} min read
-          </p>
-          <BlogByline />
-          <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            {DESCRIPTION}
-          </p>
-        </header>
+      <ArticleMain>
+        <article>
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>
+              {TITLE}
+            </h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
+              {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              · {READING_TIME_MIN} min read
+            </p>
+            <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
+              {DESCRIPTION}
+            </p>
+          </header>
 
-        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
-          <p>
-            Your rental has appreciated, your tenant has paid down the loan, and
-            now you&apos;re sitting on equity that isn&apos;t doing anything.
-            The possible move is to pull some out for the next down payment or a
-            rehab. Two tools to compare are a{" "}
-            <strong>cash-out refinance</strong> and a <strong>HELOC</strong> —
-            and choosing wrong can add material cost depending on the existing
-            balance, new quote, fees, draw amount, and hold period.
-          </p>
-          <p>
-            They sound similar (both turn equity into cash) but they behave very
-            differently. Use live written quotes and the same draw and
-            hold-period assumptions when comparing them.
-          </p>
+          <ArticleBody>
+            <p>
+              Your rental has appreciated, your tenant has paid down the loan, and
+              now you&apos;re sitting on equity that isn&apos;t doing anything.
+              The possible move is to pull some out for the next down payment or a
+              rehab. Two tools to compare are a{" "}
+              <strong>cash-out refinance</strong> and a <strong>HELOC</strong> —
+              and choosing wrong can add material cost depending on the existing
+              balance, new quote, fees, draw amount, and hold period.
+            </p>
+            <p>
+              They sound similar (both turn equity into cash) but they behave very
+              differently. Use live written quotes and the same draw and
+              hold-period assumptions when comparing them.
+            </p>
 
-          <h2 className="text-2xl sm:text-3xl">How each one works</h2>
-          <p>
-            <strong>Cash-out refinance</strong> — you replace your existing
-            mortgage with a new, <em>larger</em> one and take the difference in
-            cash. If you owe $200k on a property worth $400k and refinance to a
-            $300k loan, you walk away with ~$100k (minus closing costs) and a
-            brand-new loan on the full $300k.
-          </p>
-          <p>
-            <strong>HELOC (home equity line of credit)</strong> — a revolving
-            second lien that sits <em>on top</em> of your existing mortgage.
-            Your first loan is untouched; you get a credit line you can draw,
-            repay, and redraw during the draw period, usually at a{" "}
-            <a
-              href="https://files.consumerfinance.gov/f/documents/cfpb_heloc-brochure.pdf"
-              className="text-primary font-semibold hover:underline"
-            >
-              variable rate
-            </a>
-            , and some plans allow interest-only payments while you draw.
-          </p>
-
-          <h2 className="text-2xl sm:text-3xl">
-            The investment-property variables to verify
-          </h2>
-          <p>
-            Agency cash-out limits are lower on a rental than on the home you
-            live in, and investment-property HELOC terms vary by lender:
-          </p>
-          <ul>
-            <li>
-              <strong>Cash-out refi:</strong> confirm the current LTV matrix
-              (Freddie Mac&apos;s{" "}
+            <h2>How each one works</h2>
+            <p>
+              <strong>Cash-out refinance</strong> — you replace your existing
+              mortgage with a new, <em>larger</em> one and take the difference in
+              cash. If you owe $200k on a property worth $400k and refinance to a
+              $300k loan, you walk away with ~$100k (minus closing costs) and a
+              brand-new loan on the full $300k.
+            </p>
+            <p>
+              <strong>HELOC (home equity line of credit)</strong> — a revolving
+              second lien that sits <em>on top</em> of your existing mortgage.
+              Your first loan is untouched; you get a credit line you can draw,
+              repay, and redraw during the draw period, usually at a{" "}
               <a
-                href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
-                className="text-primary font-semibold hover:underline"
+                href="https://files.consumerfinance.gov/f/documents/cfpb_heloc-brochure.pdf"
+                className="tc-link"
               >
-                maximum cash-out LTV
-              </a>{" "}
-              is 75% for a one-unit investment property and 70% for two to four
-              units, against 80% and 75% for a home you live in),{" "}
-              <a
-                href="https://selling-guide.fanniemae.com/sel/b2-1.3-03/cash-out-refinance-transactions"
-                className="text-primary font-semibold hover:underline"
+                variable rate
+              </a>
+              , and some plans allow interest-only payments while you draw.
+            </p>
+
+            <h2>
+              The investment-property variables to verify
+            </h2>
+            <p>
+              Agency cash-out limits are lower on a rental than on the home you
+              live in, and investment-property HELOC terms vary by lender:
+            </p>
+            <ul>
+              <li>
+                <strong>Cash-out refi:</strong> confirm the current LTV matrix
+                (Freddie Mac&apos;s{" "}
+                <a
+                  href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
+                  className="tc-link"
+                >
+                  maximum cash-out LTV
+                </a>{" "}
+                is 75% for a one-unit investment property and 70% for two to four
+                units, against 80% and 75% for a home you live in),{" "}
+                <a
+                  href="https://selling-guide.fanniemae.com/sel/b2-1.3-03/cash-out-refinance-transactions"
+                  className="tc-link"
+                >
+                  seasoning
+                </a>{" "}
+                and value basis, appraisal rules, coverage or DTI treatment, reserves, pricing,
+                and closing costs.
+              </li>
+              <li>
+                <strong>HELOC on a rental:</strong> confirm combined LTV, credit
+                and reserve tiers, variable-rate index and margin, draw and
+                repayment periods, line-freeze rights, fees, and lien-position
+                rules.
+              </li>
+              <li>
+                <strong>Availability:</strong> investment-property HELOC offerings
+                vary by institution, geography, property, and borrower. Shop
+                several lenders and compare current written terms.
+              </li>
+            </ul>
+
+            <h2>
+              The first comparison: what rate are you replacing?
+            </h2>
+            <p>
+              A cash-out refinance{" "}
+              <strong>resets your entire first mortgage</strong>
+              to the new note&apos;s quoted rate and terms. If an existing first
+              mortgage has a materially lower rate than the new quote, refinancing
+              doesn&apos;t just cost more on the cash you pull — it re-prices the{" "}
+              <em>whole balance</em>. The impact depends on balance, amortization,
+              fees, taxes, hold period, and the alternative line&apos;s actual
+              usage.
+            </p>
+            <p>
+              A HELOC sidesteps that entirely. It leaves the cheap first mortgage
+              alone and charges the higher rate only on the slice you actually
+              draw, if the line is approved and remains available. Use this as a
+              comparison checklist, not an approval rule:
+            </p>
+            <ul>
+              <li>
+                <strong>
+                  The existing first mortgage is materially cheaper than the new
+                  quote:
+                </strong>{" "}
+                compare an eligible HELOC or fixed second lien so the old first
+                may remain in place.
+              </li>
+              <li>
+                <strong>The existing rate is near or above the new quote:</strong>{" "}
+                a cash-out refi may compare better, particularly if a fixed
+                payment and one lien matter.
+              </li>
+            </ul>
+
+            <h2>When each one may fit</h2>
+            <h3>Cash-out refinance may fit better when…</h3>
+            <ul>
+              <li>
+                Your current rate is at or above today&apos;s — nothing cheap to
+                protect.
+              </li>
+              <li>You want a large lump sum and a predictable fixed payment.</li>
+              <li>
+                You&apos;re running{" "}
+                <Link
+                  href="/blog/brrrr-method-explained"
+                  className="tc-link"
+                >
+                  BRRRR
+                </Link>{" "}
+                and refinancing out of a rehab to recycle capital, subject to the
+                lender&apos;s current seasoning, value-basis, documentation,
+                appraisal, and approval rules. See the full{" "}
+                <Link
+                  href="/blog/how-to-refinance-a-rental-property"
+                  className="tc-link"
+                >
+                  refinance walkthrough
+                </Link>
+                .
+              </li>
+            </ul>
+            <h3>HELOC may fit better when…</h3>
+            <ul>
+              <li>You have a low-rate first mortgage worth protecting.</li>
+              <li>
+                You need flexible, short-term money — fund a rehab, then pay it
+                back and redraw on the next one.
+              </li>
+              <li>
+                You prefer a line whose interest is based on the outstanding draw,
+                after accounting for fees, minimums, and variable-rate terms.
+              </li>
+            </ul>
+
+            <h2>
+              Worked example: the cheap-mortgage trap
+            </h2>
+            <p>
+              Illustrative assumptions, not current quotes or an approval:
+              $400,000 property, $200,000 still owed at <strong>3.5%</strong> from
+              a 2021 purchase, and you want ~$100,000 for the next deal.
+            </p>
+            <ul>
+              <li>
+                <strong>Modeled cash-out refi to 75% LTV ($300k) at 7%:</strong>{" "}
+                the illustration produces $100k before costs, but the full $300k
+                is now at 7%. Re-pricing the original $200k from 3.5% to 7% adds
+                roughly <strong>$7,000 a year</strong> of simple interest before
+                amortization and closing-cost effects.
+              </li>
+              <li>
+                <strong>Modeled HELOC draw of $100k at 8%:</strong> assume the
+                $200k first mortgage stays at 3.5% and the line remains available.
+                The illustration charges about $8,000/year on the fully drawn line
+                before fees and rate changes; actual interest follows the balance
+                and variable-rate terms.
+              </li>
+            </ul>
+            <p>
+              Under these assumptions, the HELOC&apos;s rate is higher yet its
+              total modeled cost may be lower because the refi&apos;s cost
+              includes the balance you already had. A central comparison is what
+              the new debt does to the property&apos;s{" "}
+              <Link
+                href="/glossary/dscr"
+                className="tc-link"
               >
-                seasoning
-              </a>{" "}
-              and value basis, appraisal rules, coverage or DTI treatment, reserves, pricing,
-              and closing costs.
-            </li>
-            <li>
-              <strong>HELOC on a rental:</strong> confirm combined LTV, credit
-              and reserve tiers, variable-rate index and margin, draw and
-              repayment periods, line-freeze rights, fees, and lien-position
-              rules.
-            </li>
-            <li>
-              <strong>Availability:</strong> investment-property HELOC offerings
-              vary by institution, geography, property, and borrower. Shop
-              several lenders and compare current written terms.
-            </li>
-          </ul>
+                DSCR
+              </Link>{" "}
+              and monthly cash flow under the same stated assumptions.
+            </p>
 
-          <h2 className="text-2xl sm:text-3xl">
-            The first comparison: what rate are you replacing?
-          </h2>
-          <p>
-            A cash-out refinance{" "}
-            <strong>resets your entire first mortgage</strong>
-            to the new note&apos;s quoted rate and terms. If an existing first
-            mortgage has a materially lower rate than the new quote, refinancing
-            doesn&apos;t just cost more on the cash you pull — it re-prices the{" "}
-            <em>whole balance</em>. The impact depends on balance, amortization,
-            fees, taxes, hold period, and the alternative line&apos;s actual
-            usage.
-          </p>
-          <p>
-            A HELOC sidesteps that entirely. It leaves the cheap first mortgage
-            alone and charges the higher rate only on the slice you actually
-            draw, if the line is approved and remains available. Use this as a
-            comparison checklist, not an approval rule:
-          </p>
-          <ul>
-            <li>
-              <strong>
-                The existing first mortgage is materially cheaper than the new
-                quote:
-              </strong>{" "}
-              compare an eligible HELOC or fixed second lien so the old first
-              may remain in place.
-            </li>
-            <li>
-              <strong>The existing rate is near or above the new quote:</strong>{" "}
-              a cash-out refi may compare better, particularly if a fixed
-              payment and one lien matter.
-            </li>
-          </ul>
+            <h2>The risks to underwrite</h2>
+            <ul>
+              <li>
+                <strong>HELOC variable rate.</strong> Many lines use variable
+                rates, and some agreements permit a lender to freeze or reduce
+                availability under stated conditions. For consumer home equity
+                lines,{" "}
+                <a
+                  href="https://www.consumerfinance.gov/rules-policy/regulations/1026/40/"
+                  className="tc-link"
+                >
+                  Regulation Z
+                </a>{" "}
+                lets a lender stop further draws or cut the credit limit when,
+                among other conditions, the property&apos;s value declines
+                significantly; a line on a rental may be business-purpose credit
+                outside that rule. Read the actual agreement before relying on
+                future draws.
+              </li>
+              <li>
+                <strong>Refi reset + closing costs.</strong> A refi applies the
+                new note to the whole balance and carries quote-specific closing
+                costs. Include every fee in the break-even comparison.
+              </li>
+              <li>
+                <strong>Over-leverage.</strong> Borrowing near the maximum a
+                lender offers can thin the cash-flow cushion. Stress-test lower
+                value, higher rate, vacancy, repairs, and a frozen line.
+              </li>
+              <li>
+                <strong>Use of the proceeds.</strong>{" "}
+                <a
+                  href="https://www.irs.gov/publications/p527"
+                  className="tc-link"
+                >
+                  IRS Publication 527
+                </a>{" "}
+                says interest on the part of the proceeds that is not related to
+                rental use generally can&apos;t be deducted as a rental expense,
+                so the after-tax cost depends on where the cash goes.
+              </li>
+            </ul>
 
-          <h2 className="text-2xl sm:text-3xl">When each one may fit</h2>
-          <h3>Cash-out refinance may fit better when…</h3>
-          <ul>
-            <li>
-              Your current rate is at or above today&apos;s — nothing cheap to
-              protect.
-            </li>
-            <li>You want a large lump sum and a predictable fixed payment.</li>
-            <li>
-              You&apos;re running{" "}
+            <p>
+              Before you pull a dollar, run the property in{" "}
+              <Link
+                href="/"
+                className="tc-link"
+              >
+                TrueCap
+              </Link>{" "}
+              with the new debt terms and watch what they do to cash flow and
+              DSCR. TrueCap&apos;s mortgage scenarios do not model a HELOC second
+              lien, so compare the cash-out loan and HELOC-on-top payments
+              yourself before you sign. If you&apos;re
+              recycling capital, pair this with the{" "}
               <Link
                 href="/blog/brrrr-method-explained"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
-                BRRRR
+                BRRRR method
               </Link>{" "}
-              and refinancing out of a rehab to recycle capital, subject to the
-              lender&apos;s current seasoning, value-basis, documentation,
-              appraisal, and approval rules. See the full{" "}
+              and{" "}
               <Link
-                href="/blog/how-to-refinance-a-rental-property"
-                className="text-primary font-semibold hover:underline"
+                href="/blog/how-to-calculate-dscr#dscr-loans"
+                className="tc-link"
               >
-                refinance walkthrough
-              </Link>
-              .
-            </li>
-          </ul>
-          <h3>HELOC may fit better when…</h3>
-          <ul>
-            <li>You have a low-rate first mortgage worth protecting.</li>
-            <li>
-              You need flexible, short-term money — fund a rehab, then pay it
-              back and redraw on the next one.
-            </li>
-            <li>
-              You prefer a line whose interest is based on the outstanding draw,
-              after accounting for fees, minimums, and variable-rate terms.
-            </li>
-          </ul>
+                DSCR-loan
+              </Link>{" "}
+              guides.
+            </p>
 
-          <h2 className="text-2xl sm:text-3xl">
-            Worked example: the cheap-mortgage trap
-          </h2>
-          <p>
-            Illustrative assumptions, not current quotes or an approval:
-            $400,000 property, $200,000 still owed at <strong>3.5%</strong> from
-            a 2021 purchase, and you want ~$100,000 for the next deal.
-          </p>
-          <ul>
-            <li>
-              <strong>Modeled cash-out refi to 75% LTV ($300k) at 7%:</strong>{" "}
-              the illustration produces $100k before costs, but the full $300k
-              is now at 7%. Re-pricing the original $200k from 3.5% to 7% adds
-              roughly <strong>$7,000 a year</strong> of simple interest before
-              amortization and closing-cost effects.
-            </li>
-            <li>
-              <strong>Modeled HELOC draw of $100k at 8%:</strong> assume the
-              $200k first mortgage stays at 3.5% and the line remains available.
-              The illustration charges about $8,000/year on the fully drawn line
-              before fees and rate changes; actual interest follows the balance
-              and variable-rate terms.
-            </li>
-          </ul>
-          <p>
-            Under these assumptions, the HELOC&apos;s rate is higher yet its
-            total modeled cost may be lower because the refi&apos;s cost
-            includes the balance you already had. A central comparison is what
-            the new debt does to the property&apos;s{" "}
-            <Link
-              href="/glossary/dscr"
-              className="text-primary font-semibold hover:underline"
-            >
-              DSCR
-            </Link>{" "}
-            and monthly cash flow under the same stated assumptions.
-          </p>
+          </ArticleBody>
 
-          <h2 className="text-2xl sm:text-3xl">The risks to underwrite</h2>
-          <ul>
-            <li>
-              <strong>HELOC variable rate.</strong> Many lines use variable
-              rates, and some agreements permit a lender to freeze or reduce
-              availability under stated conditions. For consumer home equity
-              lines,{" "}
-              <a
-                href="https://www.consumerfinance.gov/rules-policy/regulations/1026/40/"
-                className="text-primary font-semibold hover:underline"
-              >
-                Regulation Z
-              </a>{" "}
-              lets a lender stop further draws or cut the credit limit when,
-              among other conditions, the property&apos;s value declines
-              significantly; a line on a rental may be business-purpose credit
-              outside that rule. Read the actual agreement before relying on
-              future draws.
-            </li>
-            <li>
-              <strong>Refi reset + closing costs.</strong> A refi applies the
-              new note to the whole balance and carries quote-specific closing
-              costs. Include every fee in the break-even comparison.
-            </li>
-            <li>
-              <strong>Over-leverage.</strong> Borrowing near the maximum a
-              lender offers can thin the cash-flow cushion. Stress-test lower
-              value, higher rate, vacancy, repairs, and a frozen line.
-            </li>
-            <li>
-              <strong>Use of the proceeds.</strong>{" "}
-              <a
-                href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
-              >
-                IRS Publication 527
-              </a>{" "}
-              says interest on the part of the proceeds that is not related to
-              rental use generally can&apos;t be deducted as a rental expense,
-              so the after-tax cost depends on where the cash goes.
-            </li>
-          </ul>
-
-          <div className="not-prose"></div>
-
-          <p>
-            Before you pull a dollar, run the property in{" "}
-            <Link
-              href="/"
-              className="text-primary font-semibold hover:underline"
-            >
-              TrueCap
-            </Link>{" "}
-            with the new debt terms and watch what they do to cash flow and
-            DSCR. TrueCap&apos;s mortgage scenarios do not model a HELOC second
-            lien, so compare the cash-out loan and HELOC-on-top payments
-            yourself before you sign. If you&apos;re
-            recycling capital, pair this with the{" "}
-            <Link
-              href="/blog/brrrr-method-explained"
-              className="text-primary font-semibold hover:underline"
-            >
-              BRRRR method
-            </Link>{" "}
-            and{" "}
-            <Link
-              href="/blog/how-to-calculate-dscr#dscr-loans"
-              className="text-primary font-semibold hover:underline"
-            >
-              DSCR-loan
-            </Link>{" "}
-            guides.
-          </p>
-
-          <h2 className="text-2xl sm:text-3xl">FAQ</h2>
-          {FAQS.map((f, i) => (
-            <details
-              key={i}
-              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
-            >
-              <summary className="cursor-pointer font-bold text-foreground">
-                {f.q}
-              </summary>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                {f.a}
-              </p>
-            </details>
-          ))}
-
-          <p className="text-sm text-muted-foreground">
-            Rates, LTV caps, and qualification vary by lender and change often
-            — confirm current terms with a lender and your CPA.
-          </p>
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
+          <ArticleBody className="mt-8">
+            <p className="text-sm text-muted-foreground">
+              Rates, LTV caps, and qualification vary by lender and change often
+              — confirm current terms with a lender and your CPA.
+            </p>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -481,39 +491,38 @@ export default function BlogPost() {
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <NewsletterSignup variant="expanded" source="blog" />
-        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Related:{" "}
             <Link
               href="/blog/how-to-refinance-a-rental-property"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               How to refinance a rental →
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/brrrr-method-explained"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               The BRRRR method →
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/how-to-calculate-dscr#dscr-loans"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               DSCR loans explained →
             </Link>
           </p>
         </footer>
-      </main>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
