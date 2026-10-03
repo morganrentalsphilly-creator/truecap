@@ -9,13 +9,25 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -120,28 +132,24 @@ export default function GrossRentMultiplierPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-        <div className="mb-2">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-        </div>
-        <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+        <header className={ARTICLE_HEADER}>
+          <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+          <p className={ARTICLE_META}>
+            <Link href="/blog" className={ARTICLE_META_LINK}>
+              Blog
+            </Link>{" "}
+            ·{" "}
+            {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
             {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+              timeZone: "UTC",
               year: "numeric",
               month: "short",
               day: "numeric",
@@ -149,7 +157,8 @@ export default function GrossRentMultiplierPost() {
             · {READING_TIME} min read
           </p>
           <BlogByline />
-          <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+          <UnderTitleAnalyzeLink />
+          <p className={ARTICLE_LEDE}>
             Gross rent multiplier is the first number a working investor
             computes on a listing — one division, no spreadsheet, no expense
             breakdown. It will not tell you whether a deal is good, only — in
@@ -160,10 +169,8 @@ export default function GrossRentMultiplierPost() {
           </p>
         </header>
 
-        <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            The formula
-          </h2>
+        <ArticleBody>
+          <h2>The formula</h2>
           <p>
             <strong>GRM = property price ÷ annual gross rent.</strong> That is
             the whole thing. Gross rent means the rent before a single dollar of
@@ -187,14 +194,14 @@ export default function GrossRentMultiplierPost() {
             one- to four-unit homes (Forms{" "}
             <a
               href="https://sf.freddiemac.com/docs/pdf/forms/70.pdf"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               1004/70
             </a>{" "}
             and{" "}
             <a
               href="https://guide.freddiemac.com/ci/okcsFattach/get/1001329_5"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               1025/72
             </a>
@@ -202,9 +209,7 @@ export default function GrossRentMultiplierPost() {
             convention a quoted GRM uses.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            Why a screen exists at all
-          </h2>
+          <h2>Why a screen exists at all</h2>
           <p>
             The point of GRM is triage. Cap rate, cash-on-cash, and DSCR all
             need an operating-expense estimate, and a careful one takes real
@@ -216,7 +221,7 @@ export default function GrossRentMultiplierPost() {
             underwriting time on the survivors — the same job the{" "}
             <Link
               href="/blog/spot-bad-rental-in-60-seconds"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               60-second red-flag triage
             </Link>{" "}
@@ -248,16 +253,14 @@ export default function GrossRentMultiplierPost() {
             sinks to the bottom. Run any of these in the{" "}
             <Link
               href="/tools/gross-rent-multiplier-calculator"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               GRM calculator
             </Link>{" "}
             and you have your shortlist before you have finished your coffee.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            What counts as a good GRM
-          </h2>
+          <h2>What counts as a good GRM</h2>
           <p>
             There is no universal &quot;good&quot; GRM — it reflects whatever
             rent-to-price relationship a market carries. A lower GRM means more
@@ -275,7 +278,7 @@ export default function GrossRentMultiplierPost() {
             properties, Fannie Mae&apos;s{" "}
             <a
               href="https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Selling Guide requires the income approach, including the gross
               rent multiplier calculation
@@ -283,9 +286,7 @@ export default function GrossRentMultiplierPost() {
             , though an appraisal may not rely on the income approach alone.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            Turning GRM into a price screen
-          </h2>
+          <h2>Turning GRM into a price screen</h2>
           <p>
             Because GRM is just price over rent, you can rearrange it into a
             price screen once you select a target multiple:
@@ -302,21 +303,19 @@ export default function GrossRentMultiplierPost() {
             set your opening number, then let the full{" "}
             <Link
               href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               60-second underwrite
             </Link>{" "}
             confirm it.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            GRM vs cap rate: the bridge most people miss
-          </h2>
+          <h2>GRM vs cap rate: the bridge most people miss</h2>
           <p>
             GRM and{" "}
             <Link
               href="/blog/what-is-a-good-cap-rate"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               cap rate
             </Link>{" "}
@@ -324,7 +323,7 @@ export default function GrossRentMultiplierPost() {
             rate divides{" "}
             <Link
               href="/blog/how-to-calculate-noi-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               NOI
             </Link>{" "}
@@ -338,7 +337,7 @@ export default function GrossRentMultiplierPost() {
             If expenses eat 50% of gross rent — the classic{" "}
             <Link
               href="/blog/50-percent-rule-rentals"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               50% rule
             </Link>{" "}
@@ -356,9 +355,7 @@ export default function GrossRentMultiplierPost() {
             good deals — which is the next section.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            Where GRM lies: two identical GRMs, two different deals
-          </h2>
+          <h2>Where GRM lies: two identical GRMs, two different deals</h2>
           <p>
             Take two duplexes. Both cost $250,000, both gross $2,600/month, both
             therefore carry a GRM of exactly 8.0. By GRM alone they are twins.
@@ -386,7 +383,7 @@ export default function GrossRentMultiplierPost() {
             (check any scenario in the{" "}
             <Link
               href="/tools/mortgage-payment-calculator"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               mortgage payment calculator
             </Link>
@@ -410,23 +407,21 @@ export default function GrossRentMultiplierPost() {
             the conversation.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            The four things GRM cannot see
-          </h2>
+          <h2>The four things GRM cannot see</h2>
           <p>
             <strong>1. Operating expenses.</strong> Covered above — taxes,
             insurance, maintenance, vacancy, and management can swing the real
             return by two full cap-rate points on the same GRM. States where the{" "}
             <a
               href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25103&g=010XX00US$0400000"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               median property-tax bill
             </a>{" "}
             is a high share of the{" "}
             <a
               href="https://data.census.gov/api/access/data/table?id=ACSDT1Y2024.B25077&g=010XX00US$0400000"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               median home value
             </a>{" "}
@@ -441,7 +436,7 @@ export default function GrossRentMultiplierPost() {
             gross rent. Pair the screen with a real{" "}
             <Link
               href="/blog/capex-maintenance-reserves-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               capex reserve estimate
             </Link>
@@ -454,7 +449,7 @@ export default function GrossRentMultiplierPost() {
             outcomes. For anything leverage-dependent you need{" "}
             <Link
               href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               cash-on-cash and DSCR
             </Link>
@@ -469,21 +464,19 @@ export default function GrossRentMultiplierPost() {
             screen on in-place rent, and read{" "}
             <Link
               href="/blog/rental-property-pro-forma-explained"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               how to read a pro forma
             </Link>{" "}
             before you trust a seller&apos;s rent roll.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            GRM and the 1% rule are the same rule
-          </h2>
+          <h2>GRM and the 1% rule are the same rule</h2>
           <p>
             Investors who swear by the{" "}
             <Link
               href="/tools/1-percent-rule-calculator"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               1% rule
             </Link>{" "}
@@ -502,9 +495,7 @@ export default function GrossRentMultiplierPost() {
             you already have an opinion on the 1% rule.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            A sharper variant: the effective gross income multiplier
-          </h2>
+          <h2>A sharper variant: the effective gross income multiplier</h2>
           <p>
             Appraisers sometimes use a refinement called the effective gross
             income multiplier (EGIM): price ÷ <em>effective</em> gross income,
@@ -518,9 +509,7 @@ export default function GrossRentMultiplierPost() {
             is fine.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            How to actually use GRM in a buying workflow
-          </h2>
+          <h2>How to actually use GRM in a buying workflow</h2>
           <p>
             Slot it in as step zero, not the decision. The sequence that works:
           </p>
@@ -552,67 +541,66 @@ export default function GrossRentMultiplierPost() {
             is not using GRM — it is stopping at GRM.
           </p>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            FAQ
-          </h2>
-          {FAQS.map((f) => (
-            <div key={f.q}>
-              <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                {f.q}
-              </h3>
-              <p>{f.a}</p>
-            </div>
-          ))}
+        </ArticleBody>
 
-          <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-            Screen fast, then underwrite for real
-          </h2>
+        {/* faqLd above is the one FAQPage node for these rows. */}
+        <FaqSection
+          id="faq"
+          variant="inline"
+          heading="FAQ"
+          items={FAQS}
+          structuredData={false}
+          contact={null}
+        />
+
+        <ArticleBody className="mt-16">
+          <h2>Screen fast, then underwrite for real</h2>
           <p>
             GRM is the ten-second look that decides where your twenty minutes
             go. Compute it in the{" "}
             <Link
               href="/tools/gross-rent-multiplier-calculator"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               GRM calculator
             </Link>
             , translate the multiple into an{" "}
             <Link
               href="/glossary/cap-rate"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               implied cap rate
             </Link>
             , and when a listing survives the screen, run the whole thing — NOI,
             cash flow, DSCR, projections, and Buy Box fit — through
             the{" "}
-            <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+            <Link href="/analyze" prefetch={false} className="tc-link">
               TrueCap analyzer
             </Link>
             . Related reading:{" "}
             <Link
               href="/blog/what-is-a-good-cap-rate"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               what is a good cap rate
             </Link>
             ,{" "}
             <Link
               href="/blog/how-to-calculate-noi-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               how to calculate NOI
             </Link>
             , and{" "}
             <Link
               href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               cap rate vs cash-on-cash vs DSCR
             </Link>
             .
           </p>
-        </div>
+        </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -645,13 +633,12 @@ export default function GrossRentMultiplierPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
