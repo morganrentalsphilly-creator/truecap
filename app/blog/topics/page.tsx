@@ -1,11 +1,15 @@
 /**
  * /blog/topics — index of the topic hubs (P2-4). A shallow directory that
  * links to each investor-journey hub; the hubs do the heavy internal linking.
+ *
+ * Layout (DESIGN.md): the page hero with the breadcrumb as its meta line,
+ * then the hubs as ruled rows, the /blog hub's row recipe.
  */
 
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
+import { PageHero } from "@/components/marketing/page-parts";
+import { Section } from "@/components/marketing/section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BLOG_TOPICS } from "@/lib/blog-topics";
@@ -14,6 +18,16 @@ import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { JsonLd } from "@/components/seo/json-ld";
 import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
+
+/**
+ * The meta line under the H1 and its links: the article frame's meta line
+ * and meta link (a tc-link with a 44px-tall target), the link padded to 44px
+ * wide for a short word. Written out here, not imported: a file under
+ * app/blog that imports components/marketing/article is read as a post on
+ * the frame (lib/__tests__/blog-post-frame.test.tsx, seo/ARCHITECTURE.md).
+ */
+const BREADCRUMB_CLASS = "mt-4 text-sm text-muted-foreground";
+const BREADCRUMB_LINK_CLASS = "tc-link -mx-2 -my-3 inline-block px-2 py-3";
 
 /** How many hubs there are, in words; derived so the copy can't drift from lib/blog-topics.ts. */
 const NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
@@ -63,45 +77,59 @@ export default function BlogTopicsIndexPage() {
     <div className="min-h-screen bg-background">
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={schema} />
-      <main id="main" className="mx-auto max-w-4xl px-4 sm:px-6 py-8 sm:py-12">
-        <nav aria-label="Breadcrumb" className="mb-6 text-xs">
-          <ol className="flex flex-wrap items-center gap-2 text-muted-foreground">
-            <li><Link href="/" className="hover:text-foreground">Home</Link></li>
-            <li aria-hidden="true">›</li>
-            <li><Link href="/blog" className="hover:text-foreground">Blog</Link></li>
-            <li aria-hidden="true">›</li>
-            <li className="font-semibold text-foreground">Topics</li>
-          </ol>
-        </nav>
+      <main id="main" tabIndex={-1} className="min-w-0 outline-none">
+        <PageHero
+          title="Browse by topic"
+          lede={`Every TrueCap guide, grouped into the ${HUB_COUNT_WORD} things investors actually work through. Most hubs pair the reading with the calculators that run the numbers.`}
+        >
+          {/* The breadcrumb is the visible half of the BreadcrumbList above;
+              like the blog's hub link it sits under the H1, never above it. */}
+          <nav aria-label="Breadcrumb" className={BREADCRUMB_CLASS}>
+            <ol className="flex flex-wrap items-center gap-x-2">
+              <li>
+                <IntentPrefetchLink href="/" className={BREADCRUMB_LINK_CLASS}>
+                  Home
+                </IntentPrefetchLink>
+              </li>
+              <li aria-hidden="true">›</li>
+              <li>
+                <IntentPrefetchLink href="/blog" className={BREADCRUMB_LINK_CLASS}>
+                  Blog
+                </IntentPrefetchLink>
+              </li>
+              <li aria-hidden="true">›</li>
+              <li aria-current="page" className="text-foreground">
+                Topics
+              </li>
+            </ol>
+          </nav>
+        </PageHero>
 
-        <header className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground leading-tight">
-            Browse by topic
-          </h1>
-          <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-            Every TrueCap guide, grouped into the {HUB_COUNT_WORD} things investors actually work
-            through. Most hubs pair the reading with the calculators that run the numbers.
-          </p>
-        </header>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          {BLOG_TOPICS.map((topic) => (
-            <Link
-              key={topic.slug}
-              href={`/blog/topics/${topic.slug}`}
-              className="group flex flex-col gap-2 rounded-2xl border border-border bg-card p-5 transition-colors hover:border-primary"
-            >
-              <div className="flex items-center justify-between">
-                <h2 className="font-extrabold text-foreground group-hover:text-primary">{topic.title}</h2>
-                <ArrowUpRight className="size-4 text-muted-foreground transition-colors group-hover:text-primary" />
-              </div>
-              <p className="text-sm text-muted-foreground">{topic.description}</p>
-              <span className="mt-auto text-2xs font-semibold uppercase tracking-widest text-muted-foreground">
-                {topic.postSlugs.filter((slug) => isLinkablePath(`/blog/${slug}`)).length} guides
-              </span>
-            </Link>
-          ))}
-        </div>
+        {/* The hubs as ruled rows in two columns from 640px (RuledList's
+            grid), not cards. The title is the row's one link; its padding,
+            pulled back by the negative margin, makes a 44px target. */}
+        <Section rhythm="tight" rule="none">
+          <ul className="grid grid-cols-[minmax(0,1fr)] break-words border-t-2 border-foreground sm:grid-cols-[repeat(2,minmax(0,1fr))] sm:gap-x-12">
+            {BLOG_TOPICS.map((topic) => (
+              <li key={topic.slug} className="border-b border-rule-soft py-4">
+                <h2 className="text-pretty text-lg font-semibold">
+                  <IntentPrefetchLink
+                    href={`/blog/topics/${topic.slug}`}
+                    className="tc-link -my-2 inline-block max-w-full py-2"
+                  >
+                    {topic.title}
+                  </IntentPrefetchLink>
+                </h2>
+                <p className="mt-1 max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
+                  {topic.description}
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {topic.postSlugs.filter((slug) => isLinkablePath(`/blog/${slug}`)).length} guides
+                </p>
+              </li>
+            ))}
+          </ul>
+        </Section>
       </main>
       <SiteFooter />
       <ScrollDepthTracker />
