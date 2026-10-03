@@ -10,11 +10,25 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_META_NEXT,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
+import { Note } from "@/components/marketing/page-parts";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
@@ -128,44 +142,32 @@ export default function HostfullyVsHostawayVsGuestyPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleSchema} />
       <JsonLd data={breadcrumbSchema} />
       <JsonLd data={faqSchema} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="mb-2">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-        </div>
-
+      <ArticleMain>
         <article>
-          <header className="mb-8 sm:mb-10">
-            <div className="text-2xs uppercase tracking-widest text-primary font-bold mb-3">
-              Comparison · {READING_TIME_MIN} min read
-            </div>
-            <h1 className="text-3xl sm:text-5xl font-extrabold text-foreground leading-[1.05] tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground">
-              {DESCRIPTION}
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              · Comparison · {READING_TIME_MIN} min read
             </p>
-            <p className="mt-4 text-xs text-muted-foreground">
+            <p className={ARTICLE_META_NEXT}>
               Published {PUBLISHED_AT}
             </p>
             <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>{DESCRIPTION}</p>
           </header>
 
-          <section className="mb-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">
-              TL;DR
-            </h2>
-            <p className="text-sm sm:text-base leading-relaxed text-foreground">
+          <Note title="TL;DR">
+            <p>
               All three are short-term rental property management systems —
               channel managers, automation, dynamic pricing, cleaning workflows.
               <strong> Hostfully</strong>{" "}
@@ -192,9 +194,9 @@ export default function HostfullyVsHostawayVsGuestyPost() {
               <strong> TrueCap</strong> is upstream of all three: the
               underwriting calculator you&apos;d use BEFORE buying an STR.
             </p>
-          </section>
+          </Note>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] prose-headings:font-extrabold prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:text-foreground prose-li:leading-relaxed">
+          <ArticleBody className="mt-10 sm:mt-12">
             <h2>The three platforms in one sentence each</h2>
             <ul>
               <li>
@@ -490,29 +492,19 @@ export default function HostfullyVsHostawayVsGuestyPost() {
               </li>
             </ul>
 
-            <h2>FAQ</h2>
-            <div className="not-prose space-y-3">
-              {FAQ_ITEMS.map((item) => (
-                <details
-                  key={item.q}
-                  className="group rounded-xl border border-border bg-card p-4 sm:p-5"
-                >
-                  <summary className="cursor-pointer list-none flex items-start justify-between gap-3 font-bold text-sm sm:text-base text-foreground">
-                    <span>{item.q}</span>
-                    <span
-                      aria-hidden
-                      className="mt-1 size-5 shrink-0 rounded-full border border-border text-muted-foreground text-xs leading-none flex items-center justify-center transition-transform group-open:rotate-45"
-                    >
-                      +
-                    </span>
-                  </summary>
-                  <div className="mt-3 text-sm text-muted-foreground leading-relaxed">
-                    {item.a}
-                  </div>
-                </details>
-              ))}
-            </div>
+          </ArticleBody>
 
+          {/* faqSchema above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQ_ITEMS}
+            structuredData={false}
+            contact={null}
+          />
+
+          <ArticleBody className="mt-16">
             <h2>Underwrite the STR before you pick the PMS</h2>
             <p>
               Don&apos;t pick a PMS before confirming the deal pencils.
@@ -521,93 +513,85 @@ export default function HostfullyVsHostawayVsGuestyPost() {
               property pencils as an STR before you commit. Run that step
               first.
             </p>
-            <p className="not-prose"></p>
-          </div>
-
-          <PostSources
-            sources={[
-              {
-                title: "Hostfully, Property Management Software Pricing",
-                url: "https://www.hostfully.com/pricing/property-management-software/",
-              },
-              {
-                title: "Hostaway, Pricing",
-                url: "https://www.hostaway.com/pricing/",
-              },
-              {
-                title: "Hostaway, homepage",
-                url: "https://www.hostaway.com/",
-              },
-              {
-                title: "Guesty, Pricing",
-                url: "https://www.guesty.com/pricing/",
-              },
-              {
-                title: "Hostaway, What is Hostaway Marketplace?",
-                url: "https://www.hostaway.com/glossary/hostaway-marketplace/",
-              },
-              {
-                title: "Hostfully, homepage",
-                url: "https://www.hostfully.com/",
-              },
-              {
-                title: "Hostfully, Direct Booking Site",
-                url: "https://www.hostfully.com/property-management-software/features/direct-booking-site/",
-              },
-              {
-                title: "Hostaway, Communication features",
-                url: "https://www.hostaway.com/features/communication/",
-              },
-              {
-                title: "Hostaway, Integration Marketplace",
-                url: "https://www.hostaway.com/marketplace/",
-              },
-              {
-                title: "Hostaway, Automation features",
-                url: "https://www.hostaway.com/features/automation/",
-              },
-              {
-                title: "Guesty, Homeowners Portal",
-                url: "https://www.guesty.com/features/homeowners-portal/",
-              },
-              {
-                title: "Hostaway, waitlist page",
-                url: "https://www.hostaway.com/thank-you-waitlist/",
-              },
-              {
-                title: "Lodgify, Pricing",
-                url: "https://www.lodgify.com/pricing/",
-              },
-              {
-                title: "Smoobu, Pricing",
-                url: "https://www.smoobu.com/en/pricing/",
-              },
-              {
-                title: "Airbnb Help Center, Airbnb service fees",
-                url: "https://www.airbnb.com/help/article/1857",
-              },
-              {
-                title: "AirDNA, Pricing",
-                url: "https://www.airdna.co/pricing",
-              },
-            ]}
-          />
-
-          <div className="mt-10">
-            <NewsletterSignup />
-          </div>
-
-          <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
-
-          <div className="mt-10">
-            <RelatedBlogPosts currentSlug={SLUG} limit={3} />
-          </div>
+          </ArticleBody>
         </article>
-      </main>
 
-      <BlogStickyCta />
+        <PostSources
+          sources={[
+            {
+              title: "Hostfully, Property Management Software Pricing",
+              url: "https://www.hostfully.com/pricing/property-management-software/",
+            },
+            {
+              title: "Hostaway, Pricing",
+              url: "https://www.hostaway.com/pricing/",
+            },
+            {
+              title: "Hostaway, homepage",
+              url: "https://www.hostaway.com/",
+            },
+            {
+              title: "Guesty, Pricing",
+              url: "https://www.guesty.com/pricing/",
+            },
+            {
+              title: "Hostaway, What is Hostaway Marketplace?",
+              url: "https://www.hostaway.com/glossary/hostaway-marketplace/",
+            },
+            {
+              title: "Hostfully, homepage",
+              url: "https://www.hostfully.com/",
+            },
+            {
+              title: "Hostfully, Direct Booking Site",
+              url: "https://www.hostfully.com/property-management-software/features/direct-booking-site/",
+            },
+            {
+              title: "Hostaway, Communication features",
+              url: "https://www.hostaway.com/features/communication/",
+            },
+            {
+              title: "Hostaway, Integration Marketplace",
+              url: "https://www.hostaway.com/marketplace/",
+            },
+            {
+              title: "Hostaway, Automation features",
+              url: "https://www.hostaway.com/features/automation/",
+            },
+            {
+              title: "Guesty, Homeowners Portal",
+              url: "https://www.guesty.com/features/homeowners-portal/",
+            },
+            {
+              title: "Hostaway, waitlist page",
+              url: "https://www.hostaway.com/thank-you-waitlist/",
+            },
+            {
+              title: "Lodgify, Pricing",
+              url: "https://www.lodgify.com/pricing/",
+            },
+            {
+              title: "Smoobu, Pricing",
+              url: "https://www.smoobu.com/en/pricing/",
+            },
+            {
+              title: "Airbnb Help Center, Airbnb service fees",
+              url: "https://www.airbnb.com/help/article/1857",
+            },
+            {
+              title: "AirDNA, Pricing",
+              url: "https://www.airdna.co/pricing",
+            },
+          ]}
+        />
+        <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
+        <RelatedBlogPosts currentSlug={SLUG} limit={3} />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
