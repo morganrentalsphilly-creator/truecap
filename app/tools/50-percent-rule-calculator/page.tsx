@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/tools/50-percent-rule-calculator" },
   openGraph: {
     ...OPEN_GRAPH_BASE,
-    title: "50% Rule Calculator — 3-Second Rental Expense Triage",
+    title: "50% Rule Calculator — Rental Expense Triage",
     description:
       "Operating expenses ≈ half of gross rent. Run the triage live, with an adjustable expense ratio for the markets where 50% is wrong.",
     url: "/tools/50-percent-rule-calculator",
@@ -149,7 +149,7 @@ export default function FiftyPercentRuleCalculatorPage() {
               50% Rule Calculator
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground mt-2 leading-relaxed">
-              The 3-second expense triage: operating expenses run about half of
+              A first-pass expense triage: operating expenses run about half of
               gross rent, and cash flow is what survives the mortgage payment.
               Type in rent and your P&amp;I — the estimate computes live.
             </p>
@@ -180,7 +180,7 @@ export default function FiftyPercentRuleCalculatorPage() {
             </div>
             <p>
               On a $1,900/month rental with a $1,150 P&amp;I payment: expenses ≈
-              $950, NOI ≈ $950, cash flow ≈ −$200/month. Three seconds, no
+              $950, NOI ≈ $950, cash flow ≈ −$200/month. No
               spreadsheet — and in this example, a useful early warning. For the
               full honest take on the rule, see{" "}
               <Link
@@ -366,7 +366,7 @@ export default function FiftyPercentRuleCalculatorPage() {
 
           <ToolsConversionCta
             calculatorName="50% rule calculator"
-            hook="The 50% rule is a 3-second triage. TrueCap's preliminary analyzer replaces the bundled guess with itemized tax, insurance, vacancy, and CapEx assumptions, then shows how the property fits the rules you select. It's free to start."
+            hook="The 50% rule is a first-pass triage. TrueCap's preliminary analyzer replaces the bundled guess with itemized tax, insurance, vacancy, and CapEx assumptions, then shows how the property fits the rules you select. It's free to start."
           />
 
         </main>

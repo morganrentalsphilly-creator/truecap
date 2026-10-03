@@ -96,7 +96,7 @@ export default function GrmCalculatorPage() {
             under the H1 (P2-80). */}
         <PageHero
           title="GRM calculator"
-          lede="Gross Rent Multiplier — the 10-second screening ratio every real estate investor uses to triage deals before bothering with operating expenses."
+          lede="Gross Rent Multiplier — a first-pass screening ratio for triaging deals before you gather operating expenses."
           actions={<UnderTitleAnalyzeLink />}
           aside={<GrmCalculatorWidget />}
         >
@@ -119,7 +119,7 @@ export default function GrmCalculatorPage() {
                 target zip code. You don&apos;t have property tax, insurance, or
                 maintenance numbers for any of them. What you do have is price and
                 asking rent. GRM is the ratio that lets you sort that list of 40
-                into the 8 worth actually underwriting, in about 90 seconds.
+                into the 8 worth actually underwriting.
                 That&apos;s why it&apos;s the first metric every experienced
                 investor reaches for — read{" "}
                 <IntentPrefetchLink

@@ -267,7 +267,7 @@ export default function TwoPercentRuleCalculatorPage() {
                 >
                   50% rule
                 </IntentPrefetchLink>{" "}
-                on top for a 3-second expense check: if half the rent disappears
+                on top for a quick expense check: if half the rent disappears
                 into operating costs, does the deal still clear your mortgage
                 payment?
               </p>
