@@ -180,7 +180,7 @@ const EMBED_WIDGETS: Record<EmbedSlug, EmbedWidgetSpec> = {
         ),
       { loading: EmbedLoading },
     ),
-    defaultHeight: 600,
+    defaultHeight: 640,
   },
   "roi-calculator": {
     Widget: dynamic(
