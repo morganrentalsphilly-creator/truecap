@@ -280,4 +280,15 @@ describe("comps are up to 50 a month (P1-10)", () => {
       }
     }
   });
+
+  it("the /pricing table cell says up to, in the Pro and Agent Pro columns", () => {
+    // The Agent Pro column inherits the Pro cell (AGENT_PRO_CELLS has no
+    // comps entry), so one cell covers both paid columns.
+    const page = read("app/pricing/page.tsx");
+    expect(page).toContain(
+      '["Sale + rent comps from the address", "1 free", "Up to 50 / mo"],',
+    );
+    expect(page).not.toMatch(/"50 ?\/ ?mo"/);
+    expect(page).not.toMatch(/"Sale \+ rent comps from the address":/);
+  });
 });
