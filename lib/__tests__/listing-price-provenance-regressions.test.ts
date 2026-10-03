@@ -88,7 +88,12 @@ describe("listing-price provenance regressions", () => {
 
   it("describes listing-link enrichment without claiming to scrape the listing", () => {
     expect(listingLink).toContain("TrueCap extracts the address");
+    // The price lookup runs only for a paid subscription
+    // (app/actions/property-comps.ts proOnly), so the help text names it.
     expect(listingLink).toContain(
+      "a signed-in lookup on a paid plan can also fill the active\n        asking price",
+    );
+    expect(listingLink).not.toContain(
       "a signed-in lookup can also fill the active asking price",
     );
     expect(listingLink).toContain("other values remain labeled estimates");

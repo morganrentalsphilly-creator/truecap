@@ -213,6 +213,11 @@ import {
 import { consumeProductEvaluationUsageAction } from "@/app/actions/product-evaluation";
 import { claimAnonymousDecisionAction } from "@/app/actions/anonymous-decision";
 import {
+  ANONYMOUS_DECISION_INPUT_BOUND_NOTE,
+  anonymousDecisionUsedDescription,
+} from "@/lib/anonymous-decision-copy";
+import { announceTrialUsage } from "@/lib/pricing-evaluation";
+import {
   ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE,
   anonymousDecisionPresentationGrantMatches,
   bindAnonymousDecisionPresentationGrant,
@@ -1222,6 +1227,11 @@ export function InvestCalcPage({
     address: string;
     phase: "looking-up" | "needs-input";
   } | null>(null);
+  // The handoff token whose paid-plan listing lookup was refused, so the
+  // listing panel can say why the price was not filled.
+  const [listingLookupRefusedToken, setListingLookupRefusedToken] = useState<
+    string | null
+  >(null);
   // ── Progressive disclosure (financing + operating expenses) ──────────
   // Cold visitors start with just the basics (property type, address,
   // price, beds/rent); financing + operating expenses collapse behind a
@@ -1403,6 +1413,11 @@ export function InvestCalcPage({
   const [anonymousDecisionGrantAvailable, setAnonymousDecisionGrantAvailable] =
     useState(false);
   const anonymousDecisionGrantFormJsonRef = useRef<string | null>(null);
+  // Presentation only: true once this page has seen the browser's no-signup
+  // decision claimed (now or earlier). It gates the note beside "Recalculate
+  // analysis"; it authorizes nothing.
+  const [anonymousDecisionClaimSeen, setAnonymousDecisionClaimSeen] =
+    useState(false);
   const clearAnonymousDecisionPresentationGrant = useCallback(() => {
     anonymousDecisionGrantFormJsonRef.current = null;
     setAnonymousDecisionGrantAvailable(false);
@@ -6305,6 +6320,9 @@ export function InvestCalcPage({
           );
           anonymousDecisionGrantFormJsonRef.current = boundFormSnapshot;
           setAnonymousDecisionGrantAvailable(boundFormSnapshot !== null);
+          if (anonymousGrant.ok || anonymousGrant.code === "LIMIT_REACHED") {
+            setAnonymousDecisionClaimSeen(true);
+          }
           if (!anonymousGrant.ok) {
             toast({
               title:
@@ -6315,12 +6333,14 @@ export function InvestCalcPage({
                     : anonymousGrant.code === "UNAVAILABLE"
                       ? "Complete decision unavailable"
                       : "Review required",
-              // The hourly cap's own words are written here, on the page:
-              // the action's message gave no limit and no way to continue.
-              // The cap and the action are unchanged.
+              // The hourly cap and LIMIT_REACHED get the page's own text: the
+              // action's messages gave no limit, no reason and no way to
+              // continue. The cap, the grant and the action are unchanged.
               description:
                 anonymousGrant.code === "RATE_LIMITED"
                   ? ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE
+                  : anonymousGrant.code === "LIMIT_REACHED"
+                    ? anonymousDecisionUsedDescription()
                   : anonymousGrant.message,
               variant: "warning",
               ...(anonymousGrant.code === "RATE_LIMITED"
@@ -6374,6 +6394,12 @@ export function InvestCalcPage({
         ) {
           trackEvent("evaluation_deal_completed", {
             deal_number: usage.dealsUsed,
+          });
+          // Tell the trial strip the new count. A browser event, not a
+          // refetch: no second metered call and no server round trip.
+          announceTrialUsage({
+            dealsUsed: usage.dealsUsed,
+            comparisonsUsed: usage.comparisonsUsed,
           });
           if (usage.dealsUsed === 2) {
             trackEvent("second_deal_completed", { within_days: 21 });
@@ -8901,6 +8927,14 @@ export function InvestCalcPage({
           if (r.ok && handoffStillCurrent()) {
             applyComps(r.enrichment);
             compsFilled = true;
+          } else if (
+            !r.ok &&
+            r.code === "ENTITLEMENT_REQUIRED" &&
+            handoffStillCurrent()
+          ) {
+            // The lookup is refused for free and trial accounts. Say so at
+            // the listing panel instead of dropping the refusal.
+            setListingLookupRefusedToken(detail.token);
           }
         } catch (err) {
           console.warn("[listing comps] lookup failed:", err);
@@ -9971,6 +10005,14 @@ export function InvestCalcPage({
                         ? "Review the visible decision criteria below. The update action will adopt those criteria before calculating an Offer Ceiling."
                         : "Change only what you need. Edits stay in the form; incomplete entries keep the last complete result clearly labeled. Your saved deal is unchanged until you press Save."}
                     </p>
+                    {!isAuthenticated && anonymousDecisionClaimSeen ? (
+                      <p
+                        data-anonymous-decision-note=""
+                        className="mt-1.5 text-sm text-muted-foreground"
+                      >
+                        {ANONYMOUS_DECISION_INPUT_BOUND_NOTE}
+                      </p>
+                    ) : null}
                   </div>
                   <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row">
                     <Button
@@ -10187,6 +10229,11 @@ export function InvestCalcPage({
                             : null
                         }
                         onFocusMissingField={focusInvalidField}
+                        priceLookupRefused={
+                          listingImportStatus !== null &&
+                          listingImportStatus.token ===
+                            listingLookupRefusedToken
+                        }
                       />
                     }
                     sampleSlot={
