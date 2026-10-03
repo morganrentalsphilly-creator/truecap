@@ -238,7 +238,7 @@ export default function OffMarketPost() {
           </p>
           <ul>
             <li><strong>Speed of response</strong> — answer calls and emails within 4 hours, ideally faster. Sellers who reach out to multiple investors often go with whoever responds first.</li>
-            <li><strong>Speed of underwriting</strong> — being able to run a deal quickly lets you respond to far more leads each month. <Link href="/" className="tc-link">TrueCap</Link> exists specifically for this moment.</li>
+            <li><strong>Speed of underwriting</strong> — running the numbers on a lead the day it arrives lets you answer while the seller is still deciding. <Link href="/" className="tc-link">TrueCap</Link> exists specifically for this moment.</li>
             <li><strong>Clear buying criteria</strong> — wholesalers + agents send deals to investors who say &quot;yes&quot; or &quot;no&quot; cleanly. Investors who waffle get fewer deals.</li>
             <li><strong>Reliability of close</strong> — fall through on one deal and the source stops sending you deals. Close fast, close clean, close on terms agreed.</li>
           </ul>
