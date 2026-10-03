@@ -18,15 +18,28 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -126,29 +139,27 @@ export default function OperatingExpenseRatioPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>
               Operating expense ratio (OER): what&apos;s a good one for a
               rental? (2026)
             </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -156,7 +167,8 @@ export default function OperatingExpenseRatioPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               Two rentals can collect the exact same rent and be worth wildly
               different amounts, because one keeps 60 cents of every rent dollar
               and the other keeps 40. The operating expense ratio is the number
@@ -170,19 +182,13 @@ export default function OperatingExpenseRatioPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What the operating expense ratio measures
-            </h2>
+          <ArticleBody>
+            <h2>What the operating expense ratio measures</h2>
             <p>
               The operating expense ratio is the share of a property&apos;s
               income that gets eaten by the cost of running it:
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                OER = Operating expenses ÷ Effective gross income
-              </code>
-            </div>
+            <ToolFormula formula="OER = Operating expenses ÷ Effective gross income" />
             <p>
               <strong>Effective gross income</strong> (EGI) is all the money the
               property actually brings in: gross potential rent, plus any other
@@ -197,7 +203,7 @@ export default function OperatingExpenseRatioPost() {
               cents survives as{" "}
               <Link
                 href="/blog/how-to-calculate-noi-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 net operating income
               </Link>
@@ -210,7 +216,7 @@ export default function OperatingExpenseRatioPost() {
               it is set by capitalizing NOI (
               <a
                 href="https://selling-guide.fanniemae.com/sel/b4-1.3-10/cost-and-income-approach-value"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 agency appraisals of two-to-four-unit rentals instead apply a
                 gross rent multiplier to gross rent
@@ -219,16 +225,14 @@ export default function OperatingExpenseRatioPost() {
               direction.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What counts as an operating expense — and what doesn&apos;t
-            </h2>
+            <h2>What counts as an operating expense — and what doesn&apos;t</h2>
             <p>
               The ratio is only as honest as the line items you feed it, and the
               classification is where most people go wrong. An operating expense
               is a recurring cost of running the property that any owner would
               face regardless of how they financed it. That includes:
             </p>
-            <ul className="list-disc pl-6 space-y-1">
+            <ul>
               <li>Property taxes and insurance</li>
               <li>Property management (even if you self-manage — more below)</li>
               <li>Repairs and maintenance</li>
@@ -239,7 +243,7 @@ export default function OperatingExpenseRatioPost() {
                 Replacement reserves for big-ticket items (
                 <a
                   href="https://www.hud.gov/sites/dfiles/OCHCO/documents/4430GHSGG.pdf"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   HUD&apos;s multifamily appraisal rules count them in total
                   operating expenses
@@ -251,7 +255,7 @@ export default function OperatingExpenseRatioPost() {
               Four costs are <strong>not</strong> operating expenses, and folding
               any of them in wrecks the ratio:
             </p>
-            <ul className="list-disc pl-6 space-y-1">
+            <ul>
               <li>
                 <strong>The mortgage.</strong> Principal and interest are
                 financing, not operations. Debt service lives below NOI, so it
@@ -261,7 +265,7 @@ export default function OperatingExpenseRatioPost() {
                 <strong>Depreciation.</strong> A{" "}
                 <a
                   href="https://www.irs.gov/publications/p527"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   paper deduction on your tax return
                 </a>
@@ -272,7 +276,7 @@ export default function OperatingExpenseRatioPost() {
                 replacement is a{" "}
                 <a
                   href="https://www.irs.gov/publications/p527"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   capital item
                 </a>
@@ -294,16 +298,14 @@ export default function OperatingExpenseRatioPost() {
               pressure-test the assumption that drives that denominator, the{" "}
               <Link
                 href="/tools/vacancy-rate-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 vacancy rate calculator
               </Link>{" "}
               derives it from turnover instead of guessing 5%.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              A worked example: the $250K duplex
-            </h2>
+            <h2>A worked example: the $250K duplex</h2>
             <p>
               Take a $250,000 duplex, two units at $1,250/month, so $30,000 of
               gross potential rent a year. Assume 6% vacancy and collection loss,
@@ -311,8 +313,8 @@ export default function OperatingExpenseRatioPost() {
               <strong>$28,200 of effective gross income</strong>. Here are the
               operating expenses, line by line:
             </p>
-            <ScrollX label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
+            <ArticleTable label="Data table" stickyFirstColumn={false}>
+              <table className="[&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
                 <thead>
                   <tr>
                     <th className="text-left">Operating expense</th>
@@ -354,7 +356,7 @@ export default function OperatingExpenseRatioPost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
             <p>
               So the ratio is $11,156 ÷ $28,200 ≈ <strong>40%</strong>, and NOI
               is $28,200 − $11,156 = <strong>$17,044</strong>, a 6.8% cap rate on
@@ -367,7 +369,7 @@ export default function OperatingExpenseRatioPost() {
               building. It&apos;s the classic{" "}
               <Link
                 href="/blog/capex-maintenance-reserves-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 reserves-and-CapEx question
               </Link>
@@ -375,9 +377,7 @@ export default function OperatingExpenseRatioPost() {
               deal and one that tells the truth.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              What&apos;s a good OER? Rough benchmark bands
-            </h2>
+            <h2>What&apos;s a good OER? Rough benchmark bands</h2>
             <p>
               There is no single right answer, because the ratio depends heavily
               on the age of the building, who pays the utilities, and how
@@ -385,8 +385,8 @@ export default function OperatingExpenseRatioPost() {
               thumb, not measured 2026 data), measured on effective gross income
               and excluding debt service:
             </p>
-            <ScrollX label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm [&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
+            <ArticleTable label="Data table" stickyFirstColumn={false}>
+              <table className="[&_td:last-child]:whitespace-nowrap [&_td:last-child]:text-right [&_th:last-child]:text-right">
                 <thead>
                   <tr>
                     <th className="text-left">Property profile</th>
@@ -412,7 +412,7 @@ export default function OperatingExpenseRatioPost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
             <p>
               Two cautions before you use these. First, a high OER isn&apos;t
               automatically a bad deal — a building can run at 55% and still be a
@@ -429,7 +429,7 @@ export default function OperatingExpenseRatioPost() {
               For a measured anchor, in the Census Bureau and HUD&apos;s{" "}
               <a
                 href="https://www.census.gov/content/dam/Census/library/visualizations/2021/econ/2021-RHFS-Infographic-tagged.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 2021 Rental Housing Finance Survey
               </a>{" "}
@@ -441,14 +441,12 @@ export default function OperatingExpenseRatioPost() {
               a given property should budget.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              OER and the 50% rule are the same idea
-            </h2>
+            <h2>OER and the 50% rule are the same idea</h2>
             <p>
               If the ratio feels familiar, it should: the{" "}
               <Link
                 href="/blog/50-percent-rule-rentals"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 50% rule
               </Link>{" "}
@@ -471,9 +469,7 @@ export default function OperatingExpenseRatioPost() {
               it.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              From OER to value: why the ratio moves the price
-            </h2>
+            <h2>From OER to value: why the ratio moves the price</h2>
             <p>
               Here&apos;s the part that turns OER from a trivia number into a
               money number. Wherever value is set by capitalizing income, it runs
@@ -481,11 +477,13 @@ export default function OperatingExpenseRatioPost() {
               OER (agency appraisals of two-to-four-unit rentals use a gross rent
               multiplier instead):
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                NOI = EGI × (1 − OER) &nbsp;→&nbsp; Value = NOI ÷ market cap rate
-              </code>
-            </div>
+            <ToolFormula
+              formula={
+                <>
+                  NOI = EGI × (1 − OER) &nbsp;→&nbsp; Value = NOI ÷ market cap rate
+                </>
+              }
+            />
             <p>
               Because value is a multiple of NOI, and NOI moves one-for-one with
               the OER, a small error in the ratio levers into a large error in
@@ -503,7 +501,7 @@ export default function OperatingExpenseRatioPost() {
               that causes it. The free{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap analyzer
               </Link>{" "}
@@ -511,10 +509,8 @@ export default function OperatingExpenseRatioPost() {
               NOI and cap rate re-price together, line by line.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Five ways people get OER wrong
-            </h2>
-            <ul className="list-disc pl-6 space-y-2">
+            <h2>Five ways people get OER wrong</h2>
+            <ul>
               <li>
                 <strong>Putting the mortgage in the numerator.</strong> Debt
                 service is financing, not operations. It belongs below NOI. This
@@ -546,21 +542,20 @@ export default function OperatingExpenseRatioPost() {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
+          </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The bottom line
-            </h2>
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
+
+          <ArticleBody className="mt-16">
+            <h2>The bottom line</h2>
             <p>
               The operating expense ratio is the cleanest one-number read on how
               hard a property has to work to keep what it earns. Compute it
@@ -573,12 +568,12 @@ export default function OperatingExpenseRatioPost() {
               overpaying. Anchor it against the{" "}
               <Link
                 href="/blog/50-percent-rule-rentals"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 50% rule
               </Link>{" "}
               as a sanity check, and let the{" "}
-              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="tc-link">
                 TrueCap analyzer
               </Link>{" "}
               carry the operating expenses straight through to NOI, cap rate,
@@ -587,7 +582,7 @@ export default function OperatingExpenseRatioPost() {
               expenses, taxes, and rents on any specific property before you rely
               on the ratio.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -611,13 +606,12 @@ export default function OperatingExpenseRatioPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
