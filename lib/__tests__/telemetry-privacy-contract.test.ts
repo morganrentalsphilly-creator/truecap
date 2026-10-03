@@ -54,7 +54,19 @@ describe("telemetry privacy contract", () => {
     expect(layout).not.toContain("googletagmanager.com/gtm.js");
     expect(vercel).toContain("beforeSend={sanitizeVercelAnalyticsEvent}");
     expect(vercel).toContain("sanitizeSensitiveUrl(event.url)");
-    expect(vercel).toContain("shouldKeepThirdPartyTelemetryDisabled");
+    // Vercel's mount uses the cookieless gate: the strict gate plus an exact
+    // allowlist of two `next` values (lib/sensitive-url.ts, P1-49). Google
+    // and PostHog must stay on the strict one.
+    expect(vercel).toContain("shouldKeepCookielessPageAnalyticsDisabled");
+    expect(vercel).not.toContain("isCountedNextLocation(");
+    expect(google).not.toContain("shouldKeepCookielessPageAnalyticsDisabled");
+    expect(google).not.toContain("isCountedNextLocation");
+    expect(read("components/analytics/posthog-provider.tsx")).not.toMatch(
+      /shouldKeepCookielessPageAnalyticsDisabled|isCountedNextLocation/,
+    );
+    expect(read("lib/analytics.ts")).not.toMatch(
+      /shouldKeepCookielessPageAnalyticsDisabled|isCountedNextLocation/,
+    );
 
     const config = read("next.config.mjs");
     for (const route of [
