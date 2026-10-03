@@ -186,6 +186,45 @@ export function classifyStripeSubscriptions(
   return mismatches;
 }
 
+export type ForeignMissingLocalFilter = {
+  /** Paid in Stripe, no local row, and ours (or not provably foreign). */
+  kept: string[];
+  /** Paid in Stripe, no local row, and the other product's: not drift. */
+  skippedForeignApp: number;
+  /** The foreign check itself failed; the id is KEPT so it is still reported. */
+  foreignCheckErrors: number;
+};
+
+/**
+ * The Stripe account is shared with another product. Its paid subscriptions
+ * have no local row by design, so category (a) "paid in Stripe, no local
+ * row" reported every one of them as drift on every run. This drops them,
+ * using the same rule the webhook and lib/billing/reconcile.ts use
+ * (isForeignSubscription in lib/stripe/billing-user-resolution.ts), which the
+ * route injects as `isForeign` so this module still does no IO of its own.
+ *
+ * Only `missingLocal` is filtered: the other categories need a local
+ * subscriptions row, and a subscription with a local row is never skipped.
+ * A check that throws keeps the id, so a failure can hide nothing.
+ */
+export async function dropForeignMissingLocal(
+  missingLocal: readonly string[],
+  isForeign: (stripeSubscriptionId: string) => Promise<boolean>
+): Promise<ForeignMissingLocalFilter> {
+  const result: ForeignMissingLocalFilter = { kept: [], skippedForeignApp: 0, foreignCheckErrors: 0 };
+  for (const id of missingLocal) {
+    let foreign = false;
+    try {
+      foreign = await isForeign(id);
+    } catch {
+      result.foreignCheckErrors += 1;
+    }
+    if (foreign) result.skippedForeignApp += 1;
+    else result.kept.push(id);
+  }
+  return result;
+}
+
 export type LocalPaidPartition = {
   /**
    * Paid locally, has a stripe_subscription_id, but that id wasn't in

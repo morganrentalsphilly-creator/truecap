@@ -39,6 +39,12 @@
  * retrieve so the listing cap can't cause false alarms. A retrieve
  * failure (e.g. 404) is reported, never guess-canceled.
  *
+ * The Stripe account is shared with another product. Category (a) skips
+ * that product's subscriptions with the same isForeignSubscription rule
+ * the webhook and lib/billing/reconcile.ts use; they are counted in the
+ * summary (`skipped_foreign_app`), never reported as drift and never sent
+ * to the heal path. A subscription with a local row is never skipped.
+ *
  * Pure classification logic lives in lib/stripe-reconcile.ts (unit-
  * tested); this route is IO only.
  */
@@ -50,8 +56,10 @@ import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe/client";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { upsertSubscriptionFromStripe } from "@/lib/stripe/subscription-sync";
+import { isForeignSubscription } from "@/lib/stripe/billing-user-resolution";
 import {
   classifyStripeSubscriptions,
+  dropForeignMissingLocal,
   orphanNeedsHeal,
   partitionLocalPaidRows,
   resolveReconcileMode,
@@ -182,6 +190,14 @@ export async function GET(request: Request) {
       localRows
     );
 
+    // The shared account's other product: paid there, no local row here, by
+    // design. Not drift. A failed check keeps the id in the report.
+    const foreignFilter = await dropForeignMissingLocal(mismatches.missingLocal, async (id) => {
+      const sub = stripeSubsById.get(id);
+      return sub ? isForeignSubscription(admin, sub) : false;
+    });
+    mismatches.missingLocal = foreignFilter.kept;
+
     // (d) inverse: local paid rows whose Stripe sub wasn't in the
     // listing. Confirm each via retrieve — the cap makes "not listed"
     // inconclusive on its own.
@@ -305,6 +321,8 @@ export async function GET(request: Request) {
             ),
             stripe_listing_truncated: listingTruncated,
             local_read_truncated: localTruncated,
+            skipped_foreign_app: foreignFilter.skippedForeignApp,
+            foreign_check_errors: foreignFilter.foreignCheckErrors,
             healed,
             heal_failures: healFailures.length,
           },
@@ -323,6 +341,8 @@ export async function GET(request: Request) {
         stripe_subscriptions_scanned: stripeSubsById.size,
         stripe_listing_truncated: listingTruncated,
         local_read_truncated: localTruncated,
+        skipped_foreign_app: foreignFilter.skippedForeignApp,
+        foreign_check_errors: foreignFilter.foreignCheckErrors,
         missing_local: mismatches.missingLocal.length,
         null_plan: mismatches.nullPlan.length,
         status_mismatch: mismatches.statusMismatch.length,
@@ -334,7 +354,7 @@ export async function GET(request: Request) {
       },
     };
     console.log(
-      `[cron/reconcile-stripe] ${mode.toUpperCase()} — stuck=${stuckEvents.length}, scanned=${stripeSubsById.size}, drift=${anyDrift ? "yes" : "no"}, healed=${healed}`
+      `[cron/reconcile-stripe] ${mode.toUpperCase()} — stuck=${stuckEvents.length}, scanned=${stripeSubsById.size}, drift=${anyDrift ? "yes" : "no"}, healed=${healed}, foreign=${foreignFilter.skippedForeignApp}`
     );
     return NextResponse.json(summary);
   } catch (error) {
