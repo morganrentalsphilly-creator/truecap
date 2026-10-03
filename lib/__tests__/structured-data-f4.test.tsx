@@ -32,6 +32,15 @@ vi.mock("@/lib/supabase/server", () => ({
   createServerSupabaseClient: async () => ({ auth: { getUser: async () => ({ data: { user: null } }) } }),
 }));
 vi.mock("@/lib/stripe/display-prices", () => ({ loadStripeDisplayPrice: async () => null }));
+// The homepage and /pricing mount <Testimonials />, which reads published rows
+// through the service-role client. With Supabase variables set (CI sets
+// placeholders) that was a real request to the placeholder host, retried
+// until it gave up. The component turns any failed read into no rows, and no
+// row is published, so an empty list renders what the live page renders.
+vi.mock("@/lib/testimonials/store", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/testimonials/store")>()),
+  listPublishedTestimonials: async () => [],
+}));
 // The unreleased calculators call permanentRedirect before they render; the
 // release-readiness check below renders them past it (and only there).
 const navigation = vi.hoisted(() => ({ renderPastRedirects: false }));
