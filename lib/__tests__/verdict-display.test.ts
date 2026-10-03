@@ -106,7 +106,9 @@ describe("verdict display — single source of wording", () => {
     for (const file of [
       "lib/compare-metrics.ts",
       "components/investcalc/saved-analyses-page-v2.tsx",
-      "app/d/[encoded]/opengraph-image.tsx",
+      // The share links' card. It was app/d/[encoded]/opengraph-image.tsx
+      // until one deal-free card replaced it for /s and /d.
+      "app/og/share/route.tsx",
       "lib/deal-score.ts",
     ]) {
       const source = read(file);

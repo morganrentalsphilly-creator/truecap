@@ -240,10 +240,11 @@ describe("social card contract", () => {
 
   /**
    * Pages that set a page-level openGraph and name no image on purpose.
-   * /s/[token] is a private, noindexed share page with a "summary" card:
-   * whether it should show an image is a product decision, not this test's.
+   * None today. /s/[token] was the one until 2026-10-03, when the share
+   * preview was decided: both share pages name the one deal-free card,
+   * /og/share (lib/__tests__/share-link-preview.test.ts).
    */
-  const NO_IMAGE_BY_DESIGN = new Set(["app/s/[token]/page.tsx"]);
+  const NO_IMAGE_BY_DESIGN = new Set<string>([]);
 
   it("walks the real tree (a walker that finds nothing guards nothing)", () => {
     expect(PAGES.length).toBeGreaterThan(150);
@@ -293,11 +294,13 @@ describe("social card contract", () => {
     expect(openGraphBlocks(twitterOnly)[0]).not.toMatch(IMAGES_KEY);
     expect(openGraphBlocks("const m = { openGraph: shared };")).toEqual([null]);
     expect(openGraphBlocks("const m = { title: 1 };")).toEqual([]);
-    // The walk finds real blocks: the one page excused above has one, with no image.
+    // The walk finds real blocks: the share page has one, and it names the
+    // share card (it named no image until the preview was decided).
     const share = openGraphBlocks(visible("app/s/[token]/page.tsx"));
     expect(share).toHaveLength(1);
     expect(share[0]).not.toBeNull();
-    expect(share[0]).not.toMatch(IMAGES_KEY);
+    expect(share[0]).toMatch(IMAGES_KEY);
+    expect(share[0]).toContain("images: [SHARE_CARD_IMAGE]");
     const markets = openGraphBlocks(visible("app/markets/page.tsx"));
     expect(markets).toHaveLength(1);
     expect(markets[0]).toMatch(IMAGES_KEY);
@@ -369,7 +372,9 @@ describe("social card contract", () => {
     // Page-level openGraph drops og:site_name and og:locale unless the page
     // spreads the base (2026-10 audit: missing on every sitemap page).
     //
-    // Three groups wait, each on a decision this test does not make:
+    // Two groups wait, each on a decision this test does not make (the two
+    // share pages were a third until their preview was decided on
+    // 2026-10-03; they carry the base now and are checked like the rest):
     //   - The comparison pages, blog posts and research pages the weekly SEO
     //     loop writes (app/vs/<slug>, app/blog/<slug>, app/research/<slug>:
     //     seo/config.json `paths.agentAllow`). The loop's verifier refuses
@@ -377,18 +382,11 @@ describe("social card contract", () => {
     //     (`paths.importAllow`), and the base's module is not on it. They
     //     take the base once it is. Posts built with
     //     buildSourceFirstArticleMetadata already have it through the builder.
-    //   - The two share pages. What a texted /s or /d link previews as,
-    //     site name included, is an open product decision.
     //   - Terms and Privacy. The 2026-10 fixes leave both files exactly as
     //     they were, metadata included, until their owner says otherwise.
     const LOOP_EDITED = /^app\/(?:vs|blog|research)\/[^/[\]]+\/page\.tsx$/;
-    const SHARE_PAGES = new Set([
-      "app/s/[token]/page.tsx",
-      "app/d/[encoded]/page.tsx",
-    ]);
     const LEGAL_PAGES = new Set(["app/terms/page.tsx", "app/privacy/page.tsx"]);
     const held = (page: string) =>
-      SHARE_PAGES.has(page) ||
       LEGAL_PAGES.has(page) ||
       (LOOP_EDITED.test(page) && page !== "app/blog/topics/page.tsx");
     // The loop's own list still names all three page families held above.

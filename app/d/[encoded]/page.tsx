@@ -10,6 +10,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { decodeShareLink } from "@/lib/share-link";
+import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
+import { SHARE_CARD_IMAGE } from "@/lib/og/share-card";
 import { calculateAnalysis } from "@/lib/calc-analysis";
 import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import { SharedDealShell } from "@/components/investcalc/shared-deal-shell";
@@ -44,17 +46,24 @@ export async function generateMetadata(): Promise<Metadata> {
     // another copy for crawlers, browser extensions, or downstream tooling.
     robots: { index: false, follow: false }, // share links shouldn't be indexed
     openGraph: {
+      ...OPEN_GRAPH_BASE,
+      type: "website",
       title: socialTitle,
       description: "Shared via TrueCap.",
-      // No `images` here: Next serves the sibling opengraph-image.tsx only
-      // when the page names no image. That card is the same for every
-      // legacy link and shows no address, metric or verdict, because an
-      // unfurler caches what it reads outside TrueCap's privacy boundary.
+      // No `url`: this page's address IS the encoded snapshot, and og:url
+      // would be the second copy the note above rules out.
+      // The one deal-free card every share link shows (app/og/share): the
+      // same image for every link, with no address, metric or verdict,
+      // because an unfurler caches what it reads outside TrueCap's privacy
+      // boundary. Its URL is outside /d/, so it carries no snapshot either
+      // and robots.txt does not put it off limits.
+      images: [SHARE_CARD_IMAGE],
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: socialTitle,
       description: "Shared via TrueCap.",
+      images: [SHARE_CARD_IMAGE.url],
     },
   };
 }
