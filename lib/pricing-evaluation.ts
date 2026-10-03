@@ -1,4 +1,8 @@
-import type { ProductAccessState } from "@/lib/product-access";
+import {
+  PRODUCT_EVALUATION_COMPARISON_LIMIT,
+  PRODUCT_EVALUATION_DEAL_LIMIT,
+  type ProductAccessState,
+} from "@/lib/product-access";
 
 export type PricingEvaluationSummary = {
   status: "active" | "exhausted" | "expired" | "unavailable";
@@ -59,4 +63,58 @@ export function formatPricingEvaluationAllowance(
     );
   }
   return allowances.length > 0 ? `${allowances.join(" + ")} remaining` : null;
+}
+
+/**
+ * The analyzer announces each newly metered trial run with this browser event
+ * so the trial strip can show the new count. The counts come from the result
+ * of the one metering call the run already made: announcing them makes no
+ * request, so the strip can never cause a second metered call.
+ */
+export const TRIAL_USAGE_EVENT = "truecap:trial-usage";
+
+export type TrialUsageDetail = {
+  dealsUsed: number | null;
+  comparisonsUsed: number | null;
+};
+
+export function announceTrialUsage(detail: TrialUsageDetail): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(TRIAL_USAGE_EVENT, { detail }));
+}
+
+/**
+ * Fold a usage announcement into the summary the strip is showing. A count
+ * never goes back up: a stale or malformed announcement cannot restore
+ * allowance the server already debited.
+ */
+export function applyTrialUsage(
+  current: PricingEvaluationSummary,
+  detail: Partial<TrialUsageDetail> | null | undefined,
+): PricingEvaluationSummary {
+  if (current.status !== "active") return current;
+  const remainingAfter = (
+    used: number | null | undefined,
+    limit: number,
+    shown: number,
+  ) =>
+    typeof used === "number" && Number.isFinite(used)
+      ? Math.min(shown, Math.max(0, limit - Math.floor(used)))
+      : shown;
+  const dealsRemaining = remainingAfter(
+    detail?.dealsUsed,
+    PRODUCT_EVALUATION_DEAL_LIMIT,
+    current.dealsRemaining,
+  );
+  const comparisonsRemaining = remainingAfter(
+    detail?.comparisonsUsed,
+    PRODUCT_EVALUATION_COMPARISON_LIMIT,
+    current.comparisonsRemaining,
+  );
+  return {
+    status:
+      dealsRemaining === 0 && comparisonsRemaining === 0 ? "exhausted" : "active",
+    dealsRemaining,
+    comparisonsRemaining,
+  };
 }
