@@ -621,14 +621,14 @@ export default function BlogPost() {
               href="/blog/gross-rent-multiplier-explained"
               className="tc-link"
             >
-              Gross rent multiplier explained →
+              Gross rent multiplier explained
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/what-is-a-good-cap-rate"
               className="tc-link"
             >
-              What is a good cap rate? →
+              What is a good cap rate?
             </Link>
           </p>
         </footer>

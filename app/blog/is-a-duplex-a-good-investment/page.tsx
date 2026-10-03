@@ -1295,14 +1295,14 @@ export default function BlogPost() {
               href="/blog/single-family-vs-multi-family-rental"
               className="tc-link"
             >
-              Single-family vs multi-family rental →
+              Single-family vs multi-family rental
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/house-hack-underwriting-guide"
               className="tc-link"
             >
-              House hack underwriting: does it beat renting? →
+              House hack underwriting: does it beat renting?
             </Link>
           </p>
         </footer>

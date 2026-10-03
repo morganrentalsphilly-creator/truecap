@@ -45,6 +45,16 @@ describe("BlogStickyCta on and off the article frame", () => {
   });
 });
 
+describe("link text in posts", () => {
+  it("never ends in an arrow (DESIGN.md: no arrow suffixes)", () => {
+    // Ten posts closed their related links with " \u2192" until wave 6. An
+    // arrow inside prose or a formula ("$31,200/year \u2192 GRM 8.0") is not
+    // link text and is left alone.
+    const ARROW_BEFORE_CLOSE = /(?:\u2192|\u00bb|&rarr;|-&gt;)\s*(?:\{" "\}\s*)?<\/(?:Link|IntentPrefetchLink|a)>/;
+    for (const file of POST_FILES) expect(read(file), file).not.toMatch(ARROW_BEFORE_CLOSE);
+  });
+});
+
 describe("/blog/1-percent-rule-rental-property renders in the article frame", () => {
   const source = read("app/blog/1-percent-rule-rental-property/page.tsx");
   const html = renderToStaticMarkup(<OnePercentRulePost />);

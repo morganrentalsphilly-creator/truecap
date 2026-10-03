@@ -496,21 +496,21 @@ export default function BlogPost() {
               href="/blog/piti-explained-rental-property"
               className="tc-link"
             >
-              PITI explained →
+              PITI explained
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/how-to-calculate-noi-rental-property"
               className="tc-link"
             >
-              How to calculate NOI →
+              How to calculate NOI
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/capex-maintenance-reserves-rental-property"
               className="tc-link"
             >
-              CapEx &amp; reserves →
+              CapEx &amp; reserves
             </Link>
           </p>
         </footer>

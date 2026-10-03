@@ -1318,14 +1318,14 @@ export default function BlogPost() {
               href="/blog/how-much-down-payment-investment-property"
               className="tc-link"
             >
-              How much down payment for an investment property? →
+              How much down payment for an investment property?
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/closing-costs-investment-property"
               className="tc-link"
             >
-              Closing costs on an investment property →
+              Closing costs on an investment property
             </Link>
           </p>
         </footer>

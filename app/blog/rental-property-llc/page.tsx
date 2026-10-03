@@ -531,21 +531,21 @@ export default function BlogPost() {
               href="/blog/rental-property-insurance"
               className="tc-link"
             >
-              Rental property insurance →
+              Rental property insurance
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/schedule-e-rental-property"
               className="tc-link"
             >
-              Schedule E walkthrough →
+              Schedule E walkthrough
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/how-to-calculate-dscr#dscr-loans"
               className="tc-link"
             >
-              DSCR loans explained →
+              DSCR loans explained
             </Link>
           </p>
         </footer>
