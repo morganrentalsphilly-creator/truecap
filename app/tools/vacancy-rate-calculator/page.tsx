@@ -263,7 +263,7 @@ export default function VacancyRateCalculatorPage() {
                     term: (
                       <IntentPrefetchLink
                         href="/tools/break-even-calculator"
-                        className="tc-link"
+                        className="tc-link inline-flex min-h-11 items-center"
                       >
                         Break-even calculator
                       </IntentPrefetchLink>
@@ -273,7 +273,7 @@ export default function VacancyRateCalculatorPage() {
                     term: (
                       <IntentPrefetchLink
                         href="/blog/how-to-calculate-noi-rental-property"
-                        className="tc-link"
+                        className="tc-link inline-flex min-h-11 items-center"
                       >
                         How to calculate NOI
                       </IntentPrefetchLink>
@@ -283,7 +283,7 @@ export default function VacancyRateCalculatorPage() {
                     term: (
                       <IntentPrefetchLink
                         href="/blog/how-to-calculate-cap-rate"
-                        className="tc-link"
+                        className="tc-link inline-flex min-h-11 items-center"
                       >
                         How to calculate cap rate
                       </IntentPrefetchLink>
@@ -293,7 +293,7 @@ export default function VacancyRateCalculatorPage() {
                     term: (
                       <IntentPrefetchLink
                         href="/blog/how-to-calculate-cash-on-cash-return"
-                        className="tc-link"
+                        className="tc-link inline-flex min-h-11 items-center"
                       >
                         How to calculate cash-on-cash
                       </IntentPrefetchLink>
