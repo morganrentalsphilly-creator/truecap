@@ -11,15 +11,27 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -118,28 +130,24 @@ export default function HowToEstimateRentPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -147,7 +155,8 @@ export default function HowToEstimateRentPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               Rent is the single most important number in a rental underwrite,
               and the easiest one to guess at. Every metric you care about —
               cap rate, cash-on-cash, DSCR, cash flow — is built on top of the
@@ -159,10 +168,8 @@ export default function HowToEstimateRentPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The number you&apos;re actually after
-            </h2>
+          <ArticleBody>
+            <h2>The number you&apos;re actually after</h2>
             <p>
               &quot;Rent&quot; hides three different numbers, and confusing them
               is the first mistake. <strong>In-place rent</strong> is what the
@@ -179,14 +186,14 @@ export default function HowToEstimateRentPost() {
               rent growth has cooled: the Census Bureau&apos;s{" "}
               <a
                 href="https://www.census.gov/housing/hvs/data/histtab11.xlsx"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 median asking rent was $1,531 in Q2 2026
               </a>
               , about 2.5% above a year earlier, and the{" "}
               <a
                 href="https://www.bls.gov/news.release/archives/cpi_09112026.htm"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 BLS consumer price index for rent of primary residence rose 2.7%
               </a>{" "}
@@ -195,7 +202,7 @@ export default function HowToEstimateRentPost() {
               rent was{" "}
               <a
                 href="https://www.census.gov/housing/hvs/data/histtab11.xlsx"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 $1,486 for the year
               </a>
@@ -205,9 +212,7 @@ export default function HowToEstimateRentPost() {
               the deal probably doesn&apos;t.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The comp method, step by step
-            </h2>
+            <h2>The comp method, step by step</h2>
             <p>
               Estimating rent is the same exercise an appraiser runs for value:
               find comparable units, then adjust them toward your subject for the
@@ -243,23 +248,21 @@ export default function HowToEstimateRentPost() {
               footing as your unit.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              A worked adjustment grid
-            </h2>
+            <h2>A worked adjustment grid</h2>
             <p>
               Say the subject is a 3-bed / 1.5-bath single-family house, 1,250
               square feet, average condition, no garage. Three leased comps in the
               same neighborhood:
             </p>
 
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
-                    <th className="text-left">Comp</th>
-                    <th className="text-left">Beds / Baths</th>
-                    <th className="text-left">Sq ft</th>
-                    <th className="text-left">Condition</th>
+                  <tr>
+                    <th>Comp</th>
+                    <th>Beds / Baths</th>
+                    <th>Sq ft</th>
+                    <th>Condition</th>
                     <th className="text-right">Leased rent</th>
                     <th className="text-right">Net adj.</th>
                     <th className="text-right">Adjusted</th>
@@ -304,7 +307,7 @@ export default function HowToEstimateRentPost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
 
             <p>
               Walk through Comp A: it has an extra half-bath versus the subject
@@ -318,15 +321,13 @@ export default function HowToEstimateRentPost() {
               and you&apos;d prudently underwrite <strong>$1,900</strong>.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Two fast cross-checks
-            </h2>
+            <h2>Two fast cross-checks</h2>
             <p>
               Comps can mislead in a thin market, so bound your estimate with two
               ratios you can run in your head. The first is the{" "}
               <Link
                 href="/blog/gross-rent-multiplier-explained"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 gross rent multiplier
               </Link>
@@ -339,7 +340,7 @@ export default function HowToEstimateRentPost() {
               implies with the{" "}
               <Link
                 href="/tools/gross-rent-multiplier-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 GRM calculator
               </Link>
@@ -349,7 +350,7 @@ export default function HowToEstimateRentPost() {
               The second is the{" "}
               <Link
                 href="/blog/1-percent-rule-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 1% rule
               </Link>
@@ -359,7 +360,7 @@ export default function HowToEstimateRentPost() {
               Q2 2026 median asking rent ($1,531) is{" "}
               <a
                 href="https://www.census.gov/housing/hvs/data/histtab11.xlsx"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 about 0.45% of its median asking sales price ($343,800)
               </a>
@@ -367,7 +368,7 @@ export default function HowToEstimateRentPost() {
               flow harder to find: Freddie Mac&apos;s 30-year fixed average was{" "}
               <a
                 href="https://fred.stlouisfed.org/series/MORTGAGE30US"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 7.03% for the week of Sept. 24, 2026, against a 2021 average of
                 about 2.96%
@@ -377,9 +378,7 @@ export default function HowToEstimateRentPost() {
               that&apos;s a flag to recheck your comps before you celebrate.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              From market rent to effective rent
-            </h2>
+            <h2>From market rent to effective rent</h2>
             <p>
               Market rent is the gross number. The model needs effective rent — what
               you actually collect after the income that leaks out. Two haircuts:
@@ -392,7 +391,7 @@ export default function HowToEstimateRentPost() {
                 right for your market is its own question, covered in{" "}
                 <Link
                   href="/blog/vacancy-rate-rental-property"
-                  className="text-primary font-semibold hover:underline"
+                  className="tc-link"
                 >
                   what vacancy rate to assume
                 </Link>
@@ -411,16 +410,14 @@ export default function HowToEstimateRentPost() {
               and that effective number, not the gross, is what flows into{" "}
               <Link
                 href="/blog/how-to-calculate-noi-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 net operating income
               </Link>{" "}
               and the rest of the underwrite.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Why a $150 rent miss is so expensive
-            </h2>
+            <h2>Why a $150 rent miss is so expensive</h2>
             <p>
               Here&apos;s the part that makes rent worth getting right. Because rent
               sits at the top of the stack, a small error ripples through every
@@ -428,7 +425,7 @@ export default function HowToEstimateRentPost() {
               7% (close to Freddie Mac&apos;s{" "}
               <a
                 href="https://fred.stlouisfed.org/series/MORTGAGE30US"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 30-year fixed average of 7.03% for the week of Sept. 24, 2026
               </a>
@@ -439,11 +436,11 @@ export default function HowToEstimateRentPost() {
               $150/month gap, only about 8%:
             </p>
 
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
-                    <th className="text-left">Metric</th>
+                  <tr>
+                    <th>Metric</th>
                     <th className="text-right">Rent $1,900 (honest)</th>
                     <th className="text-right">Rent $2,050 (optimistic)</th>
                   </tr>
@@ -476,7 +473,7 @@ export default function HowToEstimateRentPost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
 
             <p>
               An 8% rent error moves the cap rate by about 0.6 points, swings
@@ -484,7 +481,7 @@ export default function HowToEstimateRentPost() {
               profit — and lifts{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 DSCR
               </Link>{" "}
@@ -492,7 +489,7 @@ export default function HowToEstimateRentPost() {
               1.08.{" "}
               <Link
                 href="/blog/how-to-calculate-dscr"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Some DSCR loan programs
               </Link>{" "}
@@ -508,30 +505,28 @@ export default function HowToEstimateRentPost() {
               This is also why seller pro formas lean high; the{" "}
               <Link
                 href="/blog/rental-property-pro-forma-explained"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 seven lies in a pro forma
               </Link>{" "}
               almost always start with the rent line.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Special cases worth a second look
-            </h2>
+            <h2>Special cases worth a second look</h2>
             <p>
               <strong>Section 8: rent reasonableness and FMR.</strong> If
               you&apos;re renting to a voucher tenant, the housing authority must
               find your rent{" "}
               <a
                 href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.507"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 reasonable against comparable unassisted units
               </a>
               . Its{" "}
               <a
                 href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.503"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 payment standard, generally 90% to 110% of HUD&apos;s Fair Market
                 Rent
@@ -540,14 +535,14 @@ export default function HowToEstimateRentPost() {
               at initial lease-up{" "}
               <a
                 href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-IX/part-982/subpart-K/section-982.508"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 their share can&apos;t exceed 40% of adjusted monthly income
               </a>
               . HUD sets Fair Market Rent at the{" "}
               <a
                 href="https://www.ecfr.gov/current/title-24/subtitle-B/chapter-VIII/part-888/subpart-A/section-888.113"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 40th-percentile gross rent (rent plus utilities) for
                 standard-quality units across the area
@@ -558,7 +553,7 @@ export default function HowToEstimateRentPost() {
               the mechanics are in{" "}
               <Link
                 href="/blog/section-8-rental-property-investing"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 how Section 8 math works
               </Link>
@@ -579,9 +574,7 @@ export default function HowToEstimateRentPost() {
               it&apos;s a wish, not an estimate.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              A repeatable workflow
-            </h2>
+            <h2>A repeatable workflow</h2>
             <p>
               Put it together and the process is fast once you&apos;ve done it a few
               times: pull three to five leased comps within a mile and 90 days,
@@ -594,7 +587,7 @@ export default function HowToEstimateRentPost() {
             </p>
             <p>
               The full{" "}
-              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="tc-link">
                 TrueCap analyzer
               </Link>{" "}
               does the first pass for you: enter the address and, if the rent
@@ -607,21 +600,20 @@ export default function HowToEstimateRentPost() {
               filling a blank box you have to guess at.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
+          </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The bottom line
-            </h2>
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
+
+          <ArticleBody className="mt-16">
+            <h2>The bottom line</h2>
             <p>
               Rent is the input everything else leans on, so it deserves more than a
               glance at the listing. Estimate market rent from recently leased comps,
@@ -634,7 +626,7 @@ export default function HowToEstimateRentPost() {
               of the underwrite — cap rate, DSCR, cash flow — finally tells you the
               truth.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -676,13 +668,12 @@ export default function HowToEstimateRentPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
