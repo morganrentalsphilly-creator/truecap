@@ -18,15 +18,28 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -126,29 +139,27 @@ export default function HowToCalculateArvPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>
               How to calculate ARV (after-repair value): the comps method, step
               by step (2026)
             </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -156,7 +167,8 @@ export default function HowToCalculateArvPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               Every flip and every BRRRR deal is built on one number: the
               after-repair value, or ARV — what the property will sell for, or
               appraise at, once the renovation is done. Your 70%-rule price screen keys
@@ -174,8 +186,8 @@ export default function HowToCalculateArvPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+          <ArticleBody>
+            <h2>
               What ARV is — and what it isn&apos;t
             </h2>
             <p>
@@ -194,25 +206,27 @@ export default function HowToCalculateArvPost() {
               is to run the same play the appraiser will run, before you commit
               money to the deal.
             </p>
-            <div className="rounded-xl border border-border bg-muted/30 p-5">
-              <code className="text-sm sm:text-base text-foreground font-mono">
-                ARV ≈ average renovated-comp $/sq ft × subject finished sq ft
-              </code>
-            </div>
+            <ToolFormula
+              formula={
+                <>
+                  ARV ≈ average renovated-comp $/sq ft × subject finished sq ft
+                </>
+              }
+            />
             <p>
               That one-liner is the last step of the process, not the process
               itself. The work — and the accuracy — lives in which comps you
               select and how you adjust them.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               Why ARV runs the whole deal
             </h2>
             <p>
               Three load-bearing numbers key directly off ARV. The{" "}
               <Link
                 href="/blog/70-percent-rule-house-flipping"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 70% rule
               </Link>{" "}
@@ -221,7 +235,7 @@ export default function HowToCalculateArvPost() {
               dollar. On a{" "}
               <Link
                 href="/blog/brrrr-method-explained"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 BRRRR
               </Link>
@@ -230,7 +244,7 @@ export default function HowToCalculateArvPost() {
               property (70% for two to four units) under{" "}
               <a
                 href="https://sf.freddiemac.com/general/maximum-ltv-tltv-htltv-ratio-requirements-for-conforming-and-super-conforming-mortgages"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Freddie Mac&apos;s conforming cash-out limits
               </a>
@@ -244,7 +258,7 @@ export default function HowToCalculateArvPost() {
               subtracted from.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               The comps method, step by step
             </h2>
             <p>
@@ -254,14 +268,14 @@ export default function HowToCalculateArvPost() {
               that budget line by line — the{" "}
               <Link
                 href="/blog/how-to-estimate-rehab-costs"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 rehab estimating guide
               </Link>{" "}
               and the{" "}
               <Link
                 href="/tools/rehab-cost-estimator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 rehab cost estimator
               </Link>{" "}
@@ -270,7 +284,7 @@ export default function HowToCalculateArvPost() {
               free{" "}
               <Link
                 href="/tools/arv-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 ARV calculator
               </Link>{" "}
@@ -294,11 +308,11 @@ export default function HowToCalculateArvPost() {
               comps&apos; raw sale prices.
             </p>
             <p>Our four best comps:</p>
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
-                    <th className="text-left">Comp</th>
+                  <tr>
+                    <th>Comp</th>
                     <th className="text-right">Sq ft</th>
                     <th className="text-right">Sale price</th>
                     <th className="text-right">$/sq ft</th>
@@ -331,7 +345,7 @@ export default function HowToCalculateArvPost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
             <p>
               The four comps average <strong>$182.44 per square foot</strong>{" "}
               (the median is $182.38 — when the two agree this closely, no
@@ -344,7 +358,7 @@ export default function HowToCalculateArvPost() {
               deeply suspicious of your adjustments.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               Adjusting comps without fooling yourself
             </h2>
             <p>
@@ -355,7 +369,7 @@ export default function HowToCalculateArvPost() {
               versus no garage, finished basement space (
               <a
                 href="https://selling-guide.fanniemae.com/sel/b4-1.3-05/improvements-section-appraisal-report"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Fannie Mae&apos;s appraisal guidelines
               </a>{" "}
@@ -390,7 +404,7 @@ export default function HowToCalculateArvPost() {
               and the fix is better comps, not bigger adjustments.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               When comps are thin
             </h2>
             <p>
@@ -410,7 +424,7 @@ export default function HowToCalculateArvPost() {
               for a pre-purchase appraisal (
               <a
                 href="https://myhome.freddiemac.com/blog/homebuying/what-homebuyers-can-expect-appraisal-and-what-do-if-its-below-your-offer-price"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Freddie Mac puts the median appraisal cost at $450 to $700
               </a>
@@ -420,7 +434,7 @@ export default function HowToCalculateArvPost() {
               example,{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b2-1.3-03/cash-out-refinance-transactions"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 requires at least one borrower to have been on title for six
                 months
@@ -433,7 +447,7 @@ export default function HowToCalculateArvPost() {
               month six or later. Budget holding costs accordingly.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               Where the ARV feeds the deal math
             </h2>
             <p>
@@ -448,7 +462,7 @@ export default function HowToCalculateArvPost() {
               75% LTV cash-out{" "}
               <Link
                 href="/blog/how-to-refinance-a-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 refinance
               </Link>{" "}
@@ -461,14 +475,14 @@ export default function HowToCalculateArvPost() {
               acquisition through the{" "}
               <Link
                 href="/blog/brrrr-method-explained"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 BRRRR workflow guide
               </Link>{" "}
               to identify the additional refinance and cash-ledger inputs you need.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               What an ARV miss actually costs
             </h2>
             <p>
@@ -477,11 +491,11 @@ export default function HowToCalculateArvPost() {
               that changes is what the property is actually worth when the work
               is done:
             </p>
-            <ScrollX cue stickyFirstColumn label="Data table" className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <ArticleTable label="Data table">
+              <table>
                 <thead>
-                  <tr className="bg-muted">
-                    <th className="text-left">Actual value vs. $255K ARV</th>
+                  <tr>
+                    <th>Actual value vs. $255K ARV</th>
                     <th className="text-right">BRRRR cash left in</th>
                     <th className="text-right">Flip profit</th>
                   </tr>
@@ -509,7 +523,7 @@ export default function HowToCalculateArvPost() {
                   </tr>
                 </tbody>
               </table>
-            </ScrollX>
+            </ArticleTable>
             <p>
               The asymmetry is the lesson. A 10% ARV miss — the difference
               between a careful comp set and a hopeful one — cuts the flip
@@ -522,10 +536,10 @@ export default function HowToCalculateArvPost() {
               deal still works at 5–10% below it.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            <h2>
               Five ways people get ARV wrong
             </h2>
-            <ul className="list-disc pl-6 space-y-2">
+            <ul>
               <li>
                 <strong>Comping against unrenovated sales.</strong> Mixing dated
                 sales into the set drags the $/sq ft down — or worse, tempts you
@@ -556,19 +570,20 @@ export default function HowToCalculateArvPost() {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQ
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
+            </ArticleBody>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
+            {/* faqLd above is the one FAQPage node for these rows. */}
+            <FaqSection
+              id="faq"
+              variant="inline"
+              heading="FAQ"
+              items={FAQS}
+              structuredData={false}
+              contact={null}
+            />
+
+            <ArticleBody className="mt-16">
+            <h2>
               The bottom line
             </h2>
             <p>
@@ -583,14 +598,14 @@ export default function HowToCalculateArvPost() {
               survives an appraisal 5–10% below your estimate before you wire
               a deposit. When the property&apos;s endgame is a rental, run the
               stabilized numbers through the{" "}
-              <Link href="/analyze" prefetch={false} className="text-primary font-semibold hover:underline">
+              <Link href="/analyze" prefetch={false} className="tc-link">
                 TrueCap analyzer
               </Link>{" "}
               so the ARV, the refinance, and the cash flow all come from one
               consistent set of assumptions. Verify comps, rehab scope, and
               lender terms on any specific deal before you rely on an ARV.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources
           sources={[
@@ -618,13 +633,12 @@ export default function HowToCalculateArvPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE_PLAIN} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
