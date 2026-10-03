@@ -25,17 +25,23 @@
  *     calculator parts (components/tools/tool-parts.tsx) like the 1% rule
  *     widget: no card, the fields at the 48px Field size, the work items as
  *     rows on rules, the total as the key figure in DM Mono over the double
- *     rule. Same words, same inputs, same estimateRehab call.
+ *     rule. Same words, same inputs, same estimateRehab call, and after
+ *     the total the analyzer handoff the other calculators carry: one plain
+ *     button and one line. The analyzer handoff has no rehab field
+ *     (lib/analyzer-handoff.ts), so the link carries nothing and the line
+ *     says so, as on the ARV and 70% rule calculators.
  */
 
 import { useEffect, useId, useMemo, useState } from "react";
 import { Hammer, ChevronDown, ChevronUp } from "lucide-react";
+import { AnalyzerHandoffLink } from "@/components/analyzer-handoff-link";
 import { LedgerFigure } from "@/components/ledger/ledger-parts";
 import { ToolFrame, ToolResult } from "@/components/tools/tool-parts";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 import {
   REHAB_WORK_ITEMS,
   estimateRehab,
@@ -156,6 +162,13 @@ export function RehabEstimatorCard({
   if (variant === "tool") {
     const headingId = `${uid}-heading`;
     const itemsId = `${uid}-items`;
+    const handoffNoteId = `${uid}-handoff-note`;
+    // The handoff carries no input: the analyzer's prefill has no rehab
+    // field, and a planning estimate is not the price being evaluated.
+    const handoffHref = buildAnalyzerHandoffUrl(
+      {},
+      { utmSource: "rehab-cost-estimator" },
+    );
     return (
       // The page shows an H1 naming the estimator, so the widget's own
       // heading is for the outline only.
@@ -310,6 +323,22 @@ export function RehabEstimatorCard({
             ) : undefined
           }
         />
+
+        <AnalyzerHandoffLink
+          handoffHref={handoffHref}
+          target="_top"
+          aria-describedby={handoffNoteId}
+          className={cn(buttonVariants({ size: "cta" }), "mt-6 w-full sm:w-auto")}
+        >
+          Open the rental analyzer
+        </AnalyzerHandoffLink>
+        <p
+          id={handoffNoteId}
+          className="mt-2 text-pretty text-sm text-muted-foreground"
+        >
+          The rehab estimate is a planning figure and does not carry over.
+          Enter the price you are evaluating.
+        </p>
       </ToolFrame>
     );
   }
