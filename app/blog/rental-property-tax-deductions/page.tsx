@@ -15,13 +15,24 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -155,26 +166,22 @@ export default function TaxDeductionsPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -182,7 +189,8 @@ export default function TaxDeductionsPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               A deduction generally reduces taxable income; it is not a
               dollar-for-dollar tax saving, and limits can defer or disallow the
               current benefit. Here are 14 common rental-property expense
@@ -191,27 +199,27 @@ export default function TaxDeductionsPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
+          <ArticleBody>
             <p>
               A note before we start: eligibility depends on your facts and the
               law for the relevant tax year. The line numbers below follow the{" "}
               <a
                 href="https://www.irs.gov/pub/irs-pdf/f1040se.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 2025 Schedule E (Form 1040)
               </a>
               . Use this as a checklist alongside current{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 IRS Publication 527
               </a>{" "}
               and{" "}
               <a
                 href="https://www.irs.gov/publications/p925"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 IRS Publication 925
               </a>
@@ -219,14 +227,12 @@ export default function TaxDeductionsPost() {
               professional.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              1. Mortgage interest (Schedule E line 12)
-            </h2>
+            <h2>1. Mortgage interest (Schedule E line 12)</h2>
             <p>
               The interest allocable to rental use is{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 generally a rental expense
               </a>
@@ -242,22 +248,20 @@ export default function TaxDeductionsPost() {
               amortization schedule. Interest is below the property&apos;s{" "}
               <Link
                 href="/glossary/noi"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 NOI
               </Link>{" "}
               line because NOI is computed before debt service.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              2. Depreciation (Schedule E line 18)
-            </h2>
+            <h2>2. Depreciation (Schedule E line 18)</h2>
             <p>
               Depreciation is a common non-cash deduction. Residential rental
               buildings are generally recovered over{" "}
               <a
                 href="https://www.irs.gov/publications/p946"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 27.5 years under MACRS; land is not depreciable
               </a>
@@ -276,7 +280,7 @@ export default function TaxDeductionsPost() {
               reduces tax. The{" "}
               <Link
                 href="/blog/schedule-e-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Schedule E walkthrough
               </Link>{" "}
@@ -295,28 +299,26 @@ export default function TaxDeductionsPost() {
               adviser-reviewed scenarios and review the IRS{" "}
               <a
                 href="https://www.irs.gov/pub/irs-pdf/p5653.pdf"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Cost Segregation Audit Technique Guide
               </a>{" "}
               and{" "}
               <a
                 href="https://www.irs.gov/publications/p946"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Publication 946
               </a>
               .
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              3. Property tax (Schedule E line 16)
-            </h2>
+            <h2>3. Property tax (Schedule E line 16)</h2>
             <p>
               Annual real estate tax paid to the county;{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Publication 527
               </a>{" "}
@@ -332,9 +334,7 @@ export default function TaxDeductionsPost() {
               decision is issued.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              4. Insurance (Schedule E line 9)
-            </h2>
+            <h2>4. Insurance (Schedule E line 9)</h2>
             <p>
               Landlord insurance premiums. Note: this is landlord insurance
               specifically, not homeowner&apos;s insurance — the policies are
@@ -347,14 +347,12 @@ export default function TaxDeductionsPost() {
               personal-residence PMI rules apply.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              5. Repairs (Schedule E line 14)
-            </h2>
+            <h2>5. Repairs (Schedule E line 14)</h2>
             <p>
               A qualifying repair may be a current expense, while an improvement{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 generally must be capitalized
               </a>
@@ -374,7 +372,7 @@ export default function TaxDeductionsPost() {
               re-piping;{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Publication 527&apos;s table of improvement examples
               </a>{" "}
@@ -388,9 +386,7 @@ export default function TaxDeductionsPost() {
               not a standard deduction range.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              6. Property management fees (Schedule E line 11)
-            </h2>
+            <h2>6. Property management fees (Schedule E line 11)</h2>
             <p>
               Ordinary management fees and maintenance coordination costs
               allocable to rental operations are commonly current expenses (a
@@ -405,9 +401,7 @@ export default function TaxDeductionsPost() {
               capitalization, and other limits.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              7. Utilities (Schedule E line 17)
-            </h2>
+            <h2>7. Utilities (Schedule E line 17)</h2>
             <p>
               Owner-paid water, sewer, trash, gas, or electric allocable to
               rental use are commonly operating expenses. Reimbursements,
@@ -415,9 +409,7 @@ export default function TaxDeductionsPost() {
               periods can change the reporting.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              8. Cleaning + maintenance (Schedule E line 7)
-            </h2>
+            <h2>8. Cleaning + maintenance (Schedule E line 7)</h2>
             <p>
               Ordinary turnover cleaning, lawn service, pest control, snow
               removal, gutter cleaning, HVAC servicing, and carpet cleaning are
@@ -431,14 +423,12 @@ export default function TaxDeductionsPost() {
               rules determine the treatment.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              9. Travel (Schedule E line 6)
-            </h2>
+            <h2>9. Travel (Schedule E line 6)</h2>
             <p>
               Ordinary and necessary travel{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 primarily to manage, conserve, or maintain a rental
               </a>{" "}
@@ -446,7 +436,7 @@ export default function TaxDeductionsPost() {
               including within a year; use the{" "}
               <a
                 href="https://www.irs.gov/tax-professionals/standard-mileage-rates"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 IRS standard-mileage table
               </a>{" "}
@@ -456,7 +446,7 @@ export default function TaxDeductionsPost() {
               Trips between your home and a rental are{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 generally nondeductible commuting
               </a>{" "}
@@ -479,9 +469,7 @@ export default function TaxDeductionsPost() {
               the deduction.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              10. Professional services (Schedule E line 10)
-            </h2>
+            <h2>10. Professional services (Schedule E line 10)</h2>
             <p>
               Fees for tax preparation allocable to the rental, bookkeeping,
               and qualifying legal work may be current rental expenses
@@ -495,7 +483,7 @@ export default function TaxDeductionsPost() {
               activity{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 may be deductible
               </a>
@@ -503,15 +491,13 @@ export default function TaxDeductionsPost() {
               fees may be reported differently.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              11. HOA fees (Schedule E line 19, other)
-            </h2>
+            <h2>11. HOA fees (Schedule E line 19, other)</h2>
             <p>
               Ordinary HOA dues allocable to rental use are generally rental
               expenses. Schedule E has no dedicated HOA line; the{" "}
               <a
                 href="https://www.irs.gov/instructions/i1040se"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Schedule E instructions
               </a>{" "}
@@ -520,7 +506,7 @@ export default function TaxDeductionsPost() {
               capital improvement and{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 require capitalization
               </a>
@@ -528,9 +514,7 @@ export default function TaxDeductionsPost() {
               it.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              12. Advertising (Schedule E line 5)
-            </h2>
+            <h2>12. Advertising (Schedule E line 5)</h2>
             <p>
               Ordinary costs to advertise an available rental—listing fees and
               rental-listing photography, for example—are commonly current
@@ -538,15 +522,13 @@ export default function TaxDeductionsPost() {
               prepaid campaigns may require different treatment.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              13. Loan-origination costs (amortized)
-            </h2>
+            <h2>13. Loan-origination costs (amortized)</h2>
             <p>
               Certain costs of obtaining a rental-property loan, including
               qualifying points, are{" "}
               <a
                 href="https://www.irs.gov/instructions/i1040se"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 generally recovered over the loan term
               </a>{" "}
@@ -562,15 +544,13 @@ export default function TaxDeductionsPost() {
               correctly.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              14. Home office (if you qualify)
-            </h2>
+            <h2>14. Home office (if you qualify)</h2>
             <p>
               A home-office deduction may be available when a qualifying space
               is{" "}
               <a
                 href="https://www.irs.gov/publications/p587"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 used exclusively and regularly
               </a>{" "}
@@ -585,14 +565,12 @@ export default function TaxDeductionsPost() {
               kitchen table you also eat at is one everyday example.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The passive activity loss rules — why your losses might not deduct
-            </h2>
+            <h2>The passive activity loss rules — why your losses might not deduct</h2>
             <p>
               Rental activities are{" "}
               <a
                 href="https://www.irs.gov/publications/p925"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 generally passive under federal rules
               </a>
@@ -609,7 +587,7 @@ export default function TaxDeductionsPost() {
               An individual who actively participates may be able to deduct{" "}
               <a
                 href="https://www.irs.gov/publications/p925"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 up to $25,000 of qualifying loss
               </a>{" "}
@@ -622,7 +600,7 @@ export default function TaxDeductionsPost() {
               <strong>Real estate professional status.</strong> Passing the{" "}
               <a
                 href="https://www.irs.gov/publications/p925"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 more-than-half and 750-hour tests
               </a>{" "}
@@ -631,7 +609,7 @@ export default function TaxDeductionsPost() {
               activity, and basis, at-risk,{" "}
               <a
                 href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section461&num=0&edition=prelim"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 excess-business-loss
               </a>
@@ -639,14 +617,12 @@ export default function TaxDeductionsPost() {
               fully deductible.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              When you sell — depreciation recapture
-            </h2>
+            <h2>When you sell — depreciation recapture</h2>
             <p>
               Depreciation{" "}
               <a
                 href="https://www.irs.gov/publications/p946"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 allowed or allowable
               </a>{" "}
@@ -655,7 +631,7 @@ export default function TaxDeductionsPost() {
               section 1250 gain, which has a{" "}
               <a
                 href="https://www.irs.gov/taxtopics/tc409"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 maximum federal rate of 25%
               </a>
@@ -674,13 +650,13 @@ export default function TaxDeductionsPost() {
               A properly executed{" "}
               <Link
                 href="/blog/1031-exchange-basics"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 section 1031 exchange
               </Link>{" "}
               <a
                 href="https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title26-section1031&num=0&edition=prelim"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 may defer recognized gain
               </a>{" "}
@@ -689,9 +665,7 @@ export default function TaxDeductionsPost() {
               rather than erases tax, and it is not a cure-all for every sale.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The action plan
-            </h2>
+            <h2>The action plan</h2>
             <p>
               (1) Pull last year&apos;s Schedule E and supporting records. Use
               the categories above as review prompts, not as proof that an
@@ -716,7 +690,7 @@ export default function TaxDeductionsPost() {
               (4) Use{" "}
               <Link
                 href="/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap
               </Link>{" "}
@@ -725,18 +699,17 @@ export default function TaxDeductionsPost() {
               treatment, or filing position; build those scenarios with a
               qualified tax professional.
             </p>
-          </div>
+          </ArticleBody>
         </article>
         <PostSources sources={SOURCES} />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
