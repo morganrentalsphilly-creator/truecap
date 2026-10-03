@@ -510,8 +510,9 @@ export default function BestRentalAnalysisToolForHouseHackersPost() {
               >
                 TrueCap analyzer
               </Link>{" "}
-              gives you DSCR, cash-on-cash and monthly cash flow from one
-              address — then follow the owner-occupied math step by step in our{" "}
+              gives you DSCR, cash-on-cash and monthly cash flow from an
+              address, the asking price and each unit&apos;s bedroom count — then
+              follow the owner-occupied math step by step in our{" "}
               <Link
                 href="/blog/house-hack-underwriting-guide"
                 className="tc-link"

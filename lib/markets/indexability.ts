@@ -278,7 +278,7 @@ export const STATE_PAGE_GUIDANCE = {
     },
   ],
   run: (stateName: string) =>
-    `Enter an address and asking price. TrueCap shows cash flow, DSCR, cap rate, and the Offer Ceiling — the highest price that still meets your targets — with every assumption labeled and editable. Enter ${stateName} property tax and insurance from local evidence, not a statewide figure.`,
+    `Enter an address, the asking price and a bedroom count. TrueCap shows cash flow, DSCR, cap rate, and the Offer Ceiling — the highest price that still meets your targets — with every assumption labeled and editable. Enter ${stateName} property tax and insurance from local evidence, not a statewide figure.`,
 } as const;
 
 /** Whitespace-separated word count of plain text. */

@@ -100,8 +100,9 @@ export default function WhyTrueCapPage() {
           headingId="why-truecap-close-heading"
           lede={
             <>
-              Type an address — get cap rate, cash flow, DSCR, and a
-              plain-English verdict in 60 seconds. No card, no signup.
+              Type an address, the asking price and a bedroom count, and get
+              cap rate, cash flow, DSCR, and a plain-English verdict in 60
+              seconds. No card, no signup.
             </>
           }
           actions={analyzeAction}

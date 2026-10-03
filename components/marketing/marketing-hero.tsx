@@ -53,7 +53,7 @@ export function MarketingHero() {
           <p className="mt-4 max-w-[46ch] text-pretty text-lg leading-normal text-foreground sm:mt-5">
             {newHomepagePositioningEnabled
               ? "Paste the rental listing. In about 60 seconds, see whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded."
-              : "Enter an address for a first-pass screen with labeled, editable assumptions. Pro adds the Offer Ceiling: the highest price that still meets your targets."}
+              : "Enter an address, the asking price and a bedroom count for a first-pass screen with labeled, editable assumptions. Pro adds the Offer Ceiling: the highest price that still meets your targets."}
           </p>
           {/* Phones only: the ledger's verdict in one sentence, before the
               form, so a phone's first screen shows the answer and not only the

@@ -46,7 +46,7 @@ const POPULAR_PAGES = [
   { href: "/glossary", label: "Glossary", icon: HelpCircle, blurb: `Plain-English definitions for ${GLOSSARY_TERM_COUNT} terms.` },
   { href: "/markets", label: "Market guides", icon: MapPin, blurb: "City-level rental market intel." },
   { href: "/pricing", label: "Pricing", icon: TrendingUp, blurb: "Free + Pro plans." },
-  { href: "/analyze", label: "Run a free analysis", icon: ArrowUpRight, blurb: "Paste any address — 60-second underwrite." },
+  { href: "/analyze", label: "Run a free analysis", icon: ArrowUpRight, blurb: "An address, the asking price and a bedroom count: 60-second underwrite." },
 ];
 
 export default function NotFound() {

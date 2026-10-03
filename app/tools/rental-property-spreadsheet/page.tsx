@@ -231,7 +231,8 @@ export default function RentalPropertySpreadsheetPage() {
                 href="/analyze" prefetch={false}
                 className="tc-link"
               >
-                type an address, get the same analysis in 60 seconds
+                enter an address, the asking price and a bedroom count, and
+                get the same analysis in 60 seconds
               </Link>
               ), and the rest of you got a good spreadsheet for free.
               That&apos;s the whole model.
@@ -420,7 +421,7 @@ export default function RentalPropertySpreadsheetPage() {
                 below. */}
             <ToolsConversionCta
               calculatorName="Rental property spreadsheet"
-              hook="TrueCap's full analyzer uses the same core buy-and-hold conventions from an address—labeled HUD rent and FRED rate benchmarks, manual local property tax, plus PMI, projections, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link."
+              hook="TrueCap's full analyzer uses the same core buy-and-hold conventions, starting from an address, the asking price and a bedroom count: labeled HUD rent and FRED rate benchmarks, manual local property tax, plus PMI, projections, sensitivity, and Offer Ceiling. Save your work, compare deals, and share a link."
             />
 
             {/* The page's FAQPage node is faqLd above, built from the same

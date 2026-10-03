@@ -12,7 +12,7 @@ const SURFACES = [
     pageTitle: "Rental Property Calculator & Max Offer | TrueCap",
     socialTitle: "Rental Property Calculator & Max Offer | TrueCap",
     description:
-      "Analyze a rental property from an address, edit every assumption, and see cash flow, cap rate, DSCR, cash-on-cash return, and a target-based Offer Ceiling.",
+      "Analyze a rental property from an address, the asking price and a bedroom count. See cash flow, cap rate, DSCR, cash-on-cash return and an Offer Ceiling.",
   },
   {
     file: "app/about/page.tsx",

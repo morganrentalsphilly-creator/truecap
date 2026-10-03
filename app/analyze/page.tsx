@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     ...OPEN_GRAPH_BASE,
     title: "Analyze a Rental Property Free | TrueCap",
     description:
-      "Cash flow, DSCR, and the highest price that still meets your targets, from an address. No account.",
+      "Cash flow, DSCR, and the highest price that still meets your targets, from an address, the asking price and a bedroom count. No account.",
     url: "/analyze",
     type: "website",
   },
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Analyze a Rental Property Free | TrueCap",
     description:
-      "Cash flow, DSCR, and the highest price that still meets your targets, from an address. No account.",
+      "Cash flow, DSCR, and the highest price that still meets your targets, from an address, the asking price and a bedroom count. No account.",
   },
 };
 
