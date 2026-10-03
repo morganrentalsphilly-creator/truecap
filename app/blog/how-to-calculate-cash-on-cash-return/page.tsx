@@ -14,11 +14,24 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
@@ -144,284 +157,276 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8 sm:mb-10">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · {READING_TIME_MIN} min read
-          </p>
-          <BlogByline />
-          <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            Cash-on-cash return = annual cash flow ÷ total cash invested. It
-            measures the cash return on the dollars you actually put in.
-            Here&apos;s the formula, what counts as &ldquo;total cash
-            invested,&rdquo; three worked examples, and the two traps that
-            inflate the number.
-          </p>
-        </header>
+      <ArticleMain>
+        <article>
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>
+              {TITLE}
+            </h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
+              {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              · {READING_TIME_MIN} min read
+            </p>
+            <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
+              Cash-on-cash return = annual cash flow ÷ total cash invested. It
+              measures the cash return on the dollars you actually put in.
+              Here&apos;s the formula, what counts as &ldquo;total cash
+              invested,&rdquo; three worked examples, and the two traps that
+              inflate the number.
+            </p>
+          </header>
 
-        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
-          <h2 className="text-2xl sm:text-3xl">The cash-on-cash formula</h2>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-            <div className="text-base sm:text-lg font-mono">
-              <span className="font-bold">CoC</span> = Annual pre-tax cash flow
-              ÷ Total cash invested
-            </div>
-          </div>
-          <p>
-            Cap rate measures the property. Cash-on-cash measures
-            <em> you</em> &mdash; specifically, the return on the dollars you
-            actually wrote checks for. Two investors buying the same property at
-            the same price can have radically different cash-on-cash returns
-            based purely on how much they put down.
-          </p>
+          <ArticleBody>
+            <h2>The cash-on-cash formula</h2>
+            <ToolFormula formula="CoC = Annual pre-tax cash flow ÷ Total cash invested" />
+            <p>
+              Cap rate measures the property. Cash-on-cash measures
+              <em> you</em> &mdash; specifically, the return on the dollars you
+              actually wrote checks for. Two investors buying the same property at
+              the same price can have radically different cash-on-cash returns
+              based purely on how much they put down.
+            </p>
 
-          <h2 className="text-2xl sm:text-3xl">The 5-step process</h2>
+            <h2>The 5-step process</h2>
 
-          <h3>Step 1: Compute NOI</h3>
-          <p>
-            Net operating income = gross rent − vacancy − operating expenses
-            (taxes, insurance, management, maintenance reserve, utilities,
-            HOA). NOT including mortgage or the CapEx reserve, which TrueCap
-            treats as a below-NOI reserve that still reduces cash flow. Full
-            walkthrough in{" "}
-            <Link
-              href="/blog/how-to-calculate-cap-rate"
-              className="text-primary font-semibold hover:underline"
-            >
-              how to calculate cap rate
-            </Link>
-            .
-          </p>
-
-          <h3>Step 2: Compute annual debt service</h3>
-          <p>
-            Monthly mortgage payment (principal + interest only — exclude
-            tax/insurance escrow since those are already in operating expenses)
-            × 12.
-          </p>
-
-          <h3>Step 3: Calculate annual cash flow</h3>
-          <p>
-            Annual cash flow = NOI − annual debt service − the CapEx reserve.
-            This is the pre-tax cash that actually hits your bank account.
-          </p>
-
-          <h3>Step 4: Tally total cash invested</h3>
-          <p>What you wrote checks for, before stabilization:</p>
-          <ul>
-            <li>
-              <strong>Down payment.</strong> The non-financed portion of the
-              purchase price.
-            </li>
-            <li>
-              <strong>Closing costs.</strong> Title, lender fees, inspection,
-              appraisal, transfer taxes —{" "}
-              <a
-                href="https://myhome.freddiemac.com/blog/homebuying/what-are-closing-costs-and-how-much-will-i-pay"
-                className="text-primary font-semibold hover:underline"
+            <h3>Step 1: Compute NOI</h3>
+            <p>
+              Net operating income = gross rent − vacancy − operating expenses
+              (taxes, insurance, management, maintenance reserve, utilities,
+              HOA). NOT including mortgage or the CapEx reserve, which TrueCap
+              treats as a below-NOI reserve that still reduces cash flow. Full
+              walkthrough in{" "}
+              <Link
+                href="/blog/how-to-calculate-cap-rate"
+                className="tc-link"
               >
-                Freddie Mac says to typically be prepared for 2% to 5% of the
-                purchase price
-              </a>
+                how to calculate cap rate
+              </Link>
               .
-            </li>
-            <li>
-              <strong>Upfront rehab / make-ready.</strong> Anything you had to
-              spend to make it rentable.
-            </li>
-            <li>
-              <strong>Initial reserves.</strong> Some investors fund 3-6 months
-              of debt service as an operating reserve at closing — that&apos;s
-              real cash invested.
-            </li>
-          </ul>
-          <p>
-            <strong>NOT</strong> included: the loan amount (that&apos;s the
-            bank&apos;s money), nor any future repairs you&apos;ll pay out of
-            cash flow.
-          </p>
+            </p>
 
-          <h3>Step 5: Divide</h3>
-          <p>Annual cash flow ÷ total cash invested. Express as percentage.</p>
+            <h3>Step 2: Compute annual debt service</h3>
+            <p>
+              Monthly mortgage payment (principal + interest only — exclude
+              tax/insurance escrow since those are already in operating expenses)
+              × 12.
+            </p>
 
-          <h2 className="text-2xl sm:text-3xl">
-            Worked example #1: leveraged single-family
-          </h2>
-          <p>
-            $300K property, 25% down at 7%, $2,400/mo rent; from the cap-rate
-            example, cash after the CapEx reserve and before debt service is
-            $12,906.
-          </p>
-          <ul>
-            <li>Loan amount: $225,000</li>
-            <li>Monthly P&amp;I (30 year, 7%): $1,497</li>
-            <li>Annual debt service: $17,964</li>
-            <li>
-              Annual cash flow: $12,906 − $17,964 = <strong>−$5,058</strong>
-            </li>
-            <li>
-              Cash invested: $75K down + $9K closing + $5K make-ready = $89,000
-            </li>
-            <li>
-              <strong>CoC:</strong> −$5,058 ÷ $89,000 = <strong>−5.7%</strong>
-            </li>
-          </ul>
-          <p>
-            Negative CoC means you&apos;re writing a check every month to own
-            this property. That can still make sense if you believe in strong
-            appreciation, but in 2026 it&apos;s a hard sell — bidding for
-            negative cash flow on a 5.3% cap rate with a 7% mortgage rate is
-            paying for hope. (For reference, the{" "}
-            <a
-              href="https://fred.stlouisfed.org/series/MORTGAGE30US"
-              className="text-primary font-semibold hover:underline"
-            >
-              Freddie Mac 30-year fixed average was 7.03% in the week of
-              September 24, 2026
-            </a>
-            .)
-          </p>
+            <h3>Step 3: Calculate annual cash flow</h3>
+            <p>
+              Annual cash flow = NOI − annual debt service − the CapEx reserve.
+              This is the pre-tax cash that actually hits your bank account.
+            </p>
 
-          <h2 className="text-2xl sm:text-3xl">
-            Worked example #2: same property with more leverage
-          </h2>
-          <p>Same $300K property, but with a DSCR loan at 80% LTV / 7.5%.</p>
-          <ul>
-            <li>Loan amount: $240,000</li>
-            <li>Monthly P&amp;I (30 year, 7.5%): $1,678</li>
-            <li>Annual debt service: $20,136</li>
-            <li>
-              Annual cash flow: $12,906 − $20,136 = <strong>−$7,230</strong>
-            </li>
-            <li>
-              Cash invested: $60K down + $9K closing + $5K make-ready = $74,000
-            </li>
-            <li>
-              <strong>CoC:</strong> −$7,230 ÷ $74,000 = <strong>−9.8%</strong>
-            </li>
-          </ul>
-          <p>
-            More leverage made the deal worse, not better — because the mortgage
-            rate (7.5%), and with it the loan constant (about 8.39% on a
-            30-year loan), is higher than the cap rate (5.3%). This is negative
-            leverage in action. The spread between the cap rate and the loan
-            constant decides whether leverage helps or hurts.
-          </p>
+            <h3>Step 4: Tally total cash invested</h3>
+            <p>What you wrote checks for, before stabilization:</p>
+            <ul>
+              <li>
+                <strong>Down payment.</strong> The non-financed portion of the
+                purchase price.
+              </li>
+              <li>
+                <strong>Closing costs.</strong> Title, lender fees, inspection,
+                appraisal, transfer taxes —{" "}
+                <a
+                  href="https://myhome.freddiemac.com/blog/homebuying/what-are-closing-costs-and-how-much-will-i-pay"
+                  className="tc-link"
+                >
+                  Freddie Mac says to typically be prepared for 2% to 5% of the
+                  purchase price
+                </a>
+                .
+              </li>
+              <li>
+                <strong>Upfront rehab / make-ready.</strong> Anything you had to
+                spend to make it rentable.
+              </li>
+              <li>
+                <strong>Initial reserves.</strong> Some investors fund 3-6 months
+                of debt service as an operating reserve at closing — that&apos;s
+                real cash invested.
+              </li>
+            </ul>
+            <p>
+              <strong>NOT</strong> included: the loan amount (that&apos;s the
+              bank&apos;s money), nor any future repairs you&apos;ll pay out of
+              cash flow.
+            </p>
 
-          <h2 className="text-2xl sm:text-3xl">
-            Worked example #3: a real deal in a higher-cap market
-          </h2>
-          <p>
-            $180K Tier 3 single-family, $1,800/mo rent, 25% down at 7%. Assume
-            cash after the CapEx reserve and before debt service of ~$14,400
-            (about 8% of price), so the cap rate (NOI before the reserve) is
-            above 8%.
-          </p>
-          <ul>
-            <li>Cash after CapEx, before debt (~8% of price): ~$14,400</li>
-            <li>Loan: $135K at 7% / 30 = $898/mo P&amp;I</li>
-            <li>Annual debt service: $10,776</li>
-            <li>
-              Annual cash flow: $14,400 − $10,776 = <strong>$3,624</strong>
-            </li>
-            <li>
-              Cash invested: $45K down + $5.4K closing + $3K make-ready =
-              $53,400
-            </li>
-            <li>
-              <strong>CoC:</strong> $3,624 ÷ $53,400 = <strong>6.8%</strong>
-            </li>
-          </ul>
-          <p>
-            A cap rate above 8%, a 7% mortgage rate on a 30-year loan (a 7.98%
-            loan constant), 75% LTV — gets you a 6.8% CoC return, below the cap
-            rate once the CapEx reserve, closing and make-ready costs are
-            counted. Not spectacular, but a real cash-flowing deal. Higher-cap
-            markets can carry more vacancy and tenant risk, so underwrite those
-            risks explicitly instead of assuming a higher CoC comes free.
-          </p>
+            <h3>Step 5: Divide</h3>
+            <p>Annual cash flow ÷ total cash invested. Express as percentage.</p>
 
-          <h2 className="text-2xl sm:text-3xl">
-            The two traps that inflate CoC
-          </h2>
-          <p>Two shortcuts make CoC look better than it is:</p>
-          <ul>
-            <li>
-              <strong>Forgetting closing costs in cash invested.</strong> A 25%
-              down payment is the headline number, but the actual cash out of
-              pocket is 27-30% once you add closing. Skipping closing inflates
-              CoC by roughly 8-20%.
-            </li>
-            <li>
-              <strong>Using gross rent in cash flow instead of NOI.</strong>
-              Subtracting mortgage from <em>gross</em> rent — instead of from
-              NOI — produces a cash flow number that ignores vacancy,
-              maintenance, and CapEx. In worked example #1, that shortcut turns
-              a −5.7% CoC into +12.2%.
-            </li>
-          </ul>
+            <h2>
+              Worked example #1: leveraged single-family
+            </h2>
+            <p>
+              $300K property, 25% down at 7%, $2,400/mo rent; from the cap-rate
+              example, cash after the CapEx reserve and before debt service is
+              $12,906.
+            </p>
+            <ul>
+              <li>Loan amount: $225,000</li>
+              <li>Monthly P&amp;I (30 year, 7%): $1,497</li>
+              <li>Annual debt service: $17,964</li>
+              <li>
+                Annual cash flow: $12,906 − $17,964 = <strong>−$5,058</strong>
+              </li>
+              <li>
+                Cash invested: $75K down + $9K closing + $5K make-ready = $89,000
+              </li>
+              <li>
+                <strong>CoC:</strong> −$5,058 ÷ $89,000 = <strong>−5.7%</strong>
+              </li>
+            </ul>
+            <p>
+              Negative CoC means you&apos;re writing a check every month to own
+              this property. That can still make sense if you believe in strong
+              appreciation, but in 2026 it&apos;s a hard sell — bidding for
+              negative cash flow on a 5.3% cap rate with a 7% mortgage rate is
+              paying for hope. (For reference, the{" "}
+              <a
+                href="https://fred.stlouisfed.org/series/MORTGAGE30US"
+                className="tc-link"
+              >
+                Freddie Mac 30-year fixed average was 7.03% in the week of
+                September 24, 2026
+              </a>
+              .)
+            </p>
 
-          <div className="not-prose"></div>
+            <h2>
+              Worked example #2: same property with more leverage
+            </h2>
+            <p>Same $300K property, but with a DSCR loan at 80% LTV / 7.5%.</p>
+            <ul>
+              <li>Loan amount: $240,000</li>
+              <li>Monthly P&amp;I (30 year, 7.5%): $1,678</li>
+              <li>Annual debt service: $20,136</li>
+              <li>
+                Annual cash flow: $12,906 − $20,136 = <strong>−$7,230</strong>
+              </li>
+              <li>
+                Cash invested: $60K down + $9K closing + $5K make-ready = $74,000
+              </li>
+              <li>
+                <strong>CoC:</strong> −$7,230 ÷ $74,000 = <strong>−9.8%</strong>
+              </li>
+            </ul>
+            <p>
+              More leverage made the deal worse, not better — because the mortgage
+              rate (7.5%), and with it the loan constant (about 8.39% on a
+              30-year loan), is higher than the cap rate (5.3%). This is negative
+              leverage in action. The spread between the cap rate and the loan
+              constant decides whether leverage helps or hurts.
+            </p>
 
-          <p className="text-sm text-muted-foreground mt-6">
-            Related reading:{" "}
-            <Link
-              href="/blog/how-to-calculate-cap-rate"
-              className="text-primary font-semibold hover:underline"
-            >
-              How to calculate cap rate
-            </Link>
-            ,{" "}
-            <Link
-              href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
-              className="text-primary font-semibold hover:underline"
-            >
-              Cap rate vs cash-on-cash vs DSCR
-            </Link>
-            ,{" "}
-            <Link
-              href="/blog/cash-on-cash-vs-irr"
-              className="text-primary font-semibold hover:underline"
-            >
-              Cash-on-cash vs IRR
-            </Link>
-            .
-          </p>
+            <h2>
+              Worked example #3: a real deal in a higher-cap market
+            </h2>
+            <p>
+              $180K Tier 3 single-family, $1,800/mo rent, 25% down at 7%. Assume
+              cash after the CapEx reserve and before debt service of ~$14,400
+              (about 8% of price), so the cap rate (NOI before the reserve) is
+              above 8%.
+            </p>
+            <ul>
+              <li>Cash after CapEx, before debt (~8% of price): ~$14,400</li>
+              <li>Loan: $135K at 7% / 30 = $898/mo P&amp;I</li>
+              <li>Annual debt service: $10,776</li>
+              <li>
+                Annual cash flow: $14,400 − $10,776 = <strong>$3,624</strong>
+              </li>
+              <li>
+                Cash invested: $45K down + $5.4K closing + $3K make-ready =
+                $53,400
+              </li>
+              <li>
+                <strong>CoC:</strong> $3,624 ÷ $53,400 = <strong>6.8%</strong>
+              </li>
+            </ul>
+            <p>
+              A cap rate above 8%, a 7% mortgage rate on a 30-year loan (a 7.98%
+              loan constant), 75% LTV — gets you a 6.8% CoC return, below the cap
+              rate once the CapEx reserve, closing and make-ready costs are
+              counted. Not spectacular, but a real cash-flowing deal. Higher-cap
+              markets can carry more vacancy and tenant risk, so underwrite those
+              risks explicitly instead of assuming a higher CoC comes free.
+            </p>
 
-          <h2 className="text-2xl sm:text-3xl">FAQ</h2>
-          {FAQS.map((f, i) => (
-            <details
-              key={i}
-              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
-            >
-              <summary className="cursor-pointer font-bold text-foreground">
-                {f.q}
-              </summary>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                {f.a}
-              </p>
-            </details>
-          ))}
+            <h2>
+              The two traps that inflate CoC
+            </h2>
+            <p>Two shortcuts make CoC look better than it is:</p>
+            <ul>
+              <li>
+                <strong>Forgetting closing costs in cash invested.</strong> A 25%
+                down payment is the headline number, but the actual cash out of
+                pocket is 27-30% once you add closing. Skipping closing inflates
+                CoC by roughly 8-20%.
+              </li>
+              <li>
+                <strong>Using gross rent in cash flow instead of NOI.</strong>
+                Subtracting mortgage from <em>gross</em> rent — instead of from
+                NOI — produces a cash flow number that ignores vacancy,
+                maintenance, and CapEx. In worked example #1, that shortcut turns
+                a −5.7% CoC into +12.2%.
+              </li>
+            </ul>
+
+            <p className="text-sm text-muted-foreground mt-6">
+              Related reading:{" "}
+              <Link
+                href="/blog/how-to-calculate-cap-rate"
+                className="tc-link"
+              >
+                How to calculate cap rate
+              </Link>
+              ,{" "}
+              <Link
+                href="/blog/cap-rate-vs-cash-on-cash-vs-dscr"
+                className="tc-link"
+              >
+                Cap rate vs cash-on-cash vs DSCR
+              </Link>
+              ,{" "}
+              <Link
+                href="/blog/cash-on-cash-vs-irr"
+                className="tc-link"
+              >
+                Cash-on-cash vs IRR
+              </Link>
+              .
+            </p>
+
+          </ArticleBody>
+
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
         </article>
         <PostSources
           sources={[
@@ -440,9 +445,6 @@ export default function BlogPost() {
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <NewsletterSignup variant="expanded" source="blog" />
-        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -451,10 +453,12 @@ export default function BlogPost() {
             screen.
           </p>
         </footer>
-      </main>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
