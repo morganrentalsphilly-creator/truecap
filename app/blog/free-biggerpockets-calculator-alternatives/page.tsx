@@ -540,7 +540,6 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
               </Link>{" "}
               lists the cases where staying put is the right answer.
             </p>
-
           </ArticleBody>
 
           {/* faqSchema above is the one FAQPage node for these rows. */}
