@@ -17,15 +17,28 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  ArticleTable,
+  ToolFormula,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { BlogByline } from "@/components/marketing/blog-byline";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { getSiteUrl } from "@/lib/site-url";
-import { ScrollX } from "@/components/ui/scroll-x";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -147,38 +160,36 @@ export default function BlogPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <header className="mb-8 sm:mb-10">
-          <Link
-            href="/blog"
-            className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Blog
-          </Link>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mt-2 leading-tight text-balance">
-            {TITLE}
-          </h1>
-          <p className="text-2xs uppercase tracking-widest text-muted-foreground font-bold mt-3">
-            {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}{" "}
-            · {READING_TIME_MIN} min read
-          </p>
-          <BlogByline />
-          <p className="text-base sm:text-lg text-muted-foreground mt-4 leading-relaxed">
-            {DESCRIPTION}
-          </p>
-        </header>
+      <ArticleMain>
+        <article>
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              · {READING_TIME_MIN} min read
+            </p>
+            <BlogByline />
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
+              {DESCRIPTION}
+            </p>
+          </header>
 
-        <article className="prose prose-slate max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] [&_p]:leading-relaxed [&_p]:text-foreground [&_h2]:font-extrabold [&_h2]:text-foreground [&_h2]:mt-10 [&_h2]:mb-3 [&_h3]:font-bold [&_h3]:text-foreground [&_h3]:mt-6 [&_h3]:mb-2 [&_li]:text-foreground [&_li]:leading-relaxed [&_strong]:text-foreground">
+          <ArticleBody>
           <p>
             The 1% rule and the 2% rule get talked about like two different
             tools. They aren&apos;t. They&apos;re the same measurement — monthly
@@ -190,7 +201,7 @@ export default function BlogPost() {
             and{" "}
             <Link
               href="/blog/gross-rent-multiplier-explained"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               gross rent multiplier
             </Link>{" "}
@@ -198,7 +209,7 @@ export default function BlogPost() {
             actually screen with.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             The two rules, in one sentence each
           </h2>
           <p>
@@ -208,14 +219,15 @@ export default function BlogPost() {
             least 2% of the price. Both are pass/fail filters you can run in
             your head on a listing before you open a spreadsheet.
           </p>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-            <div className="text-sm sm:text-base font-mono">
-              <strong>1% rule:</strong> monthly rent ÷ price ≥ 1%
-            </div>
-            <div className="text-sm sm:text-base font-mono mt-2">
-              <strong>2% rule:</strong> monthly rent ÷ price ≥ 2%
-            </div>
-          </div>
+          <ToolFormula
+            formula={
+              <>
+                <span>1% rule:</span> monthly rent ÷ price ≥ 1%
+                <br />
+                <span>2% rule:</span> monthly rent ÷ price ≥ 2%
+              </>
+            }
+          />
           <p>
             On a $200,000 property, the 1% rule wants $2,000/month in rent. The
             2% rule wants $4,000/month for the exact same building. That&apos;s
@@ -223,14 +235,14 @@ export default function BlogPost() {
             Everything else in this post is a consequence of that gap.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             The ratio underneath both: GRM and cap rate
           </h2>
           <p>
             Rent-to-price is just the{" "}
             <Link
               href="/tools/gross-rent-multiplier-calculator"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               gross rent multiplier
             </Link>{" "}
@@ -246,22 +258,24 @@ export default function BlogPost() {
             The bridge to profitability runs through the{" "}
             <Link
               href="/blog/what-is-a-good-cap-rate"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               cap rate
             </Link>
             . A useful approximation:
           </p>
-          <div className="bg-card border border-border rounded-xl p-5 sm:p-6 my-4 text-center">
-            <div className="text-sm sm:text-base font-mono">
-              cap rate ≈ (1 − operating-expense ratio) × annual gross yield
-            </div>
-          </div>
+          <ToolFormula
+            formula={
+              <>
+                cap rate ≈ (1 − operating-expense ratio) × annual gross yield
+              </>
+            }
+          />
           <p>
             At a 50% expense ratio — the{" "}
             <Link
               href="/blog/50-percent-rule-rentals"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               50% rule
             </Link>{" "}
@@ -274,7 +288,7 @@ export default function BlogPost() {
             unglamorous property produces.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             What each bar demands by price tier
           </h2>
           <p>
@@ -283,28 +297,28 @@ export default function BlogPost() {
             next to illustrative rents for each price point (your local rent
             comps will differ):
           </p>
-          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[560px] text-sm">
+          <ArticleTable label="Data table">
+            <table className="min-w-[560px]">
               <thead>
-                <tr className="border-b border-border bg-muted">
-                  <th className="text-left p-3 font-bold text-foreground">
+                <tr>
+                  <th>
                     Price
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     1% rent target
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     2% rent target
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     Illustrative rent
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     Which bar it clears
                   </th>
                 </tr>
               </thead>
-              <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0">
+              <tbody>
                 <tr>
                   <td className="font-mono">$100,000</td>
                   <td className="font-mono">$1,000</td>
@@ -332,7 +346,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </ScrollX>
+          </ArticleTable>
           <p>
             The pattern is the story. In cheaper, cash-flow-oriented markets the
             1% rule can still be a live screen. In median and appreciation
@@ -346,7 +360,7 @@ export default function BlogPost() {
             The national numbers point the same way. In the{" "}
             <a
               href="https://www.census.gov/library/stories/2026/01/housing-costs.html"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               Census Bureau&apos;s 2020-2024 American Community Survey
             </a>
@@ -357,7 +371,7 @@ export default function BlogPost() {
             of the 2% bar.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             A same-dollar worked comparison
           </h2>
           <p>
@@ -375,7 +389,7 @@ export default function BlogPost() {
             ($14,969/year). (Size any loan with the{" "}
             <Link
               href="/tools/mortgage-payment-calculator"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               mortgage payment calculator
             </Link>
@@ -400,22 +414,22 @@ export default function BlogPost() {
             $18,750 invested that&apos;s a <strong>16.4% cash-on-cash</strong>{" "}
             return.
           </p>
-          <ScrollX cue stickyFirstColumn label="Data table" className="not-prose overflow-x-auto rounded-xl border border-border bg-card my-6">
-            <table className="w-full min-w-[560px] text-sm">
+          <ArticleTable label="Data table">
+            <table className="min-w-[560px]">
               <thead>
-                <tr className="border-b border-border bg-muted">
-                  <th className="text-left p-3 font-bold text-foreground">
+                <tr>
+                  <th>
                     Metric
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     Deal A · 1% · $250K
                   </th>
-                  <th className="text-left p-3 font-bold text-foreground">
+                  <th>
                     Deal B · 2% · $75K
                   </th>
                 </tr>
               </thead>
-              <tbody className="[&_td]:p-3 [&_td]:border-b [&_td]:border-border [&_tr:last-child_td]:border-0 [&_td]:font-mono">
+              <tbody className="[&_td]:font-mono">
                 <tr>
                   <td>Rent-to-price</td>
                   <td>1.0%</td>
@@ -443,7 +457,7 @@ export default function BlogPost() {
                 </tr>
               </tbody>
             </table>
-          </ScrollX>
+          </ArticleTable>
           <p>
             On the numbers alone, the 2% deal buries the 1% deal — higher cap
             rate, real cash flow, a double-digit cash-on-cash return. So why
@@ -451,7 +465,7 @@ export default function BlogPost() {
             doesn&apos;t price the risk.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Why the 2% rule is nearly extinct
           </h2>
           <p>
@@ -471,7 +485,7 @@ export default function BlogPost() {
             the cheap-money era, a 2% property{" "}
             <a
               href="https://fred.stlouisfed.org/series/MORTGAGE30US"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               financed at 4%
             </a>{" "}
@@ -482,14 +496,14 @@ export default function BlogPost() {
             stop working — the market that produced it thinned out.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             Why even the 1% rule needs an asterisk in 2026
           </h2>
           <p>
             The 1% rule is the one you&apos;ll actually use, but{" "}
             <a
               href="https://fred.stlouisfed.org/series/MORTGAGE30US"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               7% rates
             </a>{" "}
@@ -511,14 +525,14 @@ export default function BlogPost() {
             40% apart, see our{" "}
             <Link
               href="/blog/1-percent-rule-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               full breakdown of the 1% rule
             </Link>
             .
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">
+          <h2>
             The blind spot both rules share
           </h2>
           <p>
@@ -538,7 +552,7 @@ export default function BlogPost() {
             survivors to real{" "}
             <Link
               href="/blog/how-to-calculate-noi-rental-property"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               net operating income
             </Link>{" "}
@@ -547,7 +561,7 @@ export default function BlogPost() {
             instead.
           </p>
 
-          <h2 className="text-2xl sm:text-3xl">Which rule should you use?</h2>
+          <h2>Which rule should you use?</h2>
           <p>
             For almost everyone:{" "}
             <strong>
@@ -568,36 +582,30 @@ export default function BlogPost() {
             can run either screen instantly here —{" "}
             <Link
               href="/tools/1-percent-rule-calculator"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               1% rule calculator
             </Link>{" "}
             and{" "}
             <Link
               href="/tools/2-percent-rule-calculator"
-              className="text-primary font-semibold hover:underline"
+              className="tc-link"
             >
               2% rule calculator
             </Link>{" "}
             — and then take the ones that pass to the full analyzer.
           </p>
+          </ArticleBody>
 
-          <div className="not-prose"></div>
-
-          <h2 className="text-2xl sm:text-3xl">FAQ</h2>
-          {FAQS.map((f, i) => (
-            <details
-              key={i}
-              className="not-prose bg-card border border-border rounded-xl p-4 sm:p-5 mb-3"
-            >
-              <summary className="cursor-pointer font-bold text-foreground">
-                {f.q}
-              </summary>
-              <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                {f.a}
-              </p>
-            </details>
-          ))}
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQ"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
         </article>
         <PostSources
           sources={[
@@ -616,32 +624,31 @@ export default function BlogPost() {
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
 
         <RelatedBlogPosts currentSlug={SLUG} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <NewsletterSignup variant="expanded" source="blog" />
-        </div>
 
         <footer className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Related:{" "}
             <Link
               href="/blog/1-percent-rule-rental-property"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               The 1% rule in 2026 →
             </Link>{" "}
             ·{" "}
             <Link
               href="/blog/gross-rent-multiplier-explained"
-              className="font-bold text-foreground hover:underline"
+              className="tc-link"
             >
               Gross rent multiplier explained →
             </Link>
           </p>
         </footer>
-      </main>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
