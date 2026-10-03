@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type Stripe from "stripe";
 import type { SubscriptionCheckoutIntent } from "@/lib/stripe/subscription-checkout-intent";
@@ -266,6 +268,9 @@ describe("a checkout request while another one is open", () => {
     expect(params.line_items).toEqual([{ price: "price_pro_annual", quantity: 1 }]);
     expect(params.metadata).toMatchObject({ checkout_intent_id: NEW_INTENT_ID, plan_slug: "pro_annual" });
     expect(options).toEqual({ idempotencyKey: `truecap-subscription-checkout:${NEW_INTENT_ID}` });
+    // Full price only: no promotion-code field on the hosted page.
+    expect(params.allow_promotion_codes).toBe(false);
+    expect(params.discounts).toBeUndefined();
     expect(mocks.markOpen).toHaveBeenCalledTimes(1);
     expect(mocks.complete).not.toHaveBeenCalled();
   });
@@ -338,5 +343,39 @@ describe("a checkout request while another one is open", () => {
       await createCheckoutSessionAction({ planSlug: "pro_annual", startOver: "yes" }),
     ).toMatchObject({ ok: false, code: "PLAN_NOT_FOUND" });
     expect(mocks.acquire).not.toHaveBeenCalled();
+  });
+});
+
+describe("promotion codes are off on every Checkout path", () => {
+  const ROOT = join(__dirname, "..", "..");
+
+  function sourceFiles(dir: string): string[] {
+    return readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((entry) => {
+      const path = `${dir}/${entry.name}`;
+      if (entry.isDirectory()) {
+        return entry.name === "__tests__" || entry.name === "node_modules" ? [] : sourceFiles(path);
+      }
+      return /\.(ts|tsx|mjs)$/.test(entry.name) ? [path] : [];
+    });
+  }
+
+  it("the only allow_promotion_codes in the app is the subscription Session's explicit false", () => {
+    const uses = ["app", "lib", "components"].flatMap((dir) =>
+      sourceFiles(dir).flatMap((path) =>
+        readFileSync(join(ROOT, path), "utf8")
+          .split("\n")
+          .filter((line) => /allow_promotion_codes\s*:/.test(line))
+          .map((line) => `${path}: ${line.trim()}`),
+      ),
+    );
+    expect(uses).toEqual([
+      "app/actions/billing.ts: allow_promotion_codes: intent.stripe_discount_coupon_id ? undefined : false,",
+    ]);
+  });
+
+  it("a coupon reaches Checkout only by id from this server, never from a field the buyer types", () => {
+    const billing = readFileSync(join(ROOT, "app/actions/billing.ts"), "utf8");
+    expect(billing).toContain("? [{ coupon: intent.stripe_discount_coupon_id }]");
+    expect(billing).not.toMatch(/promotion_code\s*:/);
   });
 });

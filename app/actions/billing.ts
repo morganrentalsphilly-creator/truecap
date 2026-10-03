@@ -129,7 +129,13 @@ function buildSubscriptionCheckoutSessionParams(args: {
     discounts: intent.stripe_discount_coupon_id
       ? [{ coupon: intent.stripe_discount_coupon_id }]
       : undefined,
-    allow_promotion_codes: intent.stripe_discount_coupon_id ? undefined : true,
+    // Full price only: Checkout shows no promotion-code field. Stripe
+    // accepts `discounts` or `allow_promotion_codes`, never both, so the
+    // parameter is left out when a coupon is attached, as before. The
+    // attached coupon is applied by id by this server (Pack credit, the
+    // env-configured annual coupon, or the env-whitelisted campaign code);
+    // it is not something the buyer can type.
+    allow_promotion_codes: intent.stripe_discount_coupon_id ? undefined : false,
     // The Session id goes to a Route Handler that parks it in an httpOnly
     // cookie and 303s to a clean /dashboard/new?billing=success. It must never
     // be in the URL the client tree mounts on: `session_id` is a sensitive
