@@ -116,8 +116,10 @@ describe("TrueCap Underwriting Standard 1.3", () => {
       resolve(process.cwd(), "app/methodology/page.tsx"),
       "utf8",
     );
-    expect(methodologyPage).toContain(
-      "Negative operating years\n            count as additional contributed capital",
+    // Whitespace-tolerant: the sentence wraps in the JSX source, and the
+    // page's indentation is presentation, not the claim.
+    expect(methodologyPage).toMatch(
+      /Negative operating years\s+count as additional contributed capital/,
     );
     expect(methodologyPage).toContain("modeled exit taxes");
     expect(methodologyPage).not.toContain(
