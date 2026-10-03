@@ -9,14 +9,26 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  ARTICLE_HEADER,
+  ARTICLE_LEDE,
+  ARTICLE_META,
+  ARTICLE_META_LINK,
+  ARTICLE_TITLE,
+  ArticleBody,
+  ArticleEnd,
+  ArticleMain,
+  ArticlePage,
+  UnderTitleAnalyzeLink,
+} from "@/components/marketing/article";
 import { PostSources } from "@/components/blog/post-sources";
 import { BlogByline } from "@/components/marketing/blog-byline";
+import { FaqSection } from "@/components/marketing/faq-section";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { BlogStickyCta } from "@/components/marketing/blog-sticky-cta";
 import { RelatedBlogPosts } from "@/components/marketing/related-blog-posts";
 import { RelatedContent } from "@/components/marketing/related-content";
-import { NewsletterSignup } from "@/components/marketing/newsletter-signup";
 import { getSiteUrl } from "@/lib/site-url";
 import { Header } from "@/components/investcalc/header";
 import { lastmodFor } from "@/lib/seo/lastmod";
@@ -129,28 +141,24 @@ export default function ClosingCostsPost() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <ArticlePage>
       <Header initialUser={null} initialEntitlements={null} />
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
 
-      <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <ArticleMain>
         <article>
-          <div className="mb-2">
-            <Link
-              href="/blog"
-              className="inline-flex min-h-11 items-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              ← Blog
-            </Link>
-          </div>
-          <header className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight text-balance">
-              {TITLE}
-            </h1>
-            <p className="mt-3 text-2xs uppercase tracking-widest text-muted-foreground font-bold">
+          <header className={ARTICLE_HEADER}>
+            <h1 className={ARTICLE_TITLE}>{TITLE}</h1>
+            <p className={ARTICLE_META}>
+              <Link href="/blog" className={ARTICLE_META_LINK}>
+                Blog
+              </Link>{" "}
+              ·{" "}
+              {/* A date-only PUBLISHED_AT is UTC midnight: format it in UTC, as /blog does, or a render west of UTC shows the day before. */}
               {new Date(PUBLISHED_AT).toLocaleDateString("en-US", {
+                timeZone: "UTC",
                 year: "numeric",
                 month: "short",
                 day: "numeric",
@@ -158,7 +166,8 @@ export default function ClosingCostsPost() {
               · {READING_TIME} min read
             </p>
             <BlogByline />
-            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            <UnderTitleAnalyzeLink />
+            <p className={ARTICLE_LEDE}>
               Cash to close depends on a property-specific stack of lender,
               title, government, insurance, tax, contract, and prepaid items.
               This guide shows how to assemble that stack from current written
@@ -167,10 +176,8 @@ export default function ClosingCostsPost() {
             </p>
           </header>
 
-          <div className="prose prose-neutral max-w-none [&>p]:max-w-[68ch] [&>ul]:max-w-[68ch] [&>ol]:max-w-[68ch] [&>blockquote]:max-w-[68ch] [&>h2]:max-w-[68ch] [&>h3]:max-w-[68ch] text-foreground space-y-6 leading-relaxed">
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              The short answer
-            </h2>
+          <ArticleBody>
+            <h2>The short answer</h2>
             <p>
               Do not rely on a national percentage to fund a closing. Start with
               the lender&apos;s written disclosures, title or settlement quote,
@@ -192,9 +199,7 @@ export default function ClosingCostsPost() {
               final cash-to-close figure.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              A hypothetical $250k duplex stack
-            </h2>
+            <h2>A hypothetical $250k duplex stack</h2>
             <p>
               To keep the arithmetic concrete, assume a $250,000 duplex, a 25%
               down payment, a $187,500 loan, and a 30-year term at an assumed 7%
@@ -254,9 +259,7 @@ export default function ClosingCostsPost() {
               a reserve for documented changes allowed before closing.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Group 1: lender charges and third-party services
-            </h2>
+            <h2>Group 1: lender charges and third-party services</h2>
             <p>
               <strong>Origination and lender charges.</strong> Use the amount
               and labels on the written disclosure. Compare complete same-day
@@ -270,7 +273,7 @@ export default function ClosingCostsPost() {
               fee. The rate change per point is not fixed: the{" "}
               <a
                 href="https://www.consumerfinance.gov/ask-cfpb/what-are-discount-points-and-lender-credits-and-how-do-they-work-en-136/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 CFPB explains
               </a>{" "}
@@ -283,7 +286,7 @@ export default function ClosingCostsPost() {
               exit. Run the quoted scenarios through the{" "}
               <Link
                 href="/tools/mortgage-payment-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 mortgage payment calculator
               </Link>{" "}
@@ -293,7 +296,7 @@ export default function ClosingCostsPost() {
               <strong>Appraisal and reports.</strong> Ask which{" "}
               <Link
                 href="/blog/investment-property-appraisal"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 appraisal
               </Link>
@@ -304,7 +307,7 @@ export default function ClosingCostsPost() {
               Mae&apos;s{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b4-1.2-01/appraisal-report-forms-and-exhibits"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 appraisal report forms
               </a>
@@ -315,7 +318,7 @@ export default function ClosingCostsPost() {
               (Form 1025). Fannie Mae and Freddie Mac&apos;s{" "}
               <a
                 href="https://sf.freddiemac.com/faqs/uad-and-forms-redesign"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 redesigned appraisal report
               </a>{" "}
@@ -330,9 +333,7 @@ export default function ClosingCostsPost() {
               optional or shoppable, and whether it can change or be waived.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Group 2: title, settlement, and legal items
-            </h2>
+            <h2>Group 2: title, settlement, and legal items</h2>
             <p>
               <strong>Lender&apos;s title policy.</strong> If the lender or
               program requires one, use the written premium and coverage
@@ -360,16 +361,14 @@ export default function ClosingCostsPost() {
               county or transaction into the estimate.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Group 3: government taxes, charges, and adjustments
-            </h2>
+            <h2>Group 3: government taxes, charges, and adjustments</h2>
             <p>
               Transfer, deed, documentary, conveyance, mortgage, recording, and
               other government charges vary by jurisdiction, instrument, price,
               financing, exemptions, and effective date. The CFPB&apos;s{" "}
               <a
                 href="https://www.consumerfinance.gov/rules-policy/regulations/1026/interp-37/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 official commentary on the Loan Estimate
               </a>{" "}
@@ -381,7 +380,7 @@ export default function ClosingCostsPost() {
               under the{" "}
               <a
                 href="https://www.consumerfinance.gov/rules-policy/regulations/1026/interp-38/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Closing Disclosure commentary
               </a>
@@ -397,9 +396,7 @@ export default function ClosingCostsPost() {
               not understand.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Group 4: prepaids and initial escrows
-            </h2>
+            <h2>Group 4: prepaids and initial escrows</h2>
             <p>
               Prepaids and initial escrow deposits affect cash to close but are
               different from transaction fees. Label them separately so a model
@@ -419,7 +416,7 @@ export default function ClosingCostsPost() {
               of months. Where the federal escrow rule in{" "}
               <a
                 href="https://www.consumerfinance.gov/rules-policy/regulations/1024/17/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 Regulation X
               </a>{" "}
@@ -439,7 +436,7 @@ export default function ClosingCostsPost() {
               Track these amounts in{" "}
               <Link
                 href="/blog/how-much-money-to-buy-a-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 <em>cash to close</em>
               </Link>
@@ -447,16 +444,14 @@ export default function ClosingCostsPost() {
               the same insurance or tax period twice in your{" "}
               <Link
                 href="/blog/rental-property-pro-forma-explained"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 pro forma operating expenses
               </Link>
               .
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              How the hypothetical stack changes modeled returns
-            </h2>
+            <h2>How the hypothetical stack changes modeled returns</h2>
             <p>
               A cash-on-cash calculation divides modeled annual pre-tax cash
               flow by the cash invested under the model&apos;s definition.
@@ -470,7 +465,7 @@ export default function ClosingCostsPost() {
               If annual pre-tax cash flow were $6,000, the modeled{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 cash-on-cash return
               </Link>{" "}
@@ -479,7 +474,7 @@ export default function ClosingCostsPost() {
               it is not a projected return. Read{" "}
               <Link
                 href="/blog/how-to-calculate-cash-on-cash-return"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 how to calculate cash-on-cash return
               </Link>{" "}
@@ -489,7 +484,7 @@ export default function ClosingCostsPost() {
               Acquisition charges generally do not enter a modeled{" "}
               <Link
                 href="/analyze" prefetch={false}
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 DSCR
               </Link>{" "}
@@ -502,7 +497,7 @@ export default function ClosingCostsPost() {
               Tax treatment is a separate question from these pre-tax figures.{" "}
               <a
                 href="https://www.irs.gov/publications/p527"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 IRS Publication 527
               </a>{" "}
@@ -512,9 +507,7 @@ export default function ClosingCostsPost() {
               term of the loan.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              How to compare the available options
-            </h2>
+            <h2>How to compare the available options</h2>
             <p>
               <strong>Compare complete lender options.</strong> Review written
               disclosures line by line, but also compare rate, APR, payment,
@@ -530,7 +523,7 @@ export default function ClosingCostsPost() {
               Limits are not universal. Fannie Mae&apos;s{" "}
               <a
                 href="https://selling-guide.fanniemae.com/sel/b3-4.1-02/interested-party-contributions-ipcs"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 interested party contribution limits
               </a>
@@ -546,7 +539,7 @@ export default function ClosingCostsPost() {
               duration scenarios, including a possible sale or{" "}
               <Link
                 href="/blog/how-to-refinance-a-rental-property"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 refinance the property
               </Link>
@@ -558,7 +551,7 @@ export default function ClosingCostsPost() {
               covered by the{" "}
               <a
                 href="https://www.consumerfinance.gov/rules-policy/regulations/1026/19/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 federal Loan Estimate rule
               </a>
@@ -572,9 +565,7 @@ export default function ClosingCostsPost() {
               only change.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              Build it into the deal, not after it
-            </h2>
+            <h2>Build it into the deal, not after it</h2>
             <p>
               Build an estimate before committing funds, update it when lender,
               title, insurance, tax, inspection, and contract information
@@ -586,7 +577,7 @@ export default function ClosingCostsPost() {
               Estimate your stack with the{" "}
               <Link
                 href="/tools/closing-cost-calculator"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 closing cost calculator
               </Link>
@@ -594,7 +585,7 @@ export default function ClosingCostsPost() {
               closing-cost inputs into{" "}
               <Link
                 href="/"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 TrueCap
               </Link>{" "}
@@ -604,14 +595,14 @@ export default function ClosingCostsPost() {
               the underwriting checklist, see{" "}
               <Link
                 href="/blog/how-to-underwrite-a-rental-property-in-60-seconds"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 how to underwrite a rental in 60 seconds
               </Link>{" "}
               and the{" "}
               <Link
                 href="/blog/rental-property-pro-forma-explained"
-                className="text-primary font-semibold hover:underline"
+                className="tc-link"
               >
                 pro forma guide
               </Link>
@@ -623,18 +614,17 @@ export default function ClosingCostsPost() {
               transaction documents.
             </p>
 
-            <h2 className="text-2xl font-extrabold text-foreground mt-10 mb-3">
-              FAQs
-            </h2>
-            {FAQS.map((f) => (
-              <div key={f.q}>
-                <h3 className="text-xl font-bold text-foreground mt-6 mb-2">
-                  {f.q}
-                </h3>
-                <p>{f.a}</p>
-              </div>
-            ))}
-          </div>
+          </ArticleBody>
+
+          {/* faqLd above is the one FAQPage node for these rows. */}
+          <FaqSection
+            id="faq"
+            variant="inline"
+            heading="FAQs"
+            items={FAQS}
+            structuredData={false}
+            contact={null}
+          />
         </article>
         <PostSources
           sources={[
@@ -678,13 +668,12 @@ export default function ClosingCostsPost() {
         />
         <RelatedContent kind="blog" slug={SLUG} title={TITLE} className="mt-10" />
         <RelatedBlogPosts currentSlug={SLUG} />
-      </main>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <NewsletterSignup variant="expanded" source="blog" />
-      </div>
-      <BlogStickyCta />
+      </ArticleMain>
+      <ArticleEnd>
+        <BlogStickyCta inArticleColumn />
+      </ArticleEnd>
       <SiteFooter />
       <ScrollDepthTracker />
-    </div>
+    </ArticlePage>
   );
 }
