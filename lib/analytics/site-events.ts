@@ -25,8 +25,9 @@ export type SiteEventProps = {
    *    (components/auth/sign-up-form.tsx fires it when signUpAction returns
    *    ok). With email confirmation on, that is before the confirmation link
    *    is clicked, so it includes accounts that are never confirmed. It is
-   *    sent from the browser, so it is also missing wherever analytics is
-   *    not mounted (sign-up URLs carrying `next=`, see lib/sensitive-url.ts).
+   *    sent from the browser, so it is also missing wherever Vercel Analytics
+   *    is not mounted (a sign-up URL whose `next` is not one of the two
+   *    counted values, see isCountedNextLocation in lib/sensitive-url.ts).
    *  - "google": a new Google account was created (app/auth/callback/route.ts,
    *    server-side, once per account). Google accounts are confirmed.
    *
