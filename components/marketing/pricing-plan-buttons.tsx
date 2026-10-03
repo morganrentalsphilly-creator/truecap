@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { createCheckoutSessionAction } from "@/app/actions/billing";
 import { buttonVariants } from "@/components/ui/button";
+import { OpenCheckoutChoice } from "@/components/billing/open-checkout-choice";
 import { useToast } from "@/hooks/use-toast";
 import type { CheckoutPlanSlug } from "@/lib/pricing-checkout-resume";
 import { decidePricingCardCta } from "@/lib/billing-plan-cta";
@@ -43,6 +44,13 @@ export function PricingPlanButtons({
   const { toast } = useToast();
   const [, startTransition] = useTransition();
   const [pending, setPending] = useState(false);
+  // Set when the server found the buyer's own open Checkout Session for
+  // another plan or billing period. The card then offers that checkout or a
+  // fresh one for this plan, in place of the Subscribe button.
+  const [openCheckout, setOpenCheckout] = useState<{
+    openPlanSlug: CheckoutPlanSlug;
+    resumeUrl: string;
+  } | null>(null);
   // Full width in a card, so 12px of side padding is enough (the cta size's
   // 20px broke "Create a free account — no card" onto two lines in the
   // ~274px card column at 1095px), and a label that must wrap in a narrower
@@ -53,16 +61,31 @@ export function PricingPlanButtons({
     className: "w-full px-3 text-balance",
   });
 
-  const startCheckout = (planSlug: CheckoutPlanSlug) => {
-    track("checkout_started", {
-      plan: planSlug,
-      interval: planSlug.includes("annual") ? "annual" : "monthly",
-    });
+  const startCheckout = (planSlug: CheckoutPlanSlug, startOver = false) => {
+    // One funnel event per click on Subscribe; "start over" continues the
+    // same attempt.
+    if (!startOver) {
+      track("checkout_started", {
+        plan: planSlug,
+        interval: planSlug.includes("annual") ? "annual" : "monthly",
+      });
+    }
     setPending(true);
     startTransition(async () => {
       try {
-        const result = await createCheckoutSessionAction({ planSlug });
+        const result = await createCheckoutSessionAction(
+          startOver ? { planSlug, startOver: true } : { planSlug },
+        );
         if (!result.ok) {
+          if (result.code === "CHECKOUT_OPEN_OTHER_PLAN") {
+            setOpenCheckout({
+              openPlanSlug: result.openPlanSlug,
+              resumeUrl: result.resumeUrl,
+            });
+            setPending(false);
+            return;
+          }
+          setOpenCheckout(null);
           toast({
             title: "Checkout error",
             description: result.message,
@@ -118,6 +141,20 @@ export function PricingPlanButtons({
           ? "Create a free account — no card"
           : `Start ${tierName} evaluation — no card`}
       </a>
+    );
+  }
+
+  if (openCheckout) {
+    return (
+      <OpenCheckoutChoice
+        openPlanSlug={openCheckout.openPlanSlug}
+        requestedPlanSlug={slot}
+        pending={pending}
+        onResume={() => {
+          window.location.href = openCheckout.resumeUrl;
+        }}
+        onStartOver={() => startCheckout(slot, true)}
+      />
     );
   }
 
