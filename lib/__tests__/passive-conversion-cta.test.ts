@@ -162,13 +162,18 @@ describe("sitewide passive-conversion CTA", () => {
         ...HUBS_ON_PAGE_HERO,
       ]),
     );
-    // /markets takes no under-title link: its hero already holds the one
-    // imperative analyzer button ("Run a deal free"), and a page gets one.
+    // /markets holds exactly one imperative analyzer link in its hero. Today
+    // that is the "Run a deal free" button in the hero's aside, so the page
+    // takes no under-title link; if the under-title link is chosen instead,
+    // the button goes. Never both, never neither.
     const markets = read("app/markets/page.tsx");
-    expect(markets).not.toContain("UnderTitleAnalyzeLink");
-    expect(markets.slice(markets.indexOf("<PageHero"), markets.indexOf("</PageHero>"))).toMatch(
-      /href="\/analyze\?from=markets-hub" prefetch=\{false\}[\s\S]*?Run a deal free/,
-    );
+    const marketsHero = markets.slice(markets.indexOf("<PageHero"), markets.indexOf("</PageHero>"));
+    const hasButton = /href="\/analyze\?from=markets-hub" prefetch=\{false\}[\s\S]*?Run a deal free/.test(marketsHero);
+    const underTitleMounts = markets.match(/<UnderTitleAnalyzeLink\b/g)?.length ?? 0;
+    expect(
+      Number(hasButton) + underTitleMounts,
+      "/markets: exactly one imperative analyzer link in the hero",
+    ).toBe(1);
   });
 
   it("uses the shared CTA without signup detours, overlays, or sticky bars", () => {
