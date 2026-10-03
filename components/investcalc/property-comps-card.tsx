@@ -188,16 +188,33 @@ export function PropertyCompsCard({
                   ? "Free comps lookup used"
                   : "Monthly comps limit reached",
               description: r.message,
-              action: (
-                <ToastAction
-                  altText="See Pro plans with 50 comps lookups per month"
-                  onClick={() => {
-                    window.location.assign("/pricing");
-                  }}
-                >
-                  See plans
-                </ToastAction>
-              ),
+              // A monthly cap is not lifted by any plan (Pro and Agent Pro
+              // carry the same allowance, and the site-wide cap applies to
+              // everyone), so /pricing has nothing to offer there: a capped
+              // account gets support instead. Only the free-lookup wall
+              // routes to plans.
+              action:
+                r.code === "CAP_REACHED" ? (
+                  <ToastAction
+                    altText="Email TrueCap support about the monthly comps limit"
+                    onClick={() => {
+                      window.location.assign(
+                        "mailto:hello@usetruecap.com?subject=Monthly%20comps%20limit",
+                      );
+                    }}
+                  >
+                    Contact support
+                  </ToastAction>
+                ) : (
+                  <ToastAction
+                    altText="See Pro plans with up to 50 comps lookups per month"
+                    onClick={() => {
+                      window.location.assign("/pricing");
+                    }}
+                  >
+                    See plans
+                  </ToastAction>
+                ),
             });
             return;
           }
