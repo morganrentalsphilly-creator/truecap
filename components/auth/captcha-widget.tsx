@@ -39,6 +39,16 @@ export const CAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""
  *  whether to wait for a token before enabling submit. */
 export const captchaEnabled = CAPTCHA_SITE_KEY.length > 0;
 
+/**
+ * The memo form's own widget (components/marketing/memo-email-capture.tsx).
+ * Separate from the auth widget because its secret is verified by TrueCap
+ * (MEMO_TURNSTILE_SECRET_KEY), not by Supabase, and the two secrets live in
+ * different places. Unset = the memo form shows no captcha and relies on its
+ * honeypot and the durable email-capture rate limits.
+ */
+export const MEMO_CAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_MEMO_TURNSTILE_SITE_KEY ?? "";
+export const memoCaptchaEnabled = MEMO_CAPTCHA_SITE_KEY.length > 0;
+
 type TurnstileApi = {
   render: (
     el: HTMLElement,
@@ -137,7 +147,14 @@ export function CaptchaWidget({
   onToken,
   onUnavailable,
   ref,
+  siteKey = CAPTCHA_SITE_KEY,
 }: {
+  /**
+   * The widget's site key. Defaults to the auth forms' widget. The memo form
+   * passes its own (MEMO_CAPTCHA_SITE_KEY), whose tokens TrueCap verifies
+   * itself (lib/turnstile.ts) instead of handing them to Supabase.
+   */
+  siteKey?: string;
   /** Gives the form `reset()`; see CaptchaWidgetHandle. */
   ref?: Ref<CaptchaWidgetHandle>;
   onToken: (token: string | null) => void;
@@ -151,6 +168,7 @@ export function CaptchaWidget({
    */
   onUnavailable?: () => void;
 }) {
+  const enabled = siteKey.length > 0;
   const containerRef = useRef<HTMLDivElement | null>(null);
   // Keep the latest callback without re-rendering the widget on parent renders
   // (updated in an effect — writing a ref during render breaks React's rules).
@@ -170,17 +188,17 @@ export function CaptchaWidget({
     ref,
     () => ({
       reset: () => {
-        if (!captchaEnabled) return;
+        if (!enabled) return;
         resetCaptcha(window.turnstile, widgetIdRef.current, (token) =>
           onTokenRef.current(token),
         );
       },
     }),
-    [],
+    [enabled],
   );
 
   useEffect(() => {
-    if (!captchaEnabled) return;
+    if (!enabled) return;
     let widgetId: string | null = null;
     let cancelled = false;
     void loadScript().then((api) => {
@@ -190,7 +208,7 @@ export function CaptchaWidget({
         return;
       }
       widgetId = api.render(containerRef.current, {
-        sitekey: CAPTCHA_SITE_KEY,
+        sitekey: siteKey,
         callback: (token) => onTokenRef.current(token),
         "expired-callback": () => onTokenRef.current(null),
         "error-callback": () => {
@@ -216,8 +234,8 @@ export function CaptchaWidget({
         }
       }
     };
-  }, []);
+  }, [enabled, siteKey]);
 
-  if (!captchaEnabled) return null;
+  if (!enabled) return null;
   return <div ref={containerRef} className="min-h-[65px]" />;
 }

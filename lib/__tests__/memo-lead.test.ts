@@ -137,15 +137,27 @@ describe("Turnstile verification", () => {
   const fetchReturning = (body: unknown, ok = true) =>
     vi.fn(async () => ({ ok, json: async () => body })) as unknown as typeof fetch;
 
+  it("ignores the auth forms' widget, whose secret Supabase holds", async () => {
+    expect(
+      await verifyTurnstileToken("t", "1.2.3.4", {
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: "auth-site",
+        TURNSTILE_SECRET_KEY: "auth-secret",
+      }),
+    ).toBe("not_configured");
+  });
+
   it("is skipped only when captcha is not configured at all", async () => {
     expect(await verifyTurnstileToken("t", "1.2.3.4", {})).toBe("not_configured");
     expect(
-      await verifyTurnstileToken("t", "1.2.3.4", { NEXT_PUBLIC_TURNSTILE_SITE_KEY: "site" }),
+      await verifyTurnstileToken("t", "1.2.3.4", { NEXT_PUBLIC_MEMO_TURNSTILE_SITE_KEY: "site" }),
     ).toBe("misconfigured");
   });
 
   it("requires a token Cloudflare accepts once the secret is set", async () => {
-    const env = { TURNSTILE_SECRET_KEY: "secret", NEXT_PUBLIC_TURNSTILE_SITE_KEY: "site" };
+    const env = {
+      MEMO_TURNSTILE_SECRET_KEY: "secret",
+      NEXT_PUBLIC_MEMO_TURNSTILE_SITE_KEY: "site",
+    };
     expect(await verifyTurnstileToken(undefined, "1.2.3.4", env)).toBe("failed");
     expect(await verifyTurnstileToken("t", "1.2.3.4", env, fetchReturning({ success: true }))).toBe("ok");
     expect(await verifyTurnstileToken("t", "1.2.3.4", env, fetchReturning({ success: false }))).toBe("failed");

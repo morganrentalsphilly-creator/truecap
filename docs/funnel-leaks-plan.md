@@ -77,7 +77,7 @@ Not done: Playwright coverage for the new form and card; a preview entry in `/ad
 ## 5. Rollout order
 
 1. Apply `supabase/migrations/20261003120000_memo_leads.sql`, then `20261003121000_lifecycle_email_log_leads.sql`.
-2. Set `TURNSTILE_SECRET_KEY` if the Turnstile site key is set. Create the Stripe coupon (50% off, once) and set `TRIAL_END_ANNUAL_COUPON`.
+2. Create a Turnstile widget for the memo form and set `NEXT_PUBLIC_MEMO_TURNSTILE_SITE_KEY` + `MEMO_TURNSTILE_SECRET_KEY` (its own widget; the auth forms' secret lives in Supabase). Create the Stripe coupon (50% off, once) and set `TRIAL_END_ANNUAL_COUPON`.
 3. `FUNNEL_MEMO_CAPTURE=on`, redeploy, request a memo to your own address.
 4. `FUNNEL_UPGRADE_NUDGE=on` is independent and can go any time.
 5. Sequences need `EMAIL_POSTAL_ADDRESS` (a PO box or virtual mailbox is enough). Then `FUNNEL_SEQUENCES=on` with `LIFECYCLE_EMAILS_MODE=dry`; call the cron and read the `sequences` block. Then `live`.

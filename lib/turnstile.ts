@@ -5,7 +5,10 @@ import "server-only";
  *
  * The auth forms hand their token to Supabase, which verifies it. An action
  * that never touches Supabase Auth (the decision-memo capture) has to call
- * siteverify itself with TURNSTILE_SECRET_KEY.
+ * siteverify itself. It uses ITS OWN widget — NEXT_PUBLIC_MEMO_TURNSTILE_SITE_KEY
+ * with MEMO_TURNSTILE_SECRET_KEY — never the auth forms' widget: a Turnstile
+ * secret only verifies tokens from its own site key, and the auth widget's
+ * secret is held by Supabase.
  *
  * Rollout matches components/auth/captcha-widget.tsx:
  *   - neither key set      → "not_configured": the caller proceeds on its other
@@ -24,8 +27,8 @@ export async function verifyTurnstileToken(
   env: Record<string, string | undefined> = process.env,
   fetchImpl: typeof fetch = fetch,
 ): Promise<TurnstileVerdict> {
-  const secret = env.TURNSTILE_SECRET_KEY?.trim();
-  const siteKey = env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim();
+  const secret = env.MEMO_TURNSTILE_SECRET_KEY?.trim();
+  const siteKey = env.NEXT_PUBLIC_MEMO_TURNSTILE_SITE_KEY?.trim();
   if (!secret) return siteKey ? "misconfigured" : "not_configured";
   if (!token || token.length > 2048) return "failed";
   try {

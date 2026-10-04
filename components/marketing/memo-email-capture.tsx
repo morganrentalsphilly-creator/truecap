@@ -16,7 +16,11 @@
 import { useCallback, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { captureMemoLeadAction } from "@/app/actions/memo-lead-capture";
-import { CaptchaWidget, captchaEnabled } from "@/components/auth/captcha-widget";
+import {
+  CaptchaWidget,
+  MEMO_CAPTCHA_SITE_KEY,
+  memoCaptchaEnabled,
+} from "@/components/auth/captcha-widget";
 import { trackEvent } from "@/lib/analytics";
 import { track } from "@/lib/analytics/site-events";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
@@ -93,7 +97,7 @@ export function MemoEmailCapture({ getValues, maoTarget }: Props) {
   );
 
   const waitingOnCaptcha =
-    captchaEnabled && captchaWanted && !captchaToken && !captchaUnavailable;
+    memoCaptchaEnabled && captchaWanted && !captchaToken && !captchaUnavailable;
 
   return (
     <section
@@ -163,6 +167,7 @@ export function MemoEmailCapture({ getValues, maoTarget }: Props) {
             <div className="mt-2">
               <CaptchaWidget
                 key={captchaNonce}
+                siteKey={MEMO_CAPTCHA_SITE_KEY}
                 onToken={setCaptchaToken}
                 onUnavailable={() => setCaptchaUnavailable(true)}
               />
