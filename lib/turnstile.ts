@@ -39,12 +39,19 @@ export async function verifyTurnstileToken(
       body,
       signal: AbortSignal.timeout(8_000),
     });
-    if (!res.ok) {
-      console.warn(`[turnstile] siteverify answered HTTP ${res.status}`);
+    // Cloudflare answers a wrong secret with HTTP 400 and the same JSON body
+    // as any other rejection ({ success: false, "error-codes": [...] }), so
+    // the body is read whatever the status. Only a response with no readable
+    // body counts as the service being unavailable.
+    const json = (await res.json().catch(() => null)) as {
+      success?: unknown;
+      "error-codes"?: unknown;
+    } | null;
+    if (!json) {
+      console.warn(`[turnstile] siteverify answered HTTP ${res.status} with no JSON body`);
       return "unavailable";
     }
-    const json = (await res.json()) as { success?: unknown; "error-codes"?: unknown };
-    if (json.success === true) return "ok";
+    if (res.ok && json.success === true) return "ok";
     // Cloudflare's reason, for the server log. The codes name the cause and
     // carry no secret: "invalid-input-secret" (the configured secret is not
     // this widget's), "invalid-input-response" (bad or foreign token),

@@ -161,7 +161,23 @@ describe("Turnstile verification", () => {
     expect(await verifyTurnstileToken(undefined, "1.2.3.4", env)).toBe("failed");
     expect(await verifyTurnstileToken("t", "1.2.3.4", env, fetchReturning({ success: true }))).toBe("ok");
     expect(await verifyTurnstileToken("t", "1.2.3.4", env, fetchReturning({ success: false }))).toBe("failed");
-    expect(await verifyTurnstileToken("t", "1.2.3.4", env, fetchReturning({}, false))).toBe("unavailable");
+    // A wrong secret is HTTP 400 with a JSON body: a rejection, not an outage.
+    expect(
+      await verifyTurnstileToken(
+        "t",
+        "1.2.3.4",
+        env,
+        fetchReturning({ success: false, "error-codes": ["invalid-input-secret"] }, false),
+      ),
+    ).toBe("failed");
+    const noBody = vi.fn(async () => ({
+      ok: false,
+      status: 502,
+      json: async () => {
+        throw new Error("not json");
+      },
+    })) as unknown as typeof fetch;
+    expect(await verifyTurnstileToken("t", "1.2.3.4", env, noBody)).toBe("unavailable");
     const throwing = vi.fn(async () => {
       throw new Error("network");
     }) as unknown as typeof fetch;
