@@ -138,7 +138,7 @@ export async function captureMemoLeadAction(input: {
   const ip = await getRequestIp();
   const captcha = await verifyTurnstileToken(parsed.data.captchaToken, ip);
   if (captcha === "misconfigured") {
-    Sentry.captureMessage("memo capture: Turnstile site key set without TURNSTILE_SECRET_KEY", {
+    Sentry.captureMessage("memo capture: memo Turnstile site key set without MEMO_TURNSTILE_SECRET_KEY", {
       level: "error",
       tags: { feature: "memo-lead-capture" },
     });
