@@ -10,6 +10,8 @@ import {
 } from "@/lib/evaluation-resource-key";
 import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import { captureServerEvent } from "@/lib/posthog-server";
+import { isFunnelFlagOn } from "@/lib/funnel-flags";
+import { PRODUCT_EVALUATION_DEAL_LIMIT } from "@/lib/product-access";
 import { activeAnonymousDecisionGrantMatches } from "@/lib/anonymous-decision-grant";
 import { PRODUCT_EVALUATION_DAYS } from "@/lib/product-access";
 
@@ -38,11 +40,16 @@ export type ConsumeProductEvaluationResult =
       /** True only when this call inserted a new ledger row. */
       wasNewUsage: boolean;
       startedAt: string | null;
+      /** FUNNEL_UPGRADE_NUDGE: this deal used the last of the trial's Pro
+       * deals, so the analyzer shows the inline upgrade card with it. */
+      upgradeNudge?: "third_deal";
     }
   | {
       ok: false;
       code: "SIGN_IN_REQUIRED" | "NOT_ELIGIBLE" | "EXPIRED" | "LIMIT_REACHED" | "SERVER_ERROR";
       message: string;
+      /** FUNNEL_UPGRADE_NUDGE: the deal allowance is spent. */
+      upgradeNudge?: "limit_reached";
     };
 
 /**
@@ -122,6 +129,7 @@ export async function consumeProductEvaluationUsageAction(
     };
   }
 
+  const nudgeOn = isFunnelFlagOn("FUNNEL_UPGRADE_NUDGE");
   const { data, error } = await supabase.rpc("consume_product_evaluation_usage", {
     p_kind: parsed.data.kind,
     p_resource_key: resourceKey,
@@ -173,10 +181,16 @@ export async function consumeProductEvaluationUsageAction(
         }),
       ]);
     }
+    const dealsUsed = typeof row.deals_used === "number" ? row.deals_used : 0;
     return {
       ok: true,
       access: "evaluation",
-      dealsUsed: typeof row.deals_used === "number" ? row.deals_used : 0,
+      ...(nudgeOn &&
+      parsed.data.kind === "deal" &&
+      dealsUsed >= PRODUCT_EVALUATION_DEAL_LIMIT
+        ? { upgradeNudge: "third_deal" as const }
+        : {}),
+      dealsUsed,
       comparisonsUsed: typeof row.comparisons_used === "number" ? row.comparisons_used : 0,
       expiresAt: typeof row.evaluation_expires_at === "string" ? row.evaluation_expires_at : null,
       wasNewUsage,
@@ -189,7 +203,14 @@ export async function consumeProductEvaluationUsageAction(
     return { ok: false, code: "EXPIRED", message: `Your ${PRODUCT_EVALUATION_DAYS}-day free trial has ended.` };
   }
   if (reason.endsWith("limit_reached")) {
-    return { ok: false, code: "LIMIT_REACHED", message: "This free-trial allowance has been used." };
+    return {
+      ok: false,
+      code: "LIMIT_REACHED",
+      message: "This free-trial allowance has been used.",
+      ...(nudgeOn && reason === "deal_limit_reached"
+        ? { upgradeNudge: "limit_reached" as const }
+        : {}),
+    };
   }
   return { ok: false, code: "NOT_ELIGIBLE", message: "No active free trial was found." };
 }

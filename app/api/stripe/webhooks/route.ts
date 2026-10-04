@@ -339,6 +339,17 @@ export async function POST(req: Request) {
                 ? "monthly"
                 : "unknown",
           });
+          // The trial-end annual offer (emails T4/T5) is identified by the
+          // coupon the checkout intent stamped into session metadata.
+          const trialEndCoupon = process.env.TRIAL_END_ANNUAL_COUPON?.trim();
+          if (
+            trialEndCoupon &&
+            session.metadata?.checkout_discount_coupon_id === trialEndCoupon
+          ) {
+            await trackServer("trial_offer_redeemed", {
+              plan: session.metadata?.plan_slug ?? "unknown",
+            });
+          }
           const analyticsCaptured = await captureServerEvent({
             distinctId,
             event: "subscription_started",

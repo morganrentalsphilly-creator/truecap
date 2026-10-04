@@ -43,6 +43,14 @@
  *  9. Other failures → Sentry.captureMessage tagged feature: lifecycle-emails;
  *     a single bad send never aborts the batch.
  *
+ * 10. FUNNEL_SEQUENCES=on swaps onboarding (docs/funnel-leaks-plan.md): the
+ *     trial sequence (T0..T6) REPLACES welcome, the 30-day drip and the pro
+ *     nudge for accounts, and the memo-lead sequence (L1..L4) runs for
+ *     anonymous memo requests (lib/funnel-sequences.ts,
+ *     lib/email/sequence-cron.ts). Same mode switch, same send gate, same
+ *     opt-outs, same log, same claim-before-send, same pacing. Win-back is
+ *     unchanged.
+ *
  * Requires the lifecycle_email_log migration
  * (supabase/migrations/20260620170000_lifecycle_email_log.sql) to be applied,
  * and profiles.marketing_opt_out
@@ -79,6 +87,14 @@ import {
 import { getPaidUserIds } from "@/lib/paid-user-ids";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getSiteUrl } from "@/lib/site-url";
+import { isFunnelFlagOn } from "@/lib/funnel-flags";
+import {
+  fetchAllRows,
+  planSequenceEmails,
+  purgeExpiredMemoLeads,
+  type SequenceCronPlan,
+} from "@/lib/email/sequence-cron";
+import { prepareSequenceEmail, sendSequenceEmail } from "@/lib/email/send-sequence";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -94,8 +110,16 @@ function maskEmail(email: string): string {
 /** All auth users (paginated). Solo-app scale; capped for safety. */
 async function listAllUsers(
   admin: ReturnType<typeof createAdminSupabaseClient>
-): Promise<Array<{ id: string; email: string; created_at: string; confirmed: boolean }>> {
-  const out: Array<{ id: string; email: string; created_at: string; confirmed: boolean }> = [];
+): Promise<
+  Array<{ id: string; email: string; created_at: string; confirmed: boolean; agentIntent: boolean }>
+> {
+  const out: Array<{
+    id: string;
+    email: string;
+    created_at: string;
+    confirmed: boolean;
+    agentIntent: boolean;
+  }> = [];
   const perPage = 1000;
   for (let page = 1; page <= 50; page++) {
     const { data, error } = await admin.auth.admin.listUsers({ page, perPage });
@@ -108,6 +132,8 @@ async function listAllUsers(
         email: u.email,
         created_at: u.created_at ?? new Date().toISOString(),
         confirmed: Boolean(u.email_confirmed_at),
+        // Set at sign-up from the Agent Pro path; picks the agent copy.
+        agentIntent: u.user_metadata?.signup_intent === "agent",
       });
     }
     if (users.length < perPage) break;
@@ -222,16 +248,31 @@ export async function GET(request: Request) {
     }
 
     // Already-sent keys per user.
-    const { data: logRows, error: logErr } = await admin
-      .from("lifecycle_email_log")
-      .select("user_id, email_key");
-    if (logErr) throw logErr;
+    // A row belongs to an account (user_id) or, for the memo-lead sequence,
+    // to a lead (lead_id — selected only when sequences are on, so this
+    // route keeps working before that migration is applied). Paginated: an
+    // unpaginated select stops at 1,000 rows. A truncated read cannot
+    // double-send (the claim is a unique insert) but would re-plan finished
+    // work.
+    const sequencesOn = isFunnelFlagOn("FUNNEL_SEQUENCES");
+    type LogRow = { user_id: string | null; lead_id?: string | null; email_key: string };
+    const logRows = await fetchAllRows<LogRow>((from, to) =>
+      admin
+        .from("lifecycle_email_log")
+        .select(sequencesOn ? "user_id, lead_id, email_key" : "user_id, email_key")
+        .order("id")
+        .range(from, to),
+    );
+    if (!logRows) throw new Error("lifecycle_email_log read failed");
     const sentByUser = new Map<string, string[]>();
-    for (const r of logRows ?? []) {
-      const uid = r.user_id as string;
-      const list = sentByUser.get(uid) ?? [];
-      list.push(r.email_key as string);
-      sentByUser.set(uid, list);
+    const sentByLead = new Map<string, string[]>();
+    for (const r of logRows) {
+      const target = r.user_id ? sentByUser : sentByLead;
+      const id = r.user_id ?? r.lead_id;
+      if (!id) continue;
+      const list = target.get(id) ?? [];
+      list.push(r.email_key);
+      target.set(id, list);
     }
 
     // Marketing consent — the PROMOTIONAL kinds (pro_nudge, winback) only go to
@@ -269,13 +310,17 @@ export async function GET(request: Request) {
     // resend_id = DRIP_SKIPPED_RESEND_ID (the prod schema has no status
     // column; sent_at records when the day was retired). ignoreDuplicates
     // keeps this idempotent against real sends and concurrent runs.
-    const skipRows = states.flatMap((s) =>
-      expiredDripKeys(s, now).map((key) => ({
-        user_id: s.userId,
-        email_key: key,
-        resend_id: DRIP_SKIPPED_RESEND_ID,
-      }))
-    );
+    // With sequences on the drip is replaced outright: no drip day can be
+    // selected, so there is nothing to retire.
+    const skipRows = sequencesOn
+      ? []
+      : states.flatMap((s) =>
+          expiredDripKeys(s, now).map((key) => ({
+            user_id: s.userId,
+            email_key: key,
+            resend_id: DRIP_SKIPPED_RESEND_ID,
+          }))
+        );
 
     // WELCOME AGE GUARD: a confirmed account older than WELCOME_MAX_AGE_DAYS
     // that never got its welcome will not get one now. The key is added to
@@ -333,13 +378,101 @@ export async function GET(request: Request) {
       ? states.filter((s) => !optOuts.known.has(s.userId)).length
       : 0;
 
+    // FUNNEL SEQUENCES: plan the trial (accounts) and memo-lead steps under
+    // the same opt-out rule as everything else in this run. A planning
+    // failure never takes the other sends down with it.
+    let sequencePlan: SequenceCronPlan = { due: [], retire: [], convertedLeads: [], blocked: [] };
+    if (sequencesOn) {
+      try {
+        sequencePlan = await planSequenceEmails(admin, {
+          users: users.map((u) => ({
+            id: u.id,
+            email: u.email,
+            confirmed: u.confirmed,
+            agentIntent: u.agentIntent,
+          })),
+          paidUserIds: paid,
+          sentByUser,
+          sentByLead,
+          mayEmailUser: mayEmail,
+          now,
+        });
+      } catch (err) {
+        sequencePlan.blocked.push("all:planning_failed");
+        Sentry.captureMessage("lifecycle cron: sequence planning failed", {
+          level: "error",
+          tags: { feature: "lifecycle-emails" },
+          extra: { message: err instanceof Error ? err.message : String(err) },
+        });
+      }
+      if (sequencePlan.blocked.length > 0) {
+        Sentry.captureMessage("lifecycle cron: sequence audience blocked (fail closed)", {
+          level: "error",
+          tags: { feature: "lifecycle-emails" },
+          extra: { blocked: sequencePlan.blocked },
+        });
+      }
+    }
+    const sequenceUserIds = new Set(
+      sequencePlan.due.flatMap((d) => (d.recipient.kind === "user" ? [d.recipient.userId] : []))
+    );
+
     const due = states
       .filter((state) => mayEmail(state.userId))
-      .map((state) => selectDueLifecycleEmail(state, now))
+      .map((state) => selectDueLifecycleEmail(state, now, { onboarding: !sequencesOn }))
       .filter((d): d is NonNullable<typeof d> => d !== null)
       // Drop promotional kinds for users who haven't opted into marketing.
       .filter((d) => !PROMO_KINDS.has(d.kind) || marketingConsent.has(d.userId))
+      // One email per recipient per run: a sequence step outranks win-back.
+      .filter((d) => !sequenceUserIds.has(d.userId))
       .slice(0, MAX_SENDS_PER_RUN);
+    const sequenceDue = sequencePlan.due.slice(0, Math.max(0, MAX_SENDS_PER_RUN - due.length));
+
+    // Sequence bookkeeping (live only): retire past-window steps, record
+    // leads that now have an account, and apply the 180-day lead retention.
+    let sequenceStepsRetired = 0;
+    let memoLeadsPurged: number | null = 0;
+    if (sequencesOn && mode === "live") {
+      for (let i = 0; i < sequencePlan.retire.length; i += 500) {
+        const chunk = sequencePlan.retire.slice(i, i + 500);
+        // Split by recipient kind: lead uniqueness is a partial index that
+        // PostgREST cannot upsert against, so lead rows are plain inserts
+        // (a 23505 means the row already exists, which is the goal).
+        const userRows = chunk.filter((r) => r.user_id);
+        const leadRows = chunk.filter((r) => r.lead_id);
+        if (userRows.length > 0) {
+          const { error } = await admin
+            .from("lifecycle_email_log")
+            .upsert(userRows, { onConflict: "user_id,email_key", ignoreDuplicates: true });
+          if (!error) sequenceStepsRetired += userRows.length;
+        }
+        for (const row of leadRows) {
+          const { error } = await admin.from("lifecycle_email_log").insert(row);
+          if (!error || error.code === "23505") sequenceStepsRetired += 1;
+        }
+      }
+      for (const link of sequencePlan.convertedLeads) {
+        await admin
+          .from("memo_leads")
+          .update({ converted_user_id: link.userId, converted_at: now.toISOString() })
+          .eq("id", link.leadId)
+          .is("converted_user_id", null)
+          .then(() => undefined, () => undefined);
+      }
+      memoLeadsPurged = await purgeExpiredMemoLeads(admin, now);
+      if (memoLeadsPurged === null) {
+        Sentry.captureMessage("lifecycle cron: memo lead retention purge failed", {
+          level: "warning",
+          tags: { feature: "lifecycle-emails" },
+        });
+      }
+    }
+    const sequenceDrySummary = () => ({
+      wouldSend: sequenceDue.length,
+      wouldRetireSteps: sequencePlan.retire.length,
+      wouldMarkLeadsConverted: sequencePlan.convertedLeads.length,
+      blocked: sequencePlan.blocked,
+    });
 
     const dryRunLine = (wouldSend: number) =>
       `[lifecycle] DRY RUN — ${wouldSend} emails would send, ${skipRows.length} past-window drip days and ${lateWelcomeRows.length} late welcomes would be retired` +
@@ -354,7 +487,7 @@ export async function GET(request: Request) {
       `[lifecycle] LIVE — sent ${sentCount}/${dueCount}, retired ${dripDaysRetired} past-window drip days and ${welcomesRetired} late welcomes` +
       (stoppedBy ? `, stopped early: ${stoppedBy}` : "");
 
-    if (due.length === 0) {
+    if (due.length === 0 && sequenceDue.length === 0) {
       // One line per run, also when nothing is due, so the log shows the run
       // happened and in which mode.
       console.log(mode === "dry" ? dryRunLine(0) : liveLine(0, 0, null));
@@ -369,8 +502,24 @@ export async function GET(request: Request) {
               wouldRetireDripDays: skipRows.length,
               wouldRetireWelcomes: lateWelcomeRows.length,
               sendBlocked,
+              ...(sequencesOn ? { sequences: sequenceDrySummary() } : {}),
             }
-          : { dripDaysRetired, welcomesRetired }),
+          : {
+              dripDaysRetired,
+              welcomesRetired,
+              ...(sequencesOn
+                ? {
+                    sequences: {
+                      sent: 0,
+                      due: 0,
+                      stepsRetired: sequenceStepsRetired,
+                      leadsConverted: sequencePlan.convertedLeads.length,
+                      leadsPurged: memoLeadsPurged,
+                      blocked: sequencePlan.blocked,
+                    },
+                  }
+                : {}),
+            }),
       });
     }
 
@@ -411,7 +560,67 @@ export async function GET(request: Request) {
       }
     };
 
+    // Sequence steps first: they are the time-boxed ones (T4/T5 sit inside an
+    // offer window). Same dry/live semantics, pacing, time budget and 429
+    // handling as the loop below; the two loops share the counters.
+    let sequenceSent = 0;
+    const sequenceSkipped: Record<string, number> = {};
+    for (const item of sequenceDue) {
+      if (stopped) break;
+      if (mode === "live" && Date.now() - startedAt > RUN_BUDGET_MS) {
+        stopped = "time_budget";
+        break;
+      }
+      const prepared = await prepareSequenceEmail(item, siteUrl);
+      if (!prepared.ok) {
+        // No postal address, no signable link, or missing content: the step
+        // stays unclaimed so a later run can send it inside its window.
+        sequenceSkipped[prepared.reason] = (sequenceSkipped[prepared.reason] ?? 0) + 1;
+        continue;
+      }
+      if (!firstHtml) firstHtml = prepared.prepared.rendered.html;
+      if (mode === "dry") {
+        preview.push({
+          to: maskEmail(item.recipient.email),
+          kind: `sequence:${item.sequence}:${item.variant}`,
+          key: item.stepKey,
+          subject: prepared.prepared.rendered.subject,
+        });
+        continue;
+      }
+      if (!resendKey) continue; // checked before the loop; tells the compiler
+      if (attempted > 0) await pacing.wait(SEND_GAP_MS);
+      attempted += 1;
+      const result = await sendSequenceEmail(admin, item, prepared.prepared, {
+        resendKey,
+        trigger: "cron",
+      });
+      if (result.sent) {
+        sequenceSent += 1;
+      } else if (result.rateLimited) {
+        released += 1;
+        if (result.rateLimited.kind !== "rate_limit") {
+          stopped = result.rateLimited.kind;
+          break;
+        }
+        rateLimitHits += 1;
+        if (rateLimitHits >= MAX_RATE_LIMIT_HITS) {
+          stopped = "rate_limit";
+          break;
+        }
+        await pacing.wait(result.rateLimited.retryAfterMs);
+      }
+    }
+    if (mode === "live" && Object.keys(sequenceSkipped).length > 0) {
+      Sentry.captureMessage("lifecycle cron: sequence emails skipped", {
+        level: "error",
+        tags: { feature: "lifecycle-emails" },
+        extra: { sequenceSkipped },
+      });
+    }
+
     for (const item of due) {
+      if (stopped) break;
       // One signed link per recipient. No link, no email: the user is left
       // unclaimed so a later run can send once the link can be built.
       const unsubscribeUrl = buildLifecycleUnsubscribeUrl(siteUrl, item.userId);
@@ -558,6 +767,9 @@ export async function GET(request: Request) {
         skippedOptedOut,
         skippedNoProfile,
         sendBlocked,
+        ...(sequencesOn
+          ? { sequences: { ...sequenceDrySummary(), skipped: sequenceSkipped } }
+          : {}),
         firstEmailHtml: firstHtml,
       });
     }
@@ -569,7 +781,15 @@ export async function GET(request: Request) {
       Sentry.captureMessage(`lifecycle cron: run stopped early (${stopped})`, {
         level: stopped === "time_budget" ? "warning" : "error",
         tags: { feature: "lifecycle-emails", stopped },
-        extra: { sent, due: due.length, notSent: due.length - sent, released, rateLimitHits },
+        extra: {
+          sent,
+          due: due.length,
+          notSent: due.length - sent,
+          sequenceSent,
+          sequenceDue: sequenceDue.length,
+          released,
+          rateLimitHits,
+        },
       });
     }
 
@@ -585,6 +805,19 @@ export async function GET(request: Request) {
       skippedNoUnsubscribeLink,
       released,
       stopped,
+      ...(sequencesOn
+        ? {
+            sequences: {
+              sent: sequenceSent,
+              due: sequenceDue.length,
+              stepsRetired: sequenceStepsRetired,
+              leadsConverted: sequencePlan.convertedLeads.length,
+              leadsPurged: memoLeadsPurged,
+              skipped: sequenceSkipped,
+              blocked: sequencePlan.blocked,
+            },
+          }
+        : {}),
     });
   } catch (error) {
     Sentry.captureMessage("lifecycle cron: unhandled failure", {

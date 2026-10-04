@@ -30,6 +30,7 @@ export default function robots(): MetadataRoute.Robots {
     "/settings/",
     "/d/",
     "/s/",
+    "/memo/",
     "/portal/",
     "/embed/brand/",
     // Internal rewrite target for the signed-in homepage (see proxy.ts).

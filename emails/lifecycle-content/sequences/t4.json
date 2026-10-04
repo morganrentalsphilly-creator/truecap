@@ -1,0 +1,32 @@
+{
+  "key": "T4",
+  "investor": {
+    "subject": "Your trial ends in 3 days",
+    "preheader": "What happens next, and the annual offer.",
+    "headline": "Your trial ends in 3 days",
+    "body": [
+      "Your free trial ends in 3 days. Nothing renews and you will not be charged. Your account moves to Free.",
+      {
+        "if": "trial_offer",
+        "text": "If TrueCap is earning its place, Pro annual is 50% off for your first year until {{offer_ends}}. The discount is applied at checkout when you choose Pro annual."
+      },
+      {
+        "unless": "trial_offer",
+        "text": "If TrueCap is earning its place, Pro keeps the Offer Ceiling, downside testing, comparisons, and reports on every deal."
+      }
+    ],
+    "cta_text": "See the annual plan",
+    "cta_path": "/pricing"
+  },
+  "agent": {
+    "subject": "Your trial ends in 3 days",
+    "preheader": "What happens next.",
+    "headline": "Your trial ends in 3 days",
+    "body": [
+      "Your free trial ends in 3 days. Nothing renews and you will not be charged. Your account moves to Free.",
+      "Agent Pro keeps your client roster, co-branded memos with your logo, and an Offer Ceiling for each client's targets."
+    ],
+    "cta_text": "See Agent Pro",
+    "cta_path": "/pricing"
+  }
+}

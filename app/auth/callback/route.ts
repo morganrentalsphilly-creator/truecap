@@ -5,6 +5,9 @@ import { NextResponse, after, type NextRequest } from "next/server";
 import type { EmailOtpType, User } from "@supabase/supabase-js";
 import { safeInternalNextPath } from "@/lib/auth-schema";
 import { sendLifecycleEmailNow } from "@/lib/email/send-lifecycle";
+import { linkMemoLeadToUser } from "@/lib/memo-lead";
+import { sendTrialWelcomeNow } from "@/lib/email/send-sequence";
+import { isFunnelFlagOn } from "@/lib/funnel-flags";
 import { getSiteUrl } from "@/lib/site-url";
 import { captureServerEvent } from "@/lib/posthog-server";
 import {
@@ -32,17 +35,36 @@ const NEW_OAUTH_ACCOUNT_EVENTS = [
  * repeat logins and the daily cron can't duplicate it. Best-effort.
  */
 function scheduleWelcome(
-  user: { id: string; email?: string | null } | null | undefined,
+  user:
+    | { id: string; email?: string | null; user_metadata?: Record<string, unknown> | null }
+    | null
+    | undefined,
 ) {
   const email = user?.email;
   if (!user || !email) return;
   const id = user.id;
-  after(() =>
-    sendLifecycleEmailNow(
+  const agentIntent = user.user_metadata?.signup_intent === "agent";
+  after(async () => {
+    // A confirmed address that matches a memo lead ends that lead's sequence
+    // (the account sequence takes over). Idempotent; never throws.
+    try {
+      const admin = createAdminSupabaseClient();
+      await linkMemoLeadToUser(admin, { userId: id, email });
+      // FUNNEL_SEQUENCES: T0 replaces the legacy welcome. It sends only when
+      // the scheduler says T0 is due, so later logins send nothing.
+      if (isFunnelFlagOn("FUNNEL_SEQUENCES")) {
+        await sendTrialWelcomeNow(admin, { id, email, agentIntent }, getSiteUrl());
+        return;
+      }
+    } catch {
+      /* missing service-role env — the lifecycle cron backstops both */
+      if (isFunnelFlagOn("FUNNEL_SEQUENCES")) return;
+    }
+    await sendLifecycleEmailNow(
       { userId: id, email, kind: "welcome", key: "welcome" },
       getSiteUrl(),
-    ),
-  );
+    );
+  });
 }
 
 /** A Google identity created by this very sign-in (not a returning login). */

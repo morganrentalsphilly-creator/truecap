@@ -1,0 +1,34 @@
+{
+  "key": "T5",
+  "investor": {
+    "subject": "Your trial ended. Here's what you keep",
+    "preheader": "What stays on Free.",
+    "headline": "Your trial ended",
+    "body": [
+      "Your free trial has ended. You were not charged.",
+      "On Free you keep unlimited screening analyses, the Deal score, and up to 5 saved deals.",
+      {
+        "if": "trial_offer",
+        "text": "The annual offer, 50% off your first year, is still open until {{offer_ends}}. It is applied at checkout when you choose Pro annual."
+      },
+      {
+        "unless": "trial_offer",
+        "text": "Pro adds the Offer Ceiling, downside testing, comparisons, and reports on every deal."
+      }
+    ],
+    "cta_text": "See the annual plan",
+    "cta_path": "/pricing"
+  },
+  "agent": {
+    "subject": "Your trial ended. Here's what you keep",
+    "preheader": "What stays on Free.",
+    "headline": "Your trial ended",
+    "body": [
+      "Your free trial has ended. You were not charged.",
+      "On Free you keep unlimited screening analyses, the Deal score, and up to 5 saved deals.",
+      "Agent Pro adds your client roster, co-branded memos with your logo, and an Offer Ceiling for each client's targets."
+    ],
+    "cta_text": "See Agent Pro",
+    "cta_path": "/pricing"
+  }
+}

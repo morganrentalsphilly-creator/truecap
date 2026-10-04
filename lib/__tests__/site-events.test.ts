@@ -42,11 +42,20 @@ const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 describe("typed track()", () => {
   it("names the thirteen funnel events and the two measurement events", () => {
     // 13 funnel events, plus cookie_consent_choice and primary_cta_clicked
-    // (go-to-market audit 2026-10, rows P1-52 and P2-115).
-    expect(SITE_EVENTS).toHaveLength(15);
+    // (go-to-market audit 2026-10, rows P1-52 and P2-115), plus the six
+    // funnel-leak events (docs/funnel-leaks-plan.md).
+    expect(SITE_EVENTS).toHaveLength(21);
     expect(new Set(SITE_EVENTS).size).toBe(SITE_EVENTS.length);
     expect(SITE_EVENTS).toContain("checkout_completed");
-    expect(SITE_EVENTS.slice(13)).toEqual(["cookie_consent_choice", "primary_cta_clicked"]);
+    expect(SITE_EVENTS.slice(13, 15)).toEqual(["cookie_consent_choice", "primary_cta_clicked"]);
+    expect(SITE_EVENTS.slice(15)).toEqual([
+      "memo_requested",
+      "memo_sent",
+      "sequence_email_sent",
+      "upgrade_nudge_shown",
+      "upgrade_nudge_clicked",
+      "trial_offer_redeemed",
+    ]);
   });
 
   it("buffers the event for tests and reaches Vercel, but keeps GTM dark without consent", async () => {

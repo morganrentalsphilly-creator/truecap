@@ -60,6 +60,13 @@ export type SiteEventProps = {
    * this the funnel jumped from page view to `analysis_started`.
    */
   primary_cta_clicked: { source: string };
+  // Funnel-leak features (docs/funnel-leaks-plan.md).
+  memo_requested: { source: "analyze_result" };
+  memo_sent: { has_ceiling: boolean };
+  sequence_email_sent: { sequence: "memo_lead" | "trial"; step: string; variant: "investor" | "agent" };
+  upgrade_nudge_shown: { placement: "third_deal" | "limit_reached" };
+  upgrade_nudge_clicked: { placement: "third_deal" | "limit_reached" };
+  trial_offer_redeemed: { plan: string };
 };
 
 export type SiteEvent = keyof SiteEventProps;
@@ -80,6 +87,12 @@ export const SITE_EVENTS: readonly SiteEvent[] = [
   "testimonial_submitted",
   "cookie_consent_choice",
   "primary_cta_clicked",
+  "memo_requested",
+  "memo_sent",
+  "sequence_email_sent",
+  "upgrade_nudge_shown",
+  "upgrade_nudge_clicked",
+  "trial_offer_redeemed",
 ];
 
 export const CONSENT_STORAGE_KEY = "truecap_cookie_consent_v1";

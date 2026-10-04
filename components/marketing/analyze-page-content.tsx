@@ -1,5 +1,6 @@
 import type { ComponentProps } from "react";
 import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
+import { isFunnelFlagOn } from "@/lib/funnel-flags";
 import { AnalyzeEntryFromQuery } from "@/components/marketing/analyze-entry-from-query";
 
 export type AnalyzerProps = ComponentProps<typeof InvestCalcPage>;
@@ -30,6 +31,9 @@ export const ANON_ANALYZER_PROPS: AnalyzerProps = {
   isAuthenticated: false,
   userAnalysisDefaults: null,
   advocacyContractEligible: false,
+  // Read where the server renders the static /analyze shell; the client
+  // analyzer only ever sees the boolean.
+  memoCaptureEnabled: isFunnelFlagOn("FUNNEL_MEMO_CAPTURE"),
 };
 
 /**

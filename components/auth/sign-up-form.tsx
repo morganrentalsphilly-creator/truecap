@@ -136,6 +136,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
       const result = await signUpAction(
         { ...values, captchaToken: captchaToken ?? undefined },
         safeNextPath ?? undefined,
+        selectedPlan === "agent-pro" ? "agent" : undefined,
       );
 
       if (!result.ok) {

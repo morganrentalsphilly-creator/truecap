@@ -1,0 +1,25 @@
+{
+  "key": "T6",
+  "investor": {
+    "subject": "Still looking?",
+    "preheader": "One listing, two minutes.",
+    "headline": "Still looking?",
+    "body": [
+      "If you are still looking at properties, paste the next listing you are considering. The screen is free and takes about two minutes.",
+      "This is the last email in this series."
+    ],
+    "cta_text": "Analyze a listing",
+    "cta_path": "/dashboard/new"
+  },
+  "agent": {
+    "subject": "Still working with investors?",
+    "preheader": "One listing, two minutes.",
+    "headline": "Still working with investor clients?",
+    "body": [
+      "If a client sends you a listing this week, paste it in. The screen is free and takes about two minutes.",
+      "This is the last email in this series."
+    ],
+    "cta_text": "Analyze a listing",
+    "cta_path": "/dashboard/new"
+  }
+}

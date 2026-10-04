@@ -1,0 +1,25 @@
+{
+  "key": "L4",
+  "investor": {
+    "subject": "One last note on your memo",
+    "preheader": "What Pro adds, in one sentence.",
+    "headline": "One last note",
+    "body": [
+      "Pro adds the Offer Ceiling, downside testing, 10-year projections, comparisons, and PDF reports on every deal you run, not just the first.",
+      "The free trial is 21 days with three complete Pro deals and one comparison. No card. This is the last email in this series."
+    ],
+    "cta_text": "Start the free trial",
+    "cta_path": "/auth/sign-up"
+  },
+  "agent": {
+    "subject": "One last note on your memo",
+    "preheader": "What Agent Pro adds, in one sentence.",
+    "headline": "One last note",
+    "body": [
+      "Agent Pro adds a client roster, co-branded memos with your logo, and an Offer Ceiling for each client's targets.",
+      "The free trial is 21 days with three complete Pro deals and one comparison. No card. This is the last email in this series."
+    ],
+    "cta_text": "Start the free trial",
+    "cta_path": "/auth/sign-up"
+  }
+}

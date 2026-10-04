@@ -58,6 +58,7 @@ function routeCategory(pathname: string): string {
   if (
     pathname.startsWith("/s/") ||
     pathname.startsWith("/d/") ||
+    pathname.startsWith("/memo/") ||
     pathname.startsWith("/portal/")
   ) {
     return "shared_analysis";

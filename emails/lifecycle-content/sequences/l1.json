@@ -1,0 +1,41 @@
+{
+  "key": "L1",
+  "investor": {
+    "subject": "What could break this deal",
+    "preheader": "The one assumption that moves your cash flow most.",
+    "headline": "What could break this deal",
+    "body": [
+      {
+        "if": "breaker_sentence",
+        "text": "You screened {{address}}. {{breaker_sentence}}"
+      },
+      {
+        "unless": "breaker_sentence",
+        "text": "Every deal has one assumption that does the most damage when it is wrong. Usually it is rent, vacancy, or the rate."
+      },
+      "That is a preset stress, not a prediction. The useful question is whether you have evidence for the input: a signed lease, a rate quote, the last two years of vacancy.",
+      "Replace the estimate with what you can verify and run it again. It is free and takes a minute."
+    ],
+    "cta_text": "Re-run with your assumptions",
+    "cta_path": "/analyze"
+  },
+  "agent": {
+    "subject": "What could break your client's deal",
+    "preheader": "The one assumption that moves the cash flow most.",
+    "headline": "What could break this deal",
+    "body": [
+      {
+        "if": "breaker_sentence",
+        "text": "You screened {{address}}. {{breaker_sentence}}"
+      },
+      {
+        "unless": "breaker_sentence",
+        "text": "Every deal has one assumption that does the most damage when it is wrong. Usually it is rent, vacancy, or the rate."
+      },
+      "That is a preset stress, not a prediction. It is also the first question an investor client will ask you, so it helps to have the answer before they do.",
+      "Replace the estimate with what you can verify and run it again. It is free and takes a minute."
+    ],
+    "cta_text": "Re-run with your assumptions",
+    "cta_path": "/analyze"
+  }
+}

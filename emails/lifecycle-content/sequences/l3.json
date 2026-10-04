@@ -1,0 +1,27 @@
+{
+  "key": "L3",
+  "investor": {
+    "subject": "Two deals side by side",
+    "preheader": "What the comparison view shows that one deal can't.",
+    "headline": "Two deals side by side",
+    "body": [
+      "One deal on its own only tells you whether it meets your targets. Two deals next to each other tell you which one to pursue.",
+      "The comparison view lines up cash flow, cap rate, cash-on-cash, DSCR, and Offer Ceiling for each deal, and flags where their assumptions differ so you are not comparing a 5% vacancy deal with an 8% one.",
+      "You can try it with your deal and the sample property. The 21-day free trial includes three complete Pro deals and one comparison. No card, and nothing renews."
+    ],
+    "cta_text": "Start the 21-day free trial",
+    "cta_path": "/auth/sign-up"
+  },
+  "agent": {
+    "subject": "Two listings side by side",
+    "preheader": "What the comparison view shows a client.",
+    "headline": "Two listings side by side",
+    "body": [
+      "Investor clients rarely look at one property. They want to know which of two or three to offer on.",
+      "The comparison view lines up cash flow, cap rate, cash-on-cash, DSCR, and Offer Ceiling for each listing, and flags where the assumptions differ.",
+      "You can try it with your deal and the sample property. The 21-day free trial includes three complete Pro deals and one comparison. No card, and nothing renews."
+    ],
+    "cta_text": "Start the 21-day free trial",
+    "cta_path": "/auth/sign-up"
+  }
+}
