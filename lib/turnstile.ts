@@ -39,10 +39,25 @@ export async function verifyTurnstileToken(
       body,
       signal: AbortSignal.timeout(8_000),
     });
-    if (!res.ok) return "unavailable";
-    const json = (await res.json()) as { success?: unknown };
-    return json.success === true ? "ok" : "failed";
-  } catch {
+    if (!res.ok) {
+      console.warn(`[turnstile] siteverify answered HTTP ${res.status}`);
+      return "unavailable";
+    }
+    const json = (await res.json()) as { success?: unknown; "error-codes"?: unknown };
+    if (json.success === true) return "ok";
+    // Cloudflare's reason, for the server log. The codes name the cause and
+    // carry no secret: "invalid-input-secret" (the configured secret is not
+    // this widget's), "invalid-input-response" (bad or foreign token),
+    // "timeout-or-duplicate" (expired or already verified).
+    const codes = Array.isArray(json["error-codes"])
+      ? json["error-codes"].filter((c): c is string => typeof c === "string").join(",")
+      : "none";
+    console.warn(`[turnstile] siteverify rejected the token: ${codes}`);
+    return "failed";
+  } catch (err) {
+    console.warn(
+      `[turnstile] siteverify request failed: ${err instanceof Error ? err.name : "unknown"}`,
+    );
     return "unavailable";
   }
 }
