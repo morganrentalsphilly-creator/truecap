@@ -42,7 +42,8 @@ const memoReadRateLimit = createIpRateLimit({
 export function generateMetadata(): Metadata {
   // Never resolve the private snapshot for metadata (same rule as /s).
   return {
-    title: "Your decision memo — TrueCap",
+    // Absolute: the root layout's template would append a second "TrueCap".
+    title: { absolute: "Your decision memo | TrueCap" },
     description: "A read-only rental decision memo from TrueCap.",
     robots: { index: false, follow: false, noarchive: true, nosnippet: true },
     // The token is a bearer credential: keep it out of Referer headers.

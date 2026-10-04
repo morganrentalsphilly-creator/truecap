@@ -236,6 +236,7 @@ export function SharedDealShell({
           specialistAnalysisCaptured={specialistAnalysisCaptured}
           analyzerStrategyKey={analyzerStrategyKey}
           copyShareToken={copyShareToken}
+          ownMemo={isMemo}
           // The agent's form sits above the Disclaimer and above TrueCap's
           // own block, so on a co-branded page the client reaches the agent
           // before TrueCap's promo (row P1-67).

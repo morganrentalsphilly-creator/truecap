@@ -106,6 +106,9 @@ interface ReadOnlyAnalysisViewProps {
    * Disclaimer and above TrueCap's own block, so the client reaches the
    * agent first. */
   leadForm?: ReactNode;
+  /** True on /memo/[token]: the visitor's own emailed decision, not something
+   * shared with them, so the copy says "this memo" instead of "this share". */
+  ownMemo?: boolean;
 }
 
 const fmtCash = (n: number) =>
@@ -649,7 +652,9 @@ export function ReadOnlyAnalysisView({
   analyzerStrategyKey = "buy-hold",
   copyShareToken,
   leadForm = null,
+  ownMemo = false,
 }: ReadOnlyAnalysisViewProps) {
+  const recordNoun = ownMemo ? "memo" : "share";
   const router = useRouter();
   const [copyPending, setCopyPending] = useState(false);
   const [copyError, setCopyError] = useState<string | null>(null);
@@ -798,7 +803,7 @@ export function ReadOnlyAnalysisView({
               {priceEstimated
                 ? " (automated estimate — not an asking price)"
                 : ""}
-              . This read-only share is a screening record, not a decision;
+              . This read-only {recordNoun} is a screening record, not a decision;
               independently verify every material assumption before recording a
               decision.
             </p>
@@ -814,7 +819,7 @@ export function ReadOnlyAnalysisView({
             {adoptedMaoTarget ? (
               <>
                 <p className="mt-1 text-xs font-semibold text-foreground">
-                  Under the targets captured with this share
+                  Under the targets captured with this {recordNoun}
                   {offerCeiling
                     ? " · exact ceiling"
                     : rangePreview
@@ -860,7 +865,7 @@ export function ReadOnlyAnalysisView({
             )}
             <p className="mt-2 text-2xs leading-relaxed text-muted-foreground">
               {adoptedMaoTarget
-                ? "The highest price that still meets the targets captured with this share under the assumptions shown."
+                ? `The highest price that still meets the targets captured with this ${recordNoun} under the assumptions shown.`
                 : "A supported Offer Ceiling requires captured target criteria."}
             </p>
           </div>
