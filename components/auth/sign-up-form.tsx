@@ -369,6 +369,24 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
       {/* Google OAuth — the highest-leverage friction-reducer for cold
           paid traffic. One tap, no password to invent, no confirmation
           email round-trip. Email/password stays below as the fallback. */}
+      {/* The Terms and Privacy sentence sits ABOVE the Google button, so both
+          ways of creating an account pass it. It used to sit inside the
+          email form, 495px below this button, where a visitor who signed up
+          with Google never reached it. Same words, new position; no field. */}
+      <p
+        data-signup-terms=""
+        className="text-sm leading-relaxed text-muted-foreground"
+      >
+        By creating an account, you agree to the{" "}
+        <Link href="/terms" className="tc-link font-medium">
+          Terms
+        </Link>{" "}
+        and acknowledge the{" "}
+        <Link href="/privacy" className="tc-link font-medium">
+          Privacy Policy
+        </Link>
+        .
+      </p>
       <GoogleAuthButton
         disabled={isSubmitting}
         label="Create account with Google"
@@ -530,21 +548,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
           />
 
           <p className="text-sm leading-relaxed text-muted-foreground">
-            By creating an account, you agree to the{" "}
-            <Link
-              href="/terms"
-              className="tc-link font-medium"
-            >
-              Terms
-            </Link>{" "}
-            and acknowledge the{" "}
-            <Link
-              href="/privacy"
-              className="tc-link font-medium"
-            >
-              Privacy Policy
-            </Link>
-            . No card is requested and no subscription starts today.
+            No card is requested and no subscription starts today.
           </p>
 
           <Button

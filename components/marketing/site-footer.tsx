@@ -25,6 +25,7 @@ import { PAGE_CONTAINER } from "@/components/marketing/section";
 import { AppLogo } from "@/components/brand/app-logo";
 import { FOOTER_CALCULATORS } from "@/lib/calculator-registry";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
+import { CookieChoicesButton } from "@/components/marketing/cookie-choices-button";
 
 /**
  * prefetch: false opts a link out of IntentPrefetchLink's hover/focus prefetch.
@@ -283,6 +284,11 @@ export function SiteFooter({
             >
               Terms
             </IntentPrefetchLink>
+            {/* Reopens the cookie banner: clears the stored choice, withdraws
+                consent and deletes the cookies an Accept allowed
+                (components/marketing/cookie-choices-button.tsx). A button,
+                not a link: it goes nowhere. */}
+            <CookieChoicesButton className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center transition-colors hover:text-foreground" />
             {/* NOTE: llms.txt footer link intentionally removed — it
                 looked like a technical artifact to regular visitors
                 ("what is that?"). The /llms.txt URL still resolves
