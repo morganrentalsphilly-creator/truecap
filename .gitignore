@@ -19,6 +19,8 @@ pnpm-debug.log*
 # environment variables — ignore every .env file by default, then
 # explicitly un-ignore the example template so the repo ships with a
 # documented env shape but never with real secrets.
+.env
+.env.*
 !.env.example
 
 # vercel
@@ -52,6 +54,7 @@ pnpm-debug.log*
 .env.production.local
 
 # IDEs
+.vscode
 .idea
 
 # Cursor / AI local metadata
