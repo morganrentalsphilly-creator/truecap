@@ -36,6 +36,23 @@
           ]
         }
       ]
+    },
+    "atlanta": {
+      "countyEffectiveTaxRate": null,
+      "rentalLicensing": null,
+      "faq": [
+        {
+          "q": "What is Fulton County's property tax millage rate?",
+          "a": "Fulton County held its general fund millage rate at 8.87 mills for 2025, equal to 0.887% of assessed value, according to the county. That covers only the county's general fund portion; total property tax bills also include city and school district millage.",
+          "sources": [
+            {
+              "url": "https://www.fultoncountyga.gov/News/2025/08/06/Fulton-Holds-Millage-Rate-at-8-87-mills-for-2025",
+              "title": "Fulton County, Fulton Holds Millage Rate at 8.87 Mills for 2025",
+              "retrievedAt": "2026-10-19"
+            }
+          ]
+        }
+      ]
     }
   }
 }
