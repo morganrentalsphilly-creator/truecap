@@ -85,6 +85,7 @@ moves.
 | `e2e/site-overhaul-conversion.spec.ts` | Hero submit, handoff, sample, redirects, 375px layout, analytics | ~6 (header ≤ 64px; cue bottom ≤ 560px; `[data-hero-ledger]` has a table and no img; submit opacity 1) | ~45 (events `sample_viewed`, `analysis_started`, `analysis_completed`; no GTM without consent; hrefs; 308 redirect; no overflow; CTA above the cookie bar) |
 | `e2e/public-product.spec.ts` | Overflow at 4 widths and 2× zoom; axe AA; 44px; focus-visible; analyzer flows | ~4 (`.truecap-marketing-shell` **class locator**; `[data-hero-ledger]` plus "where every figure comes from" link) | ~100+ |
 | `e2e/visual-public.spec.ts`, `e2e/visual-authenticated.spec.ts` | Opt-in captures only; no pixel diffs anywhere | 1 | ~6 |
+| `e2e/audit-analyzer-autofill.spec.ts` (behind `AUDIT_ENRICHMENT_MOCK=1`; CI's `browser-regressions`) | HUD and FRED autofill, manual property tax, every assumption editable | 1 (read the cash-flow figure from the summary's `innerText`; re-anchored in Phase 8 to the NumberFlow host's digits after the reveal) | ~12 (the mock paths, the fields' values, cash flow moves by exactly the tax difference) |
 
 ## D. Rules that contradict the new look head-on
 

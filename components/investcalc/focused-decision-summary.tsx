@@ -278,6 +278,7 @@ function FirstYearSnapshot({
             METRIC_TONE_TEXT_CLASS[cashFlowTone(result.netCashFlow)] ??
             "text-foreground"
           }`}
+          data-decision-metric="cash-flow"
         >
           <AnimatedNumber
             value={result.netCashFlow}
