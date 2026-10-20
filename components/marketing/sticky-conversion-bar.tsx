@@ -92,7 +92,7 @@ export function StickyConversionBar() {
     <div
       data-conversion-bar-root=""
       data-sticky-bottom-bar=""
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-float-up sm:px-4 sm:pt-3 sm:pb-[max(env(safe-area-inset-bottom),0.75rem)]"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-float-up sm:inset-x-4 sm:bottom-4 sm:mx-auto sm:max-w-3xl sm:rounded-lg sm:border sm:px-4 sm:py-3 sm:shadow-md"
     >
       <div className="mx-auto flex max-w-5xl items-center gap-3">
         <div className="min-w-0 flex-1">

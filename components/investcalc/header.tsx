@@ -357,9 +357,19 @@ export function Header({
     return `${avatarUrl}${avatarUrl.includes("?") ? "&" : "?"}v=${avatarVersion}`;
   }, [avatarUrl, avatarVersion]);
   const [bannerDismissed, setBannerDismissed] = useState(false);
+  // The header condenses once the page has scrolled (DESIGN.md "Header"):
+  // globals.css reads data-header-condensed on this wrapper and eases the row
+  // from 64px to 56px (56 to 52 on phones). Passive listener, one boolean.
+  const [condensed, setCondensed] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setCondensed(window.scrollY > 32);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <div className="sticky top-0 z-50">
+    <div className="sticky top-0 z-50" data-header-root="" data-header-condensed={condensed ? "true" : "false"}>
     {/* Announcement bar - Pro upgrade prompt. Only shown to AUTHENTICATED
         free users (who can actually 'upgrade'). Suppressed for cold
         visitors because 'upgrade' doesn't apply when they don't have an
@@ -412,10 +422,10 @@ export function Header({
         `sticky top-0` here or the header's paper background overlays the
         upgrade strip above it (visible on mobile as a box covering the
         strip). */}
-    {/* DESIGN.md "Header": the sheet at 90% with a blur behind it, so the
-        content shows through as it scrolls under, and one bottom line. No
-        shadow; the gutter is the marketing page container's. */}
-    <header className="border-b border-border bg-background/90 backdrop-blur-md">
+    {/* DESIGN.md "Header": the sheet and one bottom line, condensing on
+        scroll. No blur (text over a translucent bar reads below AA against
+        the grid) and no shadow; the gutter is the marketing page container's. */}
+    <header className="border-b border-border bg-background">
       <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:h-16 sm:px-6 lg:px-12">
         <div className="flex items-center justify-start gap-0 sm:gap-3 min-w-0">
           <AppLogo priority subtitleClassName="hidden sm:block" />
