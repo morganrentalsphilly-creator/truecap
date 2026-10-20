@@ -10,9 +10,9 @@ describe("TrueCap Stripe Checkout branding", () => {
   it("builds the exact supported hosted Checkout brand settings", () => {
     expect(buildTrueCapCheckoutBranding("https://example.test/")).toEqual({
       display_name: "TrueCap",
-      // The site palette (DESIGN.md): Paper and Signal Blue.
-      background_color: "#EFECE8",
-      button_color: "#0066BA",
+      // The site palette (DESIGN.md, Blueprint 2026-10-20): the sheet and cobalt.
+      background_color: "#FBFAF7",
+      button_color: "#1853C6",
       font_family: "inter",
       border_style: "rounded",
       logo: { type: "url", url: "https://example.test/Logo-png-w.png" },
@@ -25,7 +25,7 @@ describe("TrueCap Stripe Checkout branding", () => {
     for (const value of [background_color, button_color]) {
       expect(value).toMatch(/^#[0-9A-F]{6}$/);
     }
-    // The hex DESIGN.md gives for Paper and Signal Blue, and the same values
+    // The hex DESIGN.md gives for the sheet and cobalt, and the same values
     // the site's tokens resolve to.
     const design = readFileSync(join(__dirname, "..", "..", "DESIGN.md"), "utf8").toLowerCase();
     expect(design).toContain(String(background_color).toLowerCase());

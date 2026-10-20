@@ -4,9 +4,10 @@
  * app's decision summary next. Server components, no client JS.
  *
  * Ledger grammar: a heavy rule opens it, column heads sit on a rule, figures
- * are DM Mono tabular numerals right-aligned in fixed columns, soft rules
- * separate rows, the binding row sits on the band, and the one total carries a
- * double rule.
+ * are tabular numerals in the text face (the Figure rule, DESIGN.md
+ * 2026-10-20) right-aligned in fixed columns, soft rules separate rows, the
+ * binding row sits on the band, and the one total is a display figure over
+ * its rule.
  */
 
 import type { ReactNode } from "react";
@@ -38,7 +39,7 @@ export function LedgerFigure({
   className?: string;
 }) {
   return (
-    <span className={cn("font-mono tabular-nums", className)}>{children}</span>
+    <span className={cn("font-figure", className)}>{children}</span>
   );
 }
 
@@ -79,7 +80,7 @@ export function LedgerTotal({
   return (
     <span
       className={cn(
-        "ledger-rule inline-block font-mono font-medium leading-none tabular-nums tracking-[-0.02em]",
+        "ledger-rule inline-block font-display font-figure leading-none",
         draw && "ledger-rule-draw",
         className,
       )}

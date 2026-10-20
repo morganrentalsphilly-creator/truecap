@@ -1,10 +1,10 @@
 /**
- * The plan card (DESIGN.md "Components"): the one card on marketing pages,
- * because plans are the one thing a visitor compares side by side. Raised
- * paper, a 1px rule border, 6px radius, no shadow. The plan name is the
- * heading, an audience line sits under it, the price is set in DM Mono from
- * the catalog, the answers are a ruled definition list, and there is one
- * primary action.
+ * The plan card (DESIGN.md "Components"): the card a visitor compares side
+ * by side. White on the sheet, a 1px line, the object radius, the rest
+ * shadow, and depth on hover (it lifts and takes the float shadow; reduced
+ * motion keeps it still). The plan name is the heading, an audience line
+ * sits under it, the price is a display figure from the catalog, the
+ * answers are a ruled definition list, and there is one primary action.
  *
  * Server component. The action is passed in so each page keeps its own link
  * and analytics island.
@@ -82,7 +82,7 @@ export function PlanCard({
       id={id}
       className={cn(
         PLAN_CARD_ROWS,
-        "grid min-w-0 grid-rows-subgrid gap-y-0 rounded-lg border border-border bg-card p-5 sm:p-[22px]",
+        "grid min-w-0 grid-rows-subgrid gap-y-0 rounded-lg border border-border bg-card p-5 shadow-sm transition-[transform,box-shadow,border-color] duration-[var(--duration-base)] ease-[var(--ease-out)] hover:-translate-y-0.5 hover:border-primary hover:shadow-md motion-reduce:transform-none sm:p-[22px]",
         className,
       )}
       {...props}
@@ -106,7 +106,7 @@ export function PlanCard({
           the old 44px note reserve and its 12px margin left. */}
       <div className={cn("flex flex-col pt-4", answersCaption ? null : "pb-7")}>
         <p className="flex flex-wrap items-baseline gap-x-1">
-          <span className="font-mono text-section-sm font-medium tracking-[-0.02em] tabular-nums min-[380px]:text-key-sm">
+          <span className="font-display font-figure text-section-sm min-[380px]:text-key-sm">
             {price}
           </span>
           {period ? (
