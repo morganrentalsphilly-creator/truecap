@@ -142,7 +142,7 @@ export default async function ReviewsPage() {
           <SectionHeading id="verify-title">
             Three things you can check right now
           </SectionHeading>
-          <div className="mt-8 grid border-t-2 border-foreground lg:grid-cols-3 lg:gap-x-12">
+          <div className="mt-8 grid border-t border-foreground lg:grid-cols-3 lg:gap-x-12">
             <div className="flex flex-col border-b border-rule-soft py-4">
               <h3 className="text-lg font-semibold">The math is public</h3>
               <p className="mt-1 max-w-[64ch] flex-1 text-pretty text-base leading-relaxed text-muted-foreground">
@@ -247,7 +247,7 @@ export default async function ReviewsPage() {
             reads as a policy, not a gap. Set in ink: it is the policy. */}
         <Section rhythm="tight" aria-labelledby="not-published-title">
           <SectionHeading id="not-published-title">What you will not find here</SectionHeading>
-          <ul className="mt-8 grid border-t-2 border-foreground text-pretty text-base leading-relaxed sm:grid-cols-2 sm:gap-x-12">
+          <ul className="mt-8 grid border-t border-foreground text-pretty text-base leading-relaxed sm:grid-cols-2 sm:gap-x-12">
             <li className="border-b border-rule-soft py-3">Star ratings or an average score. No one is asked to rate anything.</li>
             <li className="border-b border-rule-soft py-3">Logos, badges, or press strips.</li>
             <li className="border-b border-rule-soft py-3">User counts or &ldquo;deals analyzed&rdquo; figures that are not computed from the database.</li>

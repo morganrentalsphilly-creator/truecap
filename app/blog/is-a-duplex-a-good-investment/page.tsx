@@ -321,15 +321,15 @@ export default function BlogPost() {
               <tbody>
                 <tr>
                   <td>Purchase price</td>
-                  <td className="font-mono text-right">$400,000</td>
+                  <td className="font-figure text-right">$400,000</td>
                 </tr>
                 <tr>
                   <td>Rent, per unit</td>
-                  <td className="font-mono text-right">$1,600</td>
+                  <td className="font-figure text-right">$1,600</td>
                 </tr>
                 <tr>
                   <td>Gross scheduled rent</td>
-                  <td className="font-mono text-right">
+                  <td className="font-figure text-right">
                     $3,200/mo · $38,400/yr
                   </td>
                 </tr>
@@ -343,7 +343,7 @@ export default function BlogPost() {
                     </Link>{" "}
                     (1.1%)
                   </td>
-                  <td className="font-mono text-right">$4,400/yr</td>
+                  <td className="font-figure text-right">$4,400/yr</td>
                 </tr>
                 <tr>
                   <td>
@@ -354,7 +354,7 @@ export default function BlogPost() {
                       Insurance
                     </Link>
                   </td>
-                  <td className="font-mono text-right">$2,400/yr</td>
+                  <td className="font-figure text-right">$2,400/yr</td>
                 </tr>
                 <tr>
                   <td>
@@ -372,7 +372,7 @@ export default function BlogPost() {
                       capex
                     </Link>
                   </td>
-                  <td className="font-mono text-right">6% / 8% / 8% / 5%</td>
+                  <td className="font-figure text-right">6% / 8% / 8% / 5%</td>
                 </tr>
               </tbody>
             </table>
@@ -410,37 +410,37 @@ export default function BlogPost() {
               <tbody>
                 <tr>
                   <td>Gross scheduled rent</td>
-                  <td className="font-mono text-right">$38,400</td>
+                  <td className="font-figure text-right">$38,400</td>
                   <td>2 × $1,600 × 12</td>
                 </tr>
                 <tr>
                   <td>Vacancy (6%)</td>
-                  <td className="font-mono text-right">−$2,304</td>
+                  <td className="font-figure text-right">−$2,304</td>
                   <td>About 1.4 months per unit every two years</td>
                 </tr>
                 <tr>
                   <td>Property tax</td>
-                  <td className="font-mono text-right">−$4,400</td>
+                  <td className="font-figure text-right">−$4,400</td>
                   <td>One bill, one parcel</td>
                 </tr>
                 <tr>
                   <td>Insurance</td>
-                  <td className="font-mono text-right">−$2,400</td>
+                  <td className="font-figure text-right">−$2,400</td>
                   <td>One landlord policy</td>
                 </tr>
                 <tr>
                   <td>Maintenance (8%)</td>
-                  <td className="font-mono text-right">−$3,072</td>
+                  <td className="font-figure text-right">−$3,072</td>
                   <td></td>
                 </tr>
                 <tr>
                   <td>Management (8%)</td>
-                  <td className="font-mono text-right">−$3,072</td>
+                  <td className="font-figure text-right">−$3,072</td>
                   <td>Two units, one address</td>
                 </tr>
                 <tr>
                   <td>Capex reserve (5%)</td>
-                  <td className="font-mono text-right">−$1,920</td>
+                  <td className="font-figure text-right">−$1,920</td>
                   <td>Roof, HVAC, water heaters</td>
                 </tr>
                 <tr>
@@ -452,12 +452,12 @@ export default function BlogPost() {
                       NOI
                     </Link>
                   </td>
-                  <td className="font-mono text-right font-medium">$21,232</td>
+                  <td className="font-figure text-right font-medium">$21,232</td>
                   <td>44.7% expense ratio</td>
                 </tr>
                 <tr>
                   <td>Debt service</td>
-                  <td className="font-mono text-right">−$24,558</td>
+                  <td className="font-figure text-right">−$24,558</td>
                   <td>$2,046.53 × 12</td>
                 </tr>
                 <tr>
@@ -469,7 +469,7 @@ export default function BlogPost() {
                       Cash flow
                     </Link>
                   </td>
-                  <td className="font-mono text-right font-medium">−$3,326</td>
+                  <td className="font-figure text-right font-medium">−$3,326</td>
                   <td>−$277/mo</td>
                 </tr>
               </tbody>
@@ -534,31 +534,31 @@ export default function BlogPost() {
                     </Link>{" "}
                     (25%)
                   </td>
-                  <td className="font-mono text-right">$100,000</td>
+                  <td className="font-figure text-right">$100,000</td>
                 </tr>
                 <tr>
                   <td>Closing costs</td>
-                  <td className="font-mono text-right">$9,700</td>
+                  <td className="font-figure text-right">$9,700</td>
                 </tr>
                 <tr>
                   <td>Prepaids + escrow setup</td>
-                  <td className="font-mono text-right">$4,761</td>
+                  <td className="font-figure text-right">$4,761</td>
                 </tr>
                 <tr>
                   <td>Make-ready, two units</td>
-                  <td className="font-mono text-right">$8,000</td>
+                  <td className="font-figure text-right">$8,000</td>
                 </tr>
                 <tr>
                   <td className="font-semibold">Cash actually spent</td>
-                  <td className="font-mono text-right font-medium">$122,461</td>
+                  <td className="font-figure text-right font-medium">$122,461</td>
                 </tr>
                 <tr>
                   <td>Reserves (6 × $2,613 PITIA)</td>
-                  <td className="font-mono text-right">$15,679</td>
+                  <td className="font-figure text-right">$15,679</td>
                 </tr>
                 <tr>
                   <td className="font-semibold">Total cash required</td>
-                  <td className="font-mono text-right font-medium">$138,140</td>
+                  <td className="font-figure text-right font-medium">$138,140</td>
                 </tr>
               </tbody>
             </table>
@@ -624,37 +624,37 @@ export default function BlogPost() {
               <tbody>
                 <tr>
                   <td>Principal + interest</td>
-                  <td className="font-mono text-right">$2,464.68</td>
+                  <td className="font-figure text-right">$2,464.68</td>
                   <td>$380,000 at 6.75%</td>
                 </tr>
                 <tr>
                   <td>PMI (0.8%)</td>
-                  <td className="font-mono text-right">$253.33</td>
+                  <td className="font-figure text-right">$253.33</td>
                   <td>95% LTV</td>
                 </tr>
                 <tr>
                   <td>Taxes + insurance</td>
-                  <td className="font-mono text-right">$566.67</td>
+                  <td className="font-figure text-right">$566.67</td>
                   <td></td>
                 </tr>
                 <tr>
                   <td className="font-semibold">PITIA</td>
-                  <td className="font-mono text-right font-medium">$3,284.68</td>
+                  <td className="font-figure text-right font-medium">$3,284.68</td>
                   <td></td>
                 </tr>
                 <tr>
                   <td>Tenant rent, one unit</td>
-                  <td className="font-mono text-right">−$1,600.00</td>
+                  <td className="font-figure text-right">−$1,600.00</td>
                   <td></td>
                 </tr>
                 <tr>
                   <td>Vacancy, maintenance, capex on the rented half</td>
-                  <td className="font-mono text-right">$304.00</td>
+                  <td className="font-figure text-right">$304.00</td>
                   <td>19% of $1,600; you self-manage</td>
                 </tr>
                 <tr>
                   <td className="font-semibold">Effective housing cost</td>
-                  <td className="font-mono text-right font-medium">$1,988.68</td>
+                  <td className="font-figure text-right font-medium">$1,988.68</td>
                   <td>What the duplex costs you to live in</td>
                 </tr>
               </tbody>
@@ -812,27 +812,27 @@ export default function BlogPost() {
               <tbody>
                 <tr>
                   <td>5% down, owner-occ loan (year 2)</td>
-                  <td className="font-mono text-right">$380,000</td>
-                  <td className="font-mono text-right">$32,616</td>
-                  <td className="font-mono text-right">−$11,384</td>
+                  <td className="font-figure text-right">$380,000</td>
+                  <td className="font-figure text-right">$32,616</td>
+                  <td className="font-figure text-right">−$11,384</td>
                 </tr>
                 <tr>
                   <td>20% down, owner-occ, no PMI</td>
-                  <td className="font-mono text-right">$320,000</td>
-                  <td className="font-mono text-right">$24,906</td>
-                  <td className="font-mono text-right">−$3,674</td>
+                  <td className="font-figure text-right">$320,000</td>
+                  <td className="font-figure text-right">$24,906</td>
+                  <td className="font-figure text-right">−$3,674</td>
                 </tr>
                 <tr>
                   <td>25% down investment loan (Path A)</td>
-                  <td className="font-mono text-right">$300,000</td>
-                  <td className="font-mono text-right">$24,558</td>
-                  <td className="font-mono text-right">−$3,326</td>
+                  <td className="font-figure text-right">$300,000</td>
+                  <td className="font-figure text-right">$24,558</td>
+                  <td className="font-figure text-right">−$3,326</td>
                 </tr>
                 <tr>
                   <td>Break-even</td>
-                  <td className="font-mono text-right">$273,000</td>
-                  <td className="font-mono text-right">$21,232</td>
-                  <td className="font-mono text-right">$0</td>
+                  <td className="font-figure text-right">$273,000</td>
+                  <td className="font-figure text-right">$21,232</td>
+                  <td className="font-figure text-right">$0</td>
                 </tr>
               </tbody>
             </table>
@@ -910,55 +910,55 @@ export default function BlogPost() {
               <tbody>
                 <tr>
                   <td>Gross rent</td>
-                  <td className="font-mono text-right">$38,400</td>
-                  <td className="font-mono text-right">$31,200</td>
+                  <td className="font-figure text-right">$38,400</td>
+                  <td className="font-figure text-right">$31,200</td>
                 </tr>
                 <tr>
                   <td>Gross yield</td>
-                  <td className="font-mono text-right">9.6%</td>
-                  <td className="font-mono text-right">7.8%</td>
+                  <td className="font-figure text-right">9.6%</td>
+                  <td className="font-figure text-right">7.8%</td>
                 </tr>
                 <tr>
                   <td>Operating expenses</td>
-                  <td className="font-mono text-right">$17,168</td>
-                  <td className="font-mono text-right">$14,824</td>
+                  <td className="font-figure text-right">$17,168</td>
+                  <td className="font-figure text-right">$14,824</td>
                 </tr>
                 <tr>
                   <td>NOI</td>
-                  <td className="font-mono text-right">$21,232</td>
-                  <td className="font-mono text-right">$16,376</td>
+                  <td className="font-figure text-right">$21,232</td>
+                  <td className="font-figure text-right">$16,376</td>
                 </tr>
                 <tr>
                   <td>Cap rate</td>
-                  <td className="font-mono text-right">5.31%</td>
-                  <td className="font-mono text-right">4.09%</td>
+                  <td className="font-figure text-right">5.31%</td>
+                  <td className="font-figure text-right">4.09%</td>
                 </tr>
                 <tr>
                   <td>Minimum down</td>
-                  <td className="font-mono text-right">$100,000 (25%)</td>
-                  <td className="font-mono text-right">$80,000 (20%)</td>
+                  <td className="font-figure text-right">$100,000 (25%)</td>
+                  <td className="font-figure text-right">$80,000 (20%)</td>
                 </tr>
                 <tr>
                   <td>Debt service at minimum down</td>
-                  <td className="font-mono text-right">$24,558</td>
-                  <td className="font-mono text-right">$26,196</td>
+                  <td className="font-figure text-right">$24,558</td>
+                  <td className="font-figure text-right">$26,196</td>
                 </tr>
                 <tr>
                   <td>Cash flow</td>
-                  <td className="font-mono text-right">−$3,326</td>
-                  <td className="font-mono text-right">−$9,820</td>
+                  <td className="font-figure text-right">−$3,326</td>
+                  <td className="font-figure text-right">−$9,820</td>
                 </tr>
                 <tr>
                   <td>DSCR</td>
-                  <td className="font-mono text-right">0.86</td>
-                  <td className="font-mono text-right">0.63</td>
+                  <td className="font-figure text-right">0.86</td>
+                  <td className="font-figure text-right">0.63</td>
                 </tr>
                 <tr>
                   <td className="font-semibold">Down payment to break even</td>
-                  <td className="font-mono text-right font-medium">
+                  <td className="font-figure text-right font-medium">
                     $140,600 (35%)
                   </td>
-                  <td className="font-mono text-right font-medium">
+                  <td className="font-figure text-right font-medium">
                     $200,000 (50%)
                   </td>
                 </tr>

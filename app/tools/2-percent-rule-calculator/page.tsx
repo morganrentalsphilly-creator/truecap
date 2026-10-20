@@ -331,7 +331,7 @@ export default function TwoPercentRuleCalculatorPage() {
           lede="A 2% ratio is a prompt to investigate, and investigation means real numbers. TrueCap runs the full underwrite — expenses itemized, financing modeled, verdict in plain English — from the same price and rent you typed here."
           actions={
             <>
-              <ul className="border-t-2 border-foreground">
+              <ul className="border-t border-foreground">
                 {[
                   "Cash flow, cap rate, CoC, DSCR — auto-calculated",
                   "Editable HUD rent + FRED rate benchmarks; manual local property tax",

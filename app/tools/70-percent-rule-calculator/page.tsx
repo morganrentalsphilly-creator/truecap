@@ -370,7 +370,7 @@ export default function SeventyPercentRuleCalculatorPage() {
           }
           actions={
             <>
-              <ul className="border-t-2 border-foreground">
+              <ul className="border-t border-foreground">
                 {[
                   "Entered-ARV × selected-multiplier screen on this page",
                   "Editable rehab and acquisition-cost assumptions",

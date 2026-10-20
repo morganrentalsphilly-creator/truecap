@@ -120,7 +120,7 @@ export default function ToolsLandingPage() {
             {groups.map((group) => (
               <section key={group.category} aria-labelledby={`cat-${group.category}`}>
                 <SectionHeading id={`cat-${group.category}`}>{group.label}</SectionHeading>
-                <ul className="mt-8 grid border-t-2 border-foreground sm:grid-cols-2 sm:gap-x-12">
+                <ul className="mt-8 grid border-t border-foreground sm:grid-cols-2 sm:gap-x-12">
                   {/* The title sits 16px below the rule (row pt-2 + link py-2)
                       however many lines it wraps to; py-2 around one 28px line
                       is the 44px target, and min-h-11 keeps that floor. */}

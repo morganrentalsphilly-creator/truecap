@@ -46,7 +46,7 @@ export function DataFaq({
     <section data-faq="" className="mt-16" aria-labelledby="data-faq-heading">
       <JsonLd data={buildFaqPageLd(items)} />
       <SectionHeading id="data-faq-heading">{heading}</SectionHeading>
-      <div className="mt-6 border-t-2 border-foreground">
+      <div className="mt-6 border-t border-foreground">
         {items.map((item) => (
           <div
             key={item.question}

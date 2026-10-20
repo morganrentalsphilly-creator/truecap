@@ -631,14 +631,14 @@ export default function BlogPost() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="font-mono whitespace-nowrap">Below 1.00</td>
+                    <td className="font-figure whitespace-nowrap">Below 1.00</td>
                     <td className="text-muted-foreground">
                       NOI doesn&apos;t cover the loan payments under this formula;
                       you cover the gap.
                     </td>
                   </tr>
                   <tr>
-                    <td className="font-mono whitespace-nowrap">1.00 – 1.15</td>
+                    <td className="font-figure whitespace-nowrap">1.00 – 1.15</td>
                     <td className="text-muted-foreground">
                       Covers the debt with little room. Treat it as a yellow zone:
                       acceptable only with a specific plan to raise rents or
@@ -646,21 +646,21 @@ export default function BlogPost() {
                     </td>
                   </tr>
                   <tr>
-                    <td className="font-mono whitespace-nowrap">1.15 – 1.25</td>
+                    <td className="font-figure whitespace-nowrap">1.15 – 1.25</td>
                     <td className="text-muted-foreground">
                       Some cushion, but under the 1.25 floor of the multifamily
                       standards above.
                     </td>
                   </tr>
                   <tr>
-                    <td className="font-mono whitespace-nowrap">1.25 – 1.50</td>
+                    <td className="font-figure whitespace-nowrap">1.25 – 1.50</td>
                     <td className="text-muted-foreground">
                       At or above that common floor. Stress-test it before you
                       rely on it.
                     </td>
                   </tr>
                   <tr>
-                    <td className="font-mono whitespace-nowrap">Above 1.50</td>
+                    <td className="font-figure whitespace-nowrap">Above 1.50</td>
                     <td className="text-muted-foreground">
                       A wide cushion (the sample is {BASE_DSCR}). Check whether a
                       large down payment is what produces it.

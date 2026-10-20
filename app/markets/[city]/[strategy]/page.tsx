@@ -230,7 +230,7 @@ export default async function CityStrategyPage({
               Evidence to collect for this scenario
             </SectionHeading>
             {/* The checklist as rows on rules, not bullets in a card. */}
-            <ul className="mt-6 border-t-2 border-foreground">
+            <ul className="mt-6 border-t border-foreground">
               <li className="border-b border-rule-soft py-3 text-pretty text-base leading-relaxed">
                 A supported property address, asking price, current lease, and
                 comparable rent evidence.
@@ -258,7 +258,7 @@ export default async function CityStrategyPage({
           {/* The page's ask, in SeoAnalyzerCta's grammar (the 2px ink rule,
               the heading at the H3 step, Ink 2 support, one marketing button,
               no card, no arrow icon). The handoff href is unchanged. */}
-          <section className={cn(DATA_SECTION_CLASS, "border-t-2 border-foreground pt-6")}>
+          <section className={cn(DATA_SECTION_CLASS, "border-t border-foreground pt-6")}>
             <h2 className={DATA_SUBHEADING_CLASS}>
               Start a {combo.cityName} {combo.strategyLabel} screen
             </h2>

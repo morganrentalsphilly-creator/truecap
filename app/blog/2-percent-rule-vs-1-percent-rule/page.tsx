@@ -320,28 +320,28 @@ export default function BlogPost() {
               </thead>
               <tbody>
                 <tr>
-                  <td className="font-mono">$100,000</td>
-                  <td className="font-mono">$1,000</td>
-                  <td className="font-mono">$2,000</td>
-                  <td className="font-mono">~$1,100</td>
+                  <td className="font-figure">$100,000</td>
+                  <td className="font-figure">$1,000</td>
+                  <td className="font-figure">$2,000</td>
+                  <td className="font-figure">~$1,100</td>
                   <td className="text-muted-foreground">
                     Clears 1%, misses 2%
                   </td>
                 </tr>
                 <tr>
-                  <td className="font-mono">$250,000</td>
-                  <td className="font-mono">$2,500</td>
-                  <td className="font-mono">$5,000</td>
-                  <td className="font-mono">~$2,000</td>
+                  <td className="font-figure">$250,000</td>
+                  <td className="font-figure">$2,500</td>
+                  <td className="font-figure">$5,000</td>
+                  <td className="font-figure">~$2,000</td>
                   <td className="text-muted-foreground">
                     Misses both (marginal on 1%)
                   </td>
                 </tr>
                 <tr>
-                  <td className="font-mono">$450,000</td>
-                  <td className="font-mono">$4,500</td>
-                  <td className="font-mono">$9,000</td>
-                  <td className="font-mono">~$2,700</td>
+                  <td className="font-figure">$450,000</td>
+                  <td className="font-figure">$4,500</td>
+                  <td className="font-figure">$9,000</td>
+                  <td className="font-figure">~$2,700</td>
                   <td className="text-muted-foreground">Misses both badly</td>
                 </tr>
               </tbody>
@@ -429,7 +429,7 @@ export default function BlogPost() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="[&_td]:font-mono">
+              <tbody className="[&_td]:font-figure">
                 <tr>
                   <td>Rent-to-price</td>
                   <td>1.0%</td>

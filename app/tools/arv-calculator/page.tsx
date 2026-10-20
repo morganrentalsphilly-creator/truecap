@@ -490,7 +490,7 @@ export default function ArvCalculatorPage() {
           }
           actions={
             <>
-              <ul className="border-t-2 border-foreground">
+              <ul className="border-t border-foreground">
                 {[
                   "TrueCap's Offer Ceiling — the highest price that still meets your targets",
                   "Separate rehab and stabilized-rental tools",

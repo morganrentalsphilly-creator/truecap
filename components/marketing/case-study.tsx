@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { Quote } from "lucide-react";
 import type { ProofVerification, PublicationApproval } from "@/lib/proof-records";
+import { Section, SectionHeading } from "@/components/marketing/section";
 import { isPublicationReady } from "@/lib/proof-records";
 
 export type CaseStudyData = {
@@ -23,60 +23,55 @@ export type CaseStudyData = {
 
 export function CaseStudy({ study }: { study: CaseStudyData }) {
   return (
-    <article className={`grid overflow-hidden rounded-3xl border border-border bg-card shadow-sm ${study.media ? "lg:grid-cols-[1.1fr_0.9fr]" : ""}`}>
-      <div className="p-6 sm:p-8">
-        <p className="text-2xs font-bold uppercase tracking-widest text-primary">
+    <article
+      className={`grid gap-x-12 gap-y-6 border-t border-foreground pt-6 ${study.media ? "lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]" : ""}`}
+    >
+      <div className="min-w-0">
+        <p className="font-mono text-xs text-muted-foreground">
           {study.customerType}
           {study.portfolioSize ? ` · ${study.portfolioSize}` : ""}
         </p>
-        <h3 className="mt-2 text-2xl font-extrabold tracking-tight text-foreground">{study.customerName}</h3>
-        <dl className="mt-6 grid gap-5 sm:grid-cols-2">
-          <div>
-            <dt className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">Challenge</dt>
-            <dd className="mt-1 text-sm leading-relaxed text-foreground">{study.challenge}</dd>
+        <h3 className="mt-2 font-display text-balance text-h3-sm text-foreground sm:text-2xl">{study.customerName}</h3>
+        <dl className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+          <div className="border-t border-border pt-3">
+            <dt className="text-xs font-medium text-muted-foreground">Challenge</dt>
+            <dd className="mt-1 text-pretty text-base leading-relaxed text-foreground">{study.challenge}</dd>
           </div>
-          <div>
-            <dt className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">Old workflow</dt>
-            <dd className="mt-1 text-sm leading-relaxed text-foreground">{study.oldWorkflow}</dd>
+          <div className="border-t border-border pt-3">
+            <dt className="text-xs font-medium text-muted-foreground">Old workflow</dt>
+            <dd className="mt-1 text-pretty text-base leading-relaxed text-foreground">{study.oldWorkflow}</dd>
           </div>
-          <div>
-            <dt className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">TrueCap workflow</dt>
-            <dd className="mt-1 text-sm leading-relaxed text-foreground">{study.trueCapWorkflow}</dd>
+          <div className="border-t border-border pt-3">
+            <dt className="text-xs font-medium text-muted-foreground">TrueCap workflow</dt>
+            <dd className="mt-1 text-pretty text-base leading-relaxed text-foreground">{study.trueCapWorkflow}</dd>
           </div>
           {study.quantitativeResult ? (
-            <div>
-              <dt className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">Verified result</dt>
-              <dd className="mt-1 text-sm font-bold leading-relaxed text-primary">{study.quantitativeResult}</dd>
+            <div className="border-t border-border pt-3">
+              <dt className="text-xs font-medium text-muted-foreground">Verified result</dt>
+              <dd className="mt-1 font-figure text-base font-semibold leading-relaxed text-foreground">{study.quantitativeResult}</dd>
             </div>
           ) : null}
         </dl>
         {study.quote ? (
-          <blockquote className="mt-6 flex gap-2.5 border-t border-border pt-5 text-sm leading-relaxed text-muted-foreground">
-            <Quote className="mt-0.5 size-4 shrink-0 text-primary/40" aria-hidden />
-            <span>&ldquo;{study.quote}&rdquo;</span>
+          <blockquote className="mt-6 border-t border-border pt-4 text-pretty text-base leading-relaxed text-muted-foreground">
+            &ldquo;{study.quote}&rdquo;
           </blockquote>
         ) : null}
       </div>
-      {study.media ? (
-        <div className="flex min-h-56 items-center justify-center bg-muted/30 p-5">{study.media}</div>
-      ) : null}
+      {study.media ? <div className="min-w-0">{study.media}</div> : null}
     </article>
   );
 }
 
 export function CaseStudiesSection({ studies }: { studies: readonly CaseStudyData[] }) {
-  // Never put a visible "coming soon" placeholder on a proof surface. The
-  // section appears only after verified, permissioned data is supplied.
   const publishable = studies.filter((study) => isPublicationReady(study, "caseStudy"));
   if (publishable.length === 0) return null;
   return (
-    <section className="border-t border-border bg-background">
-      <div className="mx-auto max-w-6xl space-y-5 px-4 py-14 sm:px-6 sm:py-20">
-        <div className="mb-9 text-center">
-          <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-foreground sm:text-4xl">From listing to decision.</h2>
-        </div>
+    <Section aria-labelledby="case-studies-heading">
+      <SectionHeading id="case-studies-heading">From listing to decision.</SectionHeading>
+      <div className="mt-8 space-y-10">
         {publishable.map((study) => <CaseStudy key={study.id} study={study} />)}
       </div>
-    </section>
+    </Section>
   );
 }

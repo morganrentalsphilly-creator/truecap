@@ -260,7 +260,7 @@ export default function EmbedHubPage() {
             </p>
           )}
 
-          <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-x-12 border-b border-t-2 border-b-border border-t-foreground lg:grid-cols-2">
+          <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-x-12 border-b border-t border-b-border border-t-foreground lg:grid-cols-2">
             {EMBED_LIST.map((entry) => (
               <article
                 key={entry.slug}

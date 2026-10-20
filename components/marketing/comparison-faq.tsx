@@ -166,7 +166,7 @@ export function ComparisonFaq({
           Quick answers to the questions investors comparison-shopping these tools
           actually ask.
         </p>
-        <div className="mt-8 border-t-2 border-foreground">
+        <div className="mt-8 border-t border-foreground">
           {items.map((item) => (
             <details key={item.question} className="tc-accordion group border-b border-border">
               {/* Touch-sized (48px) and focus-visible through the global 3px

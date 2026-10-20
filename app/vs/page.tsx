@@ -528,7 +528,7 @@ export default function VsHubPage() {
             <p className="mt-3 max-w-[60ch] text-pretty text-lg leading-relaxed text-muted-foreground">
               {group.description}
             </p>
-            <ul className="mt-8 grid grid-cols-[minmax(0,1fr)] border-t-2 border-foreground sm:grid-cols-2 sm:gap-x-12">
+            <ul className="mt-8 grid grid-cols-[minmax(0,1fr)] border-t border-foreground sm:grid-cols-2 sm:gap-x-12">
               {group.items.map((c) => (
                 <li key={c.slug} className="flex min-w-0 flex-col border-b border-rule-soft">
                   <IntentPrefetchLink href={`/vs/${c.slug}`} className="group flex flex-1 flex-col py-4">

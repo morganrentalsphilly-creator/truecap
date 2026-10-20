@@ -244,7 +244,7 @@ export function HowTrueCapWorks() {
         </StoryObserver>
       ) : (
         // The sample deal failed to compute: the steps still read in order.
-        <ol className="mt-8 border-t-2 border-foreground">
+        <ol className="mt-8 border-t border-foreground">
           {STORY_STEPS.map((step) => (
             <li key={step.n} className="border-b border-border py-5">
               <h3 className="text-lg font-semibold">{step.title}</h3>
@@ -349,7 +349,7 @@ export function SocialProof() {
       </SectionHeading>
       <div className="mt-8 grid gap-x-12 gap-y-8 lg:grid-cols-5">
         {/* The most detailed quote gets the most room; the rest sit beside it. */}
-        <figure className="border-t-2 border-foreground pt-5 lg:col-span-3">
+        <figure className="border-t border-foreground pt-5 lg:col-span-3">
           <blockquote className="text-xl leading-relaxed sm:text-2xl">
             &ldquo;{featured.quote}&rdquo;
           </blockquote>
@@ -442,7 +442,7 @@ export function VsCompetitors() {
         <SectionHeading id="why-truecap-workflows-heading" className="max-w-3xl">
           Choose the workflow that fits how you invest.
         </SectionHeading>
-        <div className="mt-8 grid gap-y-10 border-t-2 border-foreground lg:grid-cols-3 lg:gap-x-12 lg:gap-y-0">
+        <div className="mt-8 grid gap-y-10 border-t border-foreground lg:grid-cols-3 lg:gap-x-12 lg:gap-y-0">
           {WORKFLOW_COMPARISONS.map((item) => (
             <article
               key={item.name}
@@ -477,7 +477,7 @@ export function VsCompetitors() {
         {/* From 768px each column spans six shared rows (its name, four
             items, its source line) and each list four of them, so row N has
             one height in both lists and their rules meet. */}
-        <div className="mt-8 grid gap-x-12 gap-y-10 border-t-2 border-foreground md:grid-cols-2 md:gap-y-0">
+        <div className="mt-8 grid gap-x-12 gap-y-10 border-t border-foreground md:grid-cols-2 md:gap-y-0">
           <div className="min-w-0 pt-4 md:row-span-6 md:grid md:grid-rows-subgrid">
             <h3 className="text-balance text-lg font-semibold">
               DealCheck may fit better if you want
@@ -1040,7 +1040,7 @@ export async function PdfProUpsell() {
         role="region"
         aria-label="Free and Pro comparison"
         className={cn(
-          "mt-12 border-t-2 border-foreground",
+          "mt-12 border-t border-foreground",
           // It compares Free and Pro, so it spans exactly the first two
           // cards: two thirds of the row less half a gap (gap-5 = 1.25rem).
           agentProConfigured

@@ -404,7 +404,7 @@ export default function GlossaryPage() {
         <Section rhythm="tight" rule="none">
           <nav
             aria-label="Jump to term"
-            className="grid grid-cols-2 gap-x-6 break-words border-t-2 border-foreground sm:grid-cols-3 lg:grid-cols-4 lg:gap-x-12"
+            className="grid grid-cols-2 gap-x-6 break-words border-t border-foreground sm:grid-cols-3 lg:grid-cols-4 lg:gap-x-12"
           >
             {TERMS.map((t) => (
               <a
@@ -422,7 +422,7 @@ export default function GlossaryPage() {
             card each. A row keeps its <article id> (the jump links and the
             DefinedTerm @ids point at it) and its H2. */}
         <Section rhythm="tight">
-          <div className="max-w-[68ch] break-words border-t-2 border-foreground">
+          <div className="max-w-[68ch] break-words border-t border-foreground">
             {TERMS.map((t) => (
               <article
                 key={t.slug}

@@ -361,7 +361,7 @@ export default function BlogPost() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="[&_td]:font-mono">
+              <tbody className="[&_td]:font-figure">
                 <tr>
                   <td>0.50%</td>
                   <td>6%</td>
@@ -448,7 +448,7 @@ export default function BlogPost() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="[&_td]:font-mono">
+              <tbody className="[&_td]:font-figure">
                 <tr>
                   <td>Gross yield</td>
                   <td>11.5%</td>
