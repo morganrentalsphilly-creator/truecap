@@ -1,0 +1,42 @@
+[
+  {
+    "antipattern": "tight-leading",
+    "name": "Tight line height",
+    "description": "Line height below 1.3x the font size makes multi-line text hard to read. Use 1.5 to 1.7 for body text so lines have room to breathe.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "http://127.0.0.1:3100/tools/1-percent-rule-calculator",
+    "line": 0,
+    "snippet": "line-height 1.20x (need >=1.3)"
+  },
+  {
+    "antipattern": "nested-cards",
+    "name": "Nested cards",
+    "description": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "http://127.0.0.1:3100/tools/1-percent-rule-calculator",
+    "line": 0,
+    "snippet": "Card inside card"
+  },
+  {
+    "antipattern": "low-contrast",
+    "name": "Low contrast text",
+    "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "http://127.0.0.1:3100/tools/1-percent-rule-calculator",
+    "line": 0,
+    "snippet": "browser contrast 1.4:1 median 14.0:1 (need 3:1) via canvas-background-image+alpha, solid-background \"1% rule calculator\""
+  },
+  {
+    "antipattern": "low-contrast",
+    "name": "Low contrast text",
+    "description": "Text does not meet WCAG AA contrast requirements (4.5:1 for body, 3:1 for large text). Increase the contrast between text and background.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "http://127.0.0.1:3100/tools/1-percent-rule-calculator",
+    "line": 0,
+    "snippet": "browser contrast 1.4:1 median 14.0:1 (need 3:1) via canvas-background-image+alpha, solid-background \"Take the deal past the 1% rule\""
+  }
+]
