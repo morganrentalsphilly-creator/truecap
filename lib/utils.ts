@@ -9,11 +9,20 @@ import { extendTailwindMerge } from 'tailwind-merge'
  * fell to 16px on phones). Every custom size and shadow token is listed so a
  * color class never evicts a size, and a size never evicts a color.
  */
-const twMerge = extendTailwindMerge({
+const twMerge = extendTailwindMerge<'font-display' | 'font-figure'>({
   extend: {
     theme: {
       text: ['3xs', '2xs', 'h3-sm', 'section-sm', 'section', 'key-sm', 'key', 'display-sm', 'display'],
       shadow: ['float-up', 'glow', 'gold-glow'],
+    },
+    // The two voice utilities in globals.css (`font-display` sets weight and
+    // tracking, `font-figure` sets tabular numerals) are not font families:
+    // in the family group, `cn("font-display", "font-figure")` kept only the
+    // last. Each is its own group, so they stack, and neither evicts a
+    // family or a weight class.
+    classGroups: {
+      'font-display': ['font-display'],
+      'font-figure': ['font-figure'],
     },
   },
 })

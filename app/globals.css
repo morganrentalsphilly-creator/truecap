@@ -8,95 +8,99 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* The Underwriter's Ledger (DESIGN.md, decided 2026-09-30): Newsprint
-     paper, graphite ink, a raised paper for the few objects that sit on it.
-     White is reserved for fields a person types into (--field). */
-  --background: oklch(0.945 0.006 85);
-  --foreground: oklch(0.22 0 0);
-  --card: oklch(0.97 0.004 85);
-  --card-foreground: oklch(0.22 0 0);
-  --popover: oklch(0.97 0.004 85);
-  --popover-foreground: oklch(0.22 0 0);
+  /* Blueprint (DESIGN.md, decided 2026-10-20): a drafting sheet, graphite
+     ink, one cobalt for actions, one warm highlight for the Offer Ceiling.
+     White is the card and the field; the sheet is the page. */
+  --background: oklch(0.985 0.004 90);
+  --foreground: oklch(0.28 0.01 262);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.28 0.01 262);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.28 0.01 262);
   --field: oklch(1 0 0);
-  /* The row that decides (the ledger's binding row), selection, hover. */
-  --band: oklch(0.925 0.008 85);
-  /* Rules between rows; --border is the heavier rule under table heads. */
-  --rule-soft: oklch(0.875 0.008 85);
-  /* Dark enough to keep white text AA-safe on primary actions. */
-  --primary: oklch(0.49 0.18 240);
-  /* Signal Blue Deep: hover and pressed states of links and buttons. */
-  --primary-deep: oklch(0.42 0.16 242);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.925 0.008 85);
-  --secondary-foreground: oklch(0.22 0 0);
-  --muted: oklch(0.925 0.008 85);
-  /* Ink 2: 6.9:1 on paper, 6.5:1 on the band, 5.9:1 on --brand-blue-light. */
-  --muted-foreground: oklch(0.43 0.006 85);
-  --accent: oklch(0.925 0.008 85);
-  --accent-foreground: oklch(0.22 0 0);
+  /* The tinted band: hover rows, selection, the quiet surface under a list. */
+  --band: oklch(0.955 0.005 90);
+  /* Rules between rows; --border is the line around cards and under heads. */
+  --rule-soft: oklch(0.93 0.005 90);
+  /* Cobalt: the one action colour. 6.8:1 with white text. */
+  --primary: oklch(0.48 0.19 262);
+  --primary-deep: oklch(0.41 0.17 262);
+  --primary-foreground: oklch(0.995 0 0);
+  --primary-wash: oklch(0.95 0.025 262);
+  --secondary: oklch(0.955 0.005 90);
+  --secondary-foreground: oklch(0.28 0.01 262);
+  --muted: oklch(0.955 0.005 90);
+  /* Graphite 2: secondary text, 6.4:1 on the sheet. */
+  --muted-foreground: oklch(0.47 0.01 262);
+  --accent: oklch(0.955 0.005 90);
+  --accent-foreground: oklch(0.28 0.01 262);
   --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.99 0 0);
-  /* Text-safe red for small error copy on tinted marketing surfaces: the
-     display --destructive only reaches 3.9:1 on --brand-blue-light and 4.4:1
-     on --background, so inline messages use this darker variant (>= 5:1 on
-     both). Keep --destructive for solid fills and aria-invalid borders. */
+  --destructive-foreground: oklch(0.995 0 0);
   --destructive-text: oklch(0.5 0.22 27);
-  /* Semantic status colors must exist outside `.dashboard-shell` too: auth,
-     public, and portal surfaces use the corresponding Tailwind utilities. */
-  --success: oklch(0.46 0.14 155);
-  --success-foreground: oklch(0.99 0 0);
+  /* The warm highlight: a fill under the Offer Ceiling (never small text),
+     with a text-safe step (5.1:1 on white) and a wash for a miss chip. */
+  --highlight: oklch(0.70 0.17 55);
+  --highlight-text: oklch(0.55 0.17 50);
+  --highlight-wash: oklch(0.96 0.03 60);
+  /* Semantics: green and red are the direction of a flow or a pass and a
+     miss, never emphasis. Each clears 4.5:1 on white and on the sheet. */
+  --success: oklch(0.50 0.15 150);
+  --success-foreground: oklch(0.995 0 0);
   --warning: oklch(0.78 0.16 75);
   --warning-foreground: oklch(0.2 0.05 60);
   --gold: oklch(0.56 0.13 85);
-  /* Rules carry the structure; they are drawn, not UI boundaries. Field
-     boundaries use --input (Ink 2), 8.1:1 against the white field and 6.9:1
-     against the paper, so every input edge is perceivable (WCAG 1.4.11). */
-  --border: oklch(0.78 0.01 85);
-  --input: oklch(0.43 0.006 85);
-  --ring: oklch(0.49 0.18 240);
-  --chart-1: oklch(0.52 0.18 240);
-  --chart-2: oklch(0.6 0.16 155);
-  --chart-3: oklch(0.65 0.18 42);
+  --border: oklch(0.87 0.008 90);
+  --input: oklch(0.47 0.01 262);
+  --ring: oklch(0.48 0.19 262);
+  --chart-1: oklch(0.48 0.19 262);
+  --chart-2: oklch(0.55 0.15 150);
+  --chart-3: oklch(0.70 0.17 55);
   --chart-4: oklch(0.62 0.13 195);
-  --chart-5: oklch(0.58 0.22 15);
-  /* Radius by role: 6px is the object radius (plan cards). The scale in
-     @theme below derives controls (4px), tags (2px) and floats (8-10px). */
-  --radius: 6px;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.15 0.02 250);
-  --sidebar-primary: oklch(0.49 0.18 240);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.94 0.01 240);
-  --sidebar-accent-foreground: oklch(0.3 0.04 255);
-  --sidebar-border: oklch(0.89 0.01 240);
-  --sidebar-ring: oklch(0.52 0.18 240);
-  /* Custom tokens — accent refreshed from indigo-violet (hue 264) to a
-     desaturated electric blue (hue 240, ~#0070c4). Single accent, sat
-     dialed down per the taste-skill color-calibration rule. */
-  --brand-blue: oklch(0.49 0.18 240);
-  /* A quiet blue wash for the surfaces not yet on the ledger primitives
-     (the app's Offer Ceiling card, older marketing heroes). It was a pale
-     cyan at chroma 0.05, which fought the warm Newsprint paper; DESIGN.md
-     keeps blue for actions, so the wash stays close to the paper. */
-  --brand-blue-light: oklch(0.935 0.02 240);
-  /* Text-safe blue for small labels on --brand-blue-light (4.73:1).
-     Keep --brand-blue/--primary unchanged for buttons, icons, and larger type. */
-  --brand-blue-text: oklch(0.49 0.18 240);
-  --brand-green: oklch(0.46 0.14 155);
-  --brand-green-light: oklch(0.95 0.04 155);
-  /* One AA-safe orange: 4.63:1 against white for both text and badges. */
-  --brand-orange: oklch(0.58 0.18 42);
-  --brand-orange-light: oklch(0.96 0.04 42);
-  /* The display orange is intentionally bright, but it cannot carry small
-     text. These two narrowly scoped variants clear WCAG AA: orange text on
-     the light tint is 4.69:1; white on the solid badge is 4.63:1. */
-  /* Deepened for the tinted paper: 5.5:1 on paper, 5.2:1 on the band. */
-  --brand-orange-text: oklch(0.5 0.16 42);
-  --brand-orange-solid: oklch(0.58 0.18 42);
-  /* Same hues, deepened so figures clear 5:1 on the paper and the band. */
-  --metric-positive: oklch(0.46 0.14 155);
-  --metric-negative: oklch(0.5 0.2 15);
+  --chart-5: oklch(0.55 0.20 25);
+  /* Radius by role: 12px objects (cards, panels), 8px controls, 4px tags,
+     12-16px floats. The scale in @theme below derives the rest. */
+  --radius: 12px;
+  /* The dark band and the app's rail: the sheet inverted. */
+  --navy: oklch(0.21 0.035 262);
+  --navy-foreground: oklch(0.93 0.008 262);
+  --navy-muted: oklch(0.72 0.02 262);
+  --navy-line: oklch(1 0 0 / 0.12);
+  --sidebar: oklch(0.21 0.035 262);
+  --sidebar-foreground: oklch(0.86 0.015 262);
+  --sidebar-primary: oklch(0.62 0.17 262);
+  --sidebar-primary-foreground: oklch(0.995 0 0);
+  --sidebar-accent: oklch(0.27 0.04 262);
+  --sidebar-accent-foreground: oklch(0.995 0 0);
+  --sidebar-border: oklch(0.31 0.035 262);
+  --sidebar-ring: oklch(0.62 0.17 262);
+  /* The drafting grid: cobalt lines at two weights, drawn by the
+     bg-sheet-grid utility on marketing heroes and bands. */
+  --grid-line: oklch(0.48 0.19 262 / 0.09);
+  --grid-line-major: oklch(0.48 0.19 262 / 0.16);
+  /* Motion: three durations and two curves, the only ones components use
+     (lib/motion.ts mirrors them for Motion for React). */
+  --duration-fast: 150ms;
+  --duration-base: 220ms;
+  --duration-slow: 420ms;
+  --duration-draw: 700ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  /* Legacy names still read by older call sites and by the contrast guards
+     (which parse literal OKLCH): the same Blueprint values as above, written
+     out, so nothing drifts back to the old palette. */
+  --brand-blue: oklch(0.48 0.19 262);
+  --brand-blue-light: oklch(0.95 0.025 262);
+  --brand-blue-text: oklch(0.48 0.19 262);
+  --brand-green: oklch(0.50 0.15 150);
+  --brand-green-light: oklch(0.95 0.04 150);
+  --brand-orange: oklch(0.70 0.17 55);
+  --brand-orange-light: oklch(0.96 0.03 60);
+  --brand-orange-text: oklch(0.55 0.17 50);
+  --brand-orange-solid: oklch(0.55 0.17 50);
+  --metric-positive: oklch(0.50 0.15 150);
+  --metric-negative: oklch(0.52 0.20 25);
 }
+
 
 .dark {
   --background: oklch(0.145 0 0);
@@ -139,8 +143,8 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-sans-variable), "Archivo", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-mono-variable), "DM Mono", ui-monospace, monospace;
+  --font-sans: var(--font-sans-variable), "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-variable), "Geist Mono", ui-monospace, monospace;
   /* The two dense product-UI steps below text-xs (DESIGN.md "Label-xs" /
      "Label-2xs"). Defined as font-size only so they behave exactly like the
      arbitrary text-[11px] / text-[10px] values they replace (line-height
@@ -156,7 +160,7 @@
      The desktop H1 eases from 38px at 900px to 55px at 1280px, so the hero
      column between 1024 and 1279px keeps the headline to four lines and the
      investor cue in the first screen. */
-  --text-display: clamp(2.375rem, -0.14rem + 4.474vw, 3.4375rem);
+  --text-display: clamp(2.375rem, -0.14rem + 4.474vw, 3.5rem);
   --text-display--line-height: 1.02;
   --text-display-sm: 2.375rem;
   --text-display-sm--line-height: 1.02;
@@ -216,25 +220,32 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  /* Radius by role (DESIGN.md): 2px tags, 4px controls, 6px objects, 8-12px
-     things that float. The 2xl/3xl steps are pulled into the same tight scale
-     so no surface on the site keeps the old 16-24px pillow corners. */
-  --radius-sm: 2px;
-  --radius-md: 4px;
+  --color-highlight: var(--highlight);
+  --color-highlight-text: var(--highlight-text);
+  --color-highlight-wash: var(--highlight-wash);
+  --color-primary-wash: var(--primary-wash);
+  --color-navy: var(--navy);
+  --color-navy-foreground: var(--navy-foreground);
+  --color-navy-muted: var(--navy-muted);
+  --color-navy-line: var(--navy-line);
+  /* Radius by role (DESIGN.md): 4px tags and chips, 8px controls, 12px
+     objects (cards, panels, the field group), 14-20px floats and bands. */
+  --radius-sm: 4px;
+  --radius-md: 8px;
   --radius-lg: var(--radius);
-  --radius-xl: 8px;
-  --radius-2xl: 10px;
-  --radius-3xl: 12px;
-  /* No shadow at rest: the resting steps render nothing, so a hairline card
-     never also floats. Menus, dialogs and sticky bars keep shadow-md/lg,
-     which are both the one float shadow (DESIGN.md components.menu). */
-  --shadow-2xs: 0 0 #0000;
-  --shadow-xs: 0 0 #0000;
-  --shadow-sm: 0 0 #0000;
-  --shadow-md: 0 12px 32px -12px oklch(0.2 0 0 / 0.18), 0 2px 6px -2px oklch(0.2 0 0 / 0.08);
-  --shadow-lg: 0 12px 32px -12px oklch(0.2 0 0 / 0.18), 0 2px 6px -2px oklch(0.2 0 0 / 0.08);
-  /* The same float, cast upward, for bars fixed to the bottom edge. */
-  --shadow-float-up: 0 -12px 32px -12px oklch(0.2 0 0 / 0.18), 0 -2px 6px -2px oklch(0.2 0 0 / 0.08);
+  --radius-xl: 14px;
+  --radius-2xl: 16px;
+  --radius-3xl: 20px;
+  /* Elevation (DESIGN.md): rest, float, panel. A resting card carries the
+     soft rest shadow; floats (menus, popovers, dialogs, the sticky bars)
+     the float shadow; the hero panel and dark instruments the panel shadow. */
+  --shadow-2xs: 0 1px 1px oklch(0.28 0.01 262 / 0.04);
+  --shadow-xs: 0 1px 2px oklch(0.28 0.01 262 / 0.06);
+  --shadow-sm: 0 1px 1px oklch(0.28 0.01 262 / 0.05), 0 12px 32px -14px oklch(0.48 0.19 262 / 0.22);
+  --shadow-md: 0 12px 32px -12px oklch(0.28 0.01 262 / 0.2), 0 2px 6px -2px oklch(0.28 0.01 262 / 0.08);
+  --shadow-lg: 0 2px 4px oklch(0.28 0.01 262 / 0.1), 0 20px 48px -16px oklch(0.28 0.01 262 / 0.35);
+  /* The float, cast upward, for bars fixed to the bottom edge. */
+  --shadow-float-up: 0 -12px 32px -12px oklch(0.28 0.01 262 / 0.18), 0 -2px 6px -2px oklch(0.28 0.01 262 / 0.08);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -259,44 +270,47 @@ textarea,
   caret-color: var(--primary);
 }
 
-/* The display voice: Archivo's semi-condensed cut for H1–H3 and plan names
-   only (DESIGN.md). Everything else sets Archivo at its normal width. */
+/* The display voice: Hanken Grotesk at 750, tight, for H1-H3, plan names and
+   the key figures (DESIGN.md "Typography"). Text sets the same face at 400.
+   next/font's own size-adjusted fallback ("Hanken Grotesk Fallback") covers
+   the swap at every weight, so no hand-written face is needed here. */
 @utility font-display {
   font-family: var(--font-sans);
   font-weight: 750;
-  font-stretch: 82%;
-  letter-spacing: -0.012em;
+  letter-spacing: -0.025em;
 }
 
-/* What the display voice is set in until Archivo arrives. next/font's own
-   fallback face ("Archivo Fallback": local Arial at 98.7%) is matched to
-   Archivo at normal width, so a heading in the 82% cut was set too wide,
-   took an extra line and gave it back at the swap: a layout shift of 0.199
-   on /pricing on a slow first visit. This face joins the same family at
-   font-stretch 82%, so only font-display text selects it and everything at
-   normal width keeps next/font's face.
-   size-adjust is measured, not estimated: Archivo at 82% width and weight
-   750 is 0.853 of Arial Bold's width over the site's own headings (77
-   strings from 14 pages, in Chromium). The ascent and descent overrides are
-   Archivo's (878 and 210 per 1000 units) divided by that 0.853, the way
-   next/font derives its own. Liberation Sans Bold has Arial Bold's advance
-   widths and stands in where Arial is not installed (Linux).
-   One factor cannot make every heading break identically: Archivo's digits
-   are 0.92 of Arial Bold's width and a plain sentence 0.85, so a balanced
-   headline with figures can still move a word at the swap. The face relies
-   on next/font naming its fallback family "Archivo Fallback";
-   lib/__tests__/display-font-fallback.test.ts pins both ends. */
-@font-face {
-  /* Not a second typeface: the size-adjusted fallback DESIGN.md's Loading
-     rule calls for, named as next/font names it. */
-  font-family: "Archivo Fallback"; /* impeccable-disable-line design-system-font */
-  src: local("Arial Bold"), local("Arial-BoldMT"), local("Liberation Sans Bold"), local("LiberationSans-Bold");
-  font-weight: 750;
-  font-stretch: 82%;
-  ascent-override: 102.93%;
-  descent-override: 24.62%;
-  line-gap-override: 0%;
-  size-adjust: 85.3%;
+/* Figures: tabular numerals in the text face, so a column of numbers lines
+   up and a changing number never jitters (the Figure rule). */
+@utility font-figure {
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* The drafting sheet's grid: 16px minor lines and 80px major lines in cobalt
+   at low alpha, for the marketing hero and the close. A band inverts it. */
+@utility bg-sheet-grid {
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(var(--grid-line-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line-major) 1px, transparent 1px);
+  background-size: 16px 16px, 16px 16px, 80px 80px, 80px 80px;
+}
+@utility bg-navy-grid {
+  background-color: var(--navy);
+  background-image:
+    linear-gradient(oklch(1 0 0 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 0.05) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* The warm highlighter stroke under the Offer Ceiling: a fill behind the
+   lower third of the figure, never a colour on the glyphs themselves. */
+@utility highlight-stroke {
+  background-image: linear-gradient(transparent 62%, var(--highlight) 62%, var(--highlight) 88%, transparent 88%);
+  padding-inline: 0.06em;
 }
 
 /* A link in running text: Signal Blue, underlined, no arrow (DESIGN.md
@@ -319,7 +333,7 @@ textarea,
    SectionHeading sizes with generous space above, H3 at the H3 step, links
    in the tc-link look, strong at the plugin's 600 in ink, tables with
    sentence-case heads on rules, a blockquote as a ruled aside (no italic,
-   no quote marks), code in DM Mono. `.prose` itself is NOT redefined: the
+   no quote marks), code in Geist Mono. `.prose` itself is NOT redefined: the
    methodology, about and calculator pages that use plain `prose` keep the
    plugin's look until they opt in.
    Every rule is scoped to `.prose-ledger.prose` (two classes), so it wins
@@ -418,7 +432,7 @@ textarea,
     line-height: var(--leading-relaxed);
     quotes: none;
   }
-  /* Code: DM Mono at its 500 face (never a synthesized bold), no backticks. */
+  /* Code: Geist Mono at its 500 face (never a synthesized bold), no backticks. */
   &.prose :where(code):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
     font-family: var(--font-mono);
     font-weight: 500;
@@ -486,7 +500,7 @@ textarea,
 }
 @media (prefers-reduced-motion: no-preference) {
   .ledger-rule-draw::after {
-    animation: ledger-rule-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1) 200ms both;
+    animation: ledger-rule-in var(--duration-draw) var(--ease-out) 200ms both;
   }
 }
 
@@ -563,7 +577,7 @@ textarea,
   :where(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), select, textarea) {
     min-block-size: 2.75rem;
   }
-  /* DM Mono ships 400 and 500 only (app/layout.tsx). A figure inside a
+  /* Geist Mono ships 400 and 500 only (app/layout.tsx). A figure inside a
      semibold row asked for 600 and the browser smeared a faux bold over
      tabular numerals; without synthesis it takes the 500 face, the key-figure
      weight DESIGN.md sets. */
@@ -774,27 +788,20 @@ textarea,
      ink, rules, radius and Signal Blue as the analyzer and the marketing
      site; only the navy rail below is its own (kept by the founder).
      Status colors come from :root too. */
-  --sidebar: oklch(0.18 0.04 260);
-  --sidebar-foreground: oklch(0.85 0.02 250);
-  --sidebar-primary: oklch(0.62 0.18 240);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.24 0.05 262);
-  --sidebar-accent-foreground: oklch(0.99 0 0);
-  --sidebar-border: oklch(0.28 0.04 262);
-  --sidebar-ring: oklch(0.54 0.18 240);
+  /* The rail is the dark band's navy (:root --sidebar), nothing of its own. */
   --gradient-premium: linear-gradient(135deg, oklch(0.54 0.18 240), oklch(0.66 0.13 210));
   --gradient-success: linear-gradient(135deg, oklch(0.68 0.17 158), oklch(0.72 0.18 180));
   --gradient-gold: linear-gradient(135deg, oklch(0.82 0.14 85), oklch(0.72 0.16 50));
-  --gradient-sidebar: linear-gradient(180deg, oklch(0.2 0.05 262), oklch(0.15 0.04 260));
+  --gradient-sidebar: var(--navy);
   --gradient-card-glow: radial-gradient(circle at top right, oklch(0.54 0.18 240 / 0.08), transparent 60%);
   --shadow-lg: 0 12px 32px -8px oklch(0.2 0.04 260 / 0.12), 0 4px 8px -4px oklch(0.2 0.04 260 / 0.06);
-  --shadow-glow: 0 0 40px -8px oklch(0.54 0.18 240 / 0.35);
-  --shadow-gold-glow: 0 0 24px -4px oklch(0.78 0.14 85 / 0.4);
+  --shadow-glow: var(--shadow-md);
+  --shadow-gold-glow: var(--shadow-md);
   /* AIInsights panel background (previously hardcoded in the component). */
   --ai-insights-bg: linear-gradient(135deg, oklch(0.99 0.005 260), oklch(0.97 0.02 280));
   /* Compare page xl background (previously a hardcoded light gradient). */
   --compare-surface: radial-gradient(circle at top right, rgba(0, 112, 196, 0.08), transparent 32%), linear-gradient(180deg, #f8fbff, #eef4f8);
-  font-family: var(--font-sans-variable), "Archivo", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans-variable), "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* The mobile nav sheet is portaled OUTSIDE .dashboard-shell and can't
@@ -804,8 +811,8 @@ textarea,
   --sidebar-accent: oklch(0.24 0.05 262);
   --sidebar-accent-foreground: oklch(0.99 0 0);
   --sidebar-border: oklch(0.28 0.04 262);
-  --gradient-sidebar: linear-gradient(180deg, oklch(0.2 0.05 262), oklch(0.15 0.04 260));
-  font-family: var(--font-sans-variable), "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --gradient-sidebar: var(--navy);
+  font-family: var(--font-sans-variable), "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* The dashboard is intentionally ALWAYS LIGHT. It shares the marketing /

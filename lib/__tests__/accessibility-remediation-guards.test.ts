@@ -102,7 +102,7 @@ describe("WCAG 2.1 AA remediation guards", () => {
     }
     expect(contrast(WHITE, cssToken(css, "primary")), "button label").toBeGreaterThanOrEqual(4.5);
     expect(contrast(WHITE, cssToken(css, "primary-deep")), "button label, hover").toBeGreaterThanOrEqual(4.5);
-    expect(css).toContain("--brand-orange: oklch(0.58 0.18 42)");
+    expect(css).toContain("--brand-orange: oklch(0.70 0.17 55)");
     expect(css).toContain("outline: 3px solid var(--ring) !important");
     expect(css).toContain("outline-offset: 2px !important");
 

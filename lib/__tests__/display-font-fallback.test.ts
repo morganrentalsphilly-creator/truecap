@@ -6,68 +6,65 @@ const ROOT = process.cwd();
 const read = (p: string) => readFileSync(join(ROOT, p), "utf8");
 
 /**
- * Headings are set in Archivo's 82% display cut. Until the font file lands
- * they are set in a fallback, and next/font's generated fallback is matched
- * to Archivo at normal width, so the /pricing H1 took an extra line and gave
- * it back at the swap: a layout shift of 0.199 on a slow first visit (the
- * go-to-market audit, P2-159). app/globals.css adds a second face to the same
- * fallback family at font-stretch 82%. These cases pin the measured numbers
- * and the two assumptions the face rests on.
+ * Headings and text share one variable face, Hanken Grotesk (DESIGN.md
+ * "Typography", 2026-10-20). Until the font file lands they are set in the
+ * fallback next/font generates from the face's own metrics, so the swap
+ * gains or loses no line (the go-to-market audit's P2-159 found a 0.199
+ * layout shift when the old display cut had no matched fallback). These
+ * cases pin the three options that make the swap shift-free and the two
+ * utilities that set the display and figure voices from the same face.
  */
-describe("the display cut's fallback face", () => {
+describe("the type faces and their fallback", () => {
   const css = read("app/globals.css");
-  const faces = css.match(/@font-face\s*\{[^}]*\}/g) ?? [];
-  const face = faces[0] ?? "";
-  const descriptor = (face: string, name: string) =>
-    face.match(new RegExp(`(?:^|[;{\\s])${name}:\\s*([^;]+);`))?.[1].trim() ?? null;
+  const layout = read("app/layout.tsx");
 
-  it("is the one @font-face in globals.css, in next/font's fallback family at the display cut's width and weight", () => {
-    expect(faces).toHaveLength(1);
-    expect(descriptor(face, "font-family")).toBe('"Archivo Fallback"');
-    expect(descriptor(face, "font-stretch")).toBe("82%");
-    expect(descriptor(face, "font-weight")).toBe("750");
-    // A local bold face, so the browser never synthesises bold on top of it.
-    expect(descriptor(face, "src")).toMatch(/^local\("Arial Bold"\)/);
-    expect(descriptor(face, "src")).not.toMatch(/url\(/);
+  it("loads Hanken Grotesk with next/font's size-adjusted fallback, swapped and preloaded", () => {
+    const font = layout.match(/const hankenGrotesk = Hanken_Grotesk\(\{[\s\S]*?\n\}\);/)?.[0] ?? "";
+    expect(font).toContain('variable: "--font-sans-variable"');
+    expect(font).toContain("adjustFontFallback: true");
+    expect(font).toContain('display: "swap"');
+    // The homepage H1 is the LCP element; the face that draws it preloads.
+    expect(font).toContain("preload: true");
+    // One width: no `axes`, so the generated fallback serves display and text.
+    expect(font).not.toContain("axes:");
   });
 
-  it("selects the same width and weight the font-display utility sets", () => {
+  it("loads Geist Mono for metadata only, at the two weights the figures never use", () => {
+    const mono = layout.match(/const geistMono = Geist_Mono\(\{[\s\S]*?\n\}\);/)?.[0] ?? "";
+    expect(mono).toContain('variable: "--font-mono-variable"');
+    expect(mono).toContain('weight: ["400", "500"]');
+    expect(mono).toContain("preload: false");
+    expect(layout).toContain("${hankenGrotesk.variable} ${geistMono.variable} font-sans");
+  });
+
+  it("needs no hand-written @font-face: the fallback is next/font's own", () => {
+    expect(css.match(/@font-face\s*\{/g) ?? []).toHaveLength(0);
+    expect(css).not.toMatch(/Archivo|DM Mono/);
+    expect(css).toContain('--font-sans: var(--font-sans-variable), "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;');
+    expect(css).toContain('--font-mono: var(--font-mono-variable), "Geist Mono", ui-monospace, monospace;');
+  });
+
+  it("sets the display voice at 750 and tight, in the text face, with no width axis", () => {
     const utility = css.match(/@utility font-display \{[^}]*\}/)?.[0] ?? "";
     expect(utility).toContain("font-family: var(--font-sans);");
-    expect(utility).toContain("font-stretch: 82%;");
     expect(utility).toContain("font-weight: 750;");
+    expect(utility).toContain("letter-spacing: -0.025em;");
+    expect(utility).not.toContain("font-stretch");
   });
 
-  it("carries the measured size adjustment and Archivo's own ascent and descent", () => {
-    // Archivo at 82% width and weight 750 against Arial Bold, measured over
-    // the site's headings in Chromium: 0.853.
-    expect(descriptor(face, "size-adjust")).toBe("85.3%");
-    const metrics = (
-      JSON.parse(read("node_modules/next/dist/server/capsize-font-metrics.json")) as {
-        archivo: { ascent: number; descent: number; lineGap: number; unitsPerEm: number };
-      }
-    ).archivo;
-    const adjust = 0.853;
-    const percent = (value: string | null) => Number((value ?? "").replace("%", ""));
-    expect(percent(descriptor(face, "ascent-override"))).toBeCloseTo((metrics.ascent / metrics.unitsPerEm / adjust) * 100, 1);
-    expect(percent(descriptor(face, "descent-override"))).toBeCloseTo((Math.abs(metrics.descent) / metrics.unitsPerEm / adjust) * 100, 1);
-    expect(percent(descriptor(face, "line-gap-override"))).toBe(metrics.lineGap);
+  it("sets figures in the text face with tabular numerals", () => {
+    const utility = css.match(/@utility font-figure \{[^}]*\}/)?.[0] ?? "";
+    expect(utility).toContain("font-family: var(--font-sans);");
+    expect(utility).toContain("font-variant-numeric: tabular-nums;");
+    expect(utility).toContain('font-feature-settings: "tnum" 1;');
   });
 
-  it("joins a family next/font really generates: Archivo with an adjusted fallback", () => {
-    const layout = read("app/layout.tsx");
-    const archivo = layout.match(/const archivo = Archivo\(\{[\s\S]*?\n\}\);/)?.[0] ?? "";
-    expect(archivo).toContain("adjustFontFallback: true");
-    expect(archivo).toContain('display: "swap"');
-    expect(archivo).toContain('axes: ["wdth"]');
-    // next/font names that family "<font family> Fallback". If a Next upgrade
-    // changes the name, the face above matches nothing and headings fall back
-    // to the normal-width face again: update the family name with it.
+  it("joins a family next/font really generates, named '<family> Fallback'", () => {
+    // next/font names its fallback "<font family> Fallback" and the CSS
+    // variable carries both; if a Next upgrade changes the naming, the
+    // --font-sans stack above still resolves because it lists the family
+    // itself, but the fallback metrics would be lost: pin the loader.
     const loader = read("node_modules/next/dist/build/webpack/loaders/next-font-loader/postcss-next-font.js");
     expect(loader).toContain("formatFamily(`${fontFamily} Fallback`)");
-    // The call alone is not enough: the loader's header comment still says it
-    // hashes family names. Today formatFamily only quotes the name; if it
-    // hashes again, the hand-written "Archivo Fallback" face matches nothing.
-    expect(loader).toMatch(/const formatFamily = \(family\)=>\{\s*return `'\$\{family\}'`;/);
   });
 });

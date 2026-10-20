@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Archivo, DM_Mono } from "next/font/google";
+import { Hanken_Grotesk, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import { ActionConfirmProvider } from "@/components/ui/action-confirm-dialog";
 import { CookieConsentBanner } from "@/components/marketing/cookie-consent-banner";
@@ -16,35 +16,31 @@ import { analyzerHandoffBootstrapScript } from "@/lib/analyzer-handoff";
 import "./globals.css";
 import { JsonLd } from "@/components/seo/json-ld";
 
-const archivo = Archivo({
+/**
+ * Blueprint (DESIGN.md, 2026-10-20): one variable text face, Hanken Grotesk,
+ * for display (750, the `font-display` utility) and text (400), with tabular
+ * figures (the `font-figure` utility) for every number. Geist Mono carries
+ * only metadata: source chips, sheet captions, code.
+ */
+const hankenGrotesk = Hanken_Grotesk({
   subsets: ["latin"],
   variable: "--font-sans-variable",
-  // Variable font with the width axis: the design system sets H1–H3 and plan
-  // names in Archivo's semi-condensed cut (font-stretch: 82%, the
-  // `font-display` utility in globals.css) and everything else at normal
-  // width, from this one file. With `axes`, next/font loads the full weight
-  // range, so no `weight` list here.
-  axes: ["wdth"],
-  // Text renders at once in a fallback face, then swaps: no invisible text
-  // on slow connections. The face next/font generates here ("Archivo
-  // Fallback", local Arial at 98.7%) is matched to Archivo at normal width
-  // only; the 82% display cut has its own face under the same family name
-  // in globals.css, which depends on this option staying on. The swap is not
-  // shift-free: on a slow first visit a long paragraph can still gain or
-  // lose a line when Archivo arrives.
+  // Text renders at once in a size-adjusted fallback face, then swaps: no
+  // invisible text on slow connections and no line gained or lost at the
+  // swap. next/font generates the fallback ("Hanken Grotesk Fallback") from
+  // the face's own metrics; the one width means it serves display and text.
   display: "swap",
   adjustFontFallback: true,
   // The homepage H1 is the LCP element; preload the face that draws it.
   preload: true,
 });
-const dmMono = DM_Mono({
+const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono-variable",
   weight: ["400", "500"],
-  // The homepage hero is the sample deal's ledger, set in DM Mono in the
-  // first viewport, so the figures' face is preloaded like the headline's.
   display: "swap",
-  preload: true,
+  // Metadata only, below the fold on every page: no preload.
+  preload: false,
 });
 
 export const viewport = {
@@ -157,7 +153,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${archivo.variable} ${dmMono.variable} font-sans`}
+      className={`${hankenGrotesk.variable} ${geistMono.variable} font-sans`}
     >
       <head>
         {/* Runs before every analytics/error-reporting script. It removes the
