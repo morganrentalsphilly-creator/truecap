@@ -1,6 +1,6 @@
 /**
  * Social card for /blog/what-is-a-good-rental-yield, on the shared blog template
- * (lib/og/blog-og-template.tsx, the Newsprint frame). Next serves it as the
+ * (lib/og/blog-og-template.tsx, the shared card frame). Next serves it as the
  * post's og:image and twitter:image because the page's metadata sets no
  * images of its own.
  *
