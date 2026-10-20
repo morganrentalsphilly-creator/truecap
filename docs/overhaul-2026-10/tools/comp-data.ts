@@ -104,7 +104,7 @@ const out = {
     cocCeiling: `${maxOffer.achieved.cocReturn.toFixed(1)}%`,
     capAsking: `${analysis.capRate.toFixed(1)}%`,
     capCeiling: `${maxOffer.achieved.capRate.toFixed(1)}%`,
-    rent: formatLedgerDollars(values.monthlyRent),
+    rent: formatLedgerDollars(values.monthlyRent ?? 0),
     rate: `${values.interestRate}%`,
   },
   monthlyLedger: ledger.monthly.map((l) => ({
@@ -115,13 +115,13 @@ const out = {
   })),
   plans: {
     pro: {
-      name: PLAN_CATALOG.pro?.name ?? "Pro",
+      name: PLAN_CATALOG.pro_monthly.name,
       monthly: formatPublicUsd(PUBLIC_PRO_MONTHLY_USD),
       annual: formatPublicUsd(PUBLIC_PRO_ANNUAL_USD),
       annualPerMonth: formatPublicUsd(PUBLIC_PRO_ANNUAL_USD / 12),
     },
     agentPro: {
-      name: PLAN_CATALOG.agent_pro?.name ?? "Agent Pro",
+      name: PLAN_CATALOG.agent_pro_monthly.name,
       monthly: formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD),
       annual: formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD),
       annualPerMonth: formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD / 12),
