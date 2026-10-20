@@ -922,6 +922,21 @@ summary:has([class*="rotate-"])::marker {
     transform: none;
     pointer-events: auto;
   }
+  /* Without scripting the observer never picks a step, so the three frames
+     sit in flow under one another: the page is complete without JavaScript
+     (OVERHAUL.md §9). A browser without the `scripting` feature keeps the
+     first frame, as before. */
+  @media (scripting: none) {
+    [data-story-root] [data-story-panel] {
+      row-gap: 1rem;
+    }
+    [data-story-root] [data-story-frame] {
+      grid-area: auto;
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+  }
 }
 
 /* A leader in the receipt flow draws itself in as the section scrolls into

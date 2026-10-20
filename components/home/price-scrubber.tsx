@@ -219,6 +219,10 @@ export function PriceScrubber({
           </SliderPrimitive.Track>
           <SliderPrimitive.Thumb
             aria-label="Offer price"
+            // Radix sets aria-valuenow from the thumb's collection index, which
+            // is unknown on the server, so the attribute is missing until
+            // hydration (and without JavaScript); the value is known here.
+            aria-valuenow={point[0]}
             aria-valuetext={valueText(point)}
             aria-describedby={`${id}-help`}
             className="block size-11 cursor-grab rounded-full border-0 bg-transparent transition-transform duration-[var(--duration-fast)] before:absolute before:top-1/2 before:left-1/2 before:size-5 before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-45 before:border-2 before:border-primary before:bg-card before:shadow-xs before:content-[''] hover:scale-110 active:cursor-grabbing motion-reduce:transition-none"

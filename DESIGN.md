@@ -407,7 +407,9 @@ Every fix lands in one of these, never as a page-local override.
   1.5px graphite line with end ticks, the meets-range a highlight fill, the
   handle a cobalt-bordered diamond, markers for asking and the ceiling as
   dimension labels in Geist Mono. `aria-valuetext` reads the price, the cash
-  flow and the target; it announces on release, not per tick.
+  flow and the target; it announces on release, not per tick. The thumb sets
+  its own `aria-valuenow`, since Radix's comes from a collection index the
+  server does not have (Phase 8).
 - **Target chip:** 4px, label weight; meets on the positive wash in green,
   misses on the highlight wash in the highlight text color, with the gap in
   dollars ("Misses by $196"). Every state exists in the DOM; the active one is
@@ -451,7 +453,9 @@ Phase 5 restyles their internals and the pages follow.
    steps); the island hydrates onto it. On phones the schematic gets its own
    layout and the readout stacks.
 2. **From listing to offer:** a pinned sheet that changes as three steps
-   scroll past; the full line items behind "See every line".
+   scroll past; the full line items behind "See every line". Without
+   scripting (`@media (scripting: none)`) the three frames sit in flow under
+   one another, so the page is complete without JavaScript (Phase 8).
 3. **Every number has a receipt:** the sources as a drawn flow into the result.
 4. **Make it yours:** the live co-branding preview.
 5. **Plans:** the toggle, cards with hover depth, the comparison table.
