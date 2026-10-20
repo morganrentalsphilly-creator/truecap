@@ -159,8 +159,13 @@ describe("the share page asks for TrueCap once", () => {
     expect(view).toContain("Run this property with your assumptions");
     expect(view).toContain("Run these assumptions with a property you choose");
     expect(view).toContain("Copy this analysis to your account");
+    // Re-anchored: shared-deal-shell.tsx — the band also picks white or
+    // graphite text for the brand colour (lib/brand-contrast).
     expect(shell).toContain(
-      'style={{ background: agent.primaryColor ?? "var(--primary)" }}',
+      'background: agent.primaryColor ?? "var(--primary)",',
+    );
+    expect(shell).toContain(
+      'color: agent.primaryColor ? textOnBrand(agent.primaryColor) : "var(--primary-foreground)",',
     );
   });
 

@@ -9,6 +9,7 @@ import { Fragment } from "react";
 import { Header } from "@/components/investcalc/header";
 import { GlossaryTip } from "@/components/investcalc/glossary-tip";
 import { LedgerFigure, LedgerTotal } from "@/components/ledger/ledger-parts";
+import { PriceTrack } from "@/components/investcalc/price-track";
 import { ActionRow, PageHero } from "@/components/marketing/page-parts";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -206,10 +207,11 @@ export default function SampleDecisionMemoPage() {
                 >
                   Offer Ceiling
                 </h2>
-                <LedgerTotal className="text-key-sm lg:text-key">
+                <LedgerTotal className="highlight-stroke text-key-sm lg:text-key">
                   {money(maxOffer.maxPrice)}
                 </LedgerTotal>
               </div>
+              <PriceTrack asking={values.purchasePrice} ceiling={maxOffer.maxPrice} className="mt-2" />
               <p className="mt-3 text-base font-semibold">
                 <Separated
                   parts={[

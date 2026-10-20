@@ -283,7 +283,9 @@ export function HeroAddressForm({
             // stacked there: 58px more height pushes the investor cue under
             // the cookie banner at 1095x760 (DESIGN.md, "The ledger as the hero").
             inputClassName={cn(
-              "h-12 rounded-md bg-field px-4 text-base lg:text-base",
+              // text-foreground: inside the navy close band the field would otherwise
+              // inherit the band's light text on its white background.
+              "h-12 rounded-md bg-field px-4 text-foreground text-base lg:text-base",
               isHero && "lg:px-3 xl:px-4",
             )}
             onPlaceSelected={(place) => {
