@@ -1,0 +1,822 @@
+[
+  {
+    "label": "phase-5",
+    "page": "/for-agents",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/for-agents",
+    "title": "For Real Estate Agents — Investor Deal Analysis | TrueCap",
+    "h1": "Send your investor clients deals that already pencil.",
+    "overflowX": false,
+    "docHeight": 14087,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/for-investors",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/for-investors",
+    "title": "For Rental Investors — Buy Box & Offer Ceiling | TrueCap",
+    "h1": "Know the highest price that still meets your targets before you write the offer.",
+    "overflowX": false,
+    "docHeight": 6799,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/pricing",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 12428,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/about",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/about",
+    "title": "About TrueCap",
+    "h1": "About TrueCap",
+    "overflowX": false,
+    "docHeight": 4995,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/tools/cap-rate-calculator",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/blog/how-to-calculate-cap-rate",
+    "title": "How to calculate cap rate: worked examples (2026) | TrueCap",
+    "h1": "How to calculate cap rate (with worked examples) — 2026 guide",
+    "overflowX": false,
+    "docHeight": 10636,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/vs/avail",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/vs/avail",
+    "title": "Avail vs TrueCap (2026): Manage vs Underwrite | TrueCap",
+    "h1": "TrueCap vs Avail: underwrite the deal, then run the rental",
+    "overflowX": false,
+    "docHeight": 11401,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/markets/atlanta",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/markets/atlanta",
+    "title": "Atlanta, GA Rental Market Data (2026) | TrueCap",
+    "h1": "Atlanta, GA Rental Market Data (2026)",
+    "overflowX": false,
+    "docHeight": 7443,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/glossary",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/glossary",
+    "title": "Real Estate Glossary | TrueCap",
+    "h1": "Real Estate Glossary",
+    "overflowX": false,
+    "docHeight": 19926,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/playbook",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/playbook",
+    "title": "The First Offer Playbook | TrueCap",
+    "h1": "From screening deals to a submitted offer.",
+    "overflowX": false,
+    "docHeight": 8324,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/blog/1-percent-rule-rental-property",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/blog/1-percent-rule-rental-property",
+    "title": "The 1% rule for rental property in 2026 | TrueCap",
+    "h1": "The 1% rule for rental property: does it still work in 2026?",
+    "overflowX": false,
+    "docHeight": 14322,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/states",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/states",
+    "title": "Rental-property verification guides by state | TrueCap",
+    "h1": "Rental-property verification by state",
+    "overflowX": false,
+    "docHeight": 6581,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/this-page-does-not-exist",
+    "width": 375,
+    "status": 404,
+    "finalUrl": "http://127.0.0.1:3100/this-page-does-not-exist",
+    "title": "Page not found | TrueCap",
+    "h1": "404 — page not found",
+    "overflowX": false,
+    "docHeight": 965,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\"",
+      "\"Geist Mono\""
+    ],
+    "disclaimers": 0
+  },
+  {
+    "label": "phase-5",
+    "page": "/for-agents",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/for-agents",
+    "title": "For Real Estate Agents — Investor Deal Analysis | TrueCap",
+    "h1": "Send your investor clients deals that already pencil.",
+    "overflowX": false,
+    "docHeight": 12656,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/for-investors",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/for-investors",
+    "title": "For Rental Investors — Buy Box & Offer Ceiling | TrueCap",
+    "h1": "Know the highest price that still meets your targets before you write the offer.",
+    "overflowX": false,
+    "docHeight": 6106,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/pricing",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 8934,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/about",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/about",
+    "title": "About TrueCap",
+    "h1": "About TrueCap",
+    "overflowX": false,
+    "docHeight": 3967,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/tools/cap-rate-calculator",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/blog/how-to-calculate-cap-rate",
+    "title": "How to calculate cap rate: worked examples (2026) | TrueCap",
+    "h1": "How to calculate cap rate (with worked examples) — 2026 guide",
+    "overflowX": false,
+    "docHeight": 8157,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/vs/avail",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/vs/avail",
+    "title": "Avail vs TrueCap (2026): Manage vs Underwrite | TrueCap",
+    "h1": "TrueCap vs Avail: underwrite the deal, then run the rental",
+    "overflowX": false,
+    "docHeight": 8789,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/markets/atlanta",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/markets/atlanta",
+    "title": "Atlanta, GA Rental Market Data (2026) | TrueCap",
+    "h1": "Atlanta, GA Rental Market Data (2026)",
+    "overflowX": false,
+    "docHeight": 5515,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/glossary",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/glossary",
+    "title": "Real Estate Glossary | TrueCap",
+    "h1": "Real Estate Glossary",
+    "overflowX": false,
+    "docHeight": 15511,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/playbook",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/playbook",
+    "title": "The First Offer Playbook | TrueCap",
+    "h1": "From screening deals to a submitted offer.",
+    "overflowX": false,
+    "docHeight": 6145,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/blog/1-percent-rule-rental-property",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/blog/1-percent-rule-rental-property",
+    "title": "The 1% rule for rental property in 2026 | TrueCap",
+    "h1": "The 1% rule for rental property: does it still work in 2026?",
+    "overflowX": false,
+    "docHeight": 10045,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/states",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/states",
+    "title": "Rental-property verification guides by state | TrueCap",
+    "h1": "Rental-property verification by state",
+    "overflowX": false,
+    "docHeight": 4095,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/this-page-does-not-exist",
+    "width": 768,
+    "status": 404,
+    "finalUrl": "http://127.0.0.1:3100/this-page-does-not-exist",
+    "title": "Page not found | TrueCap",
+    "h1": "404 — page not found",
+    "overflowX": false,
+    "docHeight": 1024,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\"",
+      "\"Geist Mono\""
+    ],
+    "disclaimers": 0
+  },
+  {
+    "label": "phase-5",
+    "page": "/for-agents",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/for-agents",
+    "title": "For Real Estate Agents — Investor Deal Analysis | TrueCap",
+    "h1": "Send your investor clients deals that already pencil.",
+    "overflowX": false,
+    "docHeight": 9878,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/for-investors",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/for-investors",
+    "title": "For Rental Investors — Buy Box & Offer Ceiling | TrueCap",
+    "h1": "Know the highest price that still meets your targets before you write the offer.",
+    "overflowX": false,
+    "docHeight": 4785,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/pricing",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 7006,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/about",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/about",
+    "title": "About TrueCap",
+    "h1": "About TrueCap",
+    "overflowX": false,
+    "docHeight": 3601,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/tools/cap-rate-calculator",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/blog/how-to-calculate-cap-rate",
+    "title": "How to calculate cap rate: worked examples (2026) | TrueCap",
+    "h1": "How to calculate cap rate (with worked examples) — 2026 guide",
+    "overflowX": false,
+    "docHeight": 7831,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/vs/avail",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/vs/avail",
+    "title": "Avail vs TrueCap (2026): Manage vs Underwrite | TrueCap",
+    "h1": "TrueCap vs Avail: underwrite the deal, then run the rental",
+    "overflowX": false,
+    "docHeight": 8111,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/markets/atlanta",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/markets/atlanta",
+    "title": "Atlanta, GA Rental Market Data (2026) | TrueCap",
+    "h1": "Atlanta, GA Rental Market Data (2026)",
+    "overflowX": false,
+    "docHeight": 5197,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/glossary",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/glossary",
+    "title": "Real Estate Glossary | TrueCap",
+    "h1": "Real Estate Glossary",
+    "overflowX": false,
+    "docHeight": 14965,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/playbook",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/playbook",
+    "title": "The First Offer Playbook | TrueCap",
+    "h1": "From screening deals to a submitted offer.",
+    "overflowX": false,
+    "docHeight": 5827,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/blog/1-percent-rule-rental-property",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/blog/1-percent-rule-rental-property",
+    "title": "The 1% rule for rental property in 2026 | TrueCap",
+    "h1": "The 1% rule for rental property: does it still work in 2026?",
+    "overflowX": false,
+    "docHeight": 9672,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/states",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/states",
+    "title": "Rental-property verification guides by state | TrueCap",
+    "h1": "Rental-property verification by state",
+    "overflowX": false,
+    "docHeight": 2922,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/this-page-does-not-exist",
+    "width": 1095,
+    "status": 404,
+    "finalUrl": "http://127.0.0.1:3100/this-page-does-not-exist",
+    "title": "Page not found | TrueCap",
+    "h1": "404 — page not found",
+    "overflowX": false,
+    "docHeight": 760,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\"",
+      "\"Geist Mono\""
+    ],
+    "disclaimers": 0
+  },
+  {
+    "label": "phase-5",
+    "page": "/for-agents",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/for-agents",
+    "title": "For Real Estate Agents — Investor Deal Analysis | TrueCap",
+    "h1": "Send your investor clients deals that already pencil.",
+    "overflowX": false,
+    "docHeight": 9895,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/for-investors",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/for-investors",
+    "title": "For Rental Investors — Buy Box & Offer Ceiling | TrueCap",
+    "h1": "Know the highest price that still meets your targets before you write the offer.",
+    "overflowX": false,
+    "docHeight": 4756,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/pricing",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 6962,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/about",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/about",
+    "title": "About TrueCap",
+    "h1": "About TrueCap",
+    "overflowX": false,
+    "docHeight": 3606,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/tools/cap-rate-calculator",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/blog/how-to-calculate-cap-rate",
+    "title": "How to calculate cap rate: worked examples (2026) | TrueCap",
+    "h1": "How to calculate cap rate (with worked examples) — 2026 guide",
+    "overflowX": false,
+    "docHeight": 7856,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/vs/avail",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/vs/avail",
+    "title": "Avail vs TrueCap (2026): Manage vs Underwrite | TrueCap",
+    "h1": "TrueCap vs Avail: underwrite the deal, then run the rental",
+    "overflowX": false,
+    "docHeight": 8100,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/markets/atlanta",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/markets/atlanta",
+    "title": "Atlanta, GA Rental Market Data (2026) | TrueCap",
+    "h1": "Atlanta, GA Rental Market Data (2026)",
+    "overflowX": false,
+    "docHeight": 5212,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/glossary",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/glossary",
+    "title": "Real Estate Glossary | TrueCap",
+    "h1": "Real Estate Glossary",
+    "overflowX": false,
+    "docHeight": 14971,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/playbook",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/playbook",
+    "title": "The First Offer Playbook | TrueCap",
+    "h1": "From screening deals to a submitted offer.",
+    "overflowX": false,
+    "docHeight": 5841,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/blog/1-percent-rule-rental-property",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/blog/1-percent-rule-rental-property",
+    "title": "The 1% rule for rental property in 2026 | TrueCap",
+    "h1": "The 1% rule for rental property: does it still work in 2026?",
+    "overflowX": false,
+    "docHeight": 9744,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/states",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/states",
+    "title": "Rental-property verification guides by state | TrueCap",
+    "h1": "Rental-property verification by state",
+    "overflowX": false,
+    "docHeight": 2985,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/this-page-does-not-exist",
+    "width": 1440,
+    "status": 404,
+    "finalUrl": "http://127.0.0.1:3100/this-page-does-not-exist",
+    "title": "Page not found | TrueCap",
+    "h1": "404 — page not found",
+    "overflowX": false,
+    "docHeight": 900,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\"",
+      "\"Geist Mono\""
+    ],
+    "disclaimers": 0
+  }
+]

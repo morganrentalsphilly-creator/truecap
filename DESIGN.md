@@ -458,6 +458,40 @@ Phase 5 restyles their internals and the pages follow.
 6. **Built by a rental investor, the eight questions, the close on a navy band
    with the address form.**
 
+## The marketing pages (Phase 5)
+
+Every marketing page is set from the shared parts, so the rollout changed
+the parts and the pages followed:
+
+- **Lines, not heavy rules.** The 2px graphite rule survives only under a
+  key figure's label row (the Offer Ceiling in a result card, a
+  calculator's result). Every list, table, FAQ, figure strip and close opens
+  on a 1px graphite line (`border-t border-foreground`); rows sit on soft
+  lines. `RuledList`, `StepList`, the `/vs` lists and matrix, the market
+  and state tables, the FAQ rows, the related-posts lists and `prose-ledger`'s
+  tables and blockquotes all moved together.
+- **The sheet under the hero and the close.** `PageHero`, `VsHero` and
+  `CloseSection` carry `bg-sheet-grid`; the sections between them are the
+  plain sheet. `cn()` treats the two grid tiles as their own group, so a
+  section keeps its paper under the grid.
+- **Figures and numerals in the text face.** Step numbers (`StepList`, the
+  `/vs` ordered lists) and the posts' tables are `font-figure`; Geist Mono
+  stays for metadata (a 404's code, a case study's kind).
+- **The calculator is an instrument.** `ToolFrame` is a card (white, 1px
+  line, 12px, the rest shadow); `ToolResult`'s label sits on the 2px rule
+  with the key figure under it in the display face; `ToolFormula` sits
+  between two lines. The same frame renders chrome-free in the `/embed`
+  iframes.
+- **The key figure's stroke draws in.** `LedgerTotal` lost the ledger's
+  double rule; `draw` now animates the highlight stroke's width once
+  (`highlight-stroke-draw`), the hero's and the memo's one motion.
+- **404 and error pages** are the sheet grid, a Geist Mono code, the display
+  heading, the 48px search field, a primary control and a ruled list of
+  places to go. `global-error` keeps inline styles (no stylesheet loads
+  there) in the Blueprint hex.
+- **Case studies** (when one is publishable) are a ruled article block, not
+  a rounded card with uppercase labels.
+
 ## The app (Operate mode)
 
 The app reads the same tokens: the sheet, graphite, cobalt, white cards with
@@ -545,6 +579,14 @@ so marketing and app are one product.
   assumptions is a proposal (the form's DOM and react-hook-form registration
   would have to move); the step rail keeps its post-run-only rule (the hero
   and the source chips carry input-phase wayfinding, per its code comment).
+- 2026-10-20, Phase 5 build notes: the eight unreleased calculator pages
+  (`UNRELEASED_UNDERWRITING_CALCULATORS`) and the flagged BRRRR calculator
+  redirect or stay dark, so their page-local markup is left for the release
+  that ships them; `/for-agents` redirects to `/pricing` until Agent Pro's
+  price is configured, so a local build needs
+  `STRIPE_PRICE_AGENT_PRO_MONTHLY` to render it; the product shots in
+  `public/product/*` still show the ledger-era analyzer until Phase 7
+  regenerates them.
 
 ## Do and don't
 

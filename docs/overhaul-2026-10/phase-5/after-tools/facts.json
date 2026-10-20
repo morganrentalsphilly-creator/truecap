@@ -1,0 +1,138 @@
+[
+  {
+    "label": "phase-5",
+    "page": "/tools/1-percent-rule-calculator",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/tools/1-percent-rule-calculator",
+    "title": "Free 1% Rule Calculator — Instant Pass/Fail Screen | TrueCap",
+    "h1": "1% rule calculator",
+    "overflowX": false,
+    "docHeight": 8101,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/embed/1-percent-rule-calculator",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/embed/1-percent-rule-calculator",
+    "title": "1% Rule Calculator — Embed | TrueCap",
+    "h1": "1% Rule Calculator",
+    "overflowX": false,
+    "docHeight": 887,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 0
+  },
+  {
+    "label": "phase-5",
+    "page": "/tools/1-percent-rule-calculator",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/tools/1-percent-rule-calculator",
+    "title": "Free 1% Rule Calculator — Instant Pass/Fail Screen | TrueCap",
+    "h1": "1% rule calculator",
+    "overflowX": false,
+    "docHeight": 6462,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/embed/1-percent-rule-calculator",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/embed/1-percent-rule-calculator",
+    "title": "1% Rule Calculator — Embed | TrueCap",
+    "h1": "1% Rule Calculator",
+    "overflowX": false,
+    "docHeight": 1024,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 0
+  },
+  {
+    "label": "phase-5",
+    "page": "/tools/1-percent-rule-calculator",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/tools/1-percent-rule-calculator",
+    "title": "Free 1% Rule Calculator — Instant Pass/Fail Screen | TrueCap",
+    "h1": "1% rule calculator",
+    "overflowX": false,
+    "docHeight": 5855,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/embed/1-percent-rule-calculator",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/embed/1-percent-rule-calculator",
+    "title": "1% Rule Calculator — Embed | TrueCap",
+    "h1": "1% Rule Calculator",
+    "overflowX": false,
+    "docHeight": 760,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 0
+  },
+  {
+    "label": "phase-5",
+    "page": "/tools/1-percent-rule-calculator",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/tools/1-percent-rule-calculator",
+    "title": "Free 1% Rule Calculator — Instant Pass/Fail Screen | TrueCap",
+    "h1": "1% rule calculator",
+    "overflowX": false,
+    "docHeight": 5637,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "phase-5",
+    "page": "/embed/1-percent-rule-calculator",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/embed/1-percent-rule-calculator",
+    "title": "1% Rule Calculator — Embed | TrueCap",
+    "h1": "1% Rule Calculator",
+    "overflowX": false,
+    "docHeight": 900,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 0
+  }
+]

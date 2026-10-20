@@ -1,0 +1,23 @@
+[
+  {
+    "antipattern": "tight-leading",
+    "name": "Tight line height",
+    "description": "Line height below 1.3x the font size makes multi-line text hard to read. Use 1.5 to 1.7 for body text so lines have room to breathe.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "http://127.0.0.1:3100/vs/avail",
+    "line": 0,
+    "snippet": "line-height 1.20x (need >=1.3)"
+  },
+  {
+    "antipattern": "em-dash-overuse",
+    "name": "Em-dash overuse",
+    "description": "Em-dash saturation in body copy is an AI cadence tell. Advisory only: humans use em-dashes legitimately, so this fires only on saturation — at least 8 em-dashes (— or --) at a density near one per 500 characters of body text — never on a long article that uses a few. Prefer commas, colons, periods, or parentheses.",
+    "severity": "advisory",
+    "category": "slop",
+    "file": "http://127.0.0.1:3100/vs/avail",
+    "line": 0,
+    "snippet": "21 em-dashes in body text",
+    "advisory": true
+  }
+]
