@@ -61,8 +61,8 @@ export function PlanCard({
   audience: ReactNode;
   /** A sentence under the audience line: what the plan is for. */
   lead?: ReactNode;
-  /** Already formatted from the catalog or the Stripe display price. */
-  price: string;
+  /** Already formatted from the catalog or the Stripe display price, or an AnimatedNumber of it. */
+  price: ReactNode;
   /** "/mo", or nothing for Free. */
   period?: string;
   /** The line under the price: the annual charge, or what free means. */

@@ -16,11 +16,12 @@ import NumberFlow from "@number-flow/react";
 import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
-type NumberKind = "usd" | "usdPerMonth" | "ratio" | "percent" | "integer";
+type NumberKind = "usd" | "usdCents" | "usdPerMonth" | "ratio" | "percent" | "integer";
 type Format = NonNullable<ComponentProps<typeof NumberFlow>["format"]>;
 
 const FORMAT: Record<NumberKind, Format> = {
   usd: { style: "currency", currency: "USD", maximumFractionDigits: 0 },
+  usdCents: { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 },
   usdPerMonth: { style: "currency", currency: "USD", maximumFractionDigits: 0 },
   ratio: { minimumFractionDigits: 2, maximumFractionDigits: 2 },
   percent: { minimumFractionDigits: 1, maximumFractionDigits: 1 },

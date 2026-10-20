@@ -121,10 +121,13 @@ function newToken() {
 
 export function HeroAddressForm({
   placement = "hero",
+  tone = "light",
   className,
 }: {
   /** "hero": the first screen. "close": the same form at the page's end. */
   placement?: "hero" | "close";
+  /** "dark": the form sits on the navy band (the close), so the button is white on cobalt text. */
+  tone?: "light" | "dark";
   className?: string;
 } = {}) {
   const isHero = placement === "hero";
@@ -310,7 +313,10 @@ export function HeroAddressForm({
           type="submit"
           aria-busy={opening || undefined}
           className={cn(
-            "inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-md bg-primary px-5 text-base font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-deep",
+            "inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-md px-5 text-base font-semibold transition-colors duration-150",
+            tone === "dark"
+              ? "bg-card text-primary hover:bg-primary-wash"
+              : "bg-primary text-primary-foreground hover:bg-primary-deep",
             isHero && "lg:px-4 xl:px-5",
           )}
         >
@@ -328,7 +334,7 @@ export function HeroAddressForm({
       {isHero ? (
         <p
           data-hero-listing-expectation=""
-          className="mt-2 text-pretty text-sm text-muted-foreground"
+          className="mt-2 max-w-[62ch] text-pretty text-sm text-muted-foreground"
         >
           {HERO_LISTING_EXPECTATION}
         </p>
