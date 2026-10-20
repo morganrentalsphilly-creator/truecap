@@ -1,0 +1,195 @@
+{
+  "url": "http://127.0.0.1:3100/",
+  "measuredAt": "2026-10-20T15:18:46.960Z",
+  "rawHtmlBytes": 293595,
+  "firstPartyJavaScript": {
+    "requestCount": 38,
+    "transferBytes": 427954,
+    "resources": [
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1123-f55ab395859d7135.js",
+        "transferBytes": 15208
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1139-1abe0434c4676f84.js",
+        "transferBytes": 4316
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1652.bce336aaaf7df3c1.js",
+        "transferBytes": 4975
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1766-2627714d3dee370e.js",
+        "transferBytes": 5337
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1820-6bbab6abb2e86315.js",
+        "transferBytes": 4418
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/2128-0a3dace5fef87386.js",
+        "transferBytes": 6709
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/2311-a04ea61f99d8ee1d.js",
+        "transferBytes": 2983
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/2503-0809c2e051532795.js",
+        "transferBytes": 4432
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/2731-44e83235284a7386.js",
+        "transferBytes": 9889
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/3145-30980600b32c3a8c.js",
+        "transferBytes": 6364
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/3794-4bc5594f4938d67d.js",
+        "transferBytes": 70079
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/3977-9d76dab003152531.js",
+        "transferBytes": 5758
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/4490-9e78b2d702e28d05.js",
+        "transferBytes": 10426
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/4527-49424ed3d9921153.js",
+        "transferBytes": 6170
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/4bd1b696-8a4ab4fdf0ae305a.js",
+        "transferBytes": 65065
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/5048.b96f4051dc1092ea.js",
+        "transferBytes": 72134
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/5802-0576cd1c40a2d011.js",
+        "transferBytes": 13169
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/5d015edf.7c0ac124fa9565a7.js",
+        "transferBytes": 1945
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/6183-79893f817ca57da6.js",
+        "transferBytes": 5559
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/6415-0e54274b83887358.js",
+        "transferBytes": 4867
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/6917-d5b2f8927bb2529f.js",
+        "transferBytes": 10255
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/7979-994cff81f054c7bf.js",
+        "transferBytes": 8031
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/8409-29c10ce4e9f7dc38.js",
+        "transferBytes": 10517
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/8437-3cc78015a4392d59.js",
+        "transferBytes": 7226
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/8500-01a63dafd809e317.js",
+        "transferBytes": 5285
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/9003-30d00ed9cb2c2d64.js",
+        "transferBytes": 13313
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/9483-caff0ba77a86bbd2.js",
+        "transferBytes": 9721
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/9673-5bb104471c563801.js",
+        "transferBytes": 3224
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/error-e35018401bfdca41.js",
+        "transferBytes": 3758
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/for-investors/page-f8b3a24a16561825.js",
+        "transferBytes": 3563
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/global-error-da98ec251d381320.js",
+        "transferBytes": 2871
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/layout-984d471da9228b4c.js",
+        "transferBytes": 9086
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/not-found-ac1f0032d588e417.js",
+        "transferBytes": 2472
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/page-f0aa23f3504ce5c4.js",
+        "transferBytes": 7612
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/privacy/page-515c0052c97e5f12.js",
+        "transferBytes": 2420
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/main-app-6a4a29fb74eaaabe.js",
+        "transferBytes": 4564
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/webpack-845131b0e11f6fab.js",
+        "transferBytes": 4233
+      },
+      {
+        "url": "http://127.0.0.1:3100/_vercel/insights/script.js",
+        "transferBytes": 0
+      }
+    ]
+  },
+  "hydration": {
+    "analyzerReadyMs": 15113,
+    "waitAfterDomContentLoadedMs": 15003,
+    "mainThreadTaskDurationMs": 212,
+    "scriptDurationMs": 63,
+    "longTasks": {
+      "count": 0,
+      "totalDurationMs": 0
+    }
+  },
+  "coreWebVitals": {
+    "firstContentfulPaintMs": 64,
+    "lcpMs": 64,
+    "cls": 0.00007
+  },
+  "mobileRendering": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "horizontalOverflowPx": 0,
+    "heroAddressEntryVisible": true,
+    "heroAddressEntryAboveFold": true,
+    "heroAddressEntryAcceptsText": true
+  },
+  "accessibility": {
+    "seriousOrCriticalViolationCount": 0,
+    "violations": []
+  },
+  "calculatorReady": false,
+  "blockedExternalOrigins": [],
+  "budgetFailures": []
+}
