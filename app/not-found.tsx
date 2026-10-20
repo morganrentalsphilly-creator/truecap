@@ -32,69 +32,95 @@ const GLOSSARY_TERM_COUNT = linkableGlossaryTerms(
 ).length;
 
 const POPULAR_PAGES = [
-  { href: "/tools", label: "Free calculators", blurb: "Mortgage, vacancy, rent-to-price, rehab, and cost screens." },
-  { href: "/blog", label: "Blog", blurb: "Deep dives on rental analysis + underwriting." },
-  { href: "/glossary", label: "Glossary", blurb: `Plain-English definitions for ${GLOSSARY_TERM_COUNT} terms.` },
-  { href: "/markets", label: "Market guides", blurb: "City-level rental market intel." },
+  {
+    href: "/tools",
+    label: "Free calculators",
+    blurb: "Mortgage, vacancy, rent-to-price, rehab, and cost screens.",
+  },
+  {
+    href: "/blog",
+    label: "Blog",
+    blurb: "Deep dives on rental analysis + underwriting.",
+  },
+  {
+    href: "/glossary",
+    label: "Glossary",
+    blurb: `Plain-English definitions for ${GLOSSARY_TERM_COUNT} terms.`,
+  },
+  {
+    href: "/markets",
+    label: "Market guides",
+    blurb: "City-level rental market intel.",
+  },
   { href: "/pricing", label: "Pricing", blurb: "Free + Pro plans." },
-  { href: "/analyze", label: "Run a free analysis", blurb: "An address, the asking price and a bedroom count: a first-pass underwrite." },
+  {
+    href: "/analyze",
+    label: "Run a free analysis",
+    blurb:
+      "An address, the asking price and a bedroom count: a first-pass underwrite.",
+  },
 ];
 
 export default function NotFound() {
   return (
-    <main id="main" className="min-h-screen bg-background bg-sheet-grid px-4 pt-16 pb-12 sm:pt-24">
+    <main id="main" className="min-h-screen bg-background">
       {/* Client-only tracker — captures the requested pathname to Sentry
           so we can triage broken inbound links in operational dashboards
           instead of discovering them weeks later via analytics. */}
       <NotFoundTracker />
-      <div className="mx-auto w-full max-w-2xl">
-        <p className="font-mono text-xs text-muted-foreground">404</p>
-        <h1 className="mt-2 font-display text-balance text-display-sm text-foreground">
-          404 — page not found
-        </h1>
-        <p className="mt-4 max-w-[52ch] text-pretty text-lg text-muted-foreground">
-          The page you&apos;re looking for doesn&apos;t exist or has moved.
-          Search the site or jump to one of the most-visited sections below.
-        </p>
+      {/* The hero on the sheet grid, as every page hero; the places to go
+          follow on the plain sheet. */}
+      <section className="border-b border-border bg-sheet-grid px-4 pt-16 pb-12 sm:pt-24 sm:pb-16">
+        <div className="mx-auto w-full max-w-2xl">
+          <p className="font-mono text-xs text-muted-foreground">404</p>
+          <h1 className="mt-2 font-display text-balance text-display-sm text-foreground">
+            404 — page not found
+          </h1>
+          <p className="mt-4 max-w-[52ch] text-pretty text-lg text-muted-foreground">
+            The page you&apos;re looking for doesn&apos;t exist or has moved.
+            Search the site or jump to one of the most-visited sections below.
+          </p>
 
-        {/* Site search — the same /search route that powers Google's
+          {/* Site search — the same /search route that powers Google's
             sitelinks search box markup. Pure GET form, no JavaScript
             needed for it to work (great for crawlers + accessibility). */}
-        <form
-          action="/search"
-          method="get"
-          role="search"
-          aria-label="Search TrueCap"
-          className="relative mt-6 max-w-lg"
-        >
-          <SearchIcon
-            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <input
-            type="search"
-            name="q"
-            placeholder="Search blog, glossary, calculators…"
-            aria-label="Search the site"
-            // 16px: iOS Safari zooms the page when a focused field is smaller.
-            className="h-12 w-full rounded-md border border-input bg-field pr-4 pl-10 text-base text-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          />
-        </form>
-
-        {/* Primary CTA — the conversion action. */}
-        <div className="mt-5">
-          <Link
-            href="/analyze"
-            prefetch={false}
-            className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-[background-color] duration-150 hover:bg-primary-deep"
+          <form
+            action="/search"
+            method="get"
+            role="search"
+            aria-label="Search TrueCap"
+            className="relative mt-6 max-w-lg"
           >
-            Run a free analysis
-          </Link>
-        </div>
+            <SearchIcon
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              name="q"
+              placeholder="Search blog, glossary, calculators…"
+              aria-label="Search the site"
+              // 16px: iOS Safari zooms the page when a focused field is smaller.
+              className="h-12 w-full rounded-md border border-input bg-field pr-4 pl-10 text-base text-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            />
+          </form>
 
+          {/* Primary CTA — the conversion action. */}
+          <div className="mt-5">
+            <Link
+              href="/analyze"
+              prefetch={false}
+              className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-[background-color] duration-150 hover:bg-primary-deep"
+            >
+              Run a free analysis
+            </Link>
+          </div>
+        </div>
+      </section>
+      <div className="mx-auto w-full max-w-2xl px-4 py-12 sm:py-16">
         {/* Popular pages — a ruled list. Covers every major content area
             so any user, regardless of intent, has a relevant next step. */}
-        <ul className="mt-12 border-t border-border">
+        <ul className="border-t border-border">
           {POPULAR_PAGES.map((page) => (
             <li key={page.href} className="border-b border-rule-soft">
               <Link
