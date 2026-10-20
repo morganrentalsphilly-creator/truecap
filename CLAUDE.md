@@ -414,8 +414,9 @@ is a few lines of configuration (headline, tagline, slug) handed to
 a shared template in `lib/og/`: `blog-og-template.tsx` (73 posts),
 `vs-og-template.tsx` (38 comparison pages), `tool-og-template.tsx`
 (11 tool pages and the /tools hub) and `persona-og-template.tsx` (/analyze, /pricing and
-the four persona pages). Every template draws on one frame,
-`lib/og/newsprint.tsx` (Newsprint paper, Archivo, DM Mono).
+the five persona pages). Every template draws on one frame,
+`lib/og/newsprint.tsx` (its historical name; it draws the Blueprint sheet and
+grid in Hanken Grotesk and Geist Mono, the tokens as hex constants).
 
 The share links' card is a route handler, `app/og/share/route.tsx`: one
 static, deal-free card for `/s/[token]` and the legacy `/d/[encoded]`,
