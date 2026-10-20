@@ -90,7 +90,7 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
       }
       style={{ background: "var(--gradient-sidebar)" }}
     >
-      <div className="px-6 py-6 border-b border-sidebar-border/60">
+      <div className="border-b border-navy-line px-6 py-6">
         <AppLogo
           onDark
           className="max-w-[150px]"
