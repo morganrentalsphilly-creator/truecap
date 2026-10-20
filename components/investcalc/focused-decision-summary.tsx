@@ -20,6 +20,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShareLinkButton } from "@/components/investcalc/share-link-button";
 import { GlossaryTip } from "@/components/investcalc/glossary-tip";
+import { PriceTrack } from "@/components/investcalc/price-track";
+import { AnimatedNumber } from "@/components/motion/animated-number";
 import {
   isTrueCapSyntheticSampleAddress,
   SAMPLE_DEAL_DISPLAY,
@@ -225,10 +227,11 @@ export function validateTargetDraft(
 function TargetFit({ meets, target }: { meets: boolean; target: string }) {
   return (
     <p
-      className={`mt-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-3xs font-semibold ${
-        meets ? "bg-positive-light text-positive" : "bg-caution-light text-caution-text"
+      className={`mt-1 inline-flex items-center gap-1.5 text-xs font-medium ${
+        meets ? "text-positive" : "text-caution-text"
       }`}
     >
+      <span aria-hidden className="size-1.5 rounded-full bg-current" />
       {meets ? "Meets" : "Misses"} {target}
     </p>
   );
@@ -256,14 +259,14 @@ function FirstYearSnapshot({
   // the band. Colour follows the shared tone rules in lib/financial-presentation.
   return (
     <div
-      className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2"
+      className="grid grid-cols-1 gap-x-6 gap-y-3 min-[280px]:grid-cols-2"
       // role="group": an aria-label on a role-less div is dropped by
       // assistive tech (ARIA 1.2 forbids naming a generic element).
       role="group"
       aria-label="First-year investment snapshot"
     >
-      <div className="rounded-xl border border-primary/20 bg-[var(--brand-blue-light)] p-3">
-        <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+      <div className="border-t border-border pt-2" data-reveal-step="4">
+        <p className="text-xs font-medium text-muted-foreground">
           <GlossaryTip term="cashFlow" className="!no-underline">
             {isScenarioActive
               ? "Base cash flow after reserve"
@@ -271,12 +274,17 @@ function FirstYearSnapshot({
           </GlossaryTip>
         </p>
         <p
-          className={`mt-1 font-mono text-xl font-extrabold tabular-nums ${
+          className={`mt-1 font-display text-xl sm:text-2xl ${
             METRIC_TONE_TEXT_CLASS[cashFlowTone(result.netCashFlow)] ??
             "text-foreground"
           }`}
         >
-          {money(result.netCashFlow)}/mo
+          <AnimatedNumber
+            value={result.netCashFlow}
+            kind="usdPerMonth"
+            rollIn
+            rollInDelayMs={600}
+          />
         </p>
         {typeof cashFlowTarget === "number" ? (
           <TargetFit
@@ -285,17 +293,26 @@ function FirstYearSnapshot({
           />
         ) : null}
       </div>
-      <div className="rounded-xl border border-border bg-muted/30 p-3">
-        <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+      <div className="border-t border-border pt-2" data-reveal-step="4">
+        <p className="text-xs font-medium text-muted-foreground">
           <GlossaryTip term="dscr" className="!no-underline">
             Model DSCR
           </GlossaryTip>
         </p>
-        <p className="mt-1 font-mono text-xl font-extrabold tabular-nums text-foreground">
-          {dscrApplies ? result.dscr.toFixed(2) : NO_DEBT_SERVICE_DSCR_LABEL}
+        <p className="mt-1 font-display text-xl text-foreground sm:text-2xl">
+          {dscrApplies ? (
+            <AnimatedNumber
+              value={result.dscr}
+              kind="ratio"
+              rollIn
+              rollInDelayMs={600}
+            />
+          ) : (
+            NO_DEBT_SERVICE_DSCR_LABEL
+          )}
         </p>
         {!dscrApplies ? (
-          <p className="mt-1 text-3xs text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground">
             No modeled debt service
           </p>
         ) : typeof dscrTarget === "number" ? (
@@ -849,6 +866,14 @@ export function FocusedDecisionSummary({
                 : rangePreview
                   ? "No feasible downside case"
                   : "No feasible range";
+  // The headline prints money(ceiling) in exactly one branch: the exact
+  // solve, served and shown. Only then does the figure roll in and the price
+  // track draw; every other state (loading, range, error, no criteria) is a
+  // sentence and stays text.
+  const exactCeilingValue =
+    offerCeiling && offerCeilingHeadline === money(offerCeiling.ceiling)
+      ? offerCeiling.ceiling
+      : null;
   const offerCeilingAnnouncement = `${isScenarioActive ? "Base " : ""}Offer Ceiling: ${offerCeilingHeadline}.${
     targetAdopted && !targetBlocked ? ` Targets: ${targetLabel}.` : ""
   }`;
@@ -856,7 +881,7 @@ export function FocusedDecisionSummary({
   return (
     <section
       aria-labelledby="decision-summary-title"
-      className="rounded-2xl border-2 border-primary/30 bg-card p-5 shadow-[0_18px_50px_rgba(15,23,42,0.10)] max-[250px]:p-3 sm:p-6"
+      className="rounded-lg border border-border bg-card p-5 shadow-md max-[250px]:p-3 sm:p-6"
     >
       <div className="space-y-4">
         <div className="min-w-0">
@@ -865,14 +890,15 @@ export function FocusedDecisionSummary({
               {displayAddress}
             </p>
             {isScenarioActive ? (
-              <span className="rounded-full border border-border bg-muted px-2 py-0.5 text-3xs font-bold uppercase tracking-wider text-foreground">
+              <span className="rounded-sm border border-border px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
                 Base analysis
               </span>
             ) : null}
           </div>
           <h2
             id="decision-summary-title"
-            className="mt-1 text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
+            className="mt-1 font-display text-balance text-2xl text-foreground sm:text-3xl"
+            data-reveal-step="1"
           >
             {decisionLabel}
           </h2>
@@ -889,7 +915,10 @@ export function FocusedDecisionSummary({
           />
         ) : null}
 
-        <div className="rounded-xl border border-primary/25 bg-[var(--brand-blue-light)] p-4">
+        <div
+          className="border-t-2 border-foreground pt-3"
+          data-reveal-step="2"
+        >
           <span
             className="sr-only"
             role="status"
@@ -898,16 +927,43 @@ export function FocusedDecisionSummary({
           >
             {offerCeilingAnnouncement}
           </span>
-          <p className="text-2xs font-extrabold uppercase tracking-widest text-[var(--brand-blue-text)]">
+          <p className="text-sm font-semibold text-foreground">
             {!targetAdopted
               ? "Optional decision criteria"
               : isScenarioActive
                 ? "Base Offer Ceiling"
                 : "Offer Ceiling"}
           </p>
-          <p className="mt-1 font-mono text-2xl font-extrabold tabular-nums text-primary [overflow-wrap:anywhere] sm:text-3xl">
-            {offerCeilingHeadline}
-          </p>
+          {exactCeilingValue != null ? (
+            <p className="mt-1 font-display text-3xl text-foreground [overflow-wrap:anywhere] sm:text-key-sm lg:text-key">
+              <AnimatedNumber
+                value={exactCeilingValue}
+                kind="usd"
+                rollIn
+                rollInDelayMs={300}
+                className="highlight-stroke"
+              />
+            </p>
+          ) : (
+            <p
+              className={
+                offerCeilingHeadlineIsRange
+                  ? "mt-1 font-display font-figure text-2xl text-foreground [overflow-wrap:anywhere] sm:text-3xl"
+                  : "mt-1 font-display text-2xl text-muted-foreground [overflow-wrap:anywhere]"
+              }
+            >
+              {offerCeilingHeadline}
+            </p>
+          )}
+          {exactCeilingValue != null && Number(values.purchasePrice) > 0 ? (
+            <div className="mt-2" data-reveal-step="3">
+              <PriceTrack
+                asking={Number(values.purchasePrice)}
+                ceiling={exactCeilingValue}
+                compact
+              />
+            </div>
+          ) : null}
           {targetBlocked ? (
             <p className="mt-1 text-xs font-semibold text-foreground">
               {targetResolutionMessage}
@@ -919,13 +975,13 @@ export function FocusedDecisionSummary({
             </p>
           ) : null}
           {advocacyContractEnabled && targetDeltaNotice ? (
-            <p className="mt-2 rounded-md border border-primary/20 bg-background/70 px-2 py-1.5 text-2xs leading-relaxed text-foreground">
+            <p className="mt-2 border-l-2 border-primary pl-2 text-2xs leading-relaxed text-foreground">
               {targetDeltaNotice.message} This comparison is session-only; Save
               to record the current criteria with the analysis.
             </p>
           ) : null}
           {offerCeilingError && offerCeilingErrorCode === "RATE_LIMITED" ? (
-            <p className="mt-2 rounded-md border border-border bg-muted/40 px-2 py-1.5 text-2xs leading-relaxed text-muted-foreground">
+            <p className="mt-2 border-l-2 border-border pl-2 text-2xs leading-relaxed text-muted-foreground">
               You&apos;ve reached the hourly limit for exact ceiling solves.
               It resets on its own — no need to retry; the rest of this
               analysis is unaffected.
@@ -934,7 +990,7 @@ export function FocusedDecisionSummary({
             <button
               type="button"
               onClick={onRetryOfferCeiling}
-              className="mt-2 inline-flex min-h-11 items-center rounded-lg border border-primary/30 px-3 text-xs font-bold text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="mt-2 inline-flex min-h-11 items-center rounded-md border border-primary/40 px-3 text-xs font-semibold text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               Retry Offer Ceiling
             </button>
@@ -963,9 +1019,9 @@ export function FocusedDecisionSummary({
           !offerCeilingError ? (
             <div
               data-offer-ceiling-reveal=""
-              className="mt-3 rounded-lg border border-primary/30 bg-background p-3"
+              className="mt-3 rounded-md border border-border bg-muted/30 p-3"
             >
-              <p className="text-sm font-bold text-foreground">
+              <p className="text-sm font-semibold text-foreground">
                 {rangePreview.downsideFeasible &&
                 rangePreview.lower != null &&
                 Number(values.purchasePrice) > rangePreview.upper
@@ -986,15 +1042,15 @@ export function FocusedDecisionSummary({
                 }}
                 disabled={resultActionsBlocked}
                 title={resultActionsBlockedReason}
-                className="mt-2 h-auto min-h-11 w-full gap-2 whitespace-normal rounded-xl py-2 text-center leading-tight sm:w-auto"
+                className="mt-2 h-auto min-h-11 w-full gap-2 whitespace-normal rounded-md py-2 text-center leading-tight sm:w-auto"
               >
                 <LockKeyhole className="size-4" aria-hidden />
                 Create a free account to reveal it
               </Button>
             </div>
           ) : null}
-          <details className="group mt-2 border-t border-primary/15 pt-1">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg text-xs font-semibold text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
+          <details className="group tc-accordion mt-2 border-t border-border pt-1">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-md text-xs font-semibold text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
               How this ceiling was calculated
               <ChevronDown
                 aria-hidden
@@ -1119,7 +1175,7 @@ export function FocusedDecisionSummary({
             // 320-639px window renders this grid 2-up with ~145px cells,
             // and the nowrap "Cancel target edits" state ran ~23px past
             // the button border on each side.
-            className="h-auto min-h-11 w-full gap-2 whitespace-normal rounded-xl py-2 text-center leading-tight sm:h-11 sm:w-auto sm:whitespace-nowrap sm:py-0"
+            className="h-auto min-h-11 w-full gap-2 whitespace-normal rounded-md py-2 text-center leading-tight sm:h-11 sm:w-auto sm:whitespace-nowrap sm:py-0"
           >
             <SlidersHorizontal className="size-4" aria-hidden />
             {tuneOpen
@@ -1138,7 +1194,7 @@ export function FocusedDecisionSummary({
             onClick={onUpgrade}
             // The conversion CTA crossed its own border below ~388px as a
             // nowrap run; it wraps on phones like its siblings now.
-            className="h-auto min-h-11 w-full gap-2 whitespace-normal rounded-xl py-2 text-center leading-tight sm:h-11 sm:w-auto sm:whitespace-nowrap sm:py-0"
+            className="h-auto min-h-11 w-full gap-2 whitespace-normal rounded-md py-2 text-center leading-tight sm:h-11 sm:w-auto sm:whitespace-nowrap sm:py-0"
           >
             <LockKeyhole className="size-4" aria-hidden />
             Unlock target price
@@ -1152,7 +1208,7 @@ export function FocusedDecisionSummary({
           title={resultActionsBlockedReason}
           // The old max-[250px] fallback could never fire: the grid is
           // 2-up from 320px, and that whole window needed the wrap.
-          className="h-auto min-h-11 w-full gap-2 whitespace-normal rounded-xl py-2 text-center leading-tight sm:h-11 sm:w-auto sm:whitespace-nowrap sm:py-0"
+          className="h-auto min-h-11 w-full gap-2 whitespace-normal rounded-md py-2 text-center leading-tight sm:h-11 sm:w-auto sm:whitespace-nowrap sm:py-0"
         >
           <Edit3 className="size-4" aria-hidden />
           Edit assumptions
@@ -1166,7 +1222,7 @@ export function FocusedDecisionSummary({
             resultActionsBlockedReason ??
             (isSaveLocked ? saveLockedHint : undefined)
           }
-          className="h-11 w-full gap-2 rounded-xl max-[250px]:h-auto max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight sm:w-auto"
+          className="h-11 w-full gap-2 rounded-md max-[250px]:h-auto max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight sm:w-auto"
         >
           {isSaving ? (
             <Loader2 className="size-4 animate-spin" aria-hidden />
@@ -1175,7 +1231,7 @@ export function FocusedDecisionSummary({
           )}
           {isSaving ? "Saving…" : isSaved ? "Saved" : "Save"}
           {isSaveLocked ? (
-            <span className="ml-0.5 rounded-full bg-[var(--brand-orange)] px-1.5 py-0.5 text-3xs font-bold uppercase text-white">
+            <span className="ml-0.5 rounded-sm bg-[var(--brand-orange)] px-1.5 py-0.5 font-mono text-2xs font-semibold text-white">
               PRO
             </span>
           ) : null}
@@ -1185,7 +1241,7 @@ export function FocusedDecisionSummary({
           variant="outline"
           onClick={onAnalyzeAnotherLikeThis}
           disabled={resultActionsBlocked}
-          className="h-auto min-h-11 w-full gap-2 whitespace-normal rounded-xl py-2 text-center leading-tight sm:h-11 sm:w-auto sm:whitespace-nowrap sm:py-0"
+          className="h-auto min-h-11 w-full gap-2 whitespace-normal rounded-md py-2 text-center leading-tight sm:h-11 sm:w-auto sm:whitespace-nowrap sm:py-0"
           title={
             resultActionsBlockedReason ??
             "Keep reusable financing and operating assumptions, then enter the next property"
@@ -1213,7 +1269,7 @@ export function FocusedDecisionSummary({
           id={targetEditorId}
           hidden={!tuneOpen}
           data-offer-criteria-editor=""
-          className="mt-3 scroll-mt-24 rounded-xl border border-primary/25 bg-primary/[0.035] p-4"
+          className="mt-3 scroll-mt-24 rounded-md border border-border bg-muted/20 p-4"
         >
           <fieldset>
             <legend className="text-sm font-bold text-foreground">
@@ -1299,7 +1355,7 @@ export function FocusedDecisionSummary({
                 disabled={
                   targetDraftInvalid || (targetAdopted && !targetDraftDirty)
                 }
-                className="min-h-11 rounded-xl"
+                className="min-h-11 rounded-md"
               >
                 {targetAdopted ? "Update criteria" : "Apply criteria"}
               </Button>
@@ -1310,7 +1366,7 @@ export function FocusedDecisionSummary({
                   resetTargetDraft();
                   setTuneOpen(false);
                 }}
-                className="min-h-11 rounded-xl"
+                className="min-h-11 rounded-md"
               >
                 Cancel
               </Button>
@@ -1320,13 +1376,14 @@ export function FocusedDecisionSummary({
       ) : null}
 
       <div
-        className="mt-3 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5"
+        className="mt-3 border-l-2 border-primary py-0.5 pl-3"
         data-result-next-action=""
+        data-reveal-step="5"
       >
-        <p className="text-3xs font-bold uppercase tracking-widest text-foreground/75">
+        <p className="text-xs font-medium text-foreground/75">
           Best next step
         </p>
-        <p className="mt-1 text-sm font-extrabold text-foreground">
+        <p className="mt-0.5 text-sm font-semibold text-foreground">
           {resolvedNextAction?.label ?? "Verify the material assumptions"}
         </p>
         {resolvedNextAction?.reason ? (
@@ -1350,8 +1407,8 @@ export function FocusedDecisionSummary({
       ) : null}
 
       {viabilityLabels.length > 0 ? (
-        <div className="mt-4 rounded-xl border border-primary/20 bg-primary/5 p-3">
-          <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+        <div className="mt-4 border-l-2 border-primary py-0.5 pl-3">
+          <p className="text-xs font-medium text-muted-foreground">
             Fastest paths to meet your targets
           </p>
           <ol className="mt-2 grid gap-1 text-sm font-semibold text-foreground sm:grid-cols-2">
@@ -1366,8 +1423,8 @@ export function FocusedDecisionSummary({
       ) : null}
 
       {!advocacyContractEnabled && sensitivityLabels.length > 0 ? (
-        <div className="mt-4 rounded-xl border border-caution/40 bg-caution-light p-3">
-          <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+        <div className="mt-4 border-l-2 border-caution py-0.5 pl-3">
+          <p className="text-xs font-medium text-muted-foreground">
             {targetAdopted
               ? "Two assumptions most likely to move the decision"
               : "What can move the result"}
@@ -1383,7 +1440,7 @@ export function FocusedDecisionSummary({
         </div>
       ) : null}
 
-      <details className="group mt-2 rounded-xl border border-border bg-muted/20 px-2 py-1">
+      <details className="group tc-accordion mt-2 border-t border-border py-1">
         <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
           Decision context and key numbers
           <ChevronDown
@@ -1397,39 +1454,39 @@ export function FocusedDecisionSummary({
             role="group"
             aria-label="Secondary first-year metrics"
           >
-            <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+            <div className="border-t border-border pt-2">
+              <p className="text-xs font-medium text-muted-foreground">
                 Cash to close
               </p>
-              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
+              <p className="mt-1 font-display font-figure text-lg text-foreground">
                 {money(result.totalCashRequired)}
               </p>
             </div>
-            <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+            <div className="border-t border-border pt-2">
+              <p className="text-xs font-medium text-muted-foreground">
                 Annual NOI
               </p>
-              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
+              <p className="mt-1 font-display font-figure text-lg text-foreground">
                 {money(result.noiAnnual)}
               </p>
             </div>
-            <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+            <div className="border-t border-border pt-2">
+              <p className="text-xs font-medium text-muted-foreground">
                 <GlossaryTip term="capRate" className="!no-underline">
                   Cap rate
                 </GlossaryTip>
               </p>
-              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
+              <p className="mt-1 font-display font-figure text-lg text-foreground">
                 {formatRatioPct(result.capRate)}
               </p>
             </div>
-            <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+            <div className="border-t border-border pt-2">
+              <p className="text-xs font-medium text-muted-foreground">
                 <GlossaryTip term="coc" className="!no-underline">
                   Cash-on-cash
                 </GlossaryTip>
               </p>
-              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
+              <p className="mt-1 font-display font-figure text-lg text-foreground">
                 {result.totalCashRequired > 0
                   ? formatSignedPct(result.cocReturn)
                   : "N/A"}
@@ -1440,8 +1497,8 @@ export function FocusedDecisionSummary({
           <div
             className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2 lg:grid-cols-3"
           >
-            <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+            <div className="border-t border-border pt-2">
+              <p className="text-xs font-medium text-muted-foreground">
                 Targets
               </p>
               <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -1471,8 +1528,8 @@ export function FocusedDecisionSummary({
               ) : null}
             </div>
             {!advocacyContractEnabled ? (
-              <div className="rounded-xl border border-border bg-background p-3">
-                <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+              <div className="border-t border-border pt-2">
+                <p className="text-xs font-medium text-muted-foreground">
                   Assumption status
                 </p>
                 <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -1486,8 +1543,8 @@ export function FocusedDecisionSummary({
               </div>
             ) : null}
             {advocacyContractEnabled ? (
-              <div className="rounded-xl border border-border bg-background p-3">
-                <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+              <div className="border-t border-border pt-2">
+                <p className="text-xs font-medium text-muted-foreground">
                   User decision
                 </p>
                 <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -1498,8 +1555,8 @@ export function FocusedDecisionSummary({
                 </p>
               </div>
             ) : null}
-            <div className="rounded-xl border border-border bg-background p-3">
-              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+            <div className="border-t border-border pt-2">
+              <p className="text-xs font-medium text-muted-foreground">
                 Margin of Safety
               </p>
               <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -1527,7 +1584,7 @@ export function FocusedDecisionSummary({
         </div>
       </details>
 
-      <details className="group mt-2 rounded-xl border border-border bg-muted/20 px-2 py-1">
+      <details className="group tc-accordion mt-2 border-t border-border py-1">
         <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
           More actions
           <ChevronDown
@@ -1546,7 +1603,7 @@ export function FocusedDecisionSummary({
             onClick={onExportPdf}
             disabled={resultActionsBlocked || isExportDisabled}
             title={resultActionsBlockedReason ?? exportHint}
-            className="h-11 gap-2 rounded-xl"
+            className="h-11 gap-2 rounded-md"
           >
             {isExporting ? (
               <Loader2 className="size-4 animate-spin" aria-hidden />
@@ -1569,7 +1626,7 @@ export function FocusedDecisionSummary({
             disabled={resultActionsBlocked}
             disabledReason={resultActionsBlockedReason}
             onPrepareAuth={onPrepareAuthShare}
-            className="h-11 rounded-xl px-4"
+            className="h-11 rounded-md px-4"
           />
           {savedDealId ? (
             resultActionsBlocked ? (
@@ -1578,7 +1635,7 @@ export function FocusedDecisionSummary({
                 variant="outline"
                 disabled
                 title={resultActionsBlockedReason}
-                className="h-11 gap-2 rounded-xl"
+                className="h-11 gap-2 rounded-md"
               >
                 <ListTodo className="size-4" aria-hidden />
                 Deal workspace
@@ -1587,7 +1644,7 @@ export function FocusedDecisionSummary({
               <Button
                 asChild
                 variant="outline"
-                className="h-11 gap-2 rounded-xl"
+                className="h-11 gap-2 rounded-md"
               >
                 <Link href={`/dashboard/saved-analyses/${savedDealId}`}>
                   <ListTodo className="size-4" aria-hidden />
@@ -1615,7 +1672,7 @@ export function FocusedDecisionSummary({
                     ? "Save this analysis and add it to the compare workspace."
                     : undefined
               }
-              className="min-h-11 gap-2 rounded-xl max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
+              className="min-h-11 gap-2 rounded-md max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
             >
               {isComparing ? (
                 <Loader2 className="size-4 animate-spin" aria-hidden />
@@ -1633,7 +1690,7 @@ export function FocusedDecisionSummary({
               onClick={onUpgrade}
               disabled={resultActionsBlocked}
               title={resultActionsBlockedReason}
-              className="min-h-11 gap-2 rounded-xl max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
+              className="min-h-11 gap-2 rounded-md max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
             >
               <ListTodo className="size-4" aria-hidden />
               Compare with Pro
@@ -1645,7 +1702,7 @@ export function FocusedDecisionSummary({
             onClick={() => void onNewAnalysis()}
             disabled={resultActionsBlocked}
             title={resultActionsBlockedReason}
-            className="min-h-11 gap-2 rounded-xl max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
+            className="min-h-11 gap-2 rounded-md max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
           >
             <Sparkles className="size-4" aria-hidden />
             New analysis
