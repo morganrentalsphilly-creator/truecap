@@ -197,12 +197,12 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1.5">
           <Sparkles className="size-3.5 text-primary" />
-          <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+          <span className="text-xs font-medium text-muted-foreground">
             What-if
           </span>
         </div>
         <span
-          className={`rounded-full px-2 py-0.5 text-3xs font-extrabold uppercase tracking-wider ${tierToneClass}`}
+          className={`rounded-full px-2 py-0.5 text-xs font-semibold ${tierToneClass}`}
           aria-live="polite"
           aria-atomic="true"
         >

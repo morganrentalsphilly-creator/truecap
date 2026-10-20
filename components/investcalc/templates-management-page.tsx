@@ -568,7 +568,7 @@ export function TemplatesManagementPage({
         <section className="rounded-2xl border border-border bg-gradient-to-br from-primary/5 via-card to-card p-4 sm:p-5">
           <div className="flex items-baseline gap-2">
             <Sparkles className="size-4 text-primary" />
-            <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">
+            <h2 className="text-sm font-medium text-foreground">
               Start from a strategy template
             </h2>
           </div>
@@ -586,7 +586,7 @@ export function TemplatesManagementPage({
                   <h3 className="text-sm font-bold leading-tight text-foreground">
                     {starter.template.templateName.replace(/^Starter - /, "")}
                   </h3>
-                  <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-3xs font-bold uppercase tracking-widest text-primary">
+                  <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                     {starter.tag}
                   </span>
                 </div>
@@ -635,7 +635,7 @@ export function TemplatesManagementPage({
 
         <div className="flex items-baseline gap-2 pt-1">
           <FileText className="size-4 text-muted-foreground" />
-          <h2 className="text-sm font-bold uppercase tracking-widest text-foreground">
+          <h2 className="text-sm font-medium text-foreground">
             Your templates
           </h2>
         </div>
@@ -669,7 +669,7 @@ export function TemplatesManagementPage({
                         {template.templateName}
                       </h2>
                       {template.isDefault ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-3xs font-bold uppercase tracking-wide text-primary">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                           <Star className="size-3" /> Default
                         </span>
                       ) : null}
@@ -691,7 +691,7 @@ export function TemplatesManagementPage({
 
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   <div className="rounded-xl bg-muted/40 p-3">
-                    <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
+                    <p className="text-xs font-medium text-muted-foreground">
                       Down Payment
                     </p>
                     <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -699,7 +699,7 @@ export function TemplatesManagementPage({
                     </p>
                   </div>
                   <div className="rounded-xl bg-muted/40 p-3">
-                    <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
+                    <p className="text-xs font-medium text-muted-foreground">
                       Interest Rate
                     </p>
                     <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -707,7 +707,7 @@ export function TemplatesManagementPage({
                     </p>
                   </div>
                   <div className="rounded-xl bg-muted/40 p-3">
-                    <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
+                    <p className="text-xs font-medium text-muted-foreground">
                       Vacancy
                     </p>
                     <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -716,7 +716,7 @@ export function TemplatesManagementPage({
                   </div>
                   {TAX_STRATEGY_RELEASED ? (
                     <div className="rounded-xl bg-muted/40 p-3">
-                      <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
+                      <p className="text-xs font-medium text-muted-foreground">
                         Tax Rate
                       </p>
                       <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -813,27 +813,27 @@ export function TemplatesManagementPage({
             <table className="w-full min-w-[880px] text-sm">
               <thead className="bg-muted/40 border-b border-border">
                 <tr className="h-12">
-                  <th className="text-left px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                  <th className="text-left px-4 text-xs text-muted-foreground font-medium">
                     Template
                   </th>
-                  <th className="text-left px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                  <th className="text-left px-4 text-xs text-muted-foreground font-medium">
                     Description
                   </th>
-                  <th className="text-right px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                  <th className="text-right px-4 text-xs text-muted-foreground font-medium">
                     Down Payment
                   </th>
-                  <th className="text-right px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                  <th className="text-right px-4 text-xs text-muted-foreground font-medium">
                     Interest Rate
                   </th>
-                  <th className="text-right px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                  <th className="text-right px-4 text-xs text-muted-foreground font-medium">
                     Vacancy
                   </th>
                   {TAX_STRATEGY_RELEASED ? (
-                    <th className="text-right px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                    <th className="text-right px-4 text-xs text-muted-foreground font-medium">
                       Tax Rate
                     </th>
                   ) : null}
-                  <th className="text-right px-4 text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                  <th className="text-right px-4 text-xs text-muted-foreground font-medium">
                     Actions
                   </th>
                 </tr>
@@ -855,7 +855,7 @@ export function TemplatesManagementPage({
                               {template.templateName}
                             </p>
                             {template.isDefault ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-3xs font-bold uppercase tracking-wide text-primary">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
                                 <Star className="size-2.5" /> Default
                               </span>
                             ) : null}

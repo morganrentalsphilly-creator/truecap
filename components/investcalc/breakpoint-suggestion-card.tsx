@@ -59,7 +59,7 @@ export function BreakpointSuggestionCard({ values, result }: Props) {
     >
       <div className="mb-2 flex items-center gap-1.5">
         <Target className="size-3.5 text-primary" />
-        <span className="text-3xs font-bold uppercase tracking-widest text-primary">
+        <span className="text-xs font-medium text-primary">
           What would make it {targetTier}
         </span>
         <span className="text-3xs text-muted-foreground">

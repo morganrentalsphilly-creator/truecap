@@ -61,7 +61,7 @@ export function StressSurvivabilityCard({ base, stressed, adjustmentLabel }: Pro
       </span>
       <div className="min-w-0 space-y-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-          <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+          <span className="text-xs font-medium text-muted-foreground">
             Survivability
           </span>
           {adjustmentLabel ? (

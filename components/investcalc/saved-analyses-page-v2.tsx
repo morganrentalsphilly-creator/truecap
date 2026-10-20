@@ -450,7 +450,7 @@ function DealClientPicker({
         </button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-56 p-1.5">
-        <p className="px-1.5 pb-1 pt-0.5 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="px-1.5 pb-1 pt-0.5 text-xs font-medium text-muted-foreground">
           Show on portal for
         </p>
         <div className="max-h-56 overflow-y-auto">
@@ -1346,7 +1346,7 @@ function SortableTh({
         // whitespace-nowrap: without it "Cash Flow" and "Cap Rate" wrapped to
         // two lines, which doubled the header height AND squeezed the columns
         // below them into collision.
-        "whitespace-nowrap text-xs uppercase tracking-wider text-muted-foreground font-bold",
+        "whitespace-nowrap text-xs text-muted-foreground font-medium",
         numeric ? "text-right" : "text-left",
         className,
       )}
@@ -2480,7 +2480,7 @@ export function SavedAnalysesPage({
         )}
       >
         <div>
-          <p className="mb-2 text-3xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="mb-2 text-xs font-medium tracking-[0.18em] text-muted-foreground">
             Signal
           </p>
           <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&>*]:shrink-0 sm:[&>*]:shrink">
@@ -2501,7 +2501,7 @@ export function SavedAnalysesPage({
         </div>
 
         <div>
-          <p className="mb-2 text-3xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="mb-2 text-xs font-medium tracking-[0.18em] text-muted-foreground">
             Property Type
           </p>
           <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&>*]:shrink-0 sm:[&>*]:shrink">
@@ -2529,7 +2529,7 @@ export function SavedAnalysesPage({
         </div>
 
         <div>
-          <p className="mb-2 text-3xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="mb-2 text-xs font-medium tracking-[0.18em] text-muted-foreground">
             Status
           </p>
           <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0 [&>*]:shrink-0 sm:[&>*]:shrink">
@@ -3122,7 +3122,7 @@ export function SavedAnalysesPage({
                 (Radix only fires on change), so the arrow button owns the
                 asc/desc flip. */}
             <div className="flex items-center gap-1.5 sm:hidden">
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 Sort
               </span>
@@ -3160,7 +3160,7 @@ export function SavedAnalysesPage({
               </button>
             </div>
             <div className="hidden flex-wrap items-center gap-1.5 sm:flex">
-              <span className="inline-flex w-full items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground sm:w-auto sm:mr-1.5">
+              <span className="inline-flex w-full items-center gap-1.5 text-xs font-semibold text-muted-foreground sm:w-auto sm:mr-1.5">
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 Sort by
               </span>
@@ -3644,7 +3644,7 @@ export function SavedAnalysesPage({
 
                     <div className="mt-4 grid grid-cols-2 gap-2">
                       <div className="rounded-xl bg-muted/40 p-3">
-                        <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
+                        <p className="text-xs font-medium text-muted-foreground">
                           Cash Flow
                         </p>
                         <p
@@ -3659,7 +3659,7 @@ export function SavedAnalysesPage({
                         </p>
                       </div>
                       <div className="rounded-xl bg-muted/40 p-3">
-                        <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
+                        <p className="text-xs font-medium text-muted-foreground">
                           CoC
                         </p>
                         <p
@@ -3676,7 +3676,7 @@ export function SavedAnalysesPage({
                         </p>
                       </div>
                       <div className="rounded-xl bg-muted/40 p-3">
-                        <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
+                        <p className="text-xs font-medium text-muted-foreground">
                           Cap Rate
                         </p>
                         <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -3684,7 +3684,7 @@ export function SavedAnalysesPage({
                         </p>
                       </div>
                       <div className="rounded-xl bg-muted/40 p-3">
-                        <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
+                        <p className="text-xs font-medium text-muted-foreground">
                           Price
                         </p>
                         <p className="mt-1 text-sm font-extrabold text-foreground">
@@ -3905,10 +3905,10 @@ export function SavedAnalysesPage({
                       />
                     </label>
                   </th>
-                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                  <th className="text-left text-xs text-muted-foreground font-medium">
                     Property
                   </th>
-                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                  <th className="text-left text-xs text-muted-foreground font-medium">
                     Signal
                   </th>
                   <SortableTh
@@ -3944,22 +3944,22 @@ export function SavedAnalysesPage({
                     onSort={handleSort}
                   />
                   {optionalColumns.dscr ? (
-                    <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                    <th className="text-left text-xs text-muted-foreground font-medium">
                       DSCR
                     </th>
                   ) : null}
                   {optionalColumns.cashToClose ? (
-                    <th className="whitespace-nowrap text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                    <th className="whitespace-nowrap text-left text-xs text-muted-foreground font-medium">
                       Cash to close
                     </th>
                   ) : null}
                   {optionalColumns.market ? (
-                    <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                    <th className="text-left text-xs text-muted-foreground font-medium">
                       Market
                     </th>
                   ) : null}
                   {optionalColumns.neighborhood ? (
-                    <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                    <th className="text-left text-xs text-muted-foreground font-medium">
                       Neighborhood
                     </th>
                   ) : null}
@@ -3971,7 +3971,7 @@ export function SavedAnalysesPage({
                     onSort={handleSort}
                     className="whitespace-nowrap pr-4"
                   />
-                  <th className="text-left text-xs uppercase tracking-wider text-muted-foreground font-bold">
+                  <th className="text-left text-xs text-muted-foreground font-medium">
                     Status
                   </th>
                   {/* The table needs 1593px at DEFAULT columns inside a 1119px
@@ -3979,7 +3979,7 @@ export function SavedAnalysesPage({
                       primary control — sat ~350px past the right edge and was
                       unreachable without discovering horizontal scroll. Pin it
                       so Open is always in view; the rest still scrolls. */}
-                  <th className="sticky right-0 z-10 bg-card text-left text-xs uppercase tracking-wider text-muted-foreground font-bold shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.12)]">
+                  <th className="sticky right-0 z-10 bg-card text-left text-xs text-muted-foreground font-medium shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.12)]">
                     Actions
                   </th>
                 </tr>

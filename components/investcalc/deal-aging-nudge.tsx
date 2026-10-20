@@ -72,7 +72,7 @@ export function DealAgingNudge({
         <Clock className="size-4" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-3xs font-bold uppercase tracking-widest text-caution-text">Keep it moving</p>
+        <p className="text-xs font-medium text-caution-text">Keep it moving</p>
         <p className="mt-0.5 text-sm font-semibold text-foreground">
           You saved {address} {days} days ago and it&apos;s still marked {label}.
         </p>

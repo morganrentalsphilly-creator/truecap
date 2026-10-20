@@ -44,7 +44,7 @@ export function NextActionBanner({
       <div className="flex min-w-0 flex-1 items-start gap-3">
       <Icon aria-hidden className={`mt-0.5 size-5 shrink-0 ${t.iconClass}`} />
       <div className="min-w-0 flex-1">
-        <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+        <div className="text-xs font-medium text-muted-foreground">
           Next action
         </div>
         <div className="text-sm font-bold text-foreground">{action.label}</div>

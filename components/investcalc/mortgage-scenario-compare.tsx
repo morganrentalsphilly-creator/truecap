@@ -117,7 +117,7 @@ export function MortgageScenarioCompare({
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-semibold text-foreground">
             Compare financing scenarios
-            <span className="ml-1.5 align-middle text-3xs font-bold uppercase tracking-wide text-primary">
+            <span className="ml-1.5 align-middle text-xs font-medium text-primary">
               Pro
             </span>
           </span>
@@ -141,7 +141,7 @@ export function MortgageScenarioCompare({
     >
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-foreground">
+          <p className="text-xs font-medium text-foreground">
             Compare financing
           </p>
           <p className="mt-0.5 text-2xs text-muted-foreground">
@@ -167,7 +167,7 @@ export function MortgageScenarioCompare({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left">
-                <th scope="col" className="py-2 pr-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+                <th scope="col" className="py-2 pr-3 text-xs font-medium text-muted-foreground">
                   Scenario
                 </th>
                 {scenarios.map((s) => (
@@ -180,7 +180,7 @@ export function MortgageScenarioCompare({
                   >
                     {s.label}
                     {s.isBaseline ? (
-                      <span className="ml-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-3xs font-bold uppercase tracking-widest text-primary">
+                      <span className="ml-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
                         Now
                       </span>
                     ) : null}
@@ -260,7 +260,7 @@ export function MortgageScenarioCompare({
             <div className="flex items-center justify-between gap-2">
               <span className="text-sm font-bold text-foreground">{s.label}</span>
               {s.isBaseline ? (
-                <span className="rounded-full bg-primary px-2 py-0.5 text-3xs font-bold uppercase tracking-widest text-primary-foreground">
+                <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground">
                   Current
                 </span>
               ) : null}
@@ -328,7 +328,7 @@ function ScenarioRow({
 }) {
   return (
     <tr className="border-b border-border/50 last:border-b-0">
-      <th scope="row" className="py-2 pr-3 text-left text-2xs font-semibold uppercase tracking-widest text-muted-foreground">
+      <th scope="row" className="py-2 pr-3 text-left text-xs font-semibold text-muted-foreground">
         {label}
       </th>
       {cells.map((cell, i) => {
@@ -371,7 +371,7 @@ function MobileMetric({
         : "text-foreground";
   return (
     <div className="rounded-lg bg-muted/30 px-2 py-1.5">
-      <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="text-xs font-medium text-muted-foreground">
         {label}
       </p>
       <p className={`mt-0.5 text-sm font-bold tabular-nums ${toneClass}`}>{value}</p>

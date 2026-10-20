@@ -294,7 +294,7 @@ export function InputConfidenceCard({
         <div className="px-4 pb-3 pt-4 sm:px-5 sm:pt-5">
           <h2
             id="input-confidence-title"
-            className="text-xs font-extrabold uppercase tracking-widest text-primary"
+            className="text-xs font-semibold text-primary"
           >
             Before you offer
           </h2>
@@ -405,7 +405,7 @@ export function InputConfidenceCard({
             <Database aria-hidden className="size-4 text-primary" />
             <h2
               id="input-confidence-title"
-              className="text-xs font-extrabold uppercase tracking-widest text-primary"
+              className="text-xs font-semibold text-primary"
             >
               {advocacyContractEnabled
                 ? "Evidence readiness"
@@ -487,7 +487,7 @@ export function InputConfidenceCard({
             />
           ) : (
             <div className="min-w-0 rounded-xl border border-border bg-background p-3 text-center">
-              <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground sm:text-3xs">
+              <p className="text-xs font-medium text-muted-foreground sm:text-xs">
                 Sensitivity risk
               </p>
               <span
@@ -590,7 +590,7 @@ export function InputConfidenceCard({
                     <p className="text-sm font-bold text-foreground">
                       {item.label}
                     </p>
-                    <p className="mt-0.5 text-3xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <p className="mt-0.5 text-xs font-semibold text-muted-foreground">
                       {item.sourceDisplay}
                     </p>
                   </div>
@@ -761,7 +761,7 @@ export function InputConfidenceCard({
                     Assumption values, sources, confirmation types, evidence
                     flags, and review controls
                   </caption>
-                  <thead className="bg-muted text-3xs uppercase tracking-wider text-muted-foreground">
+                  <thead className="bg-muted text-xs text-muted-foreground">
                     <tr>
                       <th className="px-3 py-2 font-bold">Input</th>
                       <th className="px-3 py-2 font-bold">Value</th>
@@ -911,7 +911,7 @@ export function InputConfidenceCard({
                     Input value, source, scoring points, and confirmation status
                     for every underwriting input
                   </caption>
-                  <thead className="bg-muted text-3xs uppercase tracking-wider text-muted-foreground">
+                  <thead className="bg-muted text-xs text-muted-foreground">
                     <tr>
                       <th className="px-3 py-2 font-bold">Input</th>
                       <th className="px-3 py-2 font-bold">Value</th>
@@ -1008,7 +1008,7 @@ function SummaryMetric({
 }) {
   return (
     <div className="min-w-0 rounded-xl border border-border bg-background p-3 text-center">
-      <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground sm:text-3xs">
+      <p className="text-xs font-medium text-muted-foreground sm:text-xs">
         {label}
       </p>
       <p className="mt-1 break-words font-mono text-lg font-extrabold tabular-nums text-foreground sm:text-xl">

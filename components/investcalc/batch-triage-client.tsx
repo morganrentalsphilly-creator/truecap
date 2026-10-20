@@ -162,7 +162,7 @@ function PreviewInput({
     <div className="min-w-0">
       <label
         htmlFor={inputId}
-        className="mb-1 block text-3xs font-bold uppercase tracking-wider text-muted-foreground lg:sr-only"
+        className="mb-1 block text-xs font-medium text-muted-foreground lg:sr-only"
       >
         {label}
       </label>
@@ -580,7 +580,7 @@ export function BatchTriageClient({
                 key={row.id}
                 className="rounded-xl border border-border bg-background p-3"
               >
-                <p className="mb-2 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+                <p className="mb-2 text-xs font-medium text-muted-foreground">
                   Listing {index + 1}
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -632,7 +632,7 @@ export function BatchTriageClient({
             <table className="w-full table-fixed text-sm">
               <caption className="sr-only">Editable listing preview</caption>
               <thead>
-                <tr className="text-left text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+                <tr className="text-left text-xs font-medium text-muted-foreground">
                   <th scope="col" className="w-[42%] pb-2 pr-2">
                     Address
                   </th>
@@ -808,7 +808,7 @@ export function BatchTriageClient({
               {/* Desktop table */}
               <div className="mt-4 hidden overflow-hidden rounded-2xl border border-border lg:block">
                 <table className="w-full text-sm">
-                  <thead className="bg-muted/50 text-left text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+                  <thead className="bg-muted/50 text-left text-xs font-medium text-muted-foreground">
                     <tr>
                       <th scope="col" className="px-4 py-2.5">
                         Listing
@@ -995,7 +995,7 @@ export function BatchTriageClient({
                               ? triageVerdictLabel(row.recommendation)
                               : "—"}
                           </span>
-                          <span className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
+                          <span className="text-xs font-medium text-muted-foreground">
                             Deal score {row.score ?? "—"}
                           </span>
                         </div>
@@ -1007,7 +1007,7 @@ export function BatchTriageClient({
                     </div>
                     <div className="mt-2 grid grid-cols-3 gap-2 text-center text-xs">
                       <div>
-                        <div className="text-3xs uppercase tracking-wide text-muted-foreground">
+                        <div className="text-xs text-muted-foreground">
                           Cash flow
                         </div>
                         <div
@@ -1022,7 +1022,7 @@ export function BatchTriageClient({
                         </div>
                       </div>
                       <div>
-                        <div className="text-3xs uppercase tracking-wide text-muted-foreground">
+                        <div className="text-xs text-muted-foreground">
                           CoC
                         </div>
                         <div className="font-mono font-semibold text-foreground">
@@ -1030,7 +1030,7 @@ export function BatchTriageClient({
                         </div>
                       </div>
                       <div>
-                        <div className="text-3xs uppercase tracking-wide text-muted-foreground">
+                        <div className="text-xs text-muted-foreground">
                           DSCR
                         </div>
                         <div className="font-mono font-semibold text-foreground">
@@ -1040,7 +1040,7 @@ export function BatchTriageClient({
                     </div>
                     <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                       <div className="rounded-xl bg-muted/40 p-3">
-                        <div className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
+                        <div className="text-xs font-medium text-muted-foreground">
                           Offer Ceiling
                         </div>
                         <div
@@ -1056,7 +1056,7 @@ export function BatchTriageClient({
                         ) : null}
                       </div>
                       <div className="rounded-xl bg-muted/40 p-3">
-                        <div className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
+                        <div className="text-xs font-medium text-muted-foreground">
                           Gap to asking
                         </div>
                         <div

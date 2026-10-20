@@ -476,7 +476,7 @@ function OutcomeShell({
         <span className="inline-flex size-7 items-center justify-center rounded-full bg-primary/10 text-primary">
           <Icon className="size-4" />
         </span>
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-medium text-muted-foreground">
           {eyebrow}
         </p>
       </div>

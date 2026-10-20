@@ -224,7 +224,7 @@ function AssumptionConsistencyPanel({
                   <th scope="row" className="border-b border-border/70 px-3 py-2 font-semibold text-foreground">
                     {row.label}
                     {row.differs ? (
-                      <span className="ml-2 text-3xs font-bold uppercase tracking-wide text-warning-foreground">
+                      <span className="ml-2 text-xs font-medium text-warning-foreground">
                         Differs
                       </span>
                     ) : null}
@@ -267,7 +267,7 @@ function CompareSnapshotPanel({
   return (
     <div className="space-y-3 text-xs">
       <div>
-        <p className="mb-1.5 font-bold uppercase tracking-wide text-foreground">
+        <p className="mb-1.5 font-medium text-foreground">
           {source === "recorded" ? "Recorded assumptions" : "Saved inputs used for recompute"}
         </p>
         <ul className="space-y-1 text-muted-foreground">
@@ -279,7 +279,7 @@ function CompareSnapshotPanel({
         </ul>
       </div>
       <div className="border-t border-border pt-3">
-        <p className="mb-1.5 font-bold uppercase tracking-wide text-foreground">Long-term summary</p>
+        <p className="mb-1.5 font-medium text-foreground">Long-term summary</p>
         <ul className="space-y-1 text-muted-foreground">
           <li>10-yr cumulative cash flow: {formatCurrency(longTermSummary.tenYearCashFlow)}</li>
           {showTaxComparison ? (
@@ -348,14 +348,14 @@ function CompareSnapshotPanel({
           ) : null}
           {showExitComparison ? (
             <li title={formatRoiHeadline(longTermSummary.totalROI, { decimals: 1 }).title}>
-              Total ROI: {formatRoiHeadline(longTermSummary.totalROI, { decimals: 1 }).text}
+              Total ROI (cumulative): {formatRoiHeadline(longTermSummary.totalROI, { decimals: 1 }).text}
             </li>
           ) : null}
         </ul>
       </div>
       {showExitComparison ? (
         <div className="border-t border-border pt-3">
-          <p className="mb-1.5 font-bold uppercase tracking-wide text-foreground">Exit summary</p>
+          <p className="mb-1.5 font-medium text-foreground">Exit summary</p>
           <ul className="space-y-1 text-muted-foreground">
             <li>
               Highest modeled profit:{" "}
@@ -366,14 +366,14 @@ function CompareSnapshotPanel({
             <li>Year 5 profit: {formatCurrency(s.year5Profit)}</li>
             <li>Year 10 profit: {formatCurrency(s.year10Profit)}</li>
             <li title={formatRoiHeadline(s.totalROI, { decimals: 1 }).title}>
-              Total ROI: {formatRoiHeadline(s.totalROI, { decimals: 1 }).text}
+              Total ROI (cumulative): {formatRoiHeadline(s.totalROI, { decimals: 1 }).text}
             </li>
           </ul>
         </div>
       ) : null}
       {showTaxComparison ? (
         <div className="border-t border-border pt-3">
-          <p className="mb-1.5 font-bold uppercase tracking-wide text-foreground">Illustrative tax impact (10 yr)</p>
+          <p className="mb-1.5 font-medium text-foreground">Illustrative tax impact (10 yr)</p>
           <p className="flex flex-wrap items-baseline gap-x-1 text-2xs text-muted-foreground">
             <Tooltip delayDuration={200}>
               <TooltipTrigger asChild>
@@ -406,7 +406,7 @@ function AssumptionsPanel({ assumptions, purchasePrice }: { assumptions: DealAss
   return (
     <div className="space-y-3 text-xs">
       <div>
-        <p className="mb-1.5 font-bold uppercase tracking-wide text-foreground">Financing</p>
+        <p className="mb-1.5 font-medium text-foreground">Financing</p>
         <ul className="space-y-1 text-muted-foreground">
           <li>Interest rate: {fmtPct(financing.interestRatePct)}</li>
           <li>Loan term: {financing.loanTermYears != null ? `${financing.loanTermYears} yr` : "—"}</li>
@@ -417,14 +417,14 @@ function AssumptionsPanel({ assumptions, purchasePrice }: { assumptions: DealAss
         </ul>
       </div>
       <div className="border-t border-border pt-3">
-        <p className="mb-1.5 font-bold uppercase tracking-wide text-foreground">Income</p>
+        <p className="mb-1.5 font-medium text-foreground">Income</p>
         <ul className="space-y-1 text-muted-foreground">
           <li>Total monthly rent (modeled): {formatCurrency(income.totalMonthlyRent)}</li>
           <li>{income.unitsDescription}</li>
         </ul>
       </div>
       <div className="border-t border-border pt-3">
-        <p className="mb-1.5 font-bold uppercase tracking-wide text-foreground">Expenses (inputs)</p>
+        <p className="mb-1.5 font-medium text-foreground">Expenses (inputs)</p>
         <ul className="space-y-1 text-muted-foreground">
           <li>Vacancy: {fmtPct(expenses.vacancyPct)}</li>
           <li>Management: {fmtPct(expenses.managementPct)}</li>
@@ -1574,7 +1574,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                 Renders nothing without an active box. */}
             {buyBoxFitById ? (
               <div className="rounded-3xl border border-border bg-card p-4 shadow-sm">
-                <p className="text-3xs font-extrabold uppercase tracking-[0.18em] text-muted-foreground">
+                <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">
                   Your buy box
                 </p>
                 <ul className="mt-3 space-y-3">
@@ -1805,7 +1805,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                     <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-primary">
                       <TypeIcon className="size-3.5" />
                     </span>
-                    <p className="text-2xs font-extrabold uppercase tracking-[0.18em] text-primary">{getTypeLabel(deal.propertyType)}</p>
+                    <p className="text-xs font-semibold tracking-[0.18em] text-primary">{getTypeLabel(deal.propertyType)}</p>
                   </div>
                   <h2 className="line-clamp-2 min-h-10 overflow-hidden pr-8 text-lg font-extrabold leading-snug text-foreground">
                     {getDealLabel(deal)}
@@ -2050,7 +2050,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                   <div key={row.key} className="space-y-2">
                     {showSubsection ? (
                       <div className="grid grid-cols-4">
-                        <p className="col-span-4 px-1 pt-1 text-3xs font-bold uppercase tracking-[0.18em] text-muted-foreground/90">
+                        <p className="col-span-4 px-1 pt-1 text-xs font-medium tracking-[0.18em] text-muted-foreground/90">
                           {row.subsection}
                         </p>
                       </div>

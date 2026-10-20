@@ -309,7 +309,7 @@ export function SingleFamilyUnitSection({
         >
           <div className="flex items-center gap-2 mb-3">
             <CalendarClock className="w-4 h-4 text-primary" />
-            <span className="text-xs font-semibold text-foreground uppercase tracking-wide">
+            <span className="text-xs font-semibold text-foreground">
               Short-term rental income
             </span>
           </div>

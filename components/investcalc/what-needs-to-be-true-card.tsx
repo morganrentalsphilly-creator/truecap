@@ -115,7 +115,7 @@ export function WhatNeedsToBeTrueCard({ values, target, targetSource, onApply }:
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-primary">
             <Target aria-hidden className="size-4" />
-            <h2 id="what-needs-to-be-true-title" className="text-xs font-extrabold uppercase tracking-widest">
+            <h2 id="what-needs-to-be-true-title" className="text-xs font-semibold">
               What Needs To Be True?
             </h2>
           </div>
@@ -130,7 +130,7 @@ export function WhatNeedsToBeTrueCard({ values, target, targetSource, onApply }:
             Every displayed boundary changes one input at a time and is re-run through the full underwriting engine against {targetBasis}.
           </p>
         </div>
-        <span className="w-fit shrink-0 rounded-full border border-primary/25 bg-card px-2.5 py-1 text-3xs font-bold uppercase tracking-wide text-primary">
+        <span className="w-fit shrink-0 rounded-full border border-primary/25 bg-card px-2.5 py-1 text-xs font-medium text-primary">
           {targetSource === "buy-box" ? "From your Buy Box" : targetSource === "custom" ? "Custom targets" : "Default target"}
         </span>
       </div>

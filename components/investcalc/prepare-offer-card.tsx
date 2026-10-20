@@ -31,7 +31,7 @@ export function PrepareOfferCard({
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-primary">
             <ShieldCheck aria-hidden className="size-4" />
-            <h2 id="prepare-offer-title" className="text-xs font-extrabold uppercase tracking-widest">
+            <h2 id="prepare-offer-title" className="text-xs font-semibold">
               Decision review package
             </h2>
           </div>

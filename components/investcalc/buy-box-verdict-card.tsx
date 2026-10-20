@@ -361,7 +361,7 @@ export function BuyBoxVerdictCard({
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Target className="size-4 text-muted-foreground" />
-          <h3 className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+          <h3 className="text-xs font-medium text-muted-foreground">
             {multi ? "Your buy boxes" : "Your buy box"}
           </h3>
         </div>

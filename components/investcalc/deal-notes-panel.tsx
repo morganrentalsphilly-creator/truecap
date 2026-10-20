@@ -345,7 +345,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
       <div className="mb-2 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <NotebookPen className="size-4 text-primary" />
-          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">
+          <h3 className="text-xs font-medium text-foreground">
             Deal notes
           </h3>
         </div>

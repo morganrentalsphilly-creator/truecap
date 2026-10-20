@@ -55,7 +55,7 @@ export function ExitScenarioSummaryCards({
           tone: (year10?.totalProfit ?? 0) >= 0 ? "positive" : "negative",
         },
         {
-          label: "Total ROI",
+          label: "Total ROI (cumulative)",
           value:
             totalRoi == null
               ? "—"

@@ -166,7 +166,7 @@ export function DealCommentsPanel({ savedDealId }: { savedDealId: string }) {
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <MessageSquare className="size-4 text-primary" />
-          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Comments</h3>
+          <h3 className="text-xs font-medium text-foreground">Comments</h3>
         </div>
         {isBusy ? (
           <span role="status" aria-live="polite" className="inline-flex items-center gap-1 text-2xs text-muted-foreground">

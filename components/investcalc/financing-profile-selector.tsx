@@ -189,7 +189,7 @@ export function FinancingProfileSelector({
       ) : (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="min-w-0 flex-1">
-            <label htmlFor="financing-profile-selector" className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--brand-green)]">
+            <label htmlFor="financing-profile-selector" className="flex items-center gap-2 text-xs font-semibold text-[var(--brand-green)]">
               <Landmark aria-hidden className="size-4" /> Financing Profile
             </label>
             <select

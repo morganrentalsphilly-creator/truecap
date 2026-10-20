@@ -258,7 +258,7 @@ function DealScoreCard({
   if (!dealScoreResult || !dealScoreResult.ok || dealScoreResult.tier !== "pro") {
     return (
       <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
+        <p className="text-xs font-medium text-muted-foreground mb-2">
           Deal score
         </p>
         <div className="flex items-center justify-center min-h-40 rounded-xl border border-dashed border-border bg-muted/20 text-center px-4">
@@ -278,7 +278,7 @@ function DealScoreCard({
 
   return (
     <div className="bg-card rounded-2xl border border-border p-4 sm:p-6">
-      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
+      <p className="text-xs font-medium text-muted-foreground mb-2">
         Deal score
       </p>
       {/* The investor-lens toggle previously lived here; it moved into the
@@ -714,7 +714,7 @@ export function AnswerHeroCard({
         ) : recommendation ? (
           <>
             <div className="mb-2 flex items-start justify-between gap-2">
-              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-xs font-medium text-muted-foreground">
                 Recommendation
               </p>
               {/* Hero-corner Save - surfaces the toolbar's exact save
@@ -845,7 +845,7 @@ export function AnswerHeroCard({
                 ) : null}
                 {hasScoreBreakdown ? (
                   <div className="mt-3 space-y-2">
-                    <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+                    <p className="text-xs font-medium text-muted-foreground">
                       Deal score breakdown
                     </p>
                     <ScoreBreakdownReceipts
@@ -862,7 +862,7 @@ export function AnswerHeroCard({
               <>
                 <p
                   className={cn(
-                    "text-xs font-bold uppercase tracking-widest mb-2",
+                    "text-xs font-medium mb-2",
                     recommendation.variant === "strong-buy" && "text-[var(--brand-green)]",
                     recommendation.variant === "buy" && "text-primary",
                     recommendation.variant === "neutral" && "text-caution-text",

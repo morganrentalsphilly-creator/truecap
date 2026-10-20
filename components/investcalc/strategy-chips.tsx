@@ -171,7 +171,7 @@ export function StrategyChips({
         <div>
           <p
             id={labelId}
-            className="text-3xs font-bold uppercase tracking-widest text-muted-foreground"
+            className="text-xs font-medium text-muted-foreground"
           >
             {label}
           </p>
