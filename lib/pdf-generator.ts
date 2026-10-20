@@ -370,17 +370,20 @@ export const PDF_INPUT_REVIEW_FOOTNOTE =
   "User confirmations are self-reported, are not documentary evidence or third-party verification, and must be re-checked after a value changes.";
 
 // ===================== Design tokens =====================
+// The Blueprint tokens as hex (DESIGN.md "Color", 2026-10-20): graphite ink
+// and its muted step, the sheet and its lines, one cobalt. The semantic
+// colours below them keep their print-tested values.
 const COLOR = {
-  ink: "#0B1220",
-  text: "#1E293B",
-  sub: "#64748B",
-  muted: "#94A3B8",
-  line: "#E2E8F0",
+  ink: "#26292e",
+  text: "#26292e",
+  sub: "#585b61",
+  muted: "#8a8e95",
+  line: "#e9e8e4",
   cardBg: "#FFFFFF",
-  cardSoft: "#F8FAFC",
-  border: "#E5E9F2",
-  primary: "#0070c4",
-  primarySoft: "#EFF4FF",
+  cardSoft: "#fbfaf7",
+  border: "#d6d4ce",
+  primary: "#1853c6",
+  primarySoft: "#eaf0fb",
   success: "#16A34A",
   successSoft: "#ECFDF5",
   danger: "#DC2626",
@@ -394,11 +397,11 @@ const COLOR = {
   // measure ~3.2:1 on white — under the 4.5:1 floor and genuinely hard to read
   // in print. These darker pairs clear it. Bars, stripes and chart series keep
   // the brighter values above.
-  successText: "#15803D",
-  warnText: "#B45309",
+  successText: "#00792f",
+  warnText: "#bb4900",
   violetSoft: "#F5F3FF",
   gold: "#B8860B",
-  navy: "#0F172A",
+  navy: "#0f1828",
 };
 
 const PAGE = { w: 595.28, h: 841.89 }; // A4 in pt
