@@ -140,6 +140,9 @@ export function PropertyDetailsSection({
         form={form}
         hasError={!!errors.address}
         inputId="address"
+        // Hero-sized: the address is the first and largest field on the
+        // analyzer, the homepage's address field continued (OVERHAUL.md §7).
+        inputClassName="h-12 text-base sm:h-14 md:text-lg"
         errorId="address-error"
         required
         placeholder={addressPlaceholder}
