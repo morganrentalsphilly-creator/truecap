@@ -30,17 +30,20 @@ const ROOT = join(__dirname, "..", "..");
 const read = (path: string) => readFileSync(join(ROOT, path), "utf8");
 
 /** DESIGN.md, "Decided: Newsprint" and "Color", as the hex an email needs. */
+// Re-anchored: the Blueprint tokens as hex (DESIGN.md "Color", Phase 7): the
+// sheet, the card, the band, the soft line, graphite and its muted step, one
+// cobalt with white on it, the positive green and the negative red.
 const SITE = {
-  paper: "#efece8",
-  raised: "#f6f5f2",
-  band: "#e9e6e0",
-  ruleSoft: "#d8d5d0",
-  ink: "#1b1b1b",
-  ink2: "#51504c",
-  signalBlue: "#0066ba",
-  onSignalBlue: "#fcfcfc",
-  positive: "#006d32",
-  negative: "#b9003d",
+  paper: "#fbfaf7",
+  raised: "#ffffff",
+  band: "#f1f0ec",
+  ruleSoft: "#e9e8e4",
+  ink: "#26292e",
+  ink2: "#585b61",
+  signalBlue: "#1853c6",
+  onSignalBlue: "#ffffff",
+  positive: "#00792f",
+  negative: "#c21725",
 } as const;
 const ALLOWED = new Set<string>(Object.values(SITE));
 

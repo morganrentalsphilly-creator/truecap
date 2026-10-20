@@ -6,8 +6,8 @@
  * broadcast — content is per-user).
  *
  * Colours match the Supabase auth templates, the site palette from DESIGN.md: Signal Blue
- * #0066ba for the action, ink #1b1b1b and Ink 2 #51504c for text, a raised
- * card #f6f5f2 on paper #efece8, "TrueCap." wordmark.
+ * #1853c6 for the action, ink #26292e and Ink 2 #585b61 for text, a raised
+ * card #ffffff on paper #fbfaf7, "TrueCap." wordmark.
  */
 
 import {
@@ -23,11 +23,11 @@ import {
 } from "@react-email/components";
 import { rateAlertDealUrl, type RateAlertDeal } from "@/lib/rate-alerts";
 
-const BRAND = "#0066ba";
-const INK = "#1b1b1b";
-const SUB = "#51504c";
-const POSITIVE = "#006d32";
-const NEGATIVE = "#b9003d";
+const BRAND = "#1853c6";
+const INK = "#26292e";
+const SUB = "#585b61";
+const POSITIVE = "#00792f";
+const NEGATIVE = "#c21725";
 
 export type RateAlertEmailProps = {
   currentRatePct: number;
@@ -54,7 +54,7 @@ export default function RateAlertEmail({
       </Preview>
       <Body
         style={{
-          backgroundColor: "#efece8",
+          backgroundColor: "#fbfaf7",
           margin: 0,
           fontFamily: "-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif",
         }}
@@ -64,7 +64,7 @@ export default function RateAlertEmail({
         >
           <Section
             style={{
-              backgroundColor: "#f6f5f2",
+              backgroundColor: "#ffffff",
               borderRadius: 16,
               overflow: "hidden",
             }}
@@ -126,7 +126,7 @@ export default function RateAlertEmail({
               <Section key={deal.id} style={{ padding: "8px 32px" }}>
                 <Section
                   style={{
-                    border: "1px solid #d8d5d0",
+                    border: "1px solid #e9e8e4",
                     borderRadius: 12,
                     padding: "14px 16px",
                   }}
@@ -194,7 +194,7 @@ export default function RateAlertEmail({
                 style={{
                   display: "inline-block",
                   backgroundColor: BRAND,
-                  color: "#fcfcfc",
+                  color: "#ffffff",
                   fontWeight: 700,
                   fontSize: 14,
                   padding: "12px 20px",
@@ -224,14 +224,14 @@ export default function RateAlertEmail({
           </Section>
           <Text
             style={{
-              color: "#51504c",
+              color: "#585b61",
               fontSize: 11,
               textAlign: "center" as const,
               margin: "16px 0 0",
             }}
           >
             TrueCap · Rental property underwriting ·{" "}
-            <Link href={siteUrl} style={{ color: "#51504c" }}>
+            <Link href={siteUrl} style={{ color: "#585b61" }}>
               usetruecap.com
             </Link>
           </Text>
