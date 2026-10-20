@@ -9,7 +9,7 @@ import {
   YAxis,
 } from "recharts";
 import { TrendingUp } from "lucide-react";
-import { usePrefersReducedMotion } from "@/components/investcalc/analysis-panels/shared/use-prefers-reduced-motion";
+import { useChartDrawAnimation } from "@/components/investcalc/analysis-panels/shared/use-prefers-reduced-motion";
 
 const metrics = [
   { id: "score", label: "Score" },
@@ -53,7 +53,7 @@ export function PortfolioChart({ data = [] }: { data?: DealComparisonPoint[] }) 
   const [metric, setMetric] = useState<(typeof metrics)[number]["id"]>("score");
   // Recharts animates from JavaScript, which the reduced-motion CSS rule
   // cannot stop, so the mark is told directly (as the analyzer's charts are).
-  const animate = !usePrefersReducedMotion();
+  const animate = useChartDrawAnimation();
   // Dashboard is always light — chart colors are fixed to the light palette.
   const colors = CHART_COLORS.light;
   const activeMetric = metrics.find((item) => item.id === metric) ?? metrics[0];

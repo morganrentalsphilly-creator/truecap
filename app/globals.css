@@ -148,9 +148,11 @@
   /* The two dense product-UI steps below text-xs (DESIGN.md "Label-xs" /
      "Label-2xs"). Defined as font-size only so they behave exactly like the
      arbitrary text-[11px] / text-[10px] values they replace (line-height
-     keeps coming from the leading-* utility or inherits). 10px is the floor. */
-  --text-2xs: 0.6875rem;
-  --text-3xs: 0.625rem;
+     keeps coming from the leading-* utility or inherits). Phase 4 raised
+     them: 12px and 11px, so no functional text sits under the 11px floor
+     and body text is never below 12px (DESIGN.md "Typography"). */
+  --text-2xs: 0.75rem;
+  --text-3xs: 0.6875rem;
   /* The decided ramp (DESIGN.md "Typography"): small and label 14px
      (text-sm), UI 16px (text-base), marketing body 18px (text-lg), H4 20px
      (text-xl), H3 24px (text-2xl) and 21px on phones (text-h3-sm), H2 34px
@@ -986,3 +988,48 @@ summary:has([class*="rotate-"])::marker {
 }
 /* No height transition: a layout animation is off the motion rules
    (transform and opacity only); the row simply takes its condensed size. */
+
+/* The analyzer's result reveal (components/motion/result-reveal.tsx): each
+   step eases in once, 150ms after the one before, only while the root
+   carries data-result-reveal="play" (set on the client after a run) and the
+   visitor has not asked for less. At rest, every step is simply there. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-result-reveal="play"] [data-reveal-step] {
+    animation: tc-step-in var(--duration-base) var(--ease-out) both;
+    animation-delay: calc(var(--reveal-step, 0) * 150ms);
+  }
+  [data-result-reveal="play"] [data-reveal-step="1"] { --reveal-step: 1; }
+  [data-result-reveal="play"] [data-reveal-step="2"] { --reveal-step: 2; }
+  [data-result-reveal="play"] [data-reveal-step="3"] { --reveal-step: 3; }
+  [data-result-reveal="play"] [data-reveal-step="4"] { --reveal-step: 4; }
+  [data-result-reveal="play"] [data-reveal-step="5"] { --reveal-step: 5; }
+  /* The analyzer's advanced options (display-toggled, kept mounted) ease in
+     when opened, with the same step. */
+  .tc-disclosure {
+    animation: tc-step-in var(--duration-base) var(--ease-out) both;
+  }
+  @keyframes tc-step-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
+/* Print: the share page and the sample memo as a document. */
+@media print {
+  [data-print-hide],
+  [data-cookie-consent-banner],
+  [data-sticky-bottom-bar],
+  [data-sticky-calc-bar] {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .shadow-xs, .shadow-sm, .shadow-md, .shadow-lg {
+    box-shadow: none !important;
+  }
+  a {
+    text-decoration: none;
+  }
+}

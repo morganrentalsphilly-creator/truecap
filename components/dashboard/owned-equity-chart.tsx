@@ -29,7 +29,7 @@ import {
 } from "recharts";
 import { TrendingUp } from "lucide-react";
 import type { OwnedEquitySeriesPoint } from "@/lib/owned-equity-series";
-import { usePrefersReducedMotion } from "@/components/investcalc/analysis-panels/shared/use-prefers-reduced-motion";
+import { useChartDrawAnimation } from "@/components/investcalc/analysis-panels/shared/use-prefers-reduced-motion";
 
 // recharts sets SVG presentation attributes (no CSS var() resolution), so
 // chart colors are concrete literals — same convention as PortfolioChart.
@@ -83,7 +83,7 @@ function fmtMonth(iso: string): string {
 export function OwnedEquityChart({ data = [] }: { data?: OwnedEquitySeriesPoint[] }) {
   // Recharts animates from JavaScript, which the reduced-motion CSS rule
   // cannot stop, so the mark is told directly (as the analyzer's charts are).
-  const animate = !usePrefersReducedMotion();
+  const animate = useChartDrawAnimation();
   const first = data[0];
   const last = data[data.length - 1];
   const chartSummary =

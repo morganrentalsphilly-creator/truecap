@@ -319,7 +319,9 @@ describe("reduced motion reaches the charts and the last two scripted scrolls (P
     const marks = source.match(/<(?:Bar|Line|Area)[\s\n]/g) ?? [];
     expect(marks.length).toBeGreaterThan(0);
     expect(source.match(/isAnimationActive=\{animate\}/g) ?? []).toHaveLength(marks.length);
-    expect(source).toContain("const animate = !usePrefersReducedMotion();");
+    // Re-anchored: the chart files — useChartDrawAnimation() is
+    // !usePrefersReducedMotion() for the first draw only (OVERHAUL.md §4).
+    expect(source).toContain("const animate = useChartDrawAnimation();");
   });
 
   // The signed-in dashboard's charts draw in from JavaScript too. They were
@@ -336,7 +338,9 @@ describe("reduced motion reaches the charts and the last two scripted scrolls (P
     const marks = source.match(/<(?:Bar|Line|Area|Scatter)[\s\n]/g) ?? [];
     expect(marks.length).toBeGreaterThan(0);
     expect(source.match(/isAnimationActive=\{animate\}/g) ?? []).toHaveLength(marks.length);
-    expect(source).toContain("const animate = !usePrefersReducedMotion();");
+    // Re-anchored: the chart files — useChartDrawAnimation() is
+    // !usePrefersReducedMotion() for the first draw only (OVERHAUL.md §4).
+    expect(source).toContain("const animate = useChartDrawAnimation();");
   });
 
   it("covers every file that draws a Recharts mark", () => {
