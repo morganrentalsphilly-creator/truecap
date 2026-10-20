@@ -1,0 +1,279 @@
+Stop forwarding listings. Start sending deals that already pencil.
+
+Paste the rental listing. See whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded with Pro.
+
+Cash flow · Cap rate · Cash-on-cash return · DSCR · Editable assumptions
+
+Buying for your own portfolio? Same analyzer, your own Buy Box. For investors
+
+Analyze a deal free
+
+A listing link fills in the address. You enter the asking price and bedrooms; a paid Pro or Agent Pro plan can fill them.
+
+See the sample deal
+
+Free. No account. Your first full decision is included.
+
+Philadelphia rental example
+Sample deal · every input editable
+The sample deal at its asking price and at its Offer Ceiling
+Line item
+	At asking	At the Offer Ceiling
+Price	$265,000	$236,000
+Cash flow after reserves
+Target ≥ $750/mo
+	$554/mo	$750/mo
+binding target
+
+DSCR
+Target ≥ 1.25
+	1.52	1.75
+Meets the Buy Box	No	Yes
+Offer Ceiling	$236,000
+
+Asking price is $29,000 above the ceiling. Binding target: cash flow ≥ $750/mo.
+
+See where every figure comes from
+
+From listing to offer in three steps.
+The sample deal, every row open
+At asking
+At the Offer Ceiling
+Price
+At asking:
+$265,000
+At the Offer Ceiling:
+$236,000
+
+Paste the listing at the showing. A rent benchmark and a national owner-occupied mortgage-rate benchmark can fill from HUD and FRED. Property tax stays manual because a state aggregate is not a parcel bill. Switch the financing to the client's, and every assumption stays yours to review and change.
+
+What it takes to close, at each price
+Line
+	At asking	At the ceiling
+Down payment, 20%	$53,000	$47,200
+Closing costs, 3%	$7,950	$7,080
+Cash to close	$60,950	$54,280
+Cash flow after reserves Target ≥ $750/mo
+At asking:
+$554/mo
+At the Offer Ceiling:
+$750/mo
+Rent down to cash flow after reserves, per month
+Line
+	At asking	At the ceiling
+Rent	$3,050	$3,050
+Vacancy, 5% of rent	−$153	−$153
+Property tax, 1.49% of price	−$329	−$293
+Insurance, 0.5% of price	−$110	−$98
+Maintenance, 5% of rent	−$153	−$153
+Management, 8% of rent	−$244	−$244
+Net operating income	$2,061	$2,109
+Capex reserve, 5% of rent	−$153	−$153
+Mortgage payment, 6.6% over 30 years	−$1,354	−$1,206
+Cash flow after reserves, per month	$554	$750
+DSCR Target ≥ 1.25
+At asking:
+1.52
+At the Offer Ceiling:
+1.75
+Debt service coverage, per year
+Line
+	At asking	At the ceiling
+Net operating income, per year	$24,732	$25,308
+Debt service, per year	$16,247	$14,469
+Income divided by debt service	1.52	1.75
+Meets the Buy Box
+At asking:
+No
+At the Offer Ceiling:
+Yes
+
+Screen it against the client's Buy Box. Cash flow, cap rate, cash-on-cash and DSCR at the asking price, a 0–100 Deal score, and whether it meets the client's targets, with the criterion it misses if it doesn't.
+
+Each target at each price
+Line
+	At asking	At the ceiling
+Cash flow at least $750/mo	Misses by $196	Meets
+DSCR at least 1.25	Meets	Meets
+Offer Ceiling
+$236,000
+
+Send the Offer Ceiling, co-branded. The highest price that still meets the client's targets under the assumptions shown, the assumptions most likely to break the deal, and a memo the client opens without an account and can rerun with their own numbers. The Offer Ceiling and the memo are included in your first complete decision; co-branding comes with Pro and Agent Pro.
+
+Binding target
+Cash flow ≥ $750/mo
+Next target to bind
+DSCR ≥ 1.25
+Below asking
+$29,000
+
+Every input is a sample value, and every figure is rounded to whole dollars, so 12 monthly payments can differ from the yearly debt service by a few dollars.
+
+Analyze a deal free
+
+Free · no card · no signup
+
+Visible sources. Editable assumptions.
+
+TrueCap labels sourced benchmarks and its own defaults, and keeps every assumption editable. Start fast, then replace starting values with verified property facts, local comps, and lender terms.
+
+Starting value
+Source
+Replace it with
+Rent
+HUD rent benchmark (ZIP-level when available, otherwise the HUD Fair Market Rent area; when an address has no county match, a statewide HUD figure, labeled as such).
+Replace it with:
+Local rent comps
+Mortgage rate
+FRED 30-year fixed mortgage series, with its date shown.
+Replace it with:
+An investor lender quote, before deciding
+Property tax
+Your input. TrueCap does not auto-fill property tax from a state average or parcel source.
+A blank property-tax field uses a TrueCap default of 1.1% of purchase price — replace it with your local number.
+Replace it with:
+A local annual bill or reviewed effective rate
+
+Fast starting point. Transparent assumptions. Final control stays with you. This is what you show a client who asks where a number came from.
+
+What your client receives
+
+No account on their side, nothing hidden on yours. Branding is set up once in Settings and applies to every link and report.
+
+A share link that opens without an account
+Read-only and revocable from your dashboard; it expires after 180 days. The exact address stays hidden unless you choose to include it. Your client needs an account only to save a private copy.
+The decision memo, co-branded
+With branding set up, the share page carries your logo, your brand color, and “Shared by” your name or company, with a form the client can use to message you and the phone, email and website you saved. The PDF adds your tagline and a “Prepared by” block with the same contact details. TrueCap's name stays on both as the methodology behind the numbers: co-branded, not white-label.
+The numbers behind the decision
+Shared from a Pro or Agent Pro account, the page shows cash flow, cash-on-cash, cap rate and DSCR, the three inputs that move cash flow most, and a sensitivity grid with the rent, vacancy and rate you used. When the deal was screened against a Buy Box or targets you chose, it also shows whether the deal meets the targets at asking and the Offer Ceiling with those targets. The PDF lists the inputs, including property tax, insurance and financing.
+The disclaimer, and their own rerun
+The share page states that it is a screening record, not a decision, and that every material assumption should be verified. One click copies the deal's numbers into the free analyzer, where your client can change any assumption and rerun it; when the address is hidden, they enter the property address themselves. The numbers arrive as entered values, without source labels.
+The cover of the PDF report, rendered from the sample deal with no branding set. With branding set up, the cover carries the logo or company name and the brand color you saved in place of TrueCap's, and the Prepared by block shows your contact details. Read the sample decision memo
+Free screens the deal. Pro tells you what to offer.
+
+Free shows the economics before you spend more time on a property. Pro answers four questions on every deal: does it meet my criteria, what is my Offer Ceiling, what could make it fail, and can I defend the analysis?
+
+Free
+
+See the economics before you spend more time on a property.
+
+$0
+
+No account or card required.
+
+Your first decision
+Complete: cash flow, cap rate, CoC, DSCR, Buy Box fit, the Offer Ceiling, downside checks, and next steps.
+Every deal after that
+Cash flow, cap rate, CoC, DSCR, and the 0–100 Deal score.
+Saved deals
+Up to 5.
+Analyze a deal free
+Pro
+
+Know what to offer on every deal.
+
+$29.99
+/mo
+
+or $300 a year
+
+Does it meet my criteria?
+Buy Box fit on every deal.
+What is my Offer Ceiling?
+The highest price that still meets your targets, on every deal.
+What could make it fail?
+Downside sensitivity checks.
+Can I defend the analysis?
+The decision memo, and deals side by side (up to 4).
+Create an account for a 21-day free trial: 3 Pro analyses and 1 comparison. A rerun with changed inputs counts as a new analysis. No card and no automatic subscription.
+See Pro pricing
+Features included with Free and Pro
+Feature
+	Free
+First decision
+	Pro
+Paid plan
+
+Complete decision workflow	1 decision	
+Included
+
+Cap rate · CoC · DSCR · cash flow	
+Included
+	
+Included
+
+0–100 Deal score + context	
+Included
+	
+Included
+
+Decision memo/report	One exact deal	Unlimited
+Offer Ceiling + Buy Box targets	One exact deal	
+Included
+
+Save & revisit deals	Up to 5	Unlimited
+Compare deals side-by-side	–
+Not included
+	Up to 4
+Buy Box fit on every deal	–
+Not included
+	
+Included
+
+10-year cash-flow projection	–
+Not included
+	
+Included
+
+Downside sensitivity checks	One exact deal	
+Included
+Built by a rental investor. Now built for the agents who serve them, too.
+
+TrueCap is built by one person, a rental investor in Philadelphia. It started as a way to answer one practical question before every offer: what price actually makes this property work? The same analyzer now serves agents who screen and present deals for investor clients. The defaults lean conservative, every assumption is editable, and the core formulas are published.
+
+About TrueCap
+Read the methodology
+
+The questions agents ask first.
+
+Still have a question? Email us.
+
+My investor clients run their own numbers. Why would I need this?
+
+They will, and they should. Agent Pro is for screening and presenting against their criteria, so what you send already fits. The client gets the decision, the Offer Ceiling and the numbers behind them, and can rerun the deal with their own numbers in the free analyzer.
+
+Am I giving investment advice?
+
+TrueCap does not give investment advice: it applies published formulas to labeled inputs. You supply the property facts; the client can rerun the deal in the free analyzer and change every assumption, and the decision is theirs. Every share page and report carries the not-investment-advice disclaimer. What you say to a client stays a matter for your license and your brokerage.
+
+Do my clients need a TrueCap account to view what I send?
+
+No. A share link opens without signing in. It is read-only, it expires after 180 days, you can revoke it, and it hides the exact address unless you choose to include it. When TrueCap updates its underwriting standard, earlier links stop opening: rerun the deal and share a new link. A client only needs an account to save a private copy.
+
+What does the client see? Is it my branding or TrueCap's?
+
+Co-branded, not white-label. With branding set up (included in Pro and Agent Pro), the share page carries your logo, your brand color, and “Shared by” your name or company, plus a form the client can use to message you and the phone, email and website you saved. The PDF adds your tagline and a “Prepared by” block with the same contact details. TrueCap's name stays on the page and in the report as the methodology behind the numbers.
+
+Can I keep different criteria for different investor clients?
+
+Yes. Your roster holds up to 100 clients, and a Buy Box can be assigned to one client so that client's deals are screened against their targets, not yours. An account keeps up to 12 Buy Boxes in total, your own and your clients' combined.
+
+Does it work on my phone at a showing?
+
+Yes. TrueCap is a responsive web app you can add to your phone's home screen; there is no native iOS or Android app. Share links and reports open on any phone.
+
+My brokerage already gives me tools.
+
+TrueCap does not replace a CRM, transaction management, or e-signature. It screens a listing against a client's Buy Box and computes the client's Offer Ceiling, the highest price that still meets that client's targets. If your brokerage's tools already do that, you do not need TrueCap for it.
+
+Is TrueCap really free?
+
+Yes. Your first complete decision needs no account or card. Create an account for a 21-day free trial with no card: 3 Pro analyses and 1 comparison. A rerun with changed inputs counts as a new analysis. Pro is for knowing what to offer on every deal: Buy Box fit, the Offer Ceiling, downside checks, comparisons, and reports.
+
+Paste the listing. Send the deal that already pencils.
+
+Your first complete decision includes cash flow, cap rate, CoC, DSCR, Buy Box fit, the Offer Ceiling, downside checks, and next steps. No account or card required.
+
+Analyze a deal free
+
+Buying for your own portfolio? See TrueCap for investors
