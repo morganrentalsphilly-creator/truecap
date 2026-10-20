@@ -68,3 +68,13 @@ it is the strongest at 1440 and the least calm at 390.
 One direction, or a mix (for example A's panel and motion with C's figure
 scale on the result page). The choice sets Phase 2's tokens and fonts; nothing
 in Phase 2 starts before it.
+
+## Decision
+
+**2026-10-20, founder: B, Blueprint.** Phase 2 builds its tokens, type and
+motion from this comp: the drafting-sheet ground with the fine cobalt grid on
+marketing surfaces, graphite text, Hanken Grotesk for display and text, Geist
+Mono for metadata, cobalt for actions, the warm highlighter reserved for the
+Offer Ceiling, green and red only as the direction of a flow or a pass and a
+miss, and dark bands as the inverted sheet. The schematic gets its own phone
+layout in Phase 3.
