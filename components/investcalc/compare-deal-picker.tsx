@@ -183,11 +183,11 @@ export function CompareDealPicker({
 
   return (
     <div
-      className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5"
+      className="rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5"
       aria-busy={isPending}
     >
       {selectedCohort ? (
-        <p role="status" className="mb-4 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+        <p role="status" className="mb-4 rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
           Comparing one calculation cohort: <span className="font-semibold text-foreground">{selectedDeals[0]?.methodologyLabel ?? "matching saved methodology"}</span>. Deals calculated another way stay unselectable until they are re-underwritten.
         </p>
       ) : null}
@@ -200,7 +200,7 @@ export function CompareDealPicker({
               Boolean(selectedCohort && deal.methodologyCohort !== selectedCohort));
           const methodologyDescriptionId = `compare-methodology-${deal.id}`;
           return (
-            <li key={deal.id} className="rounded-xl">
+            <li key={deal.id} className="rounded-md">
               <button
                 type="button"
                 onClick={() => toggle(deal.id)}
@@ -209,7 +209,7 @@ export function CompareDealPicker({
                 aria-describedby={methodologyDescriptionId}
                 disabled={isPending}
                 className={cn(
-                  "flex min-h-11 w-full items-center gap-3 rounded-xl border p-3 text-left transition disabled:cursor-wait disabled:opacity-70",
+                  "flex min-h-11 w-full items-center gap-3 rounded-md border p-3 text-left transition disabled:cursor-wait disabled:opacity-70",
                   isSel
                     ? "border-primary bg-primary/5 ring-1 ring-primary/30"
                     : "border-border bg-background hover:border-primary/40",
@@ -265,7 +265,7 @@ export function CompareDealPicker({
       </ul>
 
       {errorMessage ? (
-        <p role="alert" className="mt-4 rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+        <p role="alert" className="mt-4 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
           {errorMessage}
         </p>
       ) : null}

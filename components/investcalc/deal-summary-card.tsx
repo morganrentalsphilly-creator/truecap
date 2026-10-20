@@ -65,7 +65,7 @@ export function DealSummaryCard({
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
+    <div className="rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex items-center justify-between gap-2">
         <p className="flex items-center gap-2 text-sm font-bold text-foreground">
           <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -89,11 +89,11 @@ export function DealSummaryCard({
       </div>
 
       {summary ? (
-        <p className="mt-3 whitespace-pre-line rounded-xl bg-muted/40 px-3 py-2.5 text-sm leading-relaxed text-foreground">
+        <p className="mt-3 whitespace-pre-line rounded-md bg-muted/40 px-3 py-2.5 text-sm leading-relaxed text-foreground">
           {summary}
         </p>
       ) : limitHit ? (
-        <div className="mt-3 flex flex-col gap-2 rounded-xl border border-primary/25 bg-[var(--brand-blue-light)] p-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-3 flex flex-col gap-2 rounded-md border border-primary/25 bg-[var(--brand-blue-light)] p-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs leading-relaxed text-foreground">
             You&apos;ve used today&apos;s free AI summaries. Pro includes unlimited summaries on
             every analysis.
@@ -111,7 +111,7 @@ export function DealSummaryCard({
           type="button"
           onClick={() => void generate()}
           disabled={isGenerating}
-          className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+          className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
         >
           {isGenerating ? (
             <>
@@ -128,7 +128,7 @@ export function DealSummaryCard({
       )}
 
       {notice && <p className="mt-2 text-2xs text-muted-foreground">{notice}</p>}
-      <p className="mt-2 text-3xs leading-relaxed text-muted-foreground">
+      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
         Generated from this analysis&apos;s numbers only. Not financial advice.
       </p>
     </div>

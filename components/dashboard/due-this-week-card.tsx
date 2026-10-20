@@ -163,7 +163,7 @@ export function DueThisWeekCard({
   return (
     <section
       aria-label={agingOnly ? "Deals going cold" : "Due this week"}
-      className="rounded-2xl border border-border bg-card p-4 sm:p-5"
+      className="rounded-lg border border-border bg-card p-4 sm:p-5"
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
@@ -177,7 +177,7 @@ export function DueThisWeekCard({
             <CalendarClock className="size-4" />
           </span>
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="text-xs font-medium text-muted-foreground">
               {agingOnly ? "Keep it moving" : "Due this week"}
             </p>
             <p className="text-sm font-semibold text-foreground">
@@ -205,7 +205,7 @@ export function DueThisWeekCard({
               <Link
                 href={`/dashboard/saved-analyses/${row.dealId}#deal-due-diligence`}
                 prefetch={false}
-                className="flex items-start gap-2.5 rounded-xl bg-muted/40 px-3 py-2 transition-colors hover:bg-muted"
+                className="flex items-start gap-2.5 rounded-md bg-muted/40 px-3 py-2 transition-colors hover:bg-muted"
               >
                 <span
                   className={`mt-0.5 shrink-0 ${row.overdue ? "text-destructive" : "text-muted-foreground"}`}

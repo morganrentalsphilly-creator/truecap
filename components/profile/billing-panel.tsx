@@ -279,7 +279,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
         </p>
       </div>
 
-      <Card className="rounded-2xl gap-3">
+      <Card className="rounded-lg gap-3">
         <CardHeader className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
@@ -300,13 +300,13 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
-          <div className="rounded-2xl border border-border bg-card p-3">
+          <div className="rounded-lg border border-border bg-card p-3">
             <p className="text-sm text-muted-foreground">Current plan</p>
             <p className="mt-1 text-xl font-bold text-foreground">{currentPlanTitle}</p>
             {subscriptionDisplay?.rateHeadline ? (
               <div
                 className={cn(
-                  "mt-2 rounded-xl border px-3 py-2.5",
+                  "mt-2 rounded-md border px-3 py-2.5",
                   subscriptionDisplay.isGrandfatheredTwenty
                     ? "border-positive/30 bg-positive-light text-positive"
                     : "border-border bg-muted/30 text-foreground"
@@ -339,7 +339,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
             <Button
               type="button"
               variant="outline"
-              className="rounded-xl"
+              className="rounded-md"
               onClick={handlePortal}
               disabled={isPortalPending || isCancelPending || !currentSubscription}
             >
@@ -350,7 +350,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-xl text-destructive hover:text-destructive"
+                className="rounded-md text-destructive hover:text-destructive"
                 onClick={handleCancelPortal}
                 disabled={isPortalPending || isCancelPending}
               >
@@ -370,7 +370,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
             <Card
               key={plan.slug}
               className={cn(
-                "rounded-2xl overflow-hidden",
+                "rounded-lg overflow-hidden",
                 isCurrent ? "border-primary/50 shadow-sm" : "border-border"
               )}
             >
@@ -392,7 +392,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                   : null}
                 </div>
                 <div className="pt-2">
-                  <span className="text-4xl font-extrabold tracking-tight">{plan.priceLabel}</span>
+                  <span className="text-4xl font-semibold tracking-tight">{plan.priceLabel}</span>
                   <span className="text-muted-foreground"> / {plan.intervalLabel}</span>
                 </div>
               </CardHeader>
@@ -418,7 +418,7 @@ export function BillingPanel({ currentSubscription, plans }: BillingPanelProps) 
                 ) : (
                 <Button
                   type="button"
-                  className="w-full rounded-xl"
+                  className="w-full rounded-md"
                   variant={isCurrent ? "outline" : "default"}
                   disabled={isCurrent || isPending || isPortalPending}
                   onClick={() =>

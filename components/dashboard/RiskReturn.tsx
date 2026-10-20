@@ -86,7 +86,7 @@ function ChartTooltip({
   if (!active || !payload?.length || !payload[0]?.payload) return null;
   const p = payload[0].payload;
   return (
-    <div className="rounded-xl border border-border bg-card px-3 py-2 text-xs shadow-sm">
+    <div className="rounded-md border border-border bg-card px-3 py-2 text-xs shadow-sm">
       <div>
         <span className="font-semibold text-muted-foreground">Property:</span>{" "}
         <span className="font-semibold text-foreground">{p.name || "-"}</span>
@@ -177,7 +177,7 @@ export function RiskReturn({
       : "No deals have both the selected return metric and a DSCR to plot.";
 
   return (
-    <div className="rounded-2xl bg-card border border-border p-4 sm:p-6">
+    <div className="rounded-lg bg-card border border-border p-4 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>
           <h3 className="text-lg font-semibold">Return vs model DSCR</h3>
@@ -213,10 +213,10 @@ export function RiskReturn({
             {/* Factual quadrant orientation only — no safety or investment verdict.
                 pointer-events-none so they never block the chart tooltip. */}
             <div aria-hidden className="pointer-events-none absolute inset-0 z-10">
-              <span className="absolute right-3 top-1 rounded bg-primary/10 px-1.5 py-0.5 text-3xs font-semibold text-primary">
+              <span className="absolute right-3 top-1 rounded bg-primary/10 px-1.5 py-0.5 text-xs font-semibold text-primary">
                 Above both references
               </span>
-              <span className="absolute bottom-9 left-10 rounded bg-muted px-1.5 py-0.5 text-3xs font-semibold text-muted-foreground">
+              <span className="absolute bottom-9 left-10 rounded bg-muted px-1.5 py-0.5 text-xs font-semibold text-muted-foreground">
                 Below both references
               </span>
             </div>
@@ -276,7 +276,7 @@ export function RiskReturn({
           ) : null}
         </>
       ) : (
-        <div className="flex h-[200px] flex-col items-center justify-center rounded-xl border border-dashed border-border text-center">
+        <div className="flex h-[200px] flex-col items-center justify-center rounded-md border border-dashed border-border text-center">
           <p className="text-sm font-medium text-foreground">Not enough data to plot</p>
           <p className="mt-1 max-w-xs text-xs text-muted-foreground">
             Deals need both a {active.label} value and a DSCR to appear here.

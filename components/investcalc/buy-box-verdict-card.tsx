@@ -274,7 +274,7 @@ export function BuyBoxVerdictCard({
       <section
         aria-label="Buy Box rules"
         role="status"
-        className="flex items-start gap-3 rounded-2xl border border-primary/20 bg-[var(--brand-blue-light)] p-4 text-sm text-foreground sm:p-5"
+        className="flex items-start gap-3 rounded-lg border border-primary/20 bg-[var(--brand-blue-light)] p-4 text-sm text-foreground sm:p-5"
       >
         <Loader2
           className="mt-0.5 size-4 shrink-0 animate-spin text-primary"
@@ -296,7 +296,7 @@ export function BuyBoxVerdictCard({
       <section
         aria-label="Buy Box rules unavailable"
         role="alert"
-        className="rounded-2xl border border-caution/30 bg-caution-light p-4 text-sm text-caution-text sm:p-5"
+        className="rounded-lg border border-caution/30 bg-caution-light p-4 text-sm text-caution-text sm:p-5"
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -350,7 +350,7 @@ export function BuyBoxVerdictCard({
     <section
       aria-label="Buy Box fit"
       className={cn(
-        "rounded-2xl border p-4 sm:p-5",
+        "rounded-lg border p-4 sm:p-5",
         r.passes
           ? "border-[var(--brand-green)]/30 bg-[var(--brand-green-light)]"
           : r.failedLabels.length > 0
@@ -388,7 +388,7 @@ export function BuyBoxVerdictCard({
         <span
           className={cn(
             "flex size-6 shrink-0 items-center justify-center rounded-full",
-            r.passes ? "bg-[var(--brand-green)] text-white" : "bg-caution text-white"
+            r.passes ? "bg-positive-light text-positive" : "bg-highlight-wash text-highlight-text"
           )}
         >
           {r.passes ? <Check className="size-3.5" /> : <X className="size-3.5" />}
@@ -397,7 +397,7 @@ export function BuyBoxVerdictCard({
           {headline}
         </p>
         {multi ? (
-          <span className="rounded-full border border-border bg-card px-2 py-0.5 text-3xs font-semibold text-muted-foreground">
+          <span className="rounded-full border border-border bg-card px-2 py-0.5 text-xs font-semibold text-muted-foreground">
             {primary.box.name}
           </span>
         ) : null}
@@ -471,7 +471,7 @@ export function BuyBoxVerdictCard({
             {c.gapText ? (
               <div
                 className={cn(
-                  "mt-0.5 text-3xs font-semibold",
+                  "mt-0.5 text-xs font-semibold",
                   c.pass === false ? "text-destructive-text" : "text-[var(--brand-green)]"
                 )}
               >

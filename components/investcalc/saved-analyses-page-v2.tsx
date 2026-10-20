@@ -836,14 +836,14 @@ function getTypeIcon(type: SavedPropertyType | null) {
 function getStatusBadge(item: SavedAnalysisListItem) {
   if (item.status === "completed") {
     return (
-      <Badge className="rounded-full border border-success/30 bg-success/10 text-success text-3xs font-semibold">
+      <Badge className="rounded-full border border-success/30 bg-success/10 text-success text-xs font-semibold">
         Completed
       </Badge>
     );
   }
   if (item.status === "archived") {
     return (
-      <Badge className="rounded-full border border-border bg-muted text-muted-foreground text-3xs font-semibold">
+      <Badge className="rounded-full border border-border bg-muted text-muted-foreground text-xs font-semibold">
         Archived
       </Badge>
     );
@@ -1214,7 +1214,7 @@ function DealTags({
               Add
             </Button>
           </div>
-          <p className="mt-1.5 text-3xs text-muted-foreground">
+          <p className="mt-1.5 text-xs text-muted-foreground">
             Up to 12 tags, 24 chars each.
           </p>
         </PopoverContent>
@@ -2462,7 +2462,7 @@ export function SavedAnalysesPage({
         <SlidersHorizontal className="h-3.5 w-3.5" />
         Filters
         {savedMobileFilterCount > 0 ? (
-          <span className="rounded-full bg-foreground px-1.5 text-3xs font-bold leading-4 text-background">
+          <span className="rounded-full bg-foreground px-1.5 text-xs font-bold leading-4 text-background">
             {savedMobileFilterCount}
           </span>
         ) : null}
@@ -2556,7 +2556,7 @@ export function SavedAnalysesPage({
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-2xl bg-muted/40 px-3 py-2">
+        <div className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2">
           <span className="text-xs font-semibold text-muted-foreground">
             Show only selected
           </span>
@@ -2577,7 +2577,7 @@ export function SavedAnalysesPage({
           type="button"
           onClick={handleExportCsv}
           disabled={displayItems.length === 0}
-          className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-2xl border border-border bg-muted/40 text-xs font-bold text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg border border-border bg-muted/40 text-xs font-bold text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50"
         >
           <FileDown className="h-3.5 w-3.5" />
           Export CSV ({displayItems.length})
@@ -3061,7 +3061,7 @@ export function SavedAnalysesPage({
           </Button>
           <div className="h-6 w-px bg-border" />
           <div className="space-y-1">
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            <h1 className="font-display text-balance text-section-sm text-foreground sm:text-section">
               My Deals
             </h1>
             <p className="text-sm text-muted-foreground">{dealCountLabel}</p>
@@ -3071,7 +3071,7 @@ export function SavedAnalysesPage({
             page silently hides most of the agent's deals with no explanation
             and no way back. */}
         {clientFilterName ? (
-          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-primary/25 bg-primary/5 px-3 py-2 text-sm">
+          <div className="flex flex-wrap items-center gap-2 rounded-md border border-primary/25 bg-primary/5 px-3 py-2 text-sm">
             <UserRound className="size-4 text-primary" aria-hidden />
             <div className="min-w-0 flex-1">
               <p className="text-foreground">
@@ -3099,7 +3099,7 @@ export function SavedAnalysesPage({
             </div>
           </div>
         ) : null}
-        <div className="rounded-2xl border border-border bg-card p-3 sm:p-4 space-y-4">
+        <div className="rounded-lg border border-border bg-card p-3 sm:p-4 space-y-4">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
             <div className="relative flex-1 max-w-xl">
               <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
@@ -3113,7 +3113,7 @@ export function SavedAnalysesPage({
                 onChange={(event) =>
                   handleSearchQueryChange(event.target.value)
                 }
-                className="h-11 rounded-xl border-border bg-muted/60 pl-9"
+                className="h-11 rounded-md border-border bg-muted/60 pl-9"
               />
             </div>
             {/* Phone width: the five sort pills collapse into one compact
@@ -3131,7 +3131,7 @@ export function SavedAnalysesPage({
                 onValueChange={(value) => handleSort(value as SortField)}
               >
                 <SelectTrigger
-                  className="h-11 flex-1 rounded-xl text-xs"
+                  className="h-11 flex-1 rounded-md text-xs"
                   aria-label="Sort deals by"
                 >
                   <SelectValue placeholder="Date Saved" />
@@ -3148,7 +3148,7 @@ export function SavedAnalysesPage({
                 type="button"
                 onClick={() => handleSort(activeSortField ?? "saved")}
                 aria-label="Toggle sort direction"
-                className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/60 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-border bg-muted/60 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 {activeSortField && activeSortDirection === "asc" ? (
                   <ArrowUp className="w-3.5 h-3.5" />
@@ -3205,7 +3205,7 @@ export function SavedAnalysesPage({
           {isMethodologySensitiveSort && hasMixedMethodologyCohorts ? (
             <p
               role="status"
-              className="rounded-xl border border-border bg-muted/45 px-3 py-2 text-xs text-muted-foreground"
+              className="rounded-md border border-border bg-muted/45 px-3 py-2 text-xs text-muted-foreground"
             >
               Results are grouped by underwriting version. Current and recorded
               calculations are never ranked against each other.
@@ -3226,7 +3226,7 @@ export function SavedAnalysesPage({
               className={cn(
                 "inline-flex min-h-11 items-center gap-1.5 self-start rounded-full border px-3 py-2 text-xs font-semibold transition-colors",
                 buyBoxOnly
-                  ? "border-[var(--brand-green)] bg-[var(--brand-green)] text-white"
+                  ? "border-[var(--brand-green)] bg-positive-light text-positive"
                   : "border-[var(--brand-green)]/30 bg-[var(--brand-green-light)] text-[var(--brand-green)] hover:bg-[var(--brand-green)]/15",
               )}
             >
@@ -3234,7 +3234,7 @@ export function SavedAnalysesPage({
               Meets my buy box
               <span
                 className={cn(
-                  "rounded-full px-1.5 py-px text-3xs tabular-nums",
+                  "rounded-full px-1.5 py-px text-xs tabular-nums",
                   buyBoxOnly ? "bg-white/20" : "bg-[var(--brand-green)]/15",
                 )}
               >
@@ -3252,7 +3252,7 @@ export function SavedAnalysesPage({
               type="button"
               variant="outline"
               size="sm"
-              className="h-11 gap-1.5 rounded-xl px-3 text-xs"
+              className="h-11 gap-1.5 rounded-md px-3 text-xs"
               onClick={() => setDesktopFiltersOpen((open) => !open)}
               aria-expanded={desktopFiltersOpen}
               aria-controls="desktop-deal-filters"
@@ -3260,7 +3260,7 @@ export function SavedAnalysesPage({
               <SlidersHorizontal className="h-3.5 w-3.5" />
               Filters
               {advancedDesktopFilterCount > 0 ? (
-                <span className="rounded-full bg-foreground px-1.5 text-3xs font-bold leading-4 text-background">
+                <span className="rounded-full bg-foreground px-1.5 text-xs font-bold leading-4 text-background">
                   {advancedDesktopFilterCount}
                 </span>
               ) : null}
@@ -3384,7 +3384,7 @@ export function SavedAnalysesPage({
               <Button
                 variant="outline"
                 size="sm"
-                className="h-11 gap-1.5 rounded-xl text-xs"
+                className="h-11 gap-1.5 rounded-md text-xs"
                 onClick={handleExportCsv}
                 disabled={displayItems.length === 0}
               >
@@ -3396,12 +3396,12 @@ export function SavedAnalysesPage({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-11 gap-1.5 rounded-xl text-xs"
+                    className="h-11 gap-1.5 rounded-md text-xs"
                   >
                     <SlidersHorizontal className="h-3.5 w-3.5" />
                     Columns
                     {optionalColumnCount > 0 ? (
-                      <span className="rounded-full bg-foreground px-1.5 text-3xs font-bold leading-4 text-background">
+                      <span className="rounded-full bg-foreground px-1.5 text-xs font-bold leading-4 text-background">
                         {optionalColumnCount}
                       </span>
                     ) : null}
@@ -3465,7 +3465,7 @@ export function SavedAnalysesPage({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card overflow-hidden">
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
           <div className="space-y-3 p-3 xl:hidden">
             {pagedItems.map((item, itemIndex) => {
               const address = getAddressParts(item);
@@ -3496,7 +3496,7 @@ export function SavedAnalysesPage({
               return (
                 <Fragment key={item.id}>
                   {startsMethodologyCohort ? (
-                    <div className="rounded-xl border border-border bg-muted/40 px-3 py-2">
+                    <div className="rounded-md border border-border bg-muted/40 px-3 py-2">
                       <p className="text-xs font-bold text-foreground">
                         {item.methodologyGroupLabel ?? "Current underwriting"}
                       </p>
@@ -3508,12 +3508,12 @@ export function SavedAnalysesPage({
                   ) : null}
                   <article
                     className={cn(
-                      "rounded-2xl border border-border bg-background p-4 shadow-sm transition-colors",
+                      "rounded-lg border border-border bg-background p-4 shadow-sm transition-colors",
                       isSelected && "border-primary/40 bg-primary/5",
                     )}
                   >
                     <div className="flex items-start gap-3 ">
-                      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                         <PropertyTypeIcon className="w-4 h-4" />
                       </span>
                       <div className="min-w-0 flex-1">
@@ -3529,13 +3529,13 @@ export function SavedAnalysesPage({
                           {item.scenarioName ? (
                             // Sibling scenarios share the address (and nickname) —
                             // this suffix keeps them tellable apart at a glance.
-                            <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-3xs font-semibold text-muted-foreground">
+                            <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-xs font-semibold text-muted-foreground">
                               Scenario · {item.scenarioName}
                             </span>
                           ) : duplicateMarkerById.has(item.id) ? (
                             // Unnamed duplicate saves at one address.
                             <span
-                              className="shrink-0 rounded-full border border-border px-2 py-0.5 text-3xs font-semibold text-muted-foreground"
+                              className="shrink-0 rounded-full border border-border px-2 py-0.5 text-xs font-semibold text-muted-foreground"
                               title="You have more than one saved analysis for this address"
                             >
                               {duplicateMarkerById.get(item.id)!.index} of{" "}
@@ -3556,7 +3556,7 @@ export function SavedAnalysesPage({
                           {item.methodologyLabel ? (
                             <Badge
                               variant="outline"
-                              className="rounded-full text-3xs font-semibold text-muted-foreground"
+                              className="rounded-full text-xs font-semibold text-muted-foreground"
                               title={
                                 item.methodologyIsCurrent === false
                                   ? `${item.methodologyLabel}. Re-underwrite this deal before comparing it with the current model.`
@@ -3643,13 +3643,13 @@ export function SavedAnalysesPage({
                     </div>
 
                     <div className="mt-4 grid grid-cols-2 gap-2">
-                      <div className="rounded-xl bg-muted/40 p-3">
+                      <div className="rounded-md bg-muted/40 p-3">
                         <p className="text-xs font-medium text-muted-foreground">
                           Cash Flow
                         </p>
                         <p
                           className={cn(
-                            "mt-1 text-sm font-extrabold",
+                            "mt-1 text-sm font-semibold",
                             (item.netCashFlowMonthly ?? 0) >= 0
                               ? "text-success"
                               : "text-[var(--metric-negative)]",
@@ -3658,13 +3658,13 @@ export function SavedAnalysesPage({
                           {toMonthCashFlow(item.netCashFlowMonthly)}
                         </p>
                       </div>
-                      <div className="rounded-xl bg-muted/40 p-3">
+                      <div className="rounded-md bg-muted/40 p-3">
                         <p className="text-xs font-medium text-muted-foreground">
                           CoC
                         </p>
                         <p
                           className={cn(
-                            "mt-1 text-sm font-extrabold",
+                            "mt-1 text-sm font-semibold",
                             cocNotApplicable
                               ? "text-muted-foreground"
                               : (cocReturnPct ?? 0) >= 0
@@ -3675,19 +3675,19 @@ export function SavedAnalysesPage({
                           {cocNotApplicable ? "N/A" : toPercent(cocReturnPct)}
                         </p>
                       </div>
-                      <div className="rounded-xl bg-muted/40 p-3">
+                      <div className="rounded-md bg-muted/40 p-3">
                         <p className="text-xs font-medium text-muted-foreground">
                           Cap Rate
                         </p>
-                        <p className="mt-1 text-sm font-extrabold text-foreground">
+                        <p className="mt-1 text-sm font-semibold text-foreground">
                           {toPercent(item.capRatePct)}
                         </p>
                       </div>
-                      <div className="rounded-xl bg-muted/40 p-3">
+                      <div className="rounded-md bg-muted/40 p-3">
                         <p className="text-xs font-medium text-muted-foreground">
                           Price
                         </p>
-                        <p className="mt-1 text-sm font-extrabold text-foreground">
+                        <p className="mt-1 text-sm font-semibold text-foreground">
                           {toCurrency(item.purchasePrice)}
                         </p>
                       </div>
@@ -3735,7 +3735,7 @@ export function SavedAnalysesPage({
                         <Button
                           variant="outline"
                           size="sm"
-                          className="h-11 flex-1 rounded-xl px-2.5 text-xs"
+                          className="h-11 flex-1 rounded-md px-2.5 text-xs"
                           asChild
                         >
                           <Link
@@ -3752,7 +3752,7 @@ export function SavedAnalysesPage({
                               type="button"
                               variant="outline"
                               size="sm"
-                              className="h-11 w-11 shrink-0 rounded-xl p-0"
+                              className="h-11 w-11 shrink-0 rounded-md p-0"
                               aria-label={`More actions for ${address.main}`}
                             >
                               <MoreHorizontal className="h-4 w-4" />
@@ -3772,7 +3772,7 @@ export function SavedAnalysesPage({
                                 ? "Download saved PDF"
                                 : "Export PDF"}
                               {!canExportPdf && !item.hasSavedPdf ? (
-                                <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-3xs font-bold text-primary">
+                                <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-xs font-bold text-primary">
                                   PRO
                                 </span>
                               ) : null}
@@ -3979,7 +3979,7 @@ export function SavedAnalysesPage({
                       primary control — sat ~350px past the right edge and was
                       unreachable without discovering horizontal scroll. Pin it
                       so Open is always in view; the rest still scrolls. */}
-                  <th className="sticky right-0 z-10 bg-card text-left text-xs text-muted-foreground font-medium shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.12)]">
+                  <th className="sticky right-0 z-10 bg-card text-left text-xs text-muted-foreground font-medium shadow-sm">
                     Actions
                   </th>
                 </tr>
@@ -4064,7 +4064,7 @@ export function SavedAnalysesPage({
                                 {item.scenarioName ? (
                                   // Sibling scenarios share the address (and
                                   // nickname) — keep the rows tellable apart.
-                                  <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-3xs font-semibold text-muted-foreground">
+                                  <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-xs font-semibold text-muted-foreground">
                                     Scenario · {item.scenarioName}
                                   </span>
                                 ) : duplicateMarkerById.has(item.id) ? (
@@ -4076,7 +4076,7 @@ export function SavedAnalysesPage({
                                   // dropped it, which is the viewport where the
                                   // duplicates sit next to each other.
                                   <span
-                                    className="shrink-0 rounded-full border border-border px-2 py-0.5 text-3xs font-semibold text-muted-foreground"
+                                    className="shrink-0 rounded-full border border-border px-2 py-0.5 text-xs font-semibold text-muted-foreground"
                                     title="You have more than one saved analysis for this address"
                                   >
                                     {duplicateMarkerById.get(item.id)!.index} of{" "}
@@ -4176,7 +4176,7 @@ export function SavedAnalysesPage({
                             {item.methodologyLabel ? (
                               <Badge
                                 variant="outline"
-                                className="rounded-full text-3xs font-semibold text-muted-foreground"
+                                className="rounded-full text-xs font-semibold text-muted-foreground"
                                 title={
                                   item.methodologyIsCurrent === false
                                     ? `${item.methodologyLabel}. Re-underwrite this deal before comparing it with the current model.`
@@ -4342,7 +4342,7 @@ export function SavedAnalysesPage({
                             ) : null}
                           </div>
                         </td>
-                        <td className="sticky right-0 z-10 bg-card pr-2 shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.12)]">
+                        <td className="sticky right-0 z-10 bg-card pr-2 shadow-sm">
                           {/* Consolidated: a single primary "Open Analysis" plus a
                             ⋯ overflow menu for the secondary actions. Previously
                             three full-width buttons here overflowed the row and
@@ -4400,7 +4400,7 @@ export function SavedAnalysesPage({
                                     ? "Download saved PDF"
                                     : "Export PDF"}
                                   {!canExportPdf && !item.hasSavedPdf ? (
-                                    <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-3xs font-bold text-primary">
+                                    <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0 text-xs font-bold text-primary">
                                       PRO
                                     </span>
                                   ) : null}
@@ -4440,7 +4440,7 @@ export function SavedAnalysesPage({
                    the brand-new-user welcome — purely because the filter
                    returned nothing. Name the real situation and the next step. */
                 <>
-                  <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <UserRound className="w-5 h-5" />
                   </div>
                   <p className="text-base font-bold text-foreground">
@@ -4454,7 +4454,7 @@ export function SavedAnalysesPage({
                   <Button
                     asChild
                     variant="outline"
-                    className="mt-4 rounded-full"
+                    className="mt-4"
                   >
                     <Link href="/dashboard/saved-analyses">Show all deals</Link>
                   </Button>
@@ -4466,9 +4466,6 @@ export function SavedAnalysesPage({
                    user with archived deals to "save your first deal" is simply
                    false. */
                 <>
-                  <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-muted">
-                    <Search className="w-5 h-5 text-muted-foreground" />
-                  </div>
                   <p className="text-sm font-semibold text-foreground">
                     No {activeDealStateFilter} deals
                   </p>
@@ -4478,7 +4475,7 @@ export function SavedAnalysesPage({
                   <Button
                     asChild
                     variant="outline"
-                    className="mt-4 rounded-full"
+                    className="mt-4"
                   >
                     <Link href="/dashboard/saved-analyses?state=all">
                       Show all deals
@@ -4493,10 +4490,7 @@ export function SavedAnalysesPage({
                    ENTITLEMENT_SAVE) and compare_deals is a Pro feature
                    (lib/entitlements-catalog.ts), so both are named as Pro. */
                 <>
-                  <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <p className="text-base font-bold text-foreground">
+                  <p className="font-display text-xl text-foreground">
                     Save your first deal
                   </p>
                   <p className="mx-auto mt-1 max-w-sm text-sm leading-relaxed text-muted-foreground">
@@ -4506,20 +4500,25 @@ export function SavedAnalysesPage({
                     so you can revisit any deal you&apos;re considering. Pro
                     adds editing and comparison.
                   </p>
-                  <Button
-                    asChild
-                    size="lg"
-                    className="mt-5 w-full rounded-full sm:w-auto"
-                  >
-                    <Link href="/dashboard/new?fresh=1">Open the analyzer</Link>
-                  </Button>
+                  <div className="mt-5 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+                    <Button asChild size="lg" className="w-full sm:w-auto">
+                      <Link href="/dashboard/new?fresh=1">Open the analyzer</Link>
+                    </Button>
+                    {/* The empty state points at the next action with the
+                        sample deal (OVERHAUL.md §7): the signed-in analyzer
+                        runs it from the same flag the homepage forwards. */}
+                    <Link
+                      href="/dashboard/new?sample=1"
+                      prefetch={false}
+                      className="tc-link inline-flex min-h-11 items-center justify-center text-sm font-medium"
+                    >
+                      Try the sample deal first
+                    </Link>
+                  </div>
                 </>
               ) : (
                 /* Has deals, but filters/search hide them all. */
                 <>
-                  <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-muted">
-                    <Search className="w-5 h-5 text-muted-foreground" />
-                  </div>
                   <p className="text-sm font-semibold text-foreground">
                     No deals match your filters
                   </p>
@@ -4529,7 +4528,7 @@ export function SavedAnalysesPage({
                   <Button
                     type="button"
                     variant="outline"
-                    className="rounded-full mt-4"
+                    className="mt-4"
                     onClick={() => {
                       // These live in React state + sessionStorage, so the old
                       // <Link> to this same route cleared nothing at all.
@@ -4615,7 +4614,7 @@ export function SavedAnalysesPage({
           )}
         </div>
 
-        <div className="rounded-2xl border border-dashed border-border bg-card/60 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="rounded-lg border border-dashed border-border bg-card/60 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">
             Showing {displayItems.length === 0 ? 0 : pageStartIndex + 1}-
             {pageEndIndex} of {displayItems.length}
@@ -4664,7 +4663,7 @@ export function SavedAnalysesPage({
           aria-live="polite"
           aria-atomic="true"
           className={cn(
-            "fixed inset-x-0 z-40 mx-auto flex w-[min(680px,calc(100vw-32px))] flex-col gap-2 rounded-2xl border border-border bg-card/95 px-4 py-3 shadow-2xl backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:gap-3",
+            "fixed inset-x-0 z-40 mx-auto flex w-[min(680px,calc(100vw-32px))] flex-col gap-2 rounded-lg border border-border bg-card/95 px-4 py-3 shadow-2xl backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:gap-3",
             // While consent is still pending, sit ABOVE the banner instead of
             // behind it. The banner measures ~96px below sm (its one-line copy
             // wraps to two on the narrowest phones) and ~78px from sm; the

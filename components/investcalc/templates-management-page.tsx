@@ -544,7 +544,7 @@ export function TemplatesManagementPage({
             </Button>
             <div className="h-6 w-px bg-border" />
             <div className="space-y-1">
-              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground xl:text-3xl">
+              <h1 className="font-display text-balance text-section-sm text-foreground sm:text-section">
                 Templates
               </h1>
               <p className="text-xs md:text-sm text-muted-foreground ">
@@ -565,7 +565,7 @@ export function TemplatesManagementPage({
             pre-populated with the starter's values so the user can
             tweak before saving - perfect for new users who don't yet
             know what every percent field means. */}
-        <section className="rounded-2xl border border-border bg-gradient-to-br from-primary/5 via-card to-card p-4 sm:p-5">
+        <section className="rounded-lg border border-border bg-card p-4 sm:p-5">
           <div className="flex items-baseline gap-2">
             <Sparkles className="size-4 text-primary" />
             <h2 className="text-sm font-medium text-foreground">
@@ -580,7 +580,7 @@ export function TemplatesManagementPage({
             {RELEASED_STARTER_TEMPLATES.map((starter) => (
               <article
                 key={starter.key}
-                className="flex flex-col gap-2 rounded-xl border border-border bg-background p-3 shadow-sm"
+                className="flex flex-col gap-2 rounded-md border border-border bg-background p-3 shadow-sm"
               >
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="text-sm font-bold leading-tight text-foreground">
@@ -639,7 +639,7 @@ export function TemplatesManagementPage({
             Your templates
           </h2>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-3 sm:p-4">
+        <div className="rounded-lg border border-border bg-card p-3 sm:p-4">
           <div className="relative max-w-md">
             <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
             <Input
@@ -647,20 +647,20 @@ export function TemplatesManagementPage({
               placeholder="Search templates..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-10 rounded-xl bg-muted/60 border-border"
+              className="pl-9 h-10 rounded-md bg-muted/60 border-border"
             />
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card overflow-hidden">
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
           <div className="space-y-3 p-3 xl:hidden">
             {pagedTemplates.map((template) => (
               <article
                 key={template.id}
-                className="rounded-2xl border border-border bg-background p-4 shadow-sm"
+                className="rounded-lg border border-border bg-background p-4 shadow-sm"
               >
                 <div className="flex items-start gap-3">
-                  <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                     <FileText className="w-4 h-4" />
                   </span>
                   <div className="min-w-0 flex-1">
@@ -690,36 +690,36 @@ export function TemplatesManagementPage({
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-2">
-                  <div className="rounded-xl bg-muted/40 p-3">
+                  <div className="rounded-md bg-muted/40 p-3">
                     <p className="text-xs font-medium text-muted-foreground">
                       Down Payment
                     </p>
-                    <p className="mt-1 text-sm font-extrabold text-foreground">
+                    <p className="mt-1 text-sm font-semibold text-foreground">
                       {toPercentLabel(template.downPaymentPct)}
                     </p>
                   </div>
-                  <div className="rounded-xl bg-muted/40 p-3">
+                  <div className="rounded-md bg-muted/40 p-3">
                     <p className="text-xs font-medium text-muted-foreground">
                       Interest Rate
                     </p>
-                    <p className="mt-1 text-sm font-extrabold text-foreground">
+                    <p className="mt-1 text-sm font-semibold text-foreground">
                       {toPercentLabel(template.interestRatePct)}
                     </p>
                   </div>
-                  <div className="rounded-xl bg-muted/40 p-3">
+                  <div className="rounded-md bg-muted/40 p-3">
                     <p className="text-xs font-medium text-muted-foreground">
                       Vacancy
                     </p>
-                    <p className="mt-1 text-sm font-extrabold text-foreground">
+                    <p className="mt-1 text-sm font-semibold text-foreground">
                       {toPercentLabel(template.vacancyPct)}
                     </p>
                   </div>
                   {TAX_STRATEGY_RELEASED ? (
-                    <div className="rounded-xl bg-muted/40 p-3">
+                    <div className="rounded-md bg-muted/40 p-3">
                       <p className="text-xs font-medium text-muted-foreground">
                         Tax Rate
                       </p>
-                      <p className="mt-1 text-sm font-extrabold text-foreground">
+                      <p className="mt-1 text-sm font-semibold text-foreground">
                         {toPercentLabel(template.taxRatePct)}
                       </p>
                     </div>
@@ -731,7 +731,7 @@ export function TemplatesManagementPage({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-10 rounded-xl"
+                    className="h-10 rounded-md"
                     onClick={() => openEditDialog(template)}
                   >
                     <Pencil className="w-4 h-4 mr-1.5" />
@@ -741,7 +741,7 @@ export function TemplatesManagementPage({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-10 rounded-xl"
+                    className="h-10 rounded-md"
                     disabled={busyTemplateId === template.id}
                     onClick={() => handleDuplicate(template)}
                   >
@@ -752,7 +752,7 @@ export function TemplatesManagementPage({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-10 rounded-xl"
+                    className="h-10 rounded-md"
                     disabled={
                       template.isDefault || busyTemplateId === template.id
                     }
@@ -765,7 +765,7 @@ export function TemplatesManagementPage({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-10 rounded-xl text-destructive hover:text-destructive"
+                    className="h-10 rounded-md text-destructive hover:text-destructive"
                     onClick={() => setTemplateToDelete(template)}
                   >
                     <Trash2 className="w-4 h-4 mr-1.5" />
@@ -777,7 +777,7 @@ export function TemplatesManagementPage({
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="mt-2 h-9 w-full rounded-xl text-primary"
+                    className="mt-2 h-9 w-full rounded-md text-primary"
                     disabled={busyTemplateId === template.id}
                     onClick={() => handleUseAsBuyBox(template)}
                   >
@@ -789,7 +789,7 @@ export function TemplatesManagementPage({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="mt-2 h-9 w-full rounded-xl"
+                  className="mt-2 h-9 w-full rounded-md"
                   onClick={() => openApplyDialog(template)}
                 >
                   <ArrowRightLeft className="w-4 h-4 mr-1.5" />
@@ -799,7 +799,7 @@ export function TemplatesManagementPage({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="mt-2 h-9 w-full rounded-xl"
+                  className="mt-2 h-9 w-full rounded-md"
                   onClick={() => openVersionDialog(template)}
                 >
                   <History className="w-4 h-4 mr-1.5" />
@@ -1083,7 +1083,7 @@ export function TemplatesManagementPage({
           </DialogHeader>
 
           {templateToDelete && (
-            <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-1">
+            <div className="rounded-md border border-border bg-muted/30 p-3 space-y-1">
               <p className="text-sm font-semibold text-foreground">
                 {templateToDelete.templateName}
               </p>
@@ -1244,7 +1244,7 @@ export function TemplatesManagementPage({
               {versions.map((v, i) => (
                 <div
                   key={v.id}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-border bg-card p-3"
+                  className="flex items-center justify-between gap-3 rounded-md border border-border bg-card p-3"
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-foreground">

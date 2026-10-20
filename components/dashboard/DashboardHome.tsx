@@ -34,7 +34,7 @@ import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 // gets the headline numbers painted before the charts hydrate.
 const ChartSkeleton = ({ heightClass }: { heightClass: string }) => (
   <div
-    className={`${heightClass} animate-pulse rounded-2xl border border-border bg-card`}
+    className={`${heightClass} animate-pulse rounded-lg border border-border bg-card`}
   />
 );
 const PortfolioChart = dynamic(
@@ -1031,7 +1031,7 @@ export function DashboardHome({
             collapses to a hamburger, so these stay essential. */}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl xl:text-4xl font-bold tracking-tight">
+            <h1 className="font-display text-balance text-section-sm text-foreground sm:text-section">
               {/* An email local-part is not a name. page.tsx's getDisplayName
                   already falls back to it, so the old second fallback here was
                   dead code that guaranteed "Welcome back, <email handle>".
@@ -1050,7 +1050,7 @@ export function DashboardHome({
             <Button
               asChild
               variant="outline"
-              className="min-h-11 rounded-xl px-4 text-sm"
+              className="min-h-11 rounded-md px-4 text-sm"
             >
               <Link href="/dashboard/saved-analyses" prefetch={false}>
                 <Briefcase className="h-4 w-4" />
@@ -1061,7 +1061,7 @@ export function DashboardHome({
               <Button
                 asChild
                 variant="outline"
-                className="min-h-11 rounded-xl px-4 text-sm"
+                className="min-h-11 rounded-md px-4 text-sm"
               >
                 <Link href="/dashboard/compare" prefetch={false}>
                   <ArrowUpDown className="h-4 w-4" />
@@ -1072,13 +1072,13 @@ export function DashboardHome({
               <Button
                 asChild
                 variant="outline"
-                className="min-h-11 rounded-xl px-4 text-sm"
+                className="min-h-11 rounded-md px-4 text-sm"
                 title="Compare 2-4 deals side-by-side — Pro feature"
               >
                 <Link href="/pricing" prefetch={false}>
                   <ArrowUpDown className="h-4 w-4" />
                   Compare
-                  <span className="ml-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-3xs font-bold text-primary">
+                  <span className="ml-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-xs font-bold text-primary">
                     PRO
                   </span>
                 </Link>
@@ -1090,7 +1090,7 @@ export function DashboardHome({
         {data.portfolioAggregateStatus === "unavailable" ? (
           <div
             role="alert"
-            className="flex flex-col gap-3 rounded-2xl border border-warning/35 bg-warning/10 p-4 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-3 rounded-lg border border-warning/35 bg-warning/10 p-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
               <p className="text-sm font-semibold text-foreground">
@@ -1105,7 +1105,7 @@ export function DashboardHome({
             <Button
               asChild
               variant="outline"
-              className="min-h-11 shrink-0 rounded-xl"
+              className="min-h-11 shrink-0 rounded-md"
             >
               <Link href="/dashboard" prefetch={false}>
                 Retry totals
@@ -1117,7 +1117,7 @@ export function DashboardHome({
         {data.portfolioAggregateStatus === "mixed-methodology" ? (
           <div
             role="status"
-            className="flex flex-col gap-3 rounded-2xl border border-warning/35 bg-warning/10 p-4 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-3 rounded-lg border border-warning/35 bg-warning/10 p-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
               <p className="text-sm font-semibold text-foreground">
@@ -1132,7 +1132,7 @@ export function DashboardHome({
             <Button
               asChild
               variant="outline"
-              className="min-h-11 shrink-0 rounded-xl"
+              className="min-h-11 shrink-0 rounded-md"
             >
               <Link href="/dashboard/saved-analyses" prefetch={false}>
                 Review recorded deals
@@ -1156,11 +1156,11 @@ export function DashboardHome({
         {decisionCenter ? (
           <section
             aria-label="Decision center"
-            className="rounded-2xl border border-border bg-card p-4 sm:p-5"
+            className="rounded-lg border border-border bg-card p-4 sm:p-5"
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
-                <h2 className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+                <h2 className="text-xs font-medium text-muted-foreground">
                   Decision center
                 </h2>
                 <p className="mt-1 max-w-3xl text-xs leading-relaxed text-muted-foreground">
@@ -1174,7 +1174,7 @@ export function DashboardHome({
                 prefetch={false}
                 className="inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-2 hover:underline"
               >
-                Next: {decisionCenter.nextAction.label} →
+                Next: {decisionCenter.nextAction.label}
               </Link>
             </div>
             {/* Horizontal snap rail below sm — three stacked full-width
@@ -1198,9 +1198,9 @@ export function DashboardHome({
                 }
                 prefetch={false}
                 aria-label={`Open highest-scoring deal: ${decisionCenter.best?.address ?? "My Deals"}`}
-                className="rounded-xl border border-success/30 bg-success/5 p-3 transition hover:bg-success/10 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="rounded-md border border-success/30 bg-success/5 p-3 transition hover:bg-success/10 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
-                <div className="flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest text-success">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-success">
                   <Award className="h-3.5 w-3.5" /> Highest Deal score
                 </div>
                 <div className="mt-1 truncate text-sm font-bold text-foreground">
@@ -1215,7 +1215,7 @@ export function DashboardHome({
                     : ""}
                 </div>
                 <span className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-success">
-                  Open deal →
+                  Open deal
                 </span>
               </Link>
               <Link
@@ -1233,7 +1233,7 @@ export function DashboardHome({
                       : "Review deals missing cash-flow data"
                 }
                 className={cn(
-                  "rounded-xl border p-3 transition focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+                  "rounded-md border p-3 transition focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                   decisionCenter.needsReview
                     ? "border-destructive/30 bg-destructive/5"
                     : decisionCenter.cashFlowCoverageComplete
@@ -1243,7 +1243,7 @@ export function DashboardHome({
               >
                 <div
                   className={cn(
-                    "flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest",
+                    "flex items-center gap-1.5 text-xs font-medium",
                     decisionCenter.needsReview
                       ? "text-destructive"
                       : decisionCenter.cashFlowCoverageComplete
@@ -1281,10 +1281,10 @@ export function DashboardHome({
                 )}
                 <span className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-primary">
                   {decisionCenter.needsReview
-                    ? "Review deal →"
+                    ? "Review deal"
                     : decisionCenter.cashFlowCoverageComplete
-                      ? "View active deals →"
-                      : "Review missing data →"}
+                      ? "View active deals"
+                      : "Review missing data"}
                 </span>
               </Link>
               <Link
@@ -1295,9 +1295,9 @@ export function DashboardHome({
                 }
                 prefetch={false}
                 aria-label={`Open highest modeled-upside deal: ${decisionCenter.bestUpside?.address ?? "My Deals"}`}
-                className="rounded-xl border border-primary/30 bg-primary/5 p-3 transition hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="rounded-md border border-primary/30 bg-primary/5 p-3 transition hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
-                <div className="flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest text-primary">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-primary">
                   <TrendingUp className="h-3.5 w-3.5" /> Highest modeled upside
                 </div>
                 <div className="mt-1 truncate text-sm font-bold text-foreground">
@@ -1318,8 +1318,8 @@ export function DashboardHome({
                 </div>
                 <span className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-primary">
                   {decisionCenter.bestUpside
-                    ? "Open deal →"
-                    : "View My Deals →"}
+                    ? "Open deal"
+                    : "View My Deals"}
                 </span>
               </Link>
               {/* PV-1: the personal tile — how many active deals pass the
@@ -1338,9 +1338,9 @@ export function DashboardHome({
                       : "/dashboard/saved-analyses"
                   }
                   prefetch={false}
-                  className="rounded-xl border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)]/50 p-3 transition hover:bg-[var(--brand-green-light)]"
+                  className="rounded-md border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)]/50 p-3 transition hover:bg-[var(--brand-green-light)]"
                 >
-                  <div className="flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest text-[var(--brand-green)]">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-[var(--brand-green)]">
                     <Target className="h-3.5 w-3.5" /> Meets your buy box
                   </div>
                   <div className="mt-1 truncate text-sm font-bold text-foreground">
@@ -1349,8 +1349,8 @@ export function DashboardHome({
                   </div>
                   <div className="truncate text-xs text-muted-foreground">
                     {buyBoxSummary.passingCount > 0
-                      ? "See the deals that pass →"
-                      : "None pass yet — see the gaps →"}
+                      ? "See the deals that pass"
+                      : "None pass yet — see the gaps"}
                   </div>
                 </Link>
               ) : null}
@@ -1416,9 +1416,9 @@ export function DashboardHome({
             invisible until useful. */}
         {owned && owned.count > 0 ? (
           <section aria-label="Owned portfolio" className="space-y-4">
-            <div className="rounded-2xl border border-border bg-gradient-to-br from-card via-card to-card/60 p-4 shadow-sm sm:p-5">
+            <div className="rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+                <h2 className="text-xs font-medium text-muted-foreground">
                   Owned portfolio · {owned.count}{" "}
                   {owned.count === 1 ? "property" : "properties"}
                 </h2>
@@ -1427,15 +1427,15 @@ export function DashboardHome({
                   prefetch={false}
                   className="inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-2 hover:underline"
                 >
-                  View owned deals →
+                  View owned deals
                 </Link>
               </div>
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-5">
                 <div>
-                  <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+                  <div className="text-xs font-medium text-muted-foreground">
                     Owned Equity
                   </div>
-                  <div className="mt-1 text-lg font-extrabold tabular-nums leading-tight break-words text-foreground sm:text-2xl">
+                  <div className="mt-1 text-lg font-semibold tabular-nums leading-tight break-words text-foreground sm:text-2xl">
                     {owned.totalEquity != null
                       ? `~${formatCurrency(owned.totalEquity)}`
                       : "—"}
@@ -1463,16 +1463,16 @@ export function DashboardHome({
                   </div>
                 </div>
                 <div>
-                  <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+                  <div className="text-xs font-medium text-muted-foreground">
                     Built Since Close
                   </div>
                   <div
                     className={cn(
-                      "mt-1 text-lg font-extrabold tabular-nums leading-tight break-words sm:text-2xl",
+                      "mt-1 text-lg font-semibold tabular-nums leading-tight break-words sm:text-2xl",
                       owned.equityGain != null && owned.equityGain > 0
-                        ? "text-[var(--metric-positive,#16a34a)]"
+                        ? "text-positive"
                         : owned.equityGain != null && owned.equityGain < 0
-                          ? "text-[var(--metric-negative,#dc2626)]"
+                          ? "text-negative"
                           : "text-foreground",
                     )}
                   >
@@ -1485,17 +1485,17 @@ export function DashboardHome({
                   </div>
                 </div>
                 <div>
-                  <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+                  <div className="text-xs font-medium text-muted-foreground">
                     Monthly Cash Flow
                   </div>
                   <div
                     className={cn(
-                      "mt-1 text-lg font-extrabold tabular-nums leading-tight break-words sm:text-2xl",
+                      "mt-1 text-lg font-semibold tabular-nums leading-tight break-words sm:text-2xl",
                       owned.monthlyCashFlow != null && owned.monthlyCashFlow > 0
-                        ? "text-[var(--metric-positive,#16a34a)]"
+                        ? "text-positive"
                         : owned.monthlyCashFlow != null &&
                             owned.monthlyCashFlow < 0
-                          ? "text-[var(--metric-negative,#dc2626)]"
+                          ? "text-negative"
                           : "text-foreground",
                     )}
                   >
@@ -1536,7 +1536,7 @@ export function DashboardHome({
             {hasAnyDeals && portfolio ? (
               <section>
                 <div className="mb-3 flex items-center justify-between">
-                  <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  <h2 className="text-xs font-medium text-muted-foreground">
                     Portfolio overview
                   </h2>
                 </div>
@@ -1583,7 +1583,7 @@ export function DashboardHome({
                 {/* One-line stat strip — supplementary context that doesn't
                 deserve full StatCard chrome. Dot-separators visually
                 connect them as a single fact line. */}
-                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-xl border border-border bg-card/40 px-4 py-2.5 text-xs text-muted-foreground">
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 rounded-md border border-border bg-card/40 px-4 py-2.5 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5">
                     <Percent className="h-3.5 w-3.5 text-muted-foreground/60" />
                     <span className="font-semibold text-foreground">
@@ -1649,8 +1649,8 @@ export function DashboardHome({
                 above without adding new inputs. */}
                 {kpis ? (
                   <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                    <div className="rounded-xl border border-border bg-card p-3">
-                      <div className="flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+                    <div className="rounded-md border border-border bg-card p-3">
+                      <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                         <Award className="h-3.5 w-3.5" /> Avg Deal score
                       </div>
                       <div className="mt-1 text-lg font-bold text-foreground">
@@ -1665,8 +1665,8 @@ export function DashboardHome({
                         ) : null}
                       </div>
                     </div>
-                    <div className="rounded-xl border border-border bg-card p-3">
-                      <div className="flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+                    <div className="rounded-md border border-border bg-card p-3">
+                      <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                         <Layers className="h-3.5 w-3.5" />{" "}
                         <GlossaryTip term="dscr">Weighted DSCR</GlossaryTip>
                       </div>
@@ -1677,7 +1677,7 @@ export function DashboardHome({
                             : "—"
                           : `${kpis.weightedDscr.toFixed(2)}×`}
                       </div>
-                      <div className="text-3xs text-muted-foreground">
+                      <div className="text-xs text-muted-foreground">
                         {kpis.weightedDscr == null
                           ? kpis.allCashOnly
                             ? "all active deals are cash purchases"
@@ -1687,8 +1687,8 @@ export function DashboardHome({
                             : "below 1.25 lender bar"}
                       </div>
                     </div>
-                    <div className="rounded-xl border border-border bg-card p-3">
-                      <div className="flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+                    <div className="rounded-md border border-border bg-card p-3">
+                      <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                         <DollarSign className="h-3.5 w-3.5" /> Cash to Close
                       </div>
                       <div className="mt-1 text-lg font-bold text-foreground">
@@ -1696,13 +1696,13 @@ export function DashboardHome({
                           ? "—"
                           : formatCurrency(kpis.cashToClose, true)}
                       </div>
-                      <div className="text-3xs text-muted-foreground">
+                      <div className="text-xs text-muted-foreground">
                         down + closing, active deals
                       </div>
                     </div>
                     <div
                       className={cn(
-                        "rounded-xl border p-3",
+                        "rounded-md border p-3",
                         kpis.needsReviewCount > 0
                           ? "border-destructive/30 bg-destructive/5"
                           : kpis.cashFlowCoverageComplete
@@ -1712,7 +1712,7 @@ export function DashboardHome({
                     >
                       <div
                         className={cn(
-                          "flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest",
+                          "flex items-center gap-1.5 text-xs font-medium",
                           kpis.needsReviewCount > 0
                             ? "text-destructive"
                             : kpis.cashFlowCoverageComplete
@@ -1728,7 +1728,7 @@ export function DashboardHome({
                           ? "—"
                           : kpis.needsReviewCount}
                       </div>
-                      <div className="text-3xs text-muted-foreground">
+                      <div className="text-xs text-muted-foreground">
                         {!kpis.cashFlowCoverageComplete
                           ? `${kpis.cashFlowKnownCount} of ${kpis.cashFlowTotalCount} with cash-flow data`
                           : kpis.needsReviewCount === 0
@@ -1749,7 +1749,7 @@ export function DashboardHome({
             {pipeline ? (
               <section>
                 <div className="mb-3 flex items-center justify-between">
-                  <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  <h2 className="text-xs font-medium text-muted-foreground">
                     Pipeline
                   </h2>
                   <Link
@@ -1757,16 +1757,16 @@ export function DashboardHome({
                     prefetch={false}
                     className="inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-2 hover:underline"
                   >
-                    Manage →
+                    Manage
                   </Link>
                 </div>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
                   {pipeline.segments.map((seg) => (
                     <div
                       key={seg.id}
-                      className="rounded-xl border border-border bg-card p-3"
+                      className="rounded-md border border-border bg-card p-3"
                     >
-                      <div className="truncate text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+                      <div className="truncate text-xs font-medium text-muted-foreground">
                         {seg.label}
                       </div>
                       <div className="mt-1 text-lg font-bold text-foreground">
@@ -1802,11 +1802,11 @@ export function DashboardHome({
               // slot renders the honest nudge card below instead.
               <section className="hidden sm:block">
                 <div className="mb-3">
-                  <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  <h2 className="text-xs font-medium text-muted-foreground">
                     Top performers
                   </h2>
                 </div>
-                <div className="overflow-hidden rounded-xl border border-border bg-card divide-y divide-border">
+                <div className="overflow-hidden rounded-md border border-border bg-card divide-y divide-border">
                   {(
                     [
                       {
@@ -1864,7 +1864,7 @@ export function DashboardHome({
                           <Icon className="size-4" />
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="block text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+                          <span className="block text-xs font-medium text-muted-foreground">
                             {row.label}
                           </span>
                           <span className="block truncate text-sm font-semibold text-foreground sm:text-[15px]">
@@ -1873,7 +1873,7 @@ export function DashboardHome({
                         </span>
                         <span className="shrink-0 text-right">
                           <span
-                            className="block text-sm font-extrabold tabular-nums text-foreground sm:text-lg"
+                            className="block text-sm font-semibold tabular-nums text-foreground sm:text-lg"
                             title={row.valueTitle}
                           >
                             {row.value}
@@ -1900,7 +1900,7 @@ export function DashboardHome({
             replaces are desktop-only too, so phones see no change. */}
         {hasAnyDeals && data.allDeals.length === 1 ? (
           <section className="hidden sm:block" aria-label="Save a second deal">
-            <div className="flex flex-col items-start gap-3 rounded-xl border border-dashed border-border bg-card px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col items-start gap-3 rounded-md border border-dashed border-border bg-card px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 {/* "active" — the sidebar's My Deals badge counts archived/
                     completed too, so a bare "1 saved deal" could contradict it. */}
@@ -1915,7 +1915,7 @@ export function DashboardHome({
               <Button
                 asChild
                 variant="outline"
-                className="min-h-11 shrink-0 rounded-xl px-4 text-sm"
+                className="min-h-11 shrink-0 rounded-md px-4 text-sm"
               >
                 <Link href="/dashboard/new?fresh=1" prefetch={false}>
                   <Plus className="h-4 w-4" />
@@ -1942,11 +1942,8 @@ export function DashboardHome({
             succeeded to "analyze your first property" (M3-1 / WOW-2). For
             archived-only users the copy drops the "first" framing. */}
         {!hasAnyDeals && ownedCount === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <Briefcase className="h-7 w-7" />
-            </div>
-            <h2 className="text-xl font-bold text-foreground">
+          <div className="rounded-lg border border-dashed border-border bg-card p-10 text-center">
+            <h2 className="font-display text-balance text-h3-sm text-foreground sm:text-2xl">
               Your dashboard is ready
             </h2>
             <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
@@ -1979,17 +1976,25 @@ export function DashboardHome({
               </Link>{" "}
               and every deal shows which of your targets it meets or misses.
             </p>
-            <Button
-              asChild
-              className="mt-5 min-h-11 rounded-xl px-5"
-            >
-              <Link href="/dashboard/new?fresh=1">
+            <div className="mt-5 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+              <Button asChild className="min-h-11 rounded-md px-5">
+                <Link href="/dashboard/new?fresh=1">
                 <Plus className="h-4 w-4" />
                 {savedTotalCount > 0
                   ? "Analyze a property"
                   : "Analyze your first property"}
+                </Link>
+              </Button>
+              {/* The empty state points at the next action with the sample
+                  deal (OVERHAUL.md §7). */}
+              <Link
+                href="/dashboard/new?sample=1"
+                prefetch={false}
+                className="tc-link inline-flex min-h-11 items-center justify-center text-sm font-medium"
+              >
+                Try the sample deal first
               </Link>
-            </Button>
+            </div>
           </div>
         ) : null}
 

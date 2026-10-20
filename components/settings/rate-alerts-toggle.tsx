@@ -149,7 +149,7 @@ export function RateAlertsToggle({
             {pending ? (alertsLive ? "Enabling…" : "Joining…") : alertsLive ? "Notify me" : "Join waitlist"}
           </button>
         </div>
-        <div className="hidden rounded-2xl border border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-5 shadow-sm sm:block sm:p-6">
+        <div className="hidden rounded-lg border border-primary/25 bg-card p-5 shadow-sm sm:block sm:p-6">
           <div className="flex items-start gap-2.5">
             <BellRing className="mt-0.5 size-4 shrink-0 text-primary" />
             <div className="min-w-0">
@@ -165,7 +165,7 @@ export function RateAlertsToggle({
                 type="button"
                 onClick={enableInline}
                 disabled={pending}
-                className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-70"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-70"
               >
                 <BellRing className="size-4" />
                 {pending
@@ -184,7 +184,7 @@ export function RateAlertsToggle({
   }
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+    <section className="rounded-lg border border-border bg-card p-5 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-2">
           <BellRing className="mt-0.5 size-4 text-primary" />

@@ -93,7 +93,7 @@ export async function DealLeadsCard({
 
   return (
     <section aria-labelledby="deal-leads-heading">
-      <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+      <div className="rounded-lg border border-border bg-card p-5 sm:p-6">
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2
             id="deal-leads-heading"

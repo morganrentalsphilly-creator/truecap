@@ -160,7 +160,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
   }, [sortedData]);
 
   return (
-    <div className="rounded-2xl bg-card border border-border overflow-hidden">
+    <div className="rounded-lg bg-card border border-border overflow-hidden">
       <div className="flex flex-col gap-4 p-4 pb-3 sm:flex-row sm:items-start sm:justify-between sm:p-6 sm:pb-4">
         <div>
           <h3 className="text-lg font-semibold">Deal Screening List</h3>
@@ -201,7 +201,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
           const Icon = typeIcon[d.type] ?? Building2;
           const dealId = getDealId(d);
           return (
-            <article id={`deal-${dealId}`} key={dealId} tabIndex={-1} className="scroll-mt-24 rounded-2xl border border-border bg-background p-4 shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
+            <article id={`deal-${dealId}`} key={dealId} tabIndex={-1} className="scroll-mt-24 rounded-lg border border-border bg-background p-4 shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
               <div className="flex items-start gap-3">
                 <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
                   <Icon className="h-4 w-4" />
@@ -218,7 +218,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                   </h4>
                   <p className="mt-1 text-xs text-muted-foreground">{d.address}</p>
                   {d.methodologyLabel ? (
-                    <p className="mt-0.5 text-3xs text-muted-foreground">
+                    <p className="mt-0.5 text-xs text-muted-foreground">
                       {d.methodologyLabel}
                     </p>
                   ) : null}
@@ -252,30 +252,30 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-2">
-                <div className="rounded-xl bg-muted/40 p-3">
-                  <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">Cash Flow</p>
-                  <p className={`mt-1 text-sm font-extrabold tabular-nums ${d.cashFlow == null ? "" : d.cashFlow >= 0 ? "text-success" : "text-destructive"}`}>
+                <div className="rounded-md bg-muted/40 p-3">
+                  <p className="text-xs font-medium text-muted-foreground">Cash Flow</p>
+                  <p className={`mt-1 text-sm font-semibold tabular-nums ${d.cashFlow == null ? "" : d.cashFlow >= 0 ? "text-success" : "text-destructive"}`}>
                     {d.cashFlow == null ? "-" : `${d.cashFlow >= 0 ? "+" : ""}$${Math.round(d.cashFlow).toLocaleString("en-US")}/mo`}
                   </p>
                 </div>
-                <div className="rounded-xl bg-muted/40 p-3">
-                  <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">10-Yr ROI</p>
+                <div className="rounded-md bg-muted/40 p-3">
+                  <p className="text-xs font-medium text-muted-foreground">10-Yr ROI</p>
                   {/* Extreme cumulative ROI (finding 5): framed band in the
                       cell, raw figure on the title attr — never a bare 673%. */}
                   <p
-                    className="mt-1 text-sm font-extrabold tabular-nums text-foreground"
+                    className="mt-1 text-sm font-semibold tabular-nums text-foreground"
                     title={formatRoiHeadline(d.roi, { decimals: 1, compact: true }).title}
                   >
                     {formatRoiHeadline(d.roi, { decimals: 1, compact: true }).text}
                   </p>
                 </div>
-                <div className="rounded-xl bg-muted/40 p-3">
-                  <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">Cap Rate</p>
-                  <p className="mt-1 text-sm font-extrabold tabular-nums text-foreground">{d.capRate == null ? "-" : `${d.capRate}%`}</p>
+                <div className="rounded-md bg-muted/40 p-3">
+                  <p className="text-xs font-medium text-muted-foreground">Cap Rate</p>
+                  <p className="mt-1 text-sm font-semibold tabular-nums text-foreground">{d.capRate == null ? "-" : `${d.capRate}%`}</p>
                 </div>
-                <div className="rounded-xl bg-muted/40 p-3">
-                  <p className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">Risk</p>
-                  <p className="mt-1 text-sm font-extrabold text-foreground">{d.riskLevel ?? "-"}</p>
+                <div className="rounded-md bg-muted/40 p-3">
+                  <p className="text-xs font-medium text-muted-foreground">Risk</p>
+                  <p className="mt-1 text-sm font-semibold text-foreground">{d.riskLevel ?? "-"}</p>
                 </div>
               </div>
 
@@ -298,7 +298,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                   </Popover>
                 ) : null}
                 {d.tags?.map((tag) => (
-                  <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-3xs font-semibold text-muted-foreground">
+                  <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">
                     {tag}
                   </span>
                 ))}
@@ -310,7 +310,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
           <button
             type="button"
             onClick={() => setShowAllMobile((v) => !v)}
-            className="flex min-h-11 w-full items-center justify-center rounded-xl border border-dashed border-border text-xs font-semibold text-muted-foreground hover:text-foreground"
+            className="flex min-h-11 w-full items-center justify-center rounded-md border border-dashed border-border text-xs font-semibold text-muted-foreground hover:text-foreground"
           >
             {showAllMobile ? "Show fewer" : `Show ${sortedData.length - 3} more deals`}
           </button>
@@ -320,7 +320,7 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
       <ScrollX label="Top deals table" className="hidden overflow-x-auto md:block">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground border-y border-border bg-muted/40">
+            <tr className="text-xs font-semibold text-muted-foreground border-y border-border bg-muted/40">
               <th scope="col" className="text-left px-6 py-3">Property</th>
               <th scope="col" className="text-left px-3 py-3">Deal score</th>
               <th scope="col" className="text-right px-3 py-3 hidden md:table-cell">10-Yr ROI</th>
@@ -353,14 +353,14 @@ export function TopDeals({ data }: { data: DashboardTopDeal[] }) {
                         </div>
                         <div className="text-xs text-muted-foreground">{d.address}</div>
                         {d.methodologyLabel ? (
-                          <div className="text-3xs text-muted-foreground">
+                          <div className="text-xs text-muted-foreground">
                             {d.methodologyLabel}
                           </div>
                         ) : null}
                         {d.tags?.length ? (
                           <div className="mt-2 flex flex-wrap gap-1">
                             {d.tags.map((tag) => (
-                              <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-3xs font-semibold text-muted-foreground">
+                              <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">
                                 {tag}
                               </span>
                             ))}

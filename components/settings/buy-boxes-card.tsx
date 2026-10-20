@@ -375,7 +375,7 @@ export function BuyBoxesCard() {
 
   if (migrationPending) {
     return (
-      <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-5">
+      <div className="rounded-lg border border-dashed border-border bg-muted/20 p-5">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Target className="size-4" />
           <span>Your buy boxes will be available once the latest schema update is applied.</span>
@@ -386,11 +386,11 @@ export function BuyBoxesCard() {
 
   if (!canUse) {
     return (
-      <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+      <section className="rounded-lg border border-border bg-card p-5 sm:p-6">
         <div className="mb-2 flex items-center gap-2">
           <Target className="size-4 text-[var(--brand-orange)]" />
           <h2 className="text-base font-bold text-foreground">Your buy boxes</h2>
-          <span className="rounded-full bg-[var(--brand-orange)] px-2 py-0.5 text-3xs font-bold uppercase tracking-wide text-white">
+          <span className="rounded-full bg-highlight-wash px-2 py-0.5 text-xs font-medium text-highlight-text">
             Pro
           </span>
         </div>
@@ -401,7 +401,7 @@ export function BuyBoxesCard() {
         </p>
         <Link
           href="/pricing"
-          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--brand-orange)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+          className="inline-flex items-center justify-center gap-1.5 rounded-md bg-highlight-wash px-4 py-2 text-sm font-semibold text-highlight-text hover:opacity-90"
         >
           <Lock className="size-4" /> Upgrade to set your buy boxes
         </Link>
@@ -410,13 +410,13 @@ export function BuyBoxesCard() {
   }
 
   return (
-    <section aria-labelledby="buy-boxes-heading" className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+    <section aria-labelledby="buy-boxes-heading" className="rounded-lg border border-border bg-card p-5 sm:p-6">
       <div className="mb-1 flex items-center gap-2">
         <Target className="size-4 text-primary" />
         <h2 id="buy-boxes-heading" className="text-base font-bold text-foreground">
           Your buy boxes
         </h2>
-        <span className="rounded-full border border-border px-2 py-0.5 text-3xs font-bold uppercase tracking-wide text-muted-foreground">
+        <span className="rounded-full border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground">
           Pro
         </span>
       </div>
@@ -432,23 +432,23 @@ export function BuyBoxesCard() {
           {boxes.map((box) => (
             <li
               key={box.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-background p-3"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-background p-3"
             >
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-semibold text-foreground">{box.name}</span>
                   {box.isDefault ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-3xs font-bold uppercase tracking-wide text-primary">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                       <Star className="size-2.5 fill-current" /> Default
                     </span>
                   ) : null}
                   {box.strategyKind ? (
-                    <span className="rounded-full border border-border px-2 py-0.5 text-3xs font-semibold text-muted-foreground">
+                    <span className="rounded-full border border-border px-2 py-0.5 text-xs font-semibold text-muted-foreground">
                       {strategyLabel(box.strategyKind)}
                     </span>
                   ) : null}
                   {!box.isActive ? (
-                    <span className="rounded-full border border-border px-2 py-0.5 text-3xs font-semibold text-muted-foreground">
+                    <span className="rounded-full border border-border px-2 py-0.5 text-xs font-semibold text-muted-foreground">
                       Off
                     </span>
                   ) : null}
@@ -456,7 +456,7 @@ export function BuyBoxesCard() {
                       running boxes for several buyers cannot tell their rows
                       apart — the client was only visible inside the editor. */}
                   {box.clientId && clients ? (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-3xs font-semibold text-primary">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
                       <UserRound className="size-2.5" />
                       {clients.find((c) => c.id === box.clientId)?.name ?? "Client"}
                     </span>
@@ -543,7 +543,7 @@ export function BuyBoxesCard() {
           ))}
         </ul>
       ) : (
-        <p className="mb-4 rounded-xl border border-dashed border-border bg-muted/20 p-3 text-sm text-muted-foreground">
+        <p className="mb-4 rounded-md border border-dashed border-border bg-muted/20 p-3 text-sm text-muted-foreground">
           No buy boxes yet. Add one to start screening deals against your criteria.
         </p>
       )}
@@ -557,14 +557,14 @@ export function BuyBoxesCard() {
       {editor === null && saveFit ? (
         <p
           role="status"
-          className="mb-4 rounded-xl border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)]/50 p-3 text-sm text-foreground"
+          className="mb-4 rounded-md border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)]/50 p-3 text-sm text-foreground"
         >
           {`${saveFit.passing} of your ${saveFit.evaluated} active deal${saveFit.evaluated === 1 ? "" : "s"} pass${saveFit.passing === 1 ? "es" : ""} this box — `}
           <Link
             href={saveFit.passing > 0 ? "/dashboard/saved-analyses?buyBox=1" : "/dashboard/saved-analyses"}
             className="font-semibold text-[var(--brand-green)] underline underline-offset-2 hover:opacity-80"
           >
-            {saveFit.passing > 0 ? "see them →" : "see the gaps →"}
+            {saveFit.passing > 0 ? "see them" : "see the gaps"}
           </Link>
         </p>
       ) : null}
@@ -633,10 +633,10 @@ function BoxEditorForm({
   };
 
   return (
-    <div className="mt-2 rounded-xl border border-border bg-background p-4">
+    <div className="mt-2 rounded-md border border-border bg-background p-4">
       <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1">
-          <Label htmlFor="bb-name" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+          <Label htmlFor="bb-name" className="text-xs font-medium text-muted-foreground">
             Name
           </Label>
           <Input
@@ -648,7 +648,7 @@ function BoxEditorForm({
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor="bb-strategy" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+          <Label htmlFor="bb-strategy" className="text-xs font-medium text-muted-foreground">
             Strategy (optional)
           </Label>
           <select
@@ -670,7 +670,7 @@ function BoxEditorForm({
 
         {clients && clients.length > 0 ? (
           <div className="space-y-1">
-            <Label htmlFor="bb-client" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+            <Label htmlFor="bb-client" className="text-xs font-medium text-muted-foreground">
               For client (optional)
             </Label>
             <select
@@ -693,7 +693,7 @@ function BoxEditorForm({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {RETURN_FIELDS.map((field) => (
           <div key={field.key} className="space-y-1">
-            <Label htmlFor={`bb-${field.key}`} className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+            <Label htmlFor={`bb-${field.key}`} className="text-xs font-medium text-muted-foreground">
               {field.label}
             </Label>
             <div className="relative">
@@ -724,7 +724,7 @@ function BoxEditorForm({
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
         {MONEY_FIELDS.map((field) => (
           <div key={field.key} className="space-y-1">
-            <Label htmlFor={`bb-${field.key}`} className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+            <Label htmlFor={`bb-${field.key}`} className="text-xs font-medium text-muted-foreground">
               {field.label}
             </Label>
             <div className="relative">
@@ -751,7 +751,7 @@ function BoxEditorForm({
       </div>
 
       <div className="mt-4">
-        <Label className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">Property types</Label>
+        <Label className="text-xs font-medium text-muted-foreground">Property types</Label>
         <p className="mb-2 mt-0.5 text-2xs text-muted-foreground">Leave all off to allow any type.</p>
         <div className="flex flex-wrap gap-2">
           {PROPERTY_TYPES.map((type) => {
@@ -779,7 +779,7 @@ function BoxEditorForm({
       </div>
 
       <div className="mt-4">
-        <Label htmlFor="bb-state-input" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+        <Label htmlFor="bb-state-input" className="text-xs font-medium text-muted-foreground">
           Target markets
         </Label>
         <p className="mb-2 mt-0.5 text-2xs text-muted-foreground">Add states you buy in. Leave empty to allow any market.</p>

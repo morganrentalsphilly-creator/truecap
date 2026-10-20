@@ -124,7 +124,7 @@ export function BuyBoxNudge({
   // "dashboard" — the slim 1-3-deal card. One sentence + link, nothing else.
   return (
     <section aria-label="Set your buy box" className={className}>
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-border bg-card px-4 py-3">
+      <div className="flex items-center justify-between gap-3 rounded-md border border-dashed border-border bg-card px-4 py-3">
         <p className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
           <Target aria-hidden className="size-4 shrink-0 text-[var(--brand-green)]" />
           <span>{message}</span>

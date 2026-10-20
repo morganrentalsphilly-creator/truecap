@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Plus } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Compare Deals",
@@ -515,10 +514,7 @@ function ComparePickerScreen({
       <main id="main" className="min-h-[calc(100vh-4rem)] bg-muted/30 px-4 py-8 sm:px-6">
         <div className="mx-auto max-w-2xl">
           <div className="mb-5 text-center">
-            <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Plus className="size-5" />
-            </div>
-            <h1 className="text-2xl font-extrabold text-foreground">Compare Deals</h1>
+            <h1 className="font-display text-balance text-section-sm text-foreground sm:text-section">Compare Deals</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               {pickerDeals.length >= 2
                 ? "Pick 2–4 of your saved deals to line them up side by side."
@@ -526,30 +522,39 @@ function ComparePickerScreen({
             </p>
           </div>
           {staleSelectionRecovered ? (
-            <p role="status" className="mb-4 rounded-2xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning-foreground">
+            <p role="status" className="mb-4 rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning-foreground">
               A previously selected deal is no longer active. The remaining deal is still selected; choose at least one more to continue.
             </p>
           ) : null}
           {pickerError ? (
-            <div role="alert" className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center shadow-sm">
+            <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-6 text-center shadow-sm">
               <p className="font-semibold text-foreground">Couldn&apos;t load your saved deals</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Your deals are still saved. Retry the comparison when the connection recovers.
               </p>
-              <RetryRouteButton className="mt-4 rounded-full" />
+              <RetryRouteButton className="mt-4" />
             </div>
           ) : pickerDeals.length >= 2 ? (
             <CompareDealPicker deals={pickerDeals} initialSelectedIds={initialSelectedIds} />
           ) : (
-            <div className="rounded-2xl border border-border bg-card p-6 text-center shadow-sm">
+            <div className="rounded-lg border border-border bg-card p-6 text-center shadow-sm">
               <p className="text-sm text-muted-foreground">
                 {pickerDeals.length === 1
                   ? "Save one more deal to start comparing."
                   : "Save a couple of deals first, then come back to compare them."}
               </p>
-              <Button className="mt-4 min-h-11 rounded-full" asChild>
-                <Link href="/dashboard/new?fresh=1">Analyze a property</Link>
-              </Button>
+              <div className="mt-4 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+                <Button className="min-h-11" asChild>
+                  <Link href="/dashboard/new?fresh=1">Analyze a property</Link>
+                </Button>
+                <Link
+                  href="/dashboard/new?sample=1"
+                  prefetch={false}
+                  className="tc-link inline-flex min-h-11 items-center justify-center text-sm font-medium"
+                >
+                  Try the sample deal
+                </Link>
+              </div>
             </div>
           )}
         </div>
@@ -681,8 +686,8 @@ export default async function DashboardComparePage() {
             canAccessDashboard={navAccess.dashboard}
           />
           <main id="main" className="min-h-[calc(100vh-4rem)] bg-muted/30 px-4 py-8 sm:px-6">
-            <div className="mx-auto max-w-3xl rounded-2xl border border-destructive/25 bg-destructive/5 p-6">
-              <h1 className="text-xl font-bold text-foreground">Could not load comparison</h1>
+            <div className="mx-auto max-w-3xl rounded-lg border border-destructive/25 bg-destructive/5 p-6">
+              <h1 className="font-display text-h3-sm text-foreground sm:text-2xl">Could not load comparison</h1>
               <p className="mt-2 text-sm text-muted-foreground">Please try again in a few moments.</p>
               <RetryRouteButton className="mt-4" />
             </div>

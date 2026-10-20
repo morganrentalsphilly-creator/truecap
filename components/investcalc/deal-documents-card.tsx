@@ -376,7 +376,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
   if (!loaded || unavailable) return null;
 
   return (
-    <section aria-label="Deal documents" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+    <section aria-label="Deal documents" className="rounded-lg border border-border bg-card p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Paperclip className="size-4 text-primary" />
@@ -407,7 +407,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
       </div>
 
       {loadError ? (
-        <div role="alert" className="mb-3 rounded-xl border border-destructive/25 bg-destructive/5 p-3">
+        <div role="alert" className="mb-3 rounded-md border border-destructive/25 bg-destructive/5 p-3">
           <p className="text-sm font-semibold text-foreground">Couldn&apos;t load documents</p>
           <p className="mt-1 text-xs text-muted-foreground">{loadError}</p>
           <Button
@@ -426,7 +426,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
       ) : null}
 
       {downloadFallback ? (
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-primary/25 bg-primary/5 p-3">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-md border border-primary/25 bg-primary/5 p-3">
           <p className="text-xs text-muted-foreground">Your browser blocked the new tab.</p>
           <a
             href={downloadFallback.url}
@@ -546,7 +546,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
       )}
 
       {extraction && extraction.status !== "loading" ? (
-        <div className="mt-3 rounded-xl border border-primary/25 bg-primary/5 p-3">
+        <div className="mt-3 rounded-md border border-primary/25 bg-primary/5 p-3">
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs font-medium text-muted-foreground">
               Numbers found in {extraction.fileName}
@@ -583,7 +583,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
                           : "/yr"}
                       </span>
                       {candidate.confidence === "weak" ? (
-                        <span className="ml-2 rounded-full bg-caution-light px-2 py-0.5 text-3xs font-semibold text-caution-text">
+                        <span className="ml-2 rounded-full bg-caution-light px-2 py-0.5 text-xs font-semibold text-caution-text">
                           Verify — loose match
                         </span>
                       ) : null}

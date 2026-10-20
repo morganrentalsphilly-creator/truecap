@@ -274,7 +274,7 @@ export function UserDefaultsCard() {
 
   if (migrationPending) {
     return (
-      <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-5">
+      <div className="rounded-lg border border-dashed border-border bg-muted/20 p-5">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Sliders className="size-4" />
           <span>
@@ -288,7 +288,7 @@ export function UserDefaultsCard() {
 
   if (loadFailed) {
     return (
-      <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-5">
+      <div className="rounded-lg border border-dashed border-border bg-muted/20 p-5">
         <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
           <span className="inline-flex items-center gap-2">
             <Sliders className="size-4" />
@@ -316,7 +316,7 @@ export function UserDefaultsCard() {
   return (
     <section
       aria-labelledby="user-defaults-heading"
-      className="rounded-2xl border border-border bg-card p-5 sm:p-6"
+      className="rounded-lg border border-border bg-card p-5 sm:p-6"
     >
       <div className="mb-4 flex items-center gap-2">
         <Sliders className="size-4 text-primary" />
@@ -335,7 +335,7 @@ export function UserDefaultsCard() {
       </p>
       {DEFAULTS_GROUPS.map((group) => (
         <fieldset key={group} className="mb-5 last:mb-0">
-          <legend className="mb-2 text-2xs font-bold uppercase tracking-widest text-primary">
+          <legend className="mb-2 text-xs font-medium text-primary">
             {group}
           </legend>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -343,7 +343,7 @@ export function UserDefaultsCard() {
               <div key={field.key} className="space-y-1">
                 <Label
                   htmlFor={`user-default-${field.key}`}
-                  className="text-2xs font-bold uppercase tracking-widest text-muted-foreground"
+                  className="text-xs font-medium text-muted-foreground"
                 >
                   {field.label}
                 </Label>
@@ -368,7 +368,7 @@ export function UserDefaultsCard() {
                   </span>
                 </div>
                 {field.note ? (
-                  <p className="text-3xs leading-tight text-muted-foreground">
+                  <p className="text-xs leading-tight text-muted-foreground">
                     {field.note}
                   </p>
                 ) : null}

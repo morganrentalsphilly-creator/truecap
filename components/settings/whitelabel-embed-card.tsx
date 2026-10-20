@@ -106,10 +106,10 @@ export function WhitelabelEmbedCard() {
   };
 
   return (
-    <section aria-label="White-label embed" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+    <section aria-label="White-label embed" className="rounded-lg border border-border bg-card p-4 sm:p-5">
       <div className="flex items-center gap-2">
         <Code2 className="size-4 text-primary" />
-        <h2 className="text-xs font-bold uppercase tracking-widest text-foreground">
+        <h2 className="text-xs font-medium text-foreground">
           {notConfigured ? "White-label embed preview" : "White-label embed"}
         </h2>
       </div>
@@ -120,7 +120,7 @@ export function WhitelabelEmbedCard() {
 
       <div className="mt-3 space-y-3">
         <div className="space-y-1">
-          <label htmlFor="wl-embed-calc" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+          <label htmlFor="wl-embed-calc" className="text-xs font-medium text-muted-foreground">
             Calculator
           </label>
           <select

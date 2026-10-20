@@ -449,7 +449,7 @@ export function ProfileForm({
     <>
       <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Profile</h1>
+          <h1 className="font-display text-balance text-section-sm text-foreground sm:text-section">Profile</h1>
           <p className="text-muted-foreground mt-2">Your account details, profile photo, and billing.</p>
         </div>
 
@@ -465,7 +465,7 @@ export function ProfileForm({
             noValidate
           >
             <div
-              className={`rounded-3xl border bg-card/80 p-4 shadow-sm transition-colors sm:p-5 ${
+              className={`rounded-lg border bg-card/80 p-4 shadow-sm transition-colors sm:p-5 ${
                 isDraggingOver ? "border-primary ring-2 ring-primary/40 bg-primary/5" : "border-border"
               }`}
               onDragOver={(event) => {
@@ -534,7 +534,7 @@ export function ProfileForm({
                   <FormItem>
                     <FormLabel>First name</FormLabel>
                     <FormControl>
-                      <Input className="h-11 rounded-xl" placeholder="First name" disabled={isSaving} {...field} />
+                      <Input className="h-11 rounded-md" placeholder="First name" disabled={isSaving} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -549,7 +549,7 @@ export function ProfileForm({
                     <FormLabel>Last name</FormLabel>
                     <FormControl>
                       <Input
-                        className="h-11 rounded-xl"
+                        className="h-11 rounded-md"
                         placeholder="Last name"
                         disabled={isSaving}
                         value={field.value ?? ""}
@@ -576,7 +576,7 @@ export function ProfileForm({
                       <Input
                         {...field}
                         disabled
-                        className="h-11 cursor-not-allowed rounded-xl bg-muted/40 text-muted-foreground"
+                        className="h-11 cursor-not-allowed rounded-md bg-muted/40 text-muted-foreground"
                       />
                     </FormControl>
                     <p className="text-sm text-muted-foreground">Email cannot be changed here.</p>
@@ -584,7 +584,7 @@ export function ProfileForm({
                 )}
               />
 
-              <Button type="submit" disabled={isSaving} className="min-w-40 rounded-xl">
+              <Button type="submit" disabled={isSaving} className="min-w-40 rounded-md">
                 {isSaving ? (
                   <>
                     <Loader2 className="animate-spin" />
@@ -604,10 +604,10 @@ export function ProfileForm({
         {/* Security — change password via emailed reset link. Keeps the
             flow simple and secure (proves email access) while avoiding a
             separate in-app "current password / new password" form. */}
-        <div className="rounded-3xl border border-border bg-card/80 p-4 shadow-sm sm:p-5">
+        <div className="rounded-lg border border-border bg-card/80 p-4 shadow-sm sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3 min-w-0">
-              <span className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <span className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
                 <KeyRound className="size-4" />
               </span>
               <div className="min-w-0">
@@ -630,7 +630,7 @@ export function ProfileForm({
             <Button
               type="button"
               variant="outline"
-              className="rounded-xl shrink-0"
+              className="rounded-md shrink-0"
               onClick={() => void handleSendPasswordReset()}
               disabled={
                 isSendingReset ||
@@ -690,7 +690,7 @@ export function ProfileForm({
             </DialogHeader>
 
             <div className="px-6">
-              <div className="relative h-[340px] sm:h-[420px] bg-black rounded-3xl overflow-hidden">
+              <div className="relative h-[340px] sm:h-[420px] bg-black rounded-lg overflow-hidden">
                 {rawImage ? (
                   <Cropper
                     image={rawImage}
@@ -742,7 +742,7 @@ export function ProfileForm({
             <Button
               type="button"
               variant="outline"
-              className="rounded-2xl min-w-36"
+              className="rounded-lg min-w-36"
               onClick={() => closeCropDialog(true)}
               disabled={isUploadingAvatar}
             >
@@ -751,7 +751,7 @@ export function ProfileForm({
             </Button>
             <Button
               type="button"
-              className="rounded-2xl min-w-44 bg-[#2f658f] hover:bg-[#2f658f]/90 text-white"
+              className="min-w-44 rounded-md bg-navy text-navy-foreground hover:bg-navy/90"
               onClick={() => void uploadCroppedAvatar()}
               disabled={isUploadingAvatar || !croppedAreaPixels}
             >

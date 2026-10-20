@@ -111,11 +111,11 @@ export function AgentClientsCard() {
   };
 
   return (
-    <section aria-label="Client roster" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+    <section aria-label="Client roster" className="rounded-lg border border-border bg-card p-4 sm:p-5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Users className="size-4 text-primary" />
-          <h2 className="text-xs font-bold uppercase tracking-widest text-foreground">Clients</h2>
+          <h2 className="text-xs font-medium text-foreground">Clients</h2>
         </div>
         {!editor ? (
           <Button
@@ -168,9 +168,9 @@ export function AgentClientsCard() {
       ) : null}
 
       {editor ? (
-        <div className="mt-3 space-y-3 rounded-xl border border-border bg-muted/20 p-3">
+        <div className="mt-3 space-y-3 rounded-md border border-border bg-muted/20 p-3">
           <div className="space-y-1">
-            <Label htmlFor="client-name" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+            <Label htmlFor="client-name" className="text-xs font-medium text-muted-foreground">
               Name
             </Label>
             <Input
@@ -183,7 +183,7 @@ export function AgentClientsCard() {
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1">
-              <Label htmlFor="client-email" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+              <Label htmlFor="client-email" className="text-xs font-medium text-muted-foreground">
                 Email (optional)
               </Label>
               <Input
@@ -195,7 +195,7 @@ export function AgentClientsCard() {
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="client-phone" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+              <Label htmlFor="client-phone" className="text-xs font-medium text-muted-foreground">
                 Phone (optional)
               </Label>
               <Input

@@ -74,19 +74,19 @@ import { ScrollX } from "@/components/ui/scroll-x";
 const MAX_COMPARE_ITEMS = 4;
 const MOBILE_DEAL_COLORS = [
   {
-    chip: "bg-positive text-white",
+    chip: "bg-positive-light text-positive",
     border: "border-success/30",
   },
   {
-    chip: "bg-primary text-white",
+    chip: "bg-primary text-primary-foreground",
     border: "border-primary/30",
   },
   {
-    chip: "bg-negative text-white",
+    chip: "bg-negative/10 text-negative",
     border: "border-negative/30",
   },
   {
-    chip: "bg-caution text-white",
+    chip: "bg-highlight-wash text-highlight-text",
     border: "border-warning/30",
   },
 ] as const;
@@ -177,13 +177,13 @@ function AssumptionConsistencyPanel({
       role={hasDifferences ? "alert" : "note"}
       aria-labelledby="assumption-consistency-title"
       className={cn(
-        "mb-5 rounded-2xl border px-4 py-4 text-sm",
+        "mb-5 rounded-lg border px-4 py-4 text-sm",
         hasDifferences
           ? "border-warning/50 bg-warning/10 text-warning-foreground"
           : "border-border bg-card text-foreground",
       )}
     >
-      <h2 id="assumption-consistency-title" className="font-extrabold">
+      <h2 id="assumption-consistency-title" className="font-semibold">
         {hasDifferences
           ? "Saved assumptions differ"
           : "Reviewed assumptions are consistent"}
@@ -193,7 +193,7 @@ function AssumptionConsistencyPanel({
           ? `${differenceCount} reviewed ${differenceCount === 1 ? "input differs" : "inputs differ"} across these deals. That can explain part of the result gap; scaling dollar values does not align the underlying assumptions.`
           : "The reviewed financing and operating assumptions match across these saved deals."}
       </p>
-      <details className="mt-3 rounded-xl border border-current/15 bg-background/70 px-3">
+      <details className="mt-3 rounded-md border border-current/15 bg-background/70 px-3">
         <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ">
           Review assumption matrix
         </summary>
@@ -1096,7 +1096,7 @@ function CompareMobileDealStrip({
       {deals.map((deal, index) => {
         const color = getMobileDealColor(index);
         return (
-          <div key={deal.id} className={cn("flex min-h-28 flex-col rounded-2xl border bg-card p-2 shadow-sm", color.border)}>
+          <div key={deal.id} className={cn("flex min-h-28 flex-col rounded-lg border bg-card p-2 shadow-sm", color.border)}>
             {/* The wrap kicks in at 424px, not 380px. Between 381 and 423 —
                 iPhone 12-16 (390/393), Pixel (412), 14 Plus (414), i.e. most
                 phones in use — the header did NOT wrap, and the two shrink-0
@@ -1104,7 +1104,7 @@ function CompareMobileDealStrip({
                 from a 20px circle into an 11px oval. shrink-0 on the chip means
                 it can never be the shock absorber again. */}
             <div className="flex items-start justify-between gap-1 max-[424px]:flex-wrap">
-              <span className={cn("inline-flex size-5 shrink-0 items-center justify-center rounded-full text-2xs font-extrabold", color.chip)}>
+              <span className={cn("inline-flex size-5 shrink-0 items-center justify-center rounded-full text-2xs font-semibold", color.chip)}>
                 {index + 1}
               </span>
               <div className="flex items-center gap-0.5 max-[424px]:mt-1 max-[424px]:basis-full max-[424px]:justify-start">
@@ -1171,11 +1171,11 @@ function CompareMobileDealStrip({
                 </Popover>
               </div>
             </div>
-            <p className="mt-1.5 line-clamp-2 text-2xs font-extrabold leading-tight text-foreground">
+            <p className="mt-1.5 line-clamp-2 text-2xs font-semibold leading-tight text-foreground">
               {getDealLabel(deal, { short: true })}
             </p>
             {deal.methodologyLabel ? (
-              <p className="mt-0.5 text-3xs leading-tight text-muted-foreground">
+              <p className="mt-0.5 text-xs leading-tight text-muted-foreground">
                 {deal.methodologyLabel}
               </p>
             ) : null}
@@ -1186,18 +1186,18 @@ function CompareMobileDealStrip({
                 propertyType={deal.propertyType}
               />
             </div>
-            <p className="mt-auto pt-2 text-3xs font-semibold text-muted-foreground">
+            <p className="mt-auto pt-2 text-xs font-semibold text-muted-foreground">
               {formatCurrency(deal.purchasePrice)}
             </p>
             <div className="mt-2 grid grid-cols-2 gap-1.5">
-              <Button asChild variant="outline" size="sm" className="min-h-11 rounded-xl px-2 text-2xs">
+              <Button asChild variant="outline" size="sm" className="min-h-11 rounded-md px-2 text-2xs">
                 <Link href={`/dashboard/saved-analyses/${deal.id}`}>Open</Link>
               </Button>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="min-h-11 rounded-xl px-2 text-2xs text-muted-foreground"
+                className="min-h-11 rounded-md px-2 text-2xs text-muted-foreground"
                 onClick={() => onRemove(deal)}
                 disabled={selectionPending}
                 aria-label={`Remove ${deal.address} from comparison`}
@@ -1214,7 +1214,7 @@ function CompareMobileDealStrip({
           type="button"
           onClick={onEditSelection}
           disabled={selectionPending}
-          className="flex min-h-28 flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/60 p-2 text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-primary"
+          className="flex min-h-28 flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card/60 p-2 text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-primary"
         >
           <span className="mb-2 flex size-8 items-center justify-center rounded-full border border-border bg-background">
             <Plus className="size-4" />
@@ -1437,7 +1437,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
             </Button>
             <div className="h-6 w-px bg-border" />
             <div className="space-y-1">
-              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground xl:text-3xl">Compare Deals</h1>
+              <h1 className="font-display text-balance text-section-sm text-foreground sm:text-section">Compare Deals</h1>
               <p className="text-sm text-muted-foreground ">Side-by-side investment analysis</p>
             </div>
           </div>
@@ -1459,10 +1459,10 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
         </div>
           <section
             aria-labelledby="comparison-scale-title"
-            className="mb-5 flex flex-col gap-3 rounded-2xl border border-border bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+            className="mb-5 flex flex-col gap-3 rounded-lg border border-border bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <div className="max-w-3xl">
-              <h2 id="comparison-scale-title" className="text-sm font-extrabold text-foreground">
+              <h2 id="comparison-scale-title" className="text-sm font-semibold text-foreground">
                 Comparison scale
               </h2>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
@@ -1470,7 +1470,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
               </p>
             </div>
             <div
-              className="grid shrink-0 grid-cols-2 rounded-xl bg-muted p-1"
+              className="grid shrink-0 grid-cols-2 rounded-md bg-muted p-1"
               role="group"
               aria-label="Comparison scale"
             >
@@ -1496,18 +1496,18 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
             </div>
           </section>
           {selectionError ? (
-            <div role="alert" className="mb-5 rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+            <div role="alert" className="mb-5 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
               {selectionError}
             </div>
           ) : null}
           {selectionOpen ? (
             <section id="compare-selection-editor" aria-labelledby="compare-selection-title" className="mb-5 space-y-3">
               <div>
-                <h2 id="compare-selection-title" className="text-sm font-extrabold text-foreground">Edit comparison</h2>
+                <h2 id="compare-selection-title" className="text-sm font-semibold text-foreground">Edit comparison</h2>
                 <p className="mt-1 text-xs text-muted-foreground">Choose 2–4 active saved deals. Updating this list does not change or delete any deal.</p>
               </div>
               {selectionLoadError ? (
-                <div role="alert" className="rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+                <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
                   The saved-deal list could not be loaded. The current comparison is unchanged; refresh and try again.
                 </div>
               ) : availableDeals.length >= 2 ? (
@@ -1518,20 +1518,20 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                   onComplete={() => setSelectionOpen(false)}
                 />
               ) : (
-                <div className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
+                <div className="rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
                   Save another active deal before changing this comparison.
                 </div>
               )}
             </section>
           ) : null}
-          <div className="mb-5 rounded-2xl border border-border bg-card px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+          <div className="mb-5 rounded-lg border border-border bg-card px-4 py-3 text-xs leading-relaxed text-muted-foreground">
             <p>
               Relative modeled comparison only. When every deal uses the same calculation cohort, subtle row shading marks the highest or lowest displayed value according to that metric&apos;s direction. Tied values share the same shading; no hidden tie-breaker uses Deal score, ROI, save date, or source order. A highlighted value does not establish safety or make an investment recommendation.
             </p>
           </div>
           {!methodologiesComparable ? (
-            <section role="alert" aria-labelledby="methodology-comparison-paused" className="mb-5 rounded-2xl border border-warning/50 bg-warning/10 px-4 py-4 text-sm text-warning-foreground">
-              <h2 id="methodology-comparison-paused" className="font-extrabold">
+            <section role="alert" aria-labelledby="methodology-comparison-paused" className="mb-5 rounded-lg border border-warning/50 bg-warning/10 px-4 py-4 text-sm text-warning-foreground">
+              <h2 id="methodology-comparison-paused" className="font-semibold">
                 Comparison highlights paused
               </h2>
               <p className="mt-1 leading-relaxed">
@@ -1553,7 +1553,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
             {selectionPending ? "Updating comparison selection." : ""}
           </p>
           {extremeRoiCount > 0 ? (
-            <div role="note" className="mb-5 rounded-2xl border border-warning/40 bg-warning/10 px-4 py-3 text-xs leading-relaxed text-warning-foreground">
+            <div role="note" className="mb-5 rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-xs leading-relaxed text-warning-foreground">
               <span className="font-bold">Extreme modeled 10-year ROI:</span>{" "}
               {extremeRoiCount} compared {extremeRoiCount === 1 ? "deal exceeds" : "deals exceed"} the 300% review band. These projections are highly sensitive to saved rent growth, appreciation, selling costs, financing, and exit assumptions. Compare those inputs before relying on the output; a higher projection is not a recommendation.
             </div>
@@ -1573,7 +1573,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                 numbered chip + Meets/Misses pill + the fit's personal line.
                 Renders nothing without an active box. */}
             {buyBoxFitById ? (
-              <div className="rounded-3xl border border-border bg-card p-4 shadow-sm">
+              <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
                 <p className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">
                   Your buy box
                 </p>
@@ -1585,7 +1585,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                       <li key={deal.id} className="flex items-start gap-2.5">
                         <span
                           className={cn(
-                            "mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full text-3xs font-extrabold",
+                            "mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
                             color.chip
                           )}
                         >
@@ -1593,7 +1593,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                         </span>
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="text-xs font-extrabold leading-tight text-foreground">
+                            <span className="text-xs font-semibold leading-tight text-foreground">
                               {getDealLabel(deal, { short: true })}
                             </span>
                             <BuyBoxFitBadge fit={entry?.fit} />
@@ -1616,13 +1616,13 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
               {mobileSections.map((section) => {
                 const SectionIcon = section.icon;
                 return (
-                  <AccordionItem key={section.id} value={section.id} className="rounded-3xl border border-border bg-card px-4 shadow-sm">
+                  <AccordionItem key={section.id} value={section.id} className="rounded-lg border border-border bg-card px-4 shadow-sm">
                     <AccordionTrigger className="items-center py-4 hover:no-underline">
                       <span className="flex  items-center gap-3">
-                        <span className="grid size-8 place-items-center rounded-xl bg-primary/10 text-primary">
+                        <span className="grid size-8 place-items-center rounded-md bg-primary/10 text-primary">
                           <SectionIcon className="size-4" />
                         </span>
-                        <span className="font-extrabold">{section.title}</span>
+                        <span className="font-semibold">{section.title}</span>
                       </span>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-4 pb-4">
@@ -1653,14 +1653,14 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                                   <div
                                     key={`${deal.id}-${row.key}`}
                                     className={cn(
-                                      "flex flex-col items-center justify-center rounded-xl p-2 text-center",
+                                      "flex flex-col items-center justify-center rounded-md p-2 text-center",
                                       isDirectionalEdge
                                         ? "bg-primary/[0.05] ring-1 ring-inset ring-primary/15"
                                         : "bg-muted/35",
                                     )}
                                   >
                                     <span className="mb-1 inline-flex items-center justify-center">
-                                      <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-3xs font-extrabold", color.chip)}>
+                                      <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-xs font-semibold", color.chip)}>
                                         {index + 1}
                                       </span>
                                       {isDirectionalEdge ? (
@@ -1676,14 +1676,14 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                                       row={row}
                                       value={value}
                                       normalizationMode={normalizationMode}
-                                      className="truncate text-2xs font-extrabold text-foreground"
+                                      className="truncate text-2xs font-semibold text-foreground"
                                     />
                                   </div>
                                 );
                               })}
                             </div>
                             {row.key === "maxOffer" ? (
-                              <ul className="space-y-1 rounded-xl bg-muted/25 p-2 text-3xs leading-snug text-muted-foreground">
+                              <ul className="space-y-1 rounded-md bg-muted/25 p-2 text-xs leading-snug text-muted-foreground">
                                 {deals.map((deal, index) =>
                                   deal.metrics.maxOffer != null && deal.maxOfferBasisLabel ? (
                                     <li key={`${deal.id}-mobile-max-offer-criteria`}>
@@ -1705,13 +1705,13 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
               {mobileLongTermSections.map((section) => {
                 const SectionIcon = section.icon;
                 return (
-                  <AccordionItem key={section.id} value={section.id} className="rounded-3xl border border-border bg-card px-4 shadow-sm">
+                  <AccordionItem key={section.id} value={section.id} className="rounded-lg border border-border bg-card px-4 shadow-sm">
                     <AccordionTrigger className="items-center py-4 hover:no-underline">
                       <span className="flex items-center gap-3">
-                        <span className="grid size-8 place-items-center rounded-xl bg-primary/10 text-primary">
+                        <span className="grid size-8 place-items-center rounded-md bg-primary/10 text-primary">
                           <SectionIcon className="size-4" />
                         </span>
-                        <span className="font-extrabold">{section.title}</span>
+                        <span className="font-semibold">{section.title}</span>
                       </span>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-4 pb-4">
@@ -1740,14 +1740,14 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                                   <div
                                     key={`${deal.id}-${row.key}`}
                                     className={cn(
-                                      "rounded-xl p-2 text-center",
+                                      "rounded-md p-2 text-center",
                                       isDirectionalEdge
                                         ? "bg-primary/[0.05] ring-1 ring-inset ring-primary/15"
                                         : "bg-muted/35",
                                     )}
                                   >
                                     <span className="mx-auto mb-1 inline-flex items-center justify-center">
-                                      <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-3xs font-extrabold", color.chip)}>
+                                      <span className={cn("inline-flex size-5 items-center justify-center rounded-full text-xs font-semibold", color.chip)}>
                                         {index + 1}
                                       </span>
                                       {isDirectionalEdge ? (
@@ -1759,7 +1759,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                                       ) : null}
                                     </span>
                                     <p
-                                      className="truncate text-2xs font-extrabold text-foreground"
+                                      className="truncate text-2xs font-semibold text-foreground"
                                       title={longTermRoiCellTitle(row, value)}
                                     >
                                       {formatCompactLongTermMetric(row, value)}
@@ -1786,7 +1786,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                 <div
                   key={deal.id}
                   className={cn(
-                    "relative flex min-h-[17.5rem] flex-col rounded-2xl border border-t-[3px] border-border/80 bg-card/95 p-5 shadow-[0_16px_48px_rgba(15,23,42,0.07)] ring-2 ring-transparent",
+                    "relative flex min-h-[17.5rem] flex-col rounded-lg border border-t-[3px] border-border/80 bg-card/95 p-5 shadow-sm ring-2 ring-transparent",
                     typeClasses
                   )}
                 >
@@ -1807,11 +1807,11 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                     </span>
                     <p className="text-xs font-semibold tracking-[0.18em] text-primary">{getTypeLabel(deal.propertyType)}</p>
                   </div>
-                  <h2 className="line-clamp-2 min-h-10 overflow-hidden pr-8 text-lg font-extrabold leading-snug text-foreground">
+                  <h2 className="line-clamp-2 min-h-10 overflow-hidden pr-8 text-lg font-semibold leading-snug text-foreground">
                     {getDealLabel(deal)}
                   </h2>
                   {deal.methodologyLabel ? (
-                    <p className="mt-1 text-3xs text-muted-foreground">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {deal.methodologyLabel}
                     </p>
                   ) : null}
@@ -1890,7 +1890,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                 type="button"
                 onClick={showSelectionEditor}
                 disabled={selectionPending}
-                className="flex min-h-[17.5rem] flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/45 text-muted-foreground shadow-[0_16px_48px_rgba(15,23,42,0.04)] transition-colors hover:border-primary/40 hover:text-primary"
+                className="flex min-h-[17.5rem] flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card/45 text-muted-foreground shadow-sm transition-colors hover:border-primary/40 hover:text-primary"
               >
                 <span className="mb-3 flex size-12 items-center justify-center rounded-full border border-border bg-background">
                   <Plus className="size-5" />
@@ -1910,7 +1910,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
             {buyBoxFitById ? (
               <section className="space-y-1.5">
                 <div className="grid grid-cols-4">
-                  <h3 className="col-span-4 px-1 text-xs font-extrabold tracking-[0.24em] text-muted-foreground">
+                  <h3 className="col-span-4 px-1 text-xs font-semibold tracking-[0.24em] text-muted-foreground">
                     YOUR BUY BOX
                   </h3>
                 </div>
@@ -1920,7 +1920,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                     return (
                       <div
                         key={`${deal?.id ?? "empty"}-buy-box-${index}`}
-                        className="flex min-h-8 flex-col justify-center gap-1 rounded-2xl bg-card/45 px-4 py-2 text-sm"
+                        className="flex min-h-8 flex-col justify-center gap-1 rounded-lg bg-card/45 px-4 py-2 text-sm"
                       >
                         {deal && entry ? (
                           <>
@@ -1949,7 +1949,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
             {(["RETURNS", "RISK", "DEAL"] as const).map((group) => (
               <section key={group} className="space-y-1.5">
                 <div className="grid grid-cols-4">
-                  <h3 className="col-span-4 px-1 text-xs font-extrabold tracking-[0.24em] text-muted-foreground">
+                  <h3 className="col-span-4 px-1 text-xs font-semibold tracking-[0.24em] text-muted-foreground">
                     {group === "RISK" ? "COVERAGE & OPERATIONS" : group}
                   </h3>
                 </div>
@@ -1997,7 +1997,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                                   row={row}
                                   normalizationMode={normalizationMode}
                                 >
-                                  <span className="inline-flex shrink-0 items-center font-extrabold tabular-nums text-foreground">
+                                  <span className="inline-flex shrink-0 items-center font-semibold tabular-nums text-foreground">
                                     {formatCellValue(deal, row, value)}
                                     {isDirectionalEdge ? (
                                       <span className="sr-only">
@@ -2010,7 +2010,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                                 </MetricValueWithTooltip>
                                 {row.key === "maxOffer" && value != null && deal.maxOfferBasisLabel ? (
                                   <span className={cn(
-                                    "mt-0.5 max-w-full text-3xs font-normal leading-tight text-muted-foreground",
+                                    "mt-0.5 max-w-full text-xs font-normal leading-tight text-muted-foreground",
                                     index > 0 && "text-center"
                                   )}>
                                     Criteria: {deal.maxOfferBasisLabel}
@@ -2031,7 +2031,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
 
             <section className="space-y-1.5 pt-2">
               <div className="grid grid-cols-4">
-                <h3 className="col-span-4 px-1 text-xs font-extrabold tracking-[0.24em] text-muted-foreground">LONG-TERM PERFORMANCE <span className="tracking-[0.18em] text-muted-foreground/70">(10-YEAR VIEW)</span></h3>
+                <h3 className="col-span-4 px-1 text-xs font-semibold tracking-[0.24em] text-muted-foreground">LONG-TERM PERFORMANCE <span className="tracking-[0.18em] text-muted-foreground/70">(10-YEAR VIEW)</span></h3>
               </div>
               {visibleLongTermRows.map((row, rowIndex) => {
                 const prevSubsection = rowIndex > 0 ? visibleLongTermRows[rowIndex - 1]!.subsection : null;
@@ -2103,7 +2103,7 @@ export function CompareDealsClient({ deals, availableDeals = [], selectionLoadEr
                             ) : null}
                             {deal ? (
                               <span
-                                className="inline-flex shrink-0 items-center font-extrabold tabular-nums text-foreground"
+                                className="inline-flex shrink-0 items-center font-semibold tabular-nums text-foreground"
                                 title={longTermRoiCellTitle(row, value)}
                               >
                                 {formatLongTermCell(row, value)}

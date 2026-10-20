@@ -127,8 +127,8 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
       {/* Form column */}
       <div className="space-y-6">
         {/* Logo */}
-        <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+        <section className="rounded-lg border border-border bg-card p-5 sm:p-6">
+          <h2 className="text-sm font-medium text-muted-foreground">
             Logo
           </h2>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -137,7 +137,7 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
           </p>
 
           <div className="mt-4 flex items-start gap-4">
-            <div className="flex h-24 w-44 items-center justify-center rounded-xl border border-dashed border-border bg-background">
+            <div className="flex h-24 w-44 items-center justify-center rounded-md border border-dashed border-border bg-background">
               {logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -163,7 +163,7 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                 disabled={logoUploading}
-                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {logoUploading ? (
                   <Loader2
@@ -194,8 +194,8 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
         </section>
 
         {/* Brand color + identity */}
-        <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 space-y-4">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+        <section className="rounded-lg border border-border bg-card p-5 sm:p-6 space-y-4">
+          <h2 className="text-sm font-medium text-muted-foreground">
             Identity
           </h2>
 
@@ -225,7 +225,7 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
                 onChange={(e) => setPrimaryColor(e.target.value.trim())}
                 placeholder="#1A4FBA"
                 maxLength={7}
-                className="h-11 w-32 rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono uppercase tabular-nums"
+                className="h-11 w-32 rounded-lg border border-border bg-background px-3 py-2 text-sm font-figure tabular-nums"
               />
               <button
                 type="button"
@@ -267,9 +267,9 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
         {/* Contact details render in the PDF cover's PREPARED BY block. The
             same fields also support the co-branded client/embedded surfaces,
             so saving here must preserve—not clear—existing values. */}
-        <section className="space-y-4 rounded-2xl border border-border bg-card p-5 sm:p-6">
+        <section className="space-y-4 rounded-lg border border-border bg-card p-5 sm:p-6">
           <div>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+            <h2 className="text-sm font-medium text-muted-foreground">
               Contact details
             </h2>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -331,10 +331,10 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
         </section>
 
         {/* Save bar */}
-        <div role="status" aria-live="polite" className="sticky bottom-0 -mx-4 flex items-center justify-end gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border">
+        <div role="status" aria-live="polite" className="sticky bottom-0 -mx-4 flex items-center justify-end gap-3 border-t border-border bg-background/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-lg sm:border">
           {isPending ? <span className="sr-only">Saving branding</span> : null}
           {status.kind === "saved" && (
-            <span className="text-sm font-semibold text-[var(--metric-positive,#16a34a)]">
+            <span className="text-sm font-semibold text-positive">
               Saved
             </span>
           )}
@@ -344,7 +344,7 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
           <button
             type="submit"
             disabled={isPending || logoUploading}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-60"
+            className="inline-flex min-h-11 items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-60"
           >
             {isPending ? (
               <>
@@ -360,10 +360,10 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
 
       {/* Live preview column */}
       <aside className="lg:sticky lg:top-6 lg:self-start">
-        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-medium text-muted-foreground">
           PDF cover preview
         </p>
-        <div className="mt-2 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="mt-2 overflow-hidden rounded-lg border border-border bg-card shadow-sm">
           {/* Header bar — uses the brand color */}
           <div className="h-3 w-full" style={{ background: previewAccent }} />
           <div className="p-5 space-y-4">
@@ -377,7 +377,7 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
                 />
               ) : (
                 <div
-                  className="text-lg font-extrabold tracking-tight"
+                  className="text-lg font-semibold tracking-tight"
                   style={{ color: previewAccent }}
                 >
                   {companyName || "Your Logo"}
@@ -395,19 +395,19 @@ export function BrandingForm({ initial }: { initial: BrandingRow | null }) {
                 Investment Analysis Report
               </p>
               <p>123 Sample Street, Philadelphia PA</p>
-              <p className="mt-1 text-3xs">
+              <p className="mt-1 text-xs">
                 Prepared{preparedDate ? ` ${preparedDate}` : ""}
               </p>
             </div>
             <div className="border-t border-border pt-3">
-              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-xs font-medium text-muted-foreground">
                 Prepared by
               </p>
               <p className="mt-1 text-xs font-bold text-foreground">
                 {companyName || contactName || "TrueCap"}
               </p>
               {[contactName, contactEmail, contactPhone, contactWebsite].some(Boolean) ? (
-                <p className="mt-1 break-words text-3xs leading-relaxed text-muted-foreground">
+                <p className="mt-1 break-words text-xs leading-relaxed text-muted-foreground">
                   {[contactName, contactEmail, contactPhone, contactWebsite]
                     .filter(Boolean)
                     .join(" · ")}
@@ -435,7 +435,7 @@ function Field({
 }) {
   return (
     <fieldset className="space-y-1.5">
-      <legend className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <legend className="text-xs font-semibold text-muted-foreground">
         {label}
       </legend>
       {children}

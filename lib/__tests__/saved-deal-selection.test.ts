@@ -74,7 +74,9 @@ describe("dashboard workflow guards", () => {
 
   it("makes decision-center highlights operable and clears failed reopen URLs", () => {
     expect(dashboard).toContain("Open highest-scoring deal");
-    expect(dashboard).toContain("Review deal →");
+    // Re-anchored: DashboardHome.tsx — no arrow in link text (DESIGN.md
+    // chrome rules); the link is the same.
+    expect(dashboard).toContain("Review deal");
     expect(dashboard).toContain("Open highest modeled-upside deal");
 
     const failedReopen = analyzer.slice(

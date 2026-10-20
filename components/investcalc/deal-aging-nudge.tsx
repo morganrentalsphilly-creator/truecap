@@ -67,8 +67,8 @@ export function DealAgingNudge({
         : "Stay on top of inspection, financing, and your due-diligence deadlines.";
 
   return (
-    <div className="flex items-start gap-3 rounded-2xl border border-caution/30 bg-caution-light p-4 sm:p-5">
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-card text-caution-text">
+    <div className="flex items-start gap-3 rounded-lg border border-caution/30 bg-caution-light p-4 sm:p-5">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-card text-caution-text">
         <Clock className="size-4" />
       </span>
       <div className="min-w-0 flex-1">
