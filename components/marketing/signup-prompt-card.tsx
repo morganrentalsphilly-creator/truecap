@@ -22,7 +22,7 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  ArrowRight,
+ 
   Bookmark,
   History,
   Loader2,
@@ -79,25 +79,25 @@ export function SignupPromptCard({
       : "this analysis";
 
   return (
-    <div className="rounded-2xl border border-[var(--brand-green)]/25 bg-gradient-to-br from-[var(--brand-green-light)] via-card to-card p-5 shadow-[0_12px_36px_rgba(22,163,74,0.10)] sm:p-6">
+    <div className="rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6">
       {/* Header — pill + dismiss */}
       <div className="flex items-start justify-between gap-3">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--brand-green)] px-2.5 py-1 text-3xs font-extrabold uppercase tracking-widest text-white">
-          <Bookmark className="size-3" />
+        <span className="inline-flex items-center gap-1.5 rounded-sm border border-border px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
+          <Bookmark className="size-3" aria-hidden />
           Free plan
         </span>
         <button
           type="button"
           onClick={() => setDismissed(true)}
           aria-label="Dismiss signup prompt"
-          className="inline-flex size-11 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
+          className="inline-flex size-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <X className="size-4" />
         </button>
       </div>
 
       {/* Headline */}
-      <h3 className="mt-3 text-lg font-extrabold leading-tight tracking-tight text-foreground sm:text-2xl">
+      <h3 className="mt-3 font-display text-balance text-xl text-foreground sm:text-2xl">
         Create an account to save {dealLabel}
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
@@ -133,7 +133,7 @@ export function SignupPromptCard({
       <div className="mt-5 space-y-3">
         <Suspense
           fallback={
-            <div className="flex h-12 w-full items-center justify-center rounded-xl border border-border bg-card">
+            <div className="flex h-12 w-full items-center justify-center rounded-md border border-border bg-card">
               <Loader2
                 className="size-4 animate-spin text-muted-foreground"
                 aria-hidden
@@ -156,10 +156,9 @@ export function SignupPromptCard({
         <Link
           href="/auth/sign-up?next=/dashboard/new"
           onClick={() => beginSignup("email")}
-          className="group inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-5 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
+          className="inline-flex h-11 w-full items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
         >
           Sign up with email
-          <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
         </Link>
       </div>
 
@@ -188,10 +187,10 @@ function BenefitChip({
   sub: string;
 }) {
   return (
-    <li className="flex items-start gap-2 rounded-xl border border-border bg-card p-3">
-      <Icon className="mt-0.5 size-4 shrink-0 text-[var(--brand-green)]" />
+    <li className="flex items-start gap-2 border-t border-border pt-2">
+      <Icon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
       <div className="min-w-0">
-        <div className="text-sm font-bold text-foreground">{label}</div>
+        <div className="text-sm font-semibold text-foreground">{label}</div>
         <div className="text-2xs leading-snug text-muted-foreground">
           {sub}
         </div>
