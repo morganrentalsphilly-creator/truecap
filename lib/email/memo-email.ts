@@ -62,20 +62,20 @@ export function buildMemoEmail(input: MemoEmailInput): { subject: string; text: 
   const rows = metrics
     .map(
       (m) =>
-        `<tr><td style="padding:6px 0;color:#475569;font-size:15px">${escapeHtml(m.label)}</td><td style="padding:6px 0;text-align:right;color:#0F172A;font-size:15px;font-weight:700">${escapeHtml(m.value)}</td></tr>`,
+        `<tr><td style="padding:6px 0;color:#585b61;font-size:15px">${escapeHtml(m.label)}</td><td style="padding:6px 0;text-align:right;color:#26292e;font-size:15px;font-weight:700">${escapeHtml(m.value)}</td></tr>`,
     )
     .join("");
-  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#F1F5F9;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif">
+  const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#fbfaf7;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif">
 <div style="max-width:560px;margin:32px auto;padding:28px 24px;background:#fff;border-radius:16px">
-<h1 style="margin:0 0 12px;color:#0F172A;font-size:22px;line-height:1.3">Your decision memo</h1>
+<h1 style="margin:0 0 12px;color:#26292e;font-size:22px;line-height:1.3">Your decision memo</h1>
 ${p(escapeHtml(intro))}
 <table role="presentation" style="width:100%;border-collapse:collapse;margin:0 0 14px">${rows}</table>
 ${ceilingNote ? p(escapeHtml(ceilingNote)) : ""}
 ${breaker ? p(escapeHtml(breaker)) : ""}
-<p style="margin:20px 0"><a href="${escapeHtml(input.memoUrl)}" style="display:inline-block;background:#5248D4;color:#fff;text-decoration:none;padding:12px 22px;border-radius:10px;font-weight:700;font-size:15px">Open the full memo</a></p>
+<p style="margin:20px 0"><a href="${escapeHtml(input.memoUrl)}" style="display:inline-block;background:#1853c6;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:700;font-size:15px">Open the full memo</a></p>
 <p style="margin:0;color:#6b7280;font-size:13px;line-height:1.6">${escapeHtml(caveat)}</p>
 </div>
-<p style="margin:0 0 32px;text-align:center;color:#94A3B8;font-size:12px;line-height:18px">TrueCap${postal ? ` · ${escapeHtml(postal)}` : ""}<br><a href="${escapeHtml(input.unsubscribeUrl)}" style="color:#94A3B8">Unsubscribe</a></p>
+<p style="margin:0 0 32px;text-align:center;color:#585b61;font-size:12px;line-height:18px">TrueCap${postal ? ` · ${escapeHtml(postal)}` : ""}<br><a href="${escapeHtml(input.unsubscribeUrl)}" style="color:#585b61">Unsubscribe</a></p>
 </body></html>`;
 
   return { subject: MEMO_EMAIL_SUBJECT, text, html };

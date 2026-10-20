@@ -6,8 +6,8 @@
  * content is per-user).
  *
  * Sibling to emails/rate-alert.tsx. Colours are the site palette from DESIGN.md: Signal Blue
- * #0066ba for the action, ink #1b1b1b and Ink 2 #51504c for text, a raised
- * card #f6f5f2 on paper #efece8, "TrueCap." wordmark.
+ * #1853c6 for the action, ink #26292e and Ink 2 #585b61 for text, a raised
+ * card #ffffff on paper #fbfaf7, "TrueCap." wordmark.
  */
 
 import {
@@ -23,11 +23,11 @@ import {
 } from "@react-email/components";
 import type { RentAlertDeal } from "@/lib/rent-alerts";
 
-const BRAND = "#0066ba";
-const INK = "#1b1b1b";
-const SUB = "#51504c";
-const POSITIVE = "#006d32";
-const NEGATIVE = "#b9003d";
+const BRAND = "#1853c6";
+const INK = "#26292e";
+const SUB = "#585b61";
+const POSITIVE = "#00792f";
+const NEGATIVE = "#c21725";
 
 export type RentAlertEmailProps = {
   deals: RentAlertDeal[];
@@ -46,9 +46,9 @@ export default function RentAlertEmail({ deals, siteUrl }: RentAlertEmailProps) 
           deals.length === 1 ? "a saved deal" : `${deals.length} saved deals`
         }.`}
       </Preview>
-      <Body style={{ backgroundColor: "#efece8", margin: 0, fontFamily: "-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" }}>
+      <Body style={{ backgroundColor: "#fbfaf7", margin: 0, fontFamily: "-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" }}>
         <Container style={{ maxWidth: 560, margin: "0 auto", padding: "32px 16px" }}>
-          <Section style={{ backgroundColor: "#f6f5f2", borderRadius: 16, overflow: "hidden" }}>
+          <Section style={{ backgroundColor: "#ffffff", borderRadius: 16, overflow: "hidden" }}>
             <Section style={{ backgroundColor: BRAND, height: 6, fontSize: 6, lineHeight: "6px" }}>&nbsp;</Section>
             <Section style={{ padding: "28px 32px 8px" }}>
               <Link href={siteUrl} style={{ color: INK, fontWeight: 800, fontSize: 20, textDecoration: "none" }}>
@@ -68,7 +68,7 @@ export default function RentAlertEmail({ deals, siteUrl }: RentAlertEmailProps) 
               const hasDebt = deal.before.dscrBand !== null && deal.after.dscrBand !== null;
               return (
                 <Section key={deal.id} style={{ padding: "8px 32px" }}>
-                  <Section style={{ border: "1px solid #d8d5d0", borderRadius: 12, padding: "14px 16px" }}>
+                  <Section style={{ border: "1px solid #e9e8e4", borderRadius: 12, padding: "14px 16px" }}>
                     <Text style={{ color: INK, fontWeight: 700, fontSize: 15, margin: "0 0 2px" }}>
                       {deal.label}
                     </Text>
@@ -104,7 +104,7 @@ export default function RentAlertEmail({ deals, siteUrl }: RentAlertEmailProps) 
                 style={{
                   display: "inline-block",
                   backgroundColor: BRAND,
-                  color: "#fcfcfc",
+                  color: "#ffffff",
                   fontWeight: 700,
                   fontSize: 14,
                   padding: "12px 20px",
@@ -122,8 +122,8 @@ export default function RentAlertEmail({ deals, siteUrl }: RentAlertEmailProps) 
               </Text>
             </Section>
           </Section>
-          <Text style={{ color: "#51504c", fontSize: 11, textAlign: "center" as const, margin: "16px 0 0" }}>
-            TrueCap · Rental property underwriting · <Link href={siteUrl} style={{ color: "#51504c" }}>usetruecap.com</Link>
+          <Text style={{ color: "#585b61", fontSize: 11, textAlign: "center" as const, margin: "16px 0 0" }}>
+            TrueCap · Rental property underwriting · <Link href={siteUrl} style={{ color: "#585b61" }}>usetruecap.com</Link>
           </Text>
         </Container>
       </Body>

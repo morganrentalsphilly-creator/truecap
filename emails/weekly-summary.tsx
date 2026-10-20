@@ -8,8 +8,8 @@
  * the dashboard's own libs — the email can never disagree with the app.
  *
  * Colours match emails/rate-alert.tsx, the site palette from DESIGN.md: Signal Blue
- * #0066ba for the action, ink #1b1b1b and Ink 2 #51504c for text, a raised
- * card #f6f5f2 on paper #efece8, "TrueCap." wordmark.
+ * #1853c6 for the action, ink #26292e and Ink 2 #585b61 for text, a raised
+ * card #ffffff on paper #fbfaf7, "TrueCap." wordmark.
  */
 
 import {
@@ -25,11 +25,11 @@ import {
 } from "@react-email/components";
 import type { WeeklySummaryPayload } from "@/lib/weekly-summary";
 
-const BRAND = "#0066ba";
-const INK = "#1b1b1b";
-const SUB = "#51504c";
-const POSITIVE = "#006d32";
-const NEGATIVE = "#b9003d";
+const BRAND = "#1853c6";
+const INK = "#26292e";
+const SUB = "#585b61";
+const POSITIVE = "#00792f";
+const NEGATIVE = "#c21725";
 
 export type WeeklySummaryEmailProps = {
   payload: WeeklySummaryPayload;
@@ -43,7 +43,7 @@ const fmtSignedMoney = (n: number) =>
   `${n >= 0 ? "+" : "-"}$${Math.abs(Math.round(n)).toLocaleString("en-US")}`;
 
 const rowStyle = {
-  border: "1px solid #d8d5d0",
+  border: "1px solid #e9e8e4",
   borderRadius: 12,
   padding: "12px 16px",
 } as const;
@@ -88,7 +88,7 @@ export default function WeeklySummaryEmail({
       </Preview>
       <Body
         style={{
-          backgroundColor: "#efece8",
+          backgroundColor: "#fbfaf7",
           margin: 0,
           fontFamily: "-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif",
         }}
@@ -98,7 +98,7 @@ export default function WeeklySummaryEmail({
         >
           <Section
             style={{
-              backgroundColor: "#f6f5f2",
+              backgroundColor: "#ffffff",
               borderRadius: 16,
               overflow: "hidden",
             }}
@@ -330,7 +330,7 @@ export default function WeeklySummaryEmail({
                 style={{
                   display: "inline-block",
                   backgroundColor: BRAND,
-                  color: "#fcfcfc",
+                  color: "#ffffff",
                   fontWeight: 700,
                   fontSize: 14,
                   padding: "12px 20px",
@@ -364,14 +364,14 @@ export default function WeeklySummaryEmail({
           </Section>
           <Text
             style={{
-              color: "#51504c",
+              color: "#585b61",
               fontSize: 11,
               textAlign: "center" as const,
               margin: "16px 0 0",
             }}
           >
             TrueCap · Rental property underwriting ·{" "}
-            <Link href={siteUrl} style={{ color: "#51504c" }}>
+            <Link href={siteUrl} style={{ color: "#585b61" }}>
               usetruecap.com
             </Link>
           </Text>
