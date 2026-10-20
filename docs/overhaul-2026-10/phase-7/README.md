@@ -41,7 +41,12 @@ and the emails on the Blueprint, on branch `design/overhaul-2026-10-phase-7`
   figures in the figure voice and its Offer Ceiling in the display face on
   the highlight stroke under the one 2px rule, in place of the mono figures,
   the double rule and the banded row. The `/for-agents` card embeds the new
-  memo shot. `public/home.jpg` is re-rendered.
+  memo shot, and embeds it at all again: the route had fetched the shot
+  through a relative URL against `import.meta.url`, which resolved to
+  nothing on the built server, so the card had been shipping on its
+  headline alone (`before/for-agents.png` shows it). It now reads the shot
+  from `public/` where the file system has it and otherwise over HTTP from
+  the site's own static assets. `public/home.jpg` is re-rendered.
 - `docs/overhaul-2026-10/tools/render-cards.tsx` renders every card type to
   PNG through `next/og` in Node without a build; `before/` and `after/`
   hold the eight types.
