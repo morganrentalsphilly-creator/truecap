@@ -17,7 +17,7 @@ const fmt = {
   agentProMonthly: data.plans.agentPro.monthly,
   agentProAnnual: data.plans.agentPro.annual,
   agentProAnnualPerMonth: data.plans.agentPro.annualPerMonth,
-  targetCashFlow: `$${data.target.monthlyCashFlow.toLocaleString("en-US")}/mo`,
+  targetCashFlow: `$${(data.target.monthlyCashFlow ?? 0).toLocaleString("en-US")}/mo`,
   targetDscr: String(data.target.dscr),
   targetCashFlowRaw: String(data.target.monthlyCashFlow),
   bindingTarget: data.bindingTarget,
@@ -37,7 +37,7 @@ const fmt = {
   ceiling: data.formatted.ceiling,
   askingRaw: String(data.asking),
   ceilingRaw: String(data.ceiling),
-  shortfallAsking: `$${Math.round(data.target.monthlyCashFlow - data.atAsking.cashFlow).toLocaleString("en-US")}`,
+  shortfallAsking: `$${Math.round((data.target.monthlyCashFlow ?? 0) - data.atAsking.cashFlow).toLocaleString("en-US")}`,
   bedrooms: String(data.inputs.bedrooms),
   downPaymentPct: `${data.inputs.downPaymentPct}%`,
 };
