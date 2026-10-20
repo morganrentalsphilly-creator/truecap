@@ -542,8 +542,8 @@ export default async function DashboardPage() {
     return (
       <div className="flex-1 min-w-0">
         <main id="main" className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-          <div className="rounded-2xl border border-destructive/25 bg-destructive/5 p-6">
-            <h1 className="text-xl font-bold text-foreground">Could not load dashboard</h1>
+          <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-6">
+            <h1 className="font-display text-h3-sm text-foreground sm:text-2xl">Could not load dashboard</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               Something went wrong loading your deals. This is usually temporary.
             </p>

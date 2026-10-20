@@ -176,7 +176,7 @@ function Metric({
         : "text-foreground";
   return (
     <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
-      <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+      <span className="text-xs font-medium text-muted-foreground">
         {label}
       </span>
       <span className={`text-sm font-semibold tabular-nums ${valueClass}`}>{value}</span>
@@ -360,21 +360,21 @@ export default async function DealWorkspacePage({
   if (dealRead.status === "error") {
     return (
       <main id="main" className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
-        <div role="alert" className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6">
-          <h1 className="text-xl font-bold text-foreground">Couldn&apos;t load this deal</h1>
+        <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-6">
+          <h1 className="font-display text-h3-sm text-foreground sm:text-2xl">Couldn&apos;t load this deal</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Your deal has not been removed. The workspace could not be reached right now.
           </p>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link
               href={`/dashboard/saved-analyses/${id}`}
-              className="inline-flex min-h-11 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
+              className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground"
             >
               Try again
             </Link>
             <Link
               href="/dashboard/saved-analyses"
-              className="inline-flex min-h-11 items-center rounded-xl border border-border px-4 text-sm font-semibold text-foreground"
+              className="inline-flex min-h-11 items-center rounded-md border border-border px-4 text-sm font-semibold text-foreground"
             >
               Back to My Deals
             </Link>
@@ -746,7 +746,7 @@ export default async function DealWorkspacePage({
                   <ArrowLeft className="size-3.5" />
                   My Deals
                 </Link>
-                <h1 className="mt-1 truncate text-xl font-extrabold tracking-tight text-foreground sm:text-2xl">
+                <h1 className="mt-1 truncate font-display text-h3-sm text-foreground sm:text-2xl">
                   {heading}
                 </h1>
                 {nickname ? (
@@ -762,7 +762,7 @@ export default async function DealWorkspacePage({
                     Everything for this deal — checklist, documents, notes &amp; scenarios.
                   </p>
                 )}
-                <p className="mt-1 text-3xs text-muted-foreground">
+                <p className="mt-1 text-xs text-muted-foreground">
                   {!isLegacySavedMethodologyVersion(storedMethodologyVersion) ? (
                     <>
                       TrueCap Underwriting Standard v{storedMethodologyVersion}
@@ -911,10 +911,10 @@ export default async function DealWorkspacePage({
                 labeled inline (CONFLICT #6) so this never reads as a second,
                 unexplained "your max" vs the analyzer's Offer Ceiling surfaces. */}
             {maoLine ? (
-              <div className="mt-2 flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
+              <div className="mt-2 flex items-start gap-3 rounded-lg border border-border bg-card p-4">
                 <Target aria-hidden className="mt-0.5 size-5 shrink-0 text-primary" />
                 <div className="min-w-0 flex-1">
-                  <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+                  <div className="text-xs font-medium text-muted-foreground">
                     Offer Ceiling
                   </div>
                   {maoLine.kind === "blocked" ? (

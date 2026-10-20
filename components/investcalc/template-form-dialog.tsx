@@ -309,7 +309,7 @@ export function TemplateFormDialog({
                         <Input
                           placeholder="My Rental Template"
                           {...field}
-                          className="h-11 rounded-xl"
+                          className="h-11 rounded-md"
                         />
                       </FormControl>
                       <FormMessage />
@@ -329,7 +329,7 @@ export function TemplateFormDialog({
                           maxLength={TEMPLATE_DESCRIPTION_MAX_LENGTH}
                           {...field}
                           value={field.value ?? ""}
-                          className="h-11 rounded-xl"
+                          className="h-11 rounded-md"
                         />
                       </FormControl>
                       <FormMessage />
@@ -338,7 +338,7 @@ export function TemplateFormDialog({
                 />
               </div>
 
-              <div className="rounded-xl border border-border bg-card p-4 sm:p-5 space-y-4">
+              <div className="rounded-md border border-border bg-card p-4 sm:p-5 space-y-4">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Home className="w-4 h-4" />
@@ -441,7 +441,7 @@ export function TemplateFormDialog({
                 </div>
               </div>
 
-              <div className="rounded-xl border border-border bg-card p-4 sm:p-5 space-y-4">
+              <div className="rounded-md border border-border bg-card p-4 sm:p-5 space-y-4">
                 <button
                   type="button"
                   onClick={() => setShowAdvanced((v) => !v)}
@@ -598,7 +598,7 @@ export function TemplateFormDialog({
               {/* Buy box targets - optional acquisition criteria the template
                   aims for. Adopt them as your personal Buy Box in one click
                   from the templates page. Every field is optional. */}
-              <div className="rounded-xl border border-border bg-card p-4 sm:p-5 space-y-4">
+              <div className="rounded-md border border-border bg-card p-4 sm:p-5 space-y-4">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Target className="w-4 h-4" />
@@ -675,7 +675,7 @@ export function TemplateFormDialog({
             variant="outline"
             disabled={isSaving}
             onClick={() => onOpenChange(false)}
-            className="rounded-xl"
+            className="rounded-md"
           >
             <X className="w-4 h-4 mr-2" />
             Cancel
@@ -684,7 +684,7 @@ export function TemplateFormDialog({
             type="submit"
             form={formId}
             disabled={isSaving}
-            className="rounded-xl"
+            className="rounded-md"
           >
             {isSaving ? (
               <>

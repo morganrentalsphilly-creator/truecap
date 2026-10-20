@@ -121,8 +121,8 @@ export function DealDriverInsight({
   return (
     // Neutral chrome (not the blue tint): the blue treatment is reserved
     // for the interactive what-if affordance so exactly one element pops.
-    <div className="flex items-start gap-3 rounded-2xl border border-border bg-muted/30 p-4 sm:p-5">
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-card text-primary">
+    <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-4 sm:p-5">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-card text-primary">
         <Crosshair className="size-4" />
       </span>
       <div className="min-w-0 space-y-1">

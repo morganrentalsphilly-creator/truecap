@@ -44,7 +44,7 @@ export default async function BrandingSettingsPage() {
         className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-5 space-y-6"
       >
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          <p className="text-xs font-medium text-muted-foreground">
             <Link
               href="/settings"
               className="hover:text-foreground underline-offset-2 hover:underline"
@@ -54,7 +54,7 @@ export default async function BrandingSettingsPage() {
             <span className="mx-2 text-muted-foreground/50">/</span>
             <span>Branding</span>
           </p>
-          <h1 className="mt-2 text-2xl font-bold text-foreground sm:text-3xl">
+          <h1 className="mt-2 font-display text-balance text-section-sm text-foreground sm:text-section">
             PDF report branding
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -65,8 +65,8 @@ export default async function BrandingSettingsPage() {
         </div>
 
         {!isEntitled ? (
-          <div className="rounded-2xl border-2 border-dashed border-border bg-card p-6 text-center">
-            <p className="text-xs font-bold uppercase tracking-widest text-[var(--brand-orange)]">
+          <div className="rounded-lg border-2 border-dashed border-border bg-card p-6 text-center">
+            <p className="text-xs font-medium text-[var(--brand-orange)]">
               Pro feature
             </p>
             <h2 className="mt-2 text-xl font-bold text-foreground">
@@ -80,7 +80,7 @@ export default async function BrandingSettingsPage() {
             </p>
             <Link
               href="/pricing"
-              className="mt-4 inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary/90"
+              className="mt-4 inline-flex items-center justify-center rounded-md bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary/90"
             >
               See Pro plans
             </Link>

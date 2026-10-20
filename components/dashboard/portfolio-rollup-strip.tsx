@@ -166,8 +166,8 @@ export function PortfolioRollupStrip({
       aria-label="Portfolio summary"
       className="mx-auto mt-1 w-full max-w-7xl px-4 pt-4 sm:px-6 sm:pt-6"
     >
-      <div className="rounded-2xl border border-border bg-gradient-to-br from-card via-card to-card/60 p-4 shadow-sm sm:p-5">
-        <p className="line-clamp-2 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+      <div className="rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5">
+        <p className="line-clamp-2 text-xs font-medium text-muted-foreground">
           {scopeLabel(scope, items.length)}
         </p>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-5">
@@ -267,16 +267,16 @@ function RollupTile({
 }) {
   const valueColor =
     tone === "positive"
-      ? "text-[var(--metric-positive,#16a34a)]"
+      ? "text-positive"
       : tone === "negative"
-        ? "text-[var(--metric-negative,#dc2626)]"
+        ? "text-negative"
         : "text-foreground";
   return (
     <div>
-      <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+      <div className="text-xs font-medium text-muted-foreground">
         {label}
       </div>
-      <div className={`mt-1 text-lg font-extrabold tabular-nums leading-tight break-words sm:text-2xl ${valueColor}`}>
+      <div className={`mt-1 text-lg font-semibold tabular-nums leading-tight break-words sm:text-2xl ${valueColor}`}>
         {value}
       </div>
       <div className="mt-0.5 text-2xs text-muted-foreground">{sub}</div>

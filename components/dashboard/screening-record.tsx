@@ -44,25 +44,25 @@ export function ScreeningRecord({
   return (
     <section
       aria-labelledby="screening-record-heading"
-      className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5"
+      className="rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5"
     >
-      <h2 id="screening-record-heading" className="text-base font-extrabold text-foreground">
+      <h2 id="screening-record-heading" className="text-base font-semibold text-foreground">
         Your screening record
       </h2>
       <dl className="mt-3 grid grid-cols-2 gap-4">
         <div>
-          <dt className="text-2xs font-bold uppercase tracking-wider text-muted-foreground">
+          <dt className="text-xs font-medium text-muted-foreground">
             Deals saved
           </dt>
-          <dd className="mt-0.5 font-mono text-2xl font-extrabold tabular-nums text-foreground">
+          <dd className="mt-0.5 font-figure text-2xl font-semibold tabular-nums text-foreground">
             {totalSavedDeals.toLocaleString("en-US")}
           </dd>
         </div>
         <div>
-          <dt className="text-2xs font-bold uppercase tracking-wider text-muted-foreground">
+          <dt className="text-xs font-medium text-muted-foreground">
             Work at asking
           </dt>
-          <dd className="mt-0.5 font-mono text-2xl font-extrabold tabular-nums text-foreground">
+          <dd className="mt-0.5 font-figure text-2xl font-semibold tabular-nums text-foreground">
             {judged.length === 0 ? "—" : `${clearing.length}/${judged.length}`}
           </dd>
         </div>

@@ -201,8 +201,10 @@ describe("My Deals methodology truth wiring", () => {
   });
 
   it("shows compact methodology pills beside signals and removes the old footnote", () => {
+    // Re-anchored: your-deals-table.tsx — the pill's text is 12px (Phase 6;
+    // nothing under 12px in the app).
     expect(listSource).toContain(
-      'className="rounded-full text-3xs font-semibold text-muted-foreground"',
+      'className="rounded-full text-xs font-semibold text-muted-foreground"',
     );
     expect(listSource).not.toContain(
       '<p className="mt-1 text-3xs text-muted-foreground">\n                          {item.methodologyLabel}',

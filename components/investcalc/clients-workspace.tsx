@@ -192,7 +192,7 @@ export function ClientsWorkspace({
     <main id="main" className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Clients</h1>
+          <h1 className="font-display text-balance text-section-sm text-foreground sm:text-section">Clients</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Give each buyer their own criteria, assign opportunities, and share a client-ready report.
           </p>
@@ -206,7 +206,7 @@ export function ClientsWorkspace({
 
       <section
         aria-label="Agent Pro workflow"
-        className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-4"
+        className="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-4"
       >
         <p className="text-xs font-medium text-primary">
           Agent workflow
@@ -215,7 +215,7 @@ export function ClientsWorkspace({
           {AGENT_WORKFLOW_STEPS.map((step, index) => (
             <li key={step} className="inline-flex items-center gap-1.5">
               <span className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-2 py-1">
-                <span className="text-3xs text-muted-foreground">{index + 1}</span>
+                <span className="text-xs text-muted-foreground">{index + 1}</span>
                 {step}
               </span>
               {index < AGENT_WORKFLOW_STEPS.length - 1 ? (
@@ -243,13 +243,13 @@ export function ClientsWorkspace({
       </section>
 
       {loadError ? (
-        <div className="mt-4 rounded-xl border border-destructive/25 bg-destructive/5 p-4 text-sm text-foreground">
+        <div className="mt-4 rounded-md border border-destructive/25 bg-destructive/5 p-4 text-sm text-foreground">
           {loadError}
         </div>
       ) : null}
 
       {editor ? (
-        <div className="mt-4 space-y-3 rounded-2xl border border-border bg-muted/20 p-4">
+        <div className="mt-4 space-y-3 rounded-lg border border-border bg-muted/20 p-4">
           <div className="space-y-1">
             <Label htmlFor="cw-name" className="text-xs font-medium text-muted-foreground">
               Name
@@ -299,7 +299,7 @@ export function ClientsWorkspace({
       ) : null}
 
       {clients.length === 0 && !editor ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-border bg-muted/20 p-8 text-center">
+        <div className="mt-6 rounded-lg border border-dashed border-border bg-muted/20 p-8 text-center">
           <Users className="mx-auto size-6 text-muted-foreground" />
           <p className="mt-2 font-semibold text-foreground">No clients yet</p>
           <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
@@ -317,7 +317,7 @@ export function ClientsWorkspace({
           const summary = countsById.get(c.id);
           const dealCount = summary?.dealCount ?? 0;
           return (
-            <li key={c.id} className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+            <li key={c.id} className="rounded-lg border border-border bg-card p-4 sm:p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-bold text-foreground">{c.name}</p>

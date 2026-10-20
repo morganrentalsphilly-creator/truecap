@@ -39,7 +39,7 @@ export function NextActionBanner({
   const t = TONE[action.tone];
   const Icon = t.icon;
   return (
-    <div className={`flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-start ${t.wrap}`}
+    <div className={`flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-start ${t.wrap}`}
     >
       <div className="flex min-w-0 flex-1 items-start gap-3">
       <Icon aria-hidden className={`mt-0.5 size-5 shrink-0 ${t.iconClass}`} />

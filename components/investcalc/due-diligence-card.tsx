@@ -244,7 +244,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
     return (
       <section
         aria-label="Due diligence"
-        className="rounded-2xl border border-destructive/25 bg-destructive/5 p-4"
+        className="rounded-lg border border-destructive/25 bg-destructive/5 p-4"
       >
         <div role="alert">
           <p className="text-sm font-semibold text-foreground">Couldn&apos;t load due diligence</p>
@@ -269,7 +269,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
     return (
       <section
         aria-label="Due diligence"
-        className="rounded-2xl border border-dashed border-border bg-muted/20 p-4 text-xs text-muted-foreground"
+        className="rounded-lg border border-dashed border-border bg-muted/20 p-4 text-xs text-muted-foreground"
       >
         <ClipboardCheck className="mr-1.5 inline size-3.5" />
         The due-diligence checklist will be available once the latest schema update is applied.
@@ -281,7 +281,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
   const dueSummary = dueDiligenceDueSummary(items, todayISO);
 
   return (
-    <section aria-label="Due diligence" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+    <section aria-label="Due diligence" className="rounded-lg border border-border bg-card p-4 sm:p-5">
       <div className="mb-3 flex flex-col items-start gap-2 min-[360px]:flex-row min-[360px]:items-center min-[360px]:justify-between min-[360px]:gap-3">
         <div className="flex items-center gap-2">
           <ClipboardCheck className="size-4 text-primary" />
@@ -311,7 +311,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
 
       <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
         <div
-          className="h-full rounded-full bg-[var(--brand-green)] transition-all"
+          className="h-full rounded-full bg-[var(--brand-green)] transition-colors"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -321,7 +321,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
           const status = dueDiligenceItemStatus(item, todayISO);
           const isExpanded = expandedId === item.id;
           return (
-            <li key={item.id} className="group rounded-xl bg-muted/20 p-2 sm:bg-transparent sm:p-0">
+            <li key={item.id} className="group rounded-md bg-muted/20 p-2 sm:bg-transparent sm:p-0">
               <div className="grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-start gap-x-2 gap-y-2 sm:grid-cols-[2.75rem_minmax(0,1fr)_auto_2.75rem] sm:items-center">
                 <label className="col-start-1 row-start-1 flex size-11 shrink-0 cursor-pointer items-center justify-center" aria-label={`Mark ${item.label} ${item.done ? "incomplete" : "complete"}`}>
                   <input

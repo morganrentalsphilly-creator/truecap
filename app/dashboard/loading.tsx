@@ -28,12 +28,12 @@ export default function DashboardLoading() {
         <div className="h-8 w-64 max-w-[70vw] rounded-lg bg-muted animate-pulse" />
 
         {/* Decision Center band (full-width) */}
-        <div className="h-28 w-full rounded-2xl border border-border bg-card animate-pulse" />
+        <div className="h-28 w-full rounded-lg border border-border bg-card animate-pulse" />
 
         {/* 2 hero stat cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {[0, 1].map((i) => (
-            <div key={i} className="rounded-2xl border border-border bg-card p-5 space-y-3">
+            <div key={i} className="rounded-lg border border-border bg-card p-5 space-y-3">
               <div className="h-4 w-24 rounded-md bg-muted animate-pulse" />
               <div className="h-9 w-36 rounded-md bg-muted animate-pulse" />
               <div className="h-3 w-3/4 rounded-md bg-muted animate-pulse" />
@@ -42,12 +42,12 @@ export default function DashboardLoading() {
         </div>
 
         {/* one-line stat strip */}
-        <div className="h-10 w-full rounded-xl border border-border bg-card/40 animate-pulse" />
+        <div className="h-10 w-full rounded-md border border-border bg-card/40 animate-pulse" />
 
         {/* 4-up KPI grid */}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="rounded-xl border border-border bg-card p-3 space-y-2">
+            <div key={i} className="rounded-md border border-border bg-card p-3 space-y-2">
               <div className="h-3 w-20 rounded bg-muted animate-pulse" />
               <div className="h-6 w-16 rounded bg-muted animate-pulse" />
             </div>
@@ -55,9 +55,9 @@ export default function DashboardLoading() {
         </div>
 
         {/* chart block */}
-        <div className="rounded-2xl border border-border bg-card p-6 space-y-3">
+        <div className="rounded-lg border border-border bg-card p-6 space-y-3">
           <div className="h-5 w-48 rounded-md bg-muted animate-pulse" />
-          <div className="h-64 w-full rounded-xl bg-muted animate-pulse" />
+          <div className="h-64 w-full rounded-md bg-muted animate-pulse" />
         </div>
       </div>
       </div>

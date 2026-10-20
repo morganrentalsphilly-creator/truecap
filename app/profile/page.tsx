@@ -167,14 +167,14 @@ export default async function ProfilePage({
   if (profileError || subscriptionsError || plansError) {
     return (
       <main id="main" className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
-        <div role="alert" className="rounded-2xl border border-destructive/30 bg-destructive/5 p-6">
+        <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-6">
           <h1 className="text-xl font-bold text-foreground">Couldn&apos;t load profile and billing</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             TrueCap could not verify your account or subscription right now, so it will not show a Free plan or missing profile by mistake.
           </p>
           <Link
             href="/profile"
-            className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground"
+            className="mt-4 inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground"
           >
             Try again
           </Link>

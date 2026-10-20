@@ -80,8 +80,8 @@ export default async function DashboardTemplatesPage() {
             canAccessDashboard={navAccess.dashboard}
           />
           <main id="main" className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
-            <div className="rounded-2xl border border-destructive/25 bg-destructive/5 p-6">
-              <h1 className="text-xl font-bold text-foreground">Could not load templates</h1>
+            <div className="rounded-lg border border-destructive/25 bg-destructive/5 p-6">
+              <h1 className="font-display text-h3-sm text-foreground sm:text-2xl">Could not load templates</h1>
               <p className="text-sm text-muted-foreground mt-2">{result.message}</p>
               <RetryRouteButton className="mt-4" />
             </div>

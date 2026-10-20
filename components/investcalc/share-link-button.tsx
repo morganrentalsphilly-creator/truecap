@@ -412,7 +412,7 @@ export function ShareLinkButton({
         onClick={openShare}
         disabled={disabled || isPreparing}
         className={cn(
-          "min-h-11 gap-1.5 rounded-xl text-xs sm:text-sm",
+          "min-h-11 gap-1.5 rounded-md text-xs sm:text-sm",
           className,
         )}
         title={
@@ -489,7 +489,7 @@ export function ShareLinkButton({
           </DialogHeader>
 
           {needsSignIn ? (
-            <div className="space-y-4 rounded-xl border border-border bg-muted/30 p-4">
+            <div className="space-y-4 rounded-md border border-border bg-muted/30 p-4">
               <div>
                 <p className="font-semibold text-foreground">
                   Sign in to create this link
@@ -501,7 +501,7 @@ export function ShareLinkButton({
                 </p>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
-                <Button asChild className="min-h-11 rounded-xl font-semibold">
+                <Button asChild className="min-h-11 rounded-md font-semibold">
                   <Link
                     href={`/auth/sign-up?next=${encodedReturnPath}`}
                     onClick={prepareAuthNavigation}
@@ -513,7 +513,7 @@ export function ShareLinkButton({
                 <Button
                   asChild
                   variant="outline"
-                  className="min-h-11 rounded-xl font-semibold"
+                  className="min-h-11 rounded-md font-semibold"
                 >
                   <Link
                     href={`/auth/login?next=${encodedReturnPath}`}
@@ -639,7 +639,7 @@ export function ShareLinkButton({
                 type="button"
                 onClick={prepareShare}
                 disabled={isPreparing || clientAddressChoiceMissing}
-                className="min-h-11 w-full rounded-xl font-semibold"
+                className="min-h-11 w-full rounded-md font-semibold"
               >
                 {isPreparing ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
@@ -736,7 +736,7 @@ export function ShareLinkButton({
           {!needsSignIn && sharesListState === "loading" ? (
             <p
               role="status"
-              className="rounded-xl border border-border bg-muted/20 p-3 text-xs text-muted-foreground"
+              className="rounded-md border border-border bg-muted/20 p-3 text-xs text-muted-foreground"
             >
               Loading your existing share links…
             </p>
@@ -745,7 +745,7 @@ export function ShareLinkButton({
           {!needsSignIn && sharesListState === "error" ? (
             <div
               role="alert"
-              className="rounded-xl border border-caution/40 bg-caution-light p-3 text-xs"
+              className="rounded-md border border-caution/40 bg-caution-light p-3 text-xs"
             >
               <p className="font-semibold text-foreground">
                 Existing links could not be loaded
@@ -768,7 +768,7 @@ export function ShareLinkButton({
           {!needsSignIn &&
           sharesListState === "ready" &&
           listedShares?.length === 0 ? (
-            <p className="rounded-xl border border-border bg-muted/20 p-3 text-xs text-muted-foreground">
+            <p className="rounded-md border border-border bg-muted/20 p-3 text-xs text-muted-foreground">
               No other share links on this account.
             </p>
           ) : null}
@@ -779,7 +779,7 @@ export function ShareLinkButton({
                panel reported a 597px min-content width, sized the dialog's
                grid column, and stretched every unrelated sibling — the title,
                the audience radios, the submit button — to match. */
-            <div className="min-w-0 rounded-xl border border-border bg-muted/20 p-3">
+            <div className="min-w-0 rounded-md border border-border bg-muted/20 p-3">
               <p className="text-xs font-medium text-muted-foreground">
                 Manage all share links
               </p>

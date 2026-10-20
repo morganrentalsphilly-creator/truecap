@@ -38,8 +38,10 @@ describe("batch triage review accessibility guards", () => {
   it("uses cards through tablet widths and tables only at desktop", () => {
     expect(source).toContain('className="mt-4 space-y-3 lg:hidden"');
     expect(source).toContain('className="mt-4 hidden lg:block"');
+    // Re-anchored: batch-triage-client.tsx — the table's frame is the 12px
+    // object radius (Phase 6).
     expect(source).toContain(
-      'className="mt-4 hidden overflow-hidden rounded-2xl border border-border lg:block"',
+      'className="mt-4 hidden overflow-hidden rounded-lg border border-border lg:block"',
     );
   });
 });

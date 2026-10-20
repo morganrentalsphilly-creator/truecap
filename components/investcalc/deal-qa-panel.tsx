@@ -101,7 +101,7 @@ export function DealQaPanel({
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
+    <div className="rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex items-center justify-between gap-2">
         <p className="flex items-center gap-2 text-sm font-bold text-foreground">
           <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -123,7 +123,7 @@ export function DealQaPanel({
           {turns.map((t, i) => (
             <div key={`${i}-${t.question.slice(0, 24)}`} className="space-y-1.5">
               <p className="text-xs font-semibold text-muted-foreground">{t.question}</p>
-              <p className="whitespace-pre-line rounded-xl bg-muted/40 px-3 py-2 text-sm leading-relaxed text-foreground">
+              <p className="whitespace-pre-line rounded-md bg-muted/40 px-3 py-2 text-sm leading-relaxed text-foreground">
                 {t.answer}
               </p>
             </div>
@@ -152,7 +152,7 @@ export function DealQaPanel({
 
       {/* Limit upsell */}
       {limitHit ? (
-        <div className="mt-3 flex flex-col gap-2 rounded-xl border border-primary/25 bg-[var(--brand-blue-light)] p-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-3 flex flex-col gap-2 rounded-md border border-primary/25 bg-[var(--brand-blue-light)] p-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs leading-relaxed text-foreground">
             You&apos;ve used today&apos;s free questions. Pro includes unlimited Deal Q&amp;A on
             every analysis.
@@ -180,13 +180,13 @@ export function DealQaPanel({
             maxLength={500}
             placeholder="e.g. What rent would make this cash-flow $300/mo?"
             disabled={isAsking}
-            className="h-10 min-w-0 flex-1 rounded-xl border border-border bg-background px-3 text-base md:text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60"
+            className="h-10 min-w-0 flex-1 rounded-md border border-border bg-background px-3 text-base md:text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60"
           />
           <button
             type="submit"
             disabled={isAsking || question.trim().length < 2}
             aria-label="Ask"
-            className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition disabled:opacity-40"
+            className="flex size-11 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground transition disabled:opacity-40"
           >
             {isAsking ? <Loader2 className="size-4 animate-spin" /> : <ArrowUp className="size-4" />}
           </button>
@@ -194,7 +194,7 @@ export function DealQaPanel({
       )}
 
       {notice && <p className="mt-2 text-2xs text-muted-foreground">{notice}</p>}
-      <p className="mt-2 text-3xs leading-relaxed text-muted-foreground/70">
+      <p className="mt-2 text-xs leading-relaxed text-muted-foreground/70">
         Answers are generated from this analysis&apos;s numbers only. Not financial advice.
       </p>
     </div>

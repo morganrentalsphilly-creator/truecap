@@ -92,7 +92,7 @@ export function OwnedEquityChart({ data = [] }: { data?: OwnedEquitySeriesPoint[
       : "No owned-equity history yet.";
 
   return (
-    <div className="rounded-2xl bg-card border border-border p-4 sm:p-6">
+    <div className="rounded-lg bg-card border border-border p-4 sm:p-6">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
@@ -107,10 +107,10 @@ export function OwnedEquityChart({ data = [] }: { data?: OwnedEquitySeriesPoint[
         </div>
         {last ? (
           <div className="text-right">
-            <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+            <div className="text-xs font-medium text-muted-foreground">
               Equity today
             </div>
-            <div className="text-lg font-extrabold tabular-nums text-foreground">
+            <div className="text-lg font-semibold tabular-nums text-foreground">
               {fmtCurrency(last.equity)}
             </div>
           </div>

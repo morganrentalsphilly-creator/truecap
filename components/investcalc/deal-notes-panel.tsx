@@ -303,7 +303,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
     return (
       <section
         aria-label="Deal notes"
-        className="rounded-2xl border border-destructive/25 bg-destructive/5 p-4"
+        className="rounded-lg border border-destructive/25 bg-destructive/5 p-4"
       >
         <div role="alert">
           <p className="text-sm font-semibold text-foreground">Couldn&apos;t load deal notes</p>
@@ -328,7 +328,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
     return (
       <section
         aria-label="Deal notes"
-        className="rounded-2xl border border-dashed border-border bg-muted/20 p-4 text-xs text-muted-foreground"
+        className="rounded-lg border border-dashed border-border bg-muted/20 p-4 text-xs text-muted-foreground"
       >
         <NotebookPen className="mr-1.5 inline size-3.5" />
         Deal notes will be available once the latest schema update is applied.
@@ -340,7 +340,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
   return (
     <section
       aria-label="Deal notes"
-      className="rounded-2xl border border-border bg-card p-4 sm:p-5"
+      className="rounded-lg border border-border bg-card p-4 sm:p-5"
     >
       <div className="mb-2 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
@@ -355,7 +355,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
               <Loader2 className="size-3 animate-spin" /> Saving…
             </span>
           ) : saveStatus === "saved" ? (
-            <span className="text-[var(--metric-positive,#16a34a)]">Saved just now</span>
+            <span className="text-positive">Saved just now</span>
           ) : saveStatus === "error" ? (
             <span className="inline-flex items-center gap-2">
               <span className="font-semibold text-destructive">Couldn&apos;t save</span>
@@ -379,7 +379,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
       {conflict ? (
         <div
           role="alert"
-          className="mb-3 rounded-xl border border-caution/40 bg-caution-light p-3"
+          className="mb-3 rounded-md border border-caution/40 bg-caution-light p-3"
         >
           <p className="text-sm font-semibold text-foreground">
             A newer note was saved elsewhere
@@ -419,7 +419,7 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
       {recoverableDraft !== null ? (
         <div
           role="status"
-          className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/30 p-3 text-xs text-muted-foreground"
+          className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-muted/30 p-3 text-xs text-muted-foreground"
         >
           <span>Your prior unsaved draft is preserved.</span>
           <Button
@@ -456,9 +456,9 @@ export function DealNotesPanel({ savedDealId }: { savedDealId: string }) {
         rows={4}
         maxLength={NOTES_MAX}
         placeholder="Seller motivation, inspector findings, offer strategy — anything to remember about this deal."
-        className="w-full resize-none rounded-xl border border-border bg-background p-3 text-base md:text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/40"
+        className="w-full resize-none rounded-md border border-border bg-background p-3 text-base md:text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/70 focus:outline-none focus:ring-2 focus:ring-primary/40"
       />
-      <p className="mt-1.5 text-right text-3xs text-muted-foreground">
+      <p className="mt-1.5 text-right text-xs text-muted-foreground">
         {remaining.toLocaleString()} characters left
       </p>
     </section>

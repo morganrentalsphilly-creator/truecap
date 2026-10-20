@@ -144,7 +144,7 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
 
   return (
     <section
-      className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6"
+      className="rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6"
       aria-labelledby={titleId}
     >
       <div className="flex items-start justify-between gap-4">
@@ -170,7 +170,7 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
       </div>
 
       <div
-        className="mt-4 rounded-xl border border-warning/35 bg-warning/10 p-3"
+        className="mt-4 rounded-md border border-warning/35 bg-warning/10 p-3"
         role="status"
         aria-live="polite"
       >
@@ -239,7 +239,7 @@ export function SavedDealWatchCard({ savedDealId }: { savedDealId: string }) {
             />
           </div>
 
-          <div className="flex items-start gap-2 rounded-xl bg-muted/50 p-3">
+          <div className="flex items-start gap-2 rounded-md bg-muted/50 p-3">
             <ShieldCheck aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
             <p className="text-xs leading-relaxed text-muted-foreground">
               Saving either preference sends nothing today. Delivery must re-check your current

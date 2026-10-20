@@ -35,10 +35,10 @@ export function DealHistoryTimeline({
   return (
     <section
       aria-labelledby="deal-log-heading"
-      className="rounded-2xl border border-border bg-card p-4 sm:p-5"
+      className="rounded-lg border border-border bg-card p-4 sm:p-5"
     >
       <div className="flex items-start gap-3">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-muted text-primary">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-primary">
           <History aria-hidden className="size-4" />
         </span>
         <div className="min-w-0 flex-1">
@@ -86,7 +86,7 @@ export function DealHistoryTimeline({
                     </p>
                     <time
                       dateTime={event.occurredAt}
-                      className="text-3xs tabular-nums text-muted-foreground"
+                      className="text-xs tabular-nums text-muted-foreground"
                     >
                       {formatEventTime(event.occurredAt)}
                     </time>

@@ -86,7 +86,7 @@ export function WeeklySummaryToggle() {
   if (!loaded || !available) return null;
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+    <section className="rounded-lg border border-border bg-card p-5 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-2">
           <CalendarClock className="mt-0.5 size-4 text-primary" />

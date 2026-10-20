@@ -66,8 +66,10 @@ describe("durable saved-deal reopen", () => {
     const list = read("components/investcalc/saved-analyses-page-v2.tsx");
     const banner = read("components/investcalc/next-action-banner.tsx");
 
-    expect(list).toContain('className="h-11 flex-1 rounded-xl');
-    expect(list).toContain('className="h-11 w-11 shrink-0 rounded-xl');
+    // Re-anchored: saved-analyses-page-v2.tsx — controls carry the 8px control
+    // radius (Phase 6); the 44px floor is unchanged.
+    expect(list).toContain('className="h-11 flex-1 rounded-md');
+    expect(list).toContain('className="h-11 w-11 shrink-0 rounded-md');
     expect(list).toContain('className="h-11 rounded-lg px-3 text-xs"');
     expect(list).toContain('className="h-11 w-11 rounded-lg p-0"');
     expect(banner).toContain("inline-flex min-h-11");

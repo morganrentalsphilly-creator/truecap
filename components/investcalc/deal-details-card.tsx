@@ -130,7 +130,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
 
   if (loadError) {
     return (
-      <section aria-label="Deal details" className="rounded-2xl border border-destructive/25 bg-destructive/5 p-4">
+      <section aria-label="Deal details" className="rounded-lg border border-destructive/25 bg-destructive/5 p-4">
         <div role="alert">
           <p className="text-sm font-semibold text-foreground">Couldn&apos;t load deal details</p>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -154,7 +154,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
     return (
       <section
         aria-label="Deal details"
-        className="rounded-2xl border border-dashed border-border bg-muted/20 p-4 text-xs text-muted-foreground"
+        className="rounded-lg border border-dashed border-border bg-muted/20 p-4 text-xs text-muted-foreground"
       >
         <MapPin className="mr-1.5 inline size-3.5" />
         Deal nickname, market &amp; neighborhood will be available once the latest schema update is applied.
@@ -169,7 +169,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
   ];
 
   return (
-    <section aria-label="Deal details" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+    <section aria-label="Deal details" className="rounded-lg border border-border bg-card p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <MapPin className="size-4 text-primary" />

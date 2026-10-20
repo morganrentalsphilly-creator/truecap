@@ -176,7 +176,7 @@ export function ScenariosCard({
 
   if (loadError) {
     return (
-      <section className="rounded-2xl border border-destructive/25 bg-destructive/5 p-4 sm:p-5">
+      <section className="rounded-lg border border-destructive/25 bg-destructive/5 p-4 sm:p-5">
         <div role="alert">
           <p className="text-sm font-semibold text-foreground">Couldn&apos;t load scenarios</p>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -210,12 +210,12 @@ export function ScenariosCard({
   const alternateCount = rows.filter((row) => !row.isBase).length;
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+    <section className="rounded-lg border border-border bg-card p-5 sm:p-6">
       <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Layers className="size-4 text-primary" />
           <h2 className="text-base font-bold text-foreground">Scenarios</h2>
-          <span className="rounded-full border border-border px-2 py-0.5 text-3xs font-semibold text-muted-foreground">
+          <span className="rounded-full border border-border px-2 py-0.5 text-xs font-semibold text-muted-foreground">
             {hasBase ? "1 base · " : ""}
             {alternateCount} {alternateCount === 1 ? "scenario" : "scenarios"}
           </span>
@@ -245,7 +245,7 @@ export function ScenariosCard({
           return (
             <li
               key={s.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-background p-3"
+              className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border bg-background p-3"
             >
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -255,7 +255,7 @@ export function ScenariosCard({
                   </span>
                   {s.strategyKind &&
                   isScenarioStrategyEnabled(s.strategyKind) ? (
-                    <span className="rounded-full border border-border px-2 py-0.5 text-3xs font-semibold text-muted-foreground">
+                    <span className="rounded-full border border-border px-2 py-0.5 text-xs font-semibold text-muted-foreground">
                       {strategyLabel(s.strategyKind)}
                     </span>
                   ) : null}
@@ -292,7 +292,7 @@ export function ScenariosCard({
       </ul>
 
       {adding ? (
-        <div className="mt-4 rounded-xl border border-border bg-background p-4">
+        <div className="mt-4 rounded-md border border-border bg-background p-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1">
               <Label htmlFor="scenario-name" className="text-xs font-medium text-muted-foreground">

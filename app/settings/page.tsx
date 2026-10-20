@@ -39,7 +39,7 @@ export default async function SettingsPage() {
     <>
       <main id="main" className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-5 space-y-6">
         <header>
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+          <h1 className="font-display text-balance text-section-sm text-foreground sm:text-section">
             Settings
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -91,7 +91,7 @@ export default async function SettingsPage() {
               {canCustomizeBranding ? (
                 <Badge variant="outline">Pro</Badge>
               ) : (
-                <Badge className="bg-[var(--brand-orange)] text-white">
+                <Badge className="bg-highlight-wash text-highlight-text">
                   Pro
                 </Badge>
               )}
@@ -105,7 +105,7 @@ export default async function SettingsPage() {
           <CardContent>
             <Link
               href="/settings/branding"
-              className="inline-flex items-center justify-center rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted"
+              className="inline-flex items-center justify-center rounded-md border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted"
             >
               {canCustomizeBranding ? "Configure branding" : "Preview branding"}
             </Link>

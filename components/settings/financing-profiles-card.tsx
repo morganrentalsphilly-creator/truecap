@@ -332,7 +332,7 @@ export function FinancingProfilesCard() {
     <section
       id="financing-profiles"
       aria-labelledby="financing-profiles-heading"
-      className="scroll-mt-20 rounded-2xl border border-border bg-card p-5 sm:p-6"
+      className="scroll-mt-20 rounded-lg border border-border bg-card p-5 sm:p-6"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -363,7 +363,7 @@ export function FinancingProfilesCard() {
       {profiles.length > 0 && !editor ? (
         <div className="mt-5 space-y-3">
           {profiles.map((profile) => (
-            <div key={profile.id} className="rounded-xl border border-border/70 bg-background p-4">
+            <div key={profile.id} className="rounded-md border border-border/70 bg-background p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
@@ -450,7 +450,7 @@ export function FinancingProfilesCard() {
       ) : null}
 
       {profiles.length === 0 && !editor ? (
-        <div className="mt-5 rounded-xl border border-dashed border-border p-5 text-sm text-muted-foreground">
+        <div className="mt-5 rounded-md border border-dashed border-border p-5 text-sm text-muted-foreground">
           Add your first lender profile to stop retyping financing assumptions on every deal.
         </div>
       ) : null}
@@ -459,7 +459,7 @@ export function FinancingProfilesCard() {
         <form
           aria-label={editor.id ? `Edit ${editor.name} financing profile` : "Add financing profile"}
           aria-busy={isSaving}
-          className="mt-5 space-y-5 rounded-xl border border-border bg-background p-4 sm:p-5"
+          className="mt-5 space-y-5 rounded-md border border-border bg-background p-4 sm:p-5"
           onSubmit={(event) => {
             event.preventDefault();
             handleSave();
@@ -522,7 +522,7 @@ export function FinancingProfilesCard() {
                   />
                   {field.suffix ? <span aria-hidden className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{field.suffix}</span> : null}
                 </div>
-                {field.hint ? <p id={`financing-profile-${field.key}-hint`} className="text-3xs text-muted-foreground">{field.hint}</p> : null}
+                {field.hint ? <p id={`financing-profile-${field.key}-hint`} className="text-xs text-muted-foreground">{field.hint}</p> : null}
               </div>
             ))}
           </div>
@@ -560,7 +560,7 @@ export function FinancingProfilesCard() {
                   <ShieldCheck aria-hidden /> Today
                 </Button>
               </div>
-              <p id="financing-profile-verified-hint" className="text-3xs leading-relaxed text-muted-foreground">
+              <p id="financing-profile-verified-hint" className="text-xs leading-relaxed text-muted-foreground">
                 Set this only after confirming the current lender quote or term sheet. A date
                 within 30 days can raise Input Confidence; older terms remain visible but do not.
               </p>

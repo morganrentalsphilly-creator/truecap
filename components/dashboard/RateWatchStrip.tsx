@@ -31,14 +31,14 @@ export function RateWatchStrip({
   // Ambient state — deals are watched, nothing changed yet.
   if (changedDeals.length === 0) {
     return (
-      <section aria-label="Rate watch" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+      <section aria-label="Rate watch" className="rounded-lg border border-border bg-card p-4 sm:p-5">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Bell className="size-4" />
             </span>
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Rate watch</p>
+              <p className="text-xs font-medium text-muted-foreground">Rate watch</p>
               {/* Deliberately NOT "Monitoring N deals". That word promises a
                   background watch that notifies you, and /settings says the
                   opposite out loud ("No monitoring or email is active yet").
@@ -84,14 +84,14 @@ export function RateWatchStrip({
   const extra = count - shown.length;
 
   return (
-    <section aria-label="Rate watch" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
+    <section aria-label="Rate watch" className="rounded-lg border border-border bg-card p-4 sm:p-5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Bell className="size-4" />
           </span>
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Rate watch</p>
+            <p className="text-xs font-medium text-muted-foreground">Rate watch</p>
             <p className="text-sm font-semibold text-foreground">
               30-yr rate is {currentRatePct.toFixed(2)}% —{" "}
               {count === 1 ? "1 saved deal" : `${count} saved deals`} changed at today&apos;s rate
@@ -115,7 +115,7 @@ export function RateWatchStrip({
             <Link
               href={`/dashboard/saved-analyses/${deal.id}`}
               prefetch={false}
-              className="flex items-start gap-2.5 rounded-xl bg-muted/40 px-3 py-2 transition-colors hover:bg-muted"
+              className="flex items-start gap-2.5 rounded-md bg-muted/40 px-3 py-2 transition-colors hover:bg-muted"
             >
               <span className={`mt-0.5 shrink-0 ${deal.improved ? "text-success" : "text-destructive"}`}>
                 {deal.improved ? <TrendingUp className="size-3.5" /> : <TrendingDown className="size-3.5" />}

@@ -73,7 +73,7 @@ function SortableTh({
       <button
         type="button"
         onClick={() => onToggle(sortKey)}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-md text-2xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         {label}
         <span className="sr-only">
@@ -146,9 +146,9 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
         : "Low to high";
 
   return (
-    <section aria-labelledby="your-deals-heading" className="rounded-2xl border border-border bg-card shadow-sm">
+    <section aria-labelledby="your-deals-heading" className="rounded-lg border border-border bg-card shadow-sm">
       <div className="flex items-baseline justify-between gap-3 px-4 py-3 sm:px-5">
-        <h2 id="your-deals-heading" className="text-base font-extrabold text-foreground">
+        <h2 id="your-deals-heading" className="text-base font-semibold text-foreground">
           Your deals
         </h2>
         <Link
@@ -210,7 +210,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
             return (
               <Fragment key={deal.id}>
               {startsMethodologyCohort ? (
-                <div className="rounded-xl border border-border bg-muted/40 px-3 py-2">
+                <div className="rounded-md border border-border bg-muted/40 px-3 py-2">
                   <p className="text-xs font-bold text-foreground">
                     {deal.methodologyGroupLabel ?? "Current underwriting"}
                   </p>
@@ -221,7 +221,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
               ) : null}
               <article
                 aria-labelledby={dealHeadingId}
-                className="rounded-xl border border-border bg-background p-4 shadow-sm"
+                className="rounded-md border border-border bg-background p-4 shadow-sm"
               >
                 <Link
                   id={dealHeadingId}
@@ -234,7 +234,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                 </Link>
                 {deal.methodologyLabel ? (
                   <span
-                    className="mt-1 inline-flex rounded-full border border-border px-2 py-0.5 text-3xs font-semibold text-muted-foreground"
+                    className="mt-1 inline-flex rounded-full border border-border px-2 py-0.5 text-xs font-semibold text-muted-foreground"
                     title={
                       deal.methodologyIsCurrent === false
                         ? `${deal.methodologyLabel}. Re-underwrite before comparing with the current model.`
@@ -247,18 +247,18 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
 
                 <dl className="mt-3 grid grid-cols-2 gap-3">
                   <div className="rounded-lg bg-muted/30 p-3">
-                    <dt className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
+                    <dt className="text-xs font-medium text-muted-foreground">
                       Offer Ceiling
                     </dt>
-                    <dd className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
+                    <dd className="mt-1 font-figure text-lg font-semibold tabular-nums text-foreground">
                       {money(deal.maxOffer)}
                     </dd>
                   </div>
                   <div className="rounded-lg bg-muted/30 p-3">
-                    <dt className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
+                    <dt className="text-xs font-medium text-muted-foreground">
                       Price
                     </dt>
-                    <dd className="mt-1 font-mono text-lg font-bold tabular-nums text-foreground">
+                    <dd className="mt-1 font-figure text-lg font-bold tabular-nums text-foreground">
                       {money(deal.purchasePrice)}
                     </dd>
                   </div>
@@ -275,12 +275,12 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                     </div>
                   ) : null}
                   <div className="rounded-lg border border-border p-3">
-                    <dt className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
+                    <dt className="text-xs font-medium text-muted-foreground">
                       Gap
                     </dt>
                     <dd
                       className={cn(
-                        "mt-1 font-mono text-sm font-bold tabular-nums",
+                        "mt-1 font-figure text-sm font-bold tabular-nums",
                         gap == null
                           ? "text-muted-foreground"
                           : gap > 0
@@ -298,10 +298,10 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                     </dd>
                   </div>
                   <div className="rounded-lg border border-border p-3">
-                    <dt className="text-3xs font-bold uppercase tracking-wider text-muted-foreground">
+                    <dt className="text-xs font-medium text-muted-foreground">
                       Deal score
                     </dt>
-                    <dd className="mt-1 font-mono text-sm font-bold tabular-nums text-foreground">
+                    <dd className="mt-1 font-figure text-sm font-bold tabular-nums text-foreground">
                       {deal.score ?? "—"}
                     </dd>
                   </div>
@@ -332,11 +332,11 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
             <tr>
               <SortableTh label="Property" sortKey="address" activeKey={sortKey} desc={desc} onToggle={toggle} />
               <SortableTh label="Offer Ceiling" sortKey="maxOffer" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
-              <th scope="col" className="px-3 py-2 text-right text-2xs font-bold uppercase tracking-wider text-muted-foreground">
+              <th scope="col" className="px-3 py-2 text-right text-xs font-medium text-muted-foreground">
                 Price
               </th>
               <SortableTh label="Gap" sortKey="gap" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
-              <th scope="col" className="px-3 py-2 text-left text-2xs font-bold uppercase tracking-wider text-muted-foreground">
+              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">
                 Screening result
               </th>
               <SortableTh label="Deal score" sortKey="score" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
@@ -364,7 +364,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                     </td>
                   </tr>
                 ) : null}
-                <tr className={i % 2 === 0 ? "bg-card" : "bg-muted/20"}>
+                <tr className={`transition-colors hover:bg-muted/40 ${i % 2 === 0 ? "bg-card" : "bg-muted/20"}`}>
                   <td className="max-w-[240px] px-3 py-2.5">
                     <Link
                       href={`/dashboard/saved-analyses/${deal.id}`}
@@ -375,7 +375,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                     </Link>
                     {deal.methodologyLabel ? (
                       <span
-                        className="mt-0.5 inline-flex rounded-full border border-border px-2 py-0.5 text-3xs font-semibold text-muted-foreground"
+                        className="mt-0.5 inline-flex rounded-full border border-border px-2 py-0.5 text-xs font-semibold text-muted-foreground"
                         title={
                           deal.methodologyIsCurrent === false
                             ? `${deal.methodologyLabel}. Re-underwrite before comparing with the current model.`
@@ -387,7 +387,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                     ) : null}
                   </td>
                   <td className="px-3 py-2.5 text-right text-foreground">
-                    <div className="flex items-center justify-end gap-1 whitespace-nowrap font-mono font-bold tabular-nums">
+                    <div className="flex items-center justify-end gap-1 whitespace-nowrap font-figure font-bold tabular-nums">
                       {/* ⓘ BEFORE the number: digits stay flush on the
                         column's right edge, so rows without a ceiling ("—")
                         and rows with one share a single right edge. */}
@@ -399,12 +399,12 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                       {money(deal.maxOffer)}
                     </div>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-right font-mono tabular-nums text-muted-foreground">
+                  <td className="whitespace-nowrap px-3 py-2.5 text-right font-figure tabular-nums text-muted-foreground">
                     {money(deal.purchasePrice)}
                   </td>
                   <td
                     className={cn(
-                      "whitespace-nowrap px-3 py-2.5 text-right font-mono font-semibold tabular-nums",
+                      "whitespace-nowrap px-3 py-2.5 text-right font-figure font-semibold tabular-nums",
                       gap == null
                         ? "text-muted-foreground"
                         : gap > 0
@@ -419,7 +419,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                     ) : (
                       <>
                         {money(Math.abs(gap))}
-                        <span className="ml-1 text-3xs font-semibold uppercase tracking-wide">
+                        <span className="ml-1 text-xs font-semibold">
                           {gap > 0 ? "over" : gap < 0 ? "under" : "at"}
                         </span>
                         <span className="sr-only">
@@ -439,7 +439,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                       <span className="text-xs text-muted-foreground">Not screened</span>
                     )}
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-right font-mono tabular-nums text-foreground">
+                  <td className="whitespace-nowrap px-3 py-2.5 text-right font-figure tabular-nums text-foreground">
                     {deal.score ?? "—"}
                   </td>
                 </tr>

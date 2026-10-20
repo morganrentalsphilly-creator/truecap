@@ -109,7 +109,7 @@ export function OwnedEquityCard({
     <section
       id="owned-equity"
       aria-label="Owned equity"
-      className="rounded-2xl border border-border bg-card p-4"
+      className="rounded-lg border border-border bg-card p-4"
     >
       <div className="flex items-center gap-2">
         <Landmark aria-hidden className="size-4 text-muted-foreground" />
@@ -122,7 +122,7 @@ export function OwnedEquityCard({
             <>
               <p
                 className={cn(
-                  "text-base font-extrabold tracking-tight",
+                  "text-base font-semibold tracking-tight",
                   equity.equity >= 0 ? "text-success" : "text-[var(--metric-negative)]"
                 )}
               >

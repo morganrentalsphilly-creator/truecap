@@ -79,7 +79,7 @@ export function PortfolioChart({ data = [] }: { data?: DealComparisonPoint[] }) 
     : "No deals to compare yet.";
 
   return (
-    <div className="rounded-2xl bg-card border border-border p-4 sm:p-6">
+    <div className="rounded-lg bg-card border border-border p-4 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
         <div>
           <div className="flex items-center gap-2">
