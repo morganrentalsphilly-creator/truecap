@@ -106,8 +106,10 @@ describe("marketing small-text contrast", () => {
     expect(read("components/investcalc/investcalc-page.tsx")).toContain(
       "text-[var(--brand-blue-text)] underline-offset-2"
     );
+    // Re-anchored: live-verdict-panel.tsx — the eyebrow is Geist Mono
+    // metadata now, in the same AA-safe blue.
     expect(read("components/investcalc/live-verdict-panel.tsx")).toContain(
-      "tracking-widest text-[var(--brand-blue-text)]"
+      "font-mono text-xs text-[var(--brand-blue-text)]"
     );
 
     // The hero address error renders over the tinted hero gradient.

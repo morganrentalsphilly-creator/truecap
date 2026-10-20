@@ -14,6 +14,7 @@ import { formatDscr } from "@/lib/financial-presentation";
 import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 import { GlossaryTip } from "./glossary-tip";
 import { useEffect, useState, type ReactNode } from "react";
+import { AnimatedNumber } from "@/components/motion/animated-number";
 
 /** The lightweight pre-run verdict snapshot computed by the form watcher. */
 export type LivePreviewSnapshot = {
@@ -138,10 +139,10 @@ export function LiveVerdictPanel({
         <aside
           data-live-verdict-empty=""
           aria-label="Live screening preview guidance"
-          className="hidden min-h-56 items-center rounded-2xl border border-dashed border-border/80 bg-card/60 p-6 lg:flex"
+          className="hidden min-h-56 items-center rounded-lg border border-dashed border-border bg-card/60 p-6 lg:flex"
         >
           <div className="max-w-sm">
-            <p className="inline-flex items-center gap-2 text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="inline-flex items-center gap-2 font-mono text-xs text-muted-foreground">
               <span
                 aria-hidden="true"
                 className="size-2 rounded-full bg-primary/35"
@@ -171,21 +172,18 @@ export function LiveVerdictPanel({
           // with the dashed live-preview styling it already carries. Guarded
           // by motion-safe; below lg no class applies, so the mobile card is
           // byte-identical.
-          className="rounded-2xl border-2 border-dashed border-primary/30 bg-[var(--brand-blue-light)] p-4 sm:p-5 lg:motion-safe:animate-in lg:motion-safe:fade-in lg:motion-safe:slide-in-from-bottom-2 lg:motion-safe:duration-300"
+          className="rounded-lg border border-dashed border-primary/40 bg-card p-4 shadow-sm sm:p-5 lg:motion-safe:animate-in lg:motion-safe:fade-in lg:motion-safe:slide-in-from-bottom-2 lg:motion-safe:duration-300"
         >
           <div className="mb-3 flex items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1.5 text-3xs font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/60" />
-                <span className="relative inline-flex size-2 rounded-full bg-primary" />
-              </span>
+            <span className="inline-flex items-center gap-1.5 font-mono text-xs text-[var(--brand-blue-text)]">
+              <span aria-hidden className="size-2 rounded-full bg-primary" />
               Live screening preview
             </span>
-            <span className="rounded-full border border-primary/25 bg-card px-2.5 py-0.5 text-xs font-extrabold uppercase tracking-wide text-primary">
+            <span className="rounded-sm border border-border px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
               Preliminary
             </span>
           </div>
-          <p className="mb-1 text-sm font-bold leading-snug text-foreground">
+          <p className="mb-1 text-sm font-semibold leading-snug text-foreground">
             {Math.round(livePreview.netCashFlow) >= 0
               ? `About $${Math.abs(Math.round(livePreview.netCashFlow)).toLocaleString()}/month positive at these assumptions.`
               : `About $${Math.abs(Math.round(livePreview.netCashFlow)).toLocaleString()}/month negative at these assumptions.`}
@@ -199,12 +197,12 @@ export function LiveVerdictPanel({
           ) : null}
           <div className="grid grid-cols-1 gap-2 min-[320px]:grid-cols-3 sm:gap-3">
             <div>
-              <div className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
+              <div className="text-xs font-medium text-muted-foreground">
                 Cash flow
               </div>
               <div
                 className={cn(
-                  "font-mono text-lg font-bold tabular-nums sm:text-xl",
+                  "font-display font-figure text-lg sm:text-xl",
                   // Sign + color keyed off the SAME rounded value so a
                   // sub-dollar negative (e.g. -$0.30) never renders "-$0".
                   Math.round(livePreview.netCashFlow) >= 0
@@ -212,8 +210,10 @@ export function LiveVerdictPanel({
                     : "text-[var(--metric-negative)]",
                 )}
               >
-                {Math.round(livePreview.netCashFlow) >= 0 ? "+" : "-"}$
-                {Math.abs(Math.round(livePreview.netCashFlow)).toLocaleString()}
+                <AnimatedNumber
+                  value={Math.round(livePreview.netCashFlow)}
+                  kind="usdSigned"
+                />
               </div>
             </div>
             <div>
@@ -221,25 +221,26 @@ export function LiveVerdictPanel({
                   the preview renders before the tipped metrics band exists,
                   so a first-timer meets "Cap rate"/"DSCR" here first. Same
                   no-underline treatment as the MetricCard labels. */}
-              <div className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
+              <div className="text-xs font-medium text-muted-foreground">
                 <GlossaryTip term="capRate" className="!no-underline">
                   Cap rate
                 </GlossaryTip>
               </div>
-              <div className="font-mono text-lg font-bold tabular-nums text-foreground sm:text-xl">
-                {livePreview.capRate.toFixed(1)}%
+              <div className="font-display font-figure text-lg text-foreground sm:text-xl">
+                <AnimatedNumber value={livePreview.capRate} kind="percent" />
               </div>
             </div>
             <div>
-              <div className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
+              <div className="text-xs font-medium text-muted-foreground">
                 <GlossaryTip term="dscr" className="!no-underline">
                   DSCR
                 </GlossaryTip>
               </div>
-              <div className="font-mono text-lg font-bold tabular-nums text-foreground sm:text-xl">
-                {formatDscr(
-                  livePreview.dscr,
-                  livePreview.monthlyPayment > 0,
+              <div className="font-display font-figure text-lg text-foreground sm:text-xl">
+                {livePreview.monthlyPayment > 0 ? (
+                  <AnimatedNumber value={livePreview.dscr} kind="ratio" />
+                ) : (
+                  formatDscr(livePreview.dscr, false)
                 )}
               </div>
             </div>
@@ -250,9 +251,9 @@ export function LiveVerdictPanel({
               it into an invitation to play with the one lever they control. */}
           {Math.round(livePreview.netCashFlow) < 0 &&
           livePreview.breakEvenPrice != null ? (
-            <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-2xs font-semibold leading-snug text-foreground">
+            <p className="mt-2.5 border-l-2 border-border pl-2.5 text-2xs font-medium leading-snug text-foreground">
               Breaks even near{" "}
-              <span className="font-mono font-bold">
+              <span className="font-figure font-semibold">
                 ${Math.round(livePreview.breakEvenPrice).toLocaleString()}
               </span>{" "}
               — review that modeled break-even point against the price

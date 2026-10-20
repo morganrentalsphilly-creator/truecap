@@ -47,7 +47,7 @@ function StepIndicator({
     <span
       aria-hidden
       className={cn(
-        "flex size-5 shrink-0 items-center justify-center rounded-full border text-3xs font-bold tabular-nums",
+        "flex size-5 shrink-0 items-center justify-center rounded-full border font-figure text-2xs font-semibold",
         status === "partial" && "border-[var(--brand-orange)] text-[var(--brand-orange)]",
         status === "pending" && "border-dashed border-muted-foreground/40 text-muted-foreground",
         status === "empty" && "border-border text-muted-foreground"
@@ -88,7 +88,7 @@ export function AnalyzerStepRail({
       // sticky positioning, and — unlike backdrop-filter — honours the dots'
       // border-radius, so the rasterize-once-then-composite path stays clean.
       className={cn(
-        "rounded-2xl border border-border bg-card px-2 py-1.5 shadow-sm will-change-transform",
+        "rounded-lg border border-border bg-card px-2 py-1.5 shadow-sm will-change-transform",
         className
       )}
     >
@@ -103,7 +103,7 @@ export function AnalyzerStepRail({
                 aria-current={active ? "step" : undefined}
                 aria-label={`${step.label} - ${STATUS_A11Y[step.status]}`}
                 className={cn(
-                  "flex min-h-11 items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors sm:px-2.5",
+                  "flex min-h-11 items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-semibold transition-colors sm:px-2.5",
                   active
                     ? "bg-brand-blue-light text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"

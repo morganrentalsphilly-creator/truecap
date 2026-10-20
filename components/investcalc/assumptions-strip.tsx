@@ -289,7 +289,7 @@ export function AssumptionsStrip({
         }
         aria-expanded={opensAdvanced ? isExpanded : undefined}
         className={cn(
-          "inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-full border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+          "inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-sm border border-border bg-background px-2.5 py-2 font-mono text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
           pulsing[chip.id] && "animate-pulse border-primary bg-primary/10",
         )}
       >
@@ -305,7 +305,7 @@ export function AssumptionsStrip({
         {chip.badge ? (
           <span
             className={cn(
-              "rounded-full px-1.5 py-0.5 text-3xs font-bold leading-none",
+              "rounded-sm px-1 py-0.5 text-3xs font-semibold leading-none",
               chip.badge.kind === "yours" || chip.badge.kind === "default"
                 ? "bg-muted text-muted-foreground"
                 : "bg-primary/10 text-primary",

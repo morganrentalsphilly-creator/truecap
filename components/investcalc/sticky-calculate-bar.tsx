@@ -248,7 +248,7 @@ export function StickyCalculateBar({
         <div
           id="verdict-dock-sheet"
           hidden={!dockExpanded}
-          className="mb-2 rounded-xl border border-dashed border-primary/30 bg-[var(--brand-blue-light)] px-3 py-2.5"
+          className="mb-2 rounded-md border border-border bg-card px-3 py-2.5 shadow-sm"
           onTouchStart={(e) => {
             touchStartYRef.current = e.touches[0]?.clientY ?? null;
           }}
@@ -267,18 +267,18 @@ export function StickyCalculateBar({
           }}
         >
           <div className="flex items-center justify-between gap-3">
-            <span className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
+            <span className="text-xs font-medium text-muted-foreground">
               Cap rate
             </span>
-            <span className="font-mono text-sm font-bold tabular-nums text-foreground">
+            <span className="font-figure text-sm font-semibold text-foreground">
               {livePreview.capRate.toFixed(1)}%
             </span>
           </div>
           <div className="mt-1 flex items-center justify-between gap-3">
-            <span className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
+            <span className="text-xs font-medium text-muted-foreground">
               DSCR
             </span>
-            <span className="font-mono text-sm font-bold tabular-nums text-foreground">
+            <span className="font-figure text-sm font-semibold text-foreground">
               {formatDscr(
                 livePreview.dscr,
                 livePreview.monthlyPayment > 0,
@@ -298,15 +298,15 @@ export function StickyCalculateBar({
             aria-expanded={dockExpanded}
             aria-controls="verdict-dock-sheet"
             aria-label={`Live underwriting preview: cash flow ${Math.round(livePreview.netCashFlow)} dollars per month. ${dockExpanded ? "Hide" : "Show"} cap rate and DSCR`}
-            className="flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-xl border border-border bg-muted/40 px-2.5 py-2 text-left"
+            className="flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-md border border-border bg-muted/40 px-2.5 py-2 text-left"
           >
-            <span className="shrink-0 rounded-full border border-primary/25 bg-background px-2 py-0.5 text-3xs font-extrabold uppercase tracking-wide text-primary">
+            <span className="shrink-0 rounded-sm border border-border bg-background px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
               Preview
             </span>
             <span className="min-w-0">
               <span
                 className={cn(
-                  "block truncate font-mono text-sm font-bold leading-tight tabular-nums",
+                  "block truncate font-figure text-sm font-semibold leading-tight",
                   // Sign + color keyed off the SAME rounded value so a
                   // sub-dollar negative never renders "-$0" (mirrors the
                   // in-form live preview card).

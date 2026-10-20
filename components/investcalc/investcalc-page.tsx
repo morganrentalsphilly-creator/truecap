@@ -9823,7 +9823,7 @@ export function InvestCalcPage({
                 no intro above the form (2026-09 audit) and the signed-in
                 homes never did, so nothing else on the page competes for
                 the document outline. */}
-            <h1 className="text-2xl sm:text-3xl xl:text-4xl font-extrabold text-foreground mb-2 text-balance">
+            <h1 className="font-display text-2xl sm:text-3xl xl:text-4xl text-foreground mb-2 text-balance">
               {underwritingHeading}
             </h1>
             {/* ONE headline (Choose-TrueCap Phase B, finding 3): this page
@@ -10002,7 +10002,7 @@ export function InvestCalcPage({
                   </span>
                 </div>
                 {tab.isFree && !canUseProjections && (
-                  <span className="inline-flex text-3xs font-bold bg-[var(--brand-green)] text-white px-1.5 sm:px-2 py-0.5 rounded-full uppercase shrink-0 ml-1 sm:ml-1.5">
+                  <span className="inline-flex text-xs font-medium bg-[var(--brand-green)] text-white px-1.5 sm:px-2 py-0.5 rounded-full shrink-0 ml-1 sm:ml-1.5">
                     FREE
                   </span>
                 )}
@@ -10083,7 +10083,7 @@ export function InvestCalcPage({
                 // ring (app/globals.css).
                 data-editing-assumptions-banner="true"
                 tabIndex={-1}
-                className="rounded-2xl border border-primary/25 bg-background/95 p-4 shadow-lg outline-none backdrop-blur sm:sticky sm:top-2 sm:z-30"
+                className="rounded-lg border border-border bg-card/95 p-4 shadow-md outline-none backdrop-blur sm:sticky sm:top-2 sm:z-30"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
@@ -10136,7 +10136,7 @@ export function InvestCalcPage({
                     aria-live="polite"
                     aria-atomic="true"
                     className={cn(
-                      "text-3xs font-bold uppercase tracking-widest",
+                      "text-xs font-medium",
                       staleResultsWarning
                         ? "text-caution-text dark:text-caution-light"
                         : "text-primary",
@@ -10148,7 +10148,7 @@ export function InvestCalcPage({
                   </p>
                   <dl className="mt-2 grid grid-cols-3 gap-2 text-sm">
                     <div className="min-w-0">
-                      <dt className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
+                      <dt className="text-xs font-medium text-muted-foreground">
                         Cash flow
                       </dt>
                       <dd
@@ -10167,7 +10167,7 @@ export function InvestCalcPage({
                       </dd>
                     </div>
                     <div className="min-w-0">
-                      <dt className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
+                      <dt className="text-xs font-medium text-muted-foreground">
                         Cap rate
                       </dt>
                       <dd className="font-mono font-bold tabular-nums text-foreground">
@@ -10175,7 +10175,7 @@ export function InvestCalcPage({
                       </dd>
                     </div>
                     <div className="min-w-0">
-                      <dt className="text-3xs font-bold uppercase tracking-wide text-muted-foreground">
+                      <dt className="text-xs font-medium text-muted-foreground">
                         DSCR
                       </dt>
                       <dd className="font-mono font-bold tabular-nums text-foreground">
@@ -10259,7 +10259,7 @@ export function InvestCalcPage({
                 id="step-property"
                 tabIndex={-1}
                 aria-label="Analyze a deal"
-                className="scroll-mt-24 bg-card rounded-2xl border border-border shadow-sm p-4 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:p-6 lg:col-span-3 lg:col-start-1"
+                className="scroll-mt-24 bg-card rounded-lg border border-border shadow-sm p-4 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:p-6 lg:col-span-3 lg:col-start-1"
               >
                 <div className="space-y-6">
                   <PropertyDetailsSection
@@ -10534,7 +10534,7 @@ export function InvestCalcPage({
                 id="advanced-options"
                 className={cn(
                   "space-y-5 lg:col-span-3 lg:col-start-1",
-                  advancedOpen ? "block" : "hidden",
+                  advancedOpen ? "tc-disclosure block" : "hidden",
                 )}
               >
                 {/* "Property type & template" panel — the PropertyTypeSection
@@ -10554,7 +10554,7 @@ export function InvestCalcPage({
                   <div id="step-type" className="scroll-mt-24 space-y-5">
                     {(propertyType === "multi-family" ||
                       propertyType === "owner-occupant") && (
-                      <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
+                      <div className="bg-card rounded-lg border border-border shadow-sm p-6">
                         <div className="flex items-center gap-2 mb-5">
                           <Home className="w-4 h-4 text-primary" />
                           <span className="font-semibold text-sm text-foreground">
@@ -10633,10 +10633,10 @@ export function InvestCalcPage({
                   id="decision-criteria"
                   tabIndex={-1}
                   aria-label="Offer Ceiling criteria"
-                  className="rounded-2xl border border-primary/20 bg-[var(--brand-blue-light)] p-4 lg:col-span-3"
+                  className="rounded-lg border border-border bg-card p-4 shadow-sm lg:col-span-3"
                 >
                   <div className="min-w-0">
-                    <p className="text-xs font-extrabold uppercase tracking-wide text-primary">
+                    <p className="text-xs font-semibold text-primary">
                       Offer Ceiling criteria
                     </p>
                     <p className="mt-1 font-semibold text-foreground">
@@ -10782,7 +10782,7 @@ export function InvestCalcPage({
                 disabled={isCalculating || decisionCriteriaBlockPrimaryAction}
                 data-inform-submit="true"
                 className={cn(
-                  "h-14 w-full rounded-2xl text-base font-bold shadow-lg transition-all max-[250px]:h-auto max-[250px]:min-h-14 max-[250px]:whitespace-normal max-[250px]:px-2 max-[250px]:py-3 max-[250px]:text-center max-[250px]:text-sm max-[250px]:leading-tight",
+                  "h-14 w-full rounded-md text-base font-semibold shadow-md transition-all max-[250px]:h-auto max-[250px]:min-h-14 max-[250px]:whitespace-normal max-[250px]:px-2 max-[250px]:py-3 max-[250px]:text-center max-[250px]:text-sm max-[250px]:leading-tight",
                   "bg-primary text-primary-foreground hover:bg-primary/95",
                   "lg:col-span-3 lg:col-start-1",
                 )}
@@ -11435,7 +11435,7 @@ export function InvestCalcPage({
               type="button"
               onClick={() => void handleAddressChangedChoice("new")}
               disabled={addressChangedChoiceBusy !== null}
-              className="flex w-full items-start justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left transition hover:border-primary/40 hover:bg-muted/40 disabled:opacity-60"
+              className="flex w-full items-start justify-between gap-3 rounded-lg border border-border bg-card p-4 text-left transition hover:border-primary/40 hover:bg-muted/40 disabled:opacity-60"
             >
               <div>
                 <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
@@ -11458,7 +11458,7 @@ export function InvestCalcPage({
               type="button"
               onClick={() => void handleAddressChangedChoice("update-address")}
               disabled={addressChangedChoiceBusy !== null}
-              className="flex w-full items-start justify-between gap-3 rounded-2xl border border-border bg-card p-4 text-left transition hover:border-primary/40 hover:bg-muted/40 disabled:opacity-60"
+              className="flex w-full items-start justify-between gap-3 rounded-lg border border-border bg-card p-4 text-left transition hover:border-primary/40 hover:bg-muted/40 disabled:opacity-60"
             >
               <div>
                 <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
