@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction B · Blueprint · TrueCap comp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400..800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Direction B: Blueprint. Off-white drafting sheet with a fine grid, the
+     property as a line schematic, cobalt and graphite, one warm highlight for
+     the Offer Ceiling. Figures injected from comp-data.json. */
+  :root {
+    --sheet: #fbfaf7;
+    --sheet-2: #f3f1ec;
+    --grid: rgba(24,83,198,.10);
+    --grid-major: rgba(24,83,198,.18);
+    --graphite: #26292e;
+    --graphite-2: #5c6066;
+    --line: #d9d6cf;
+    --cobalt: #1853c6;
+    --cobalt-deep: #103f9c;
+    --cobalt-wash: #e7eefc;
+    --warm: #ec7c0e;
+    --warm-text: #bb4900;
+    --warm-wash: #fdeedd;
+    --green: #0a7e3b;
+    --red: #c0272e;
+    --navy: #0f1a33;
+    --navy-text: #e5e9f3;
+    --navy-text-2: #9ca7bd;
+    --r-card: 12px;
+    --r-control: 8px;
+    --shadow-card: 0 1px 1px rgba(38,41,46,.06), 0 12px 32px -14px rgba(24,83,198,.25);
+    --font: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --mono: "Geist Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--sheet); color: var(--graphite); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+  body { margin: 0; line-height: 1.5; }
+  .num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 20px; }
+  @media (min-width: 768px) { .container { padding: 0 32px; } }
+  @media (min-width: 1200px) { .container { padding: 0 48px; } }
+  .spec-label { background: #e8e5de; color: #4a4d52; font: 500 12px/1 var(--mono); padding: 10px 20px; border-top: 1px solid #d3cfc6; }
+
+  .grid-bg { background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px), linear-gradient(var(--grid-major) 1px, transparent 1px), linear-gradient(90deg, var(--grid-major) 1px, transparent 1px); background-size: 16px 16px, 16px 16px, 80px 80px, 80px 80px; }
+
+  .hdr { position: sticky; top: 0; z-index: 10; background: rgba(251,250,247,.9); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .hdr .container { display: flex; align-items: center; gap: 28px; height: 64px; }
+  .logo { font-weight: 800; font-size: 21px; letter-spacing: -.02em; }
+  .logo b { color: var(--cobalt); }
+  .nav { display: none; gap: 22px; font-weight: 500; color: var(--graphite-2); }
+  .nav a { text-decoration: none; }
+  .nav a[aria-current] { color: var(--cobalt); }
+  .hdr .actions { margin-left: auto; display: flex; gap: 8px; }
+  @media (min-width: 1024px) { .nav { display: flex; } }
+  @media (max-width: 639px) { .hdr .btn-ghost { display: none; } .hdr .container { height: 56px; } }
+  .verdict-line { display: none; margin: 14px 0 0; font-size: 15px; line-height: 1.4; }
+  .verdict-line b { font-weight: 700; }
+  @media (max-width: 1023px) { .verdict-line { display: block; } }
+  .btn { white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; border-radius: var(--r-control); font-weight: 600; text-decoration: none; border: 1.5px solid transparent; transition: background-color .15s, border-color .15s; }
+  .btn-primary { background: var(--cobalt); color: #fff; }
+  .btn-primary:hover { background: var(--cobalt-deep); }
+  .btn-ghost { color: var(--graphite); }
+  .btn-outline { border-color: var(--graphite); color: var(--graphite); background: transparent; }
+  .btn-cta { min-height: 52px; padding: 0 22px; font-size: 16px; }
+  .field { height: 52px; border: 1.5px solid var(--graphite); border-radius: var(--r-control); background: #fff; padding: 0 16px; font: 400 16px var(--font); color: var(--graphite); }
+  .field::placeholder { color: #8a8e94; }
+  .field:focus-visible, .btn:focus-visible, .handle:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 2px; }
+
+  .hero .container { display: grid; gap: 36px; padding-top: 36px; padding-bottom: 56px; }
+  @media (min-width: 1024px) { .hero .container { grid-template-columns: minmax(0,5fr) minmax(0,7fr); gap: 56px; padding-top: 64px; padding-bottom: 80px; align-items: start; } }
+  h1 { font-size: clamp(36px, 2.1rem + 1.7vw, 58px); line-height: 1.0; letter-spacing: -.025em; font-weight: 750; margin: 0; text-wrap: balance; }
+  .sub { font-size: 18px; color: var(--graphite-2); margin: 18px 0 0; max-width: 46ch; }
+  .cue { margin: 18px 0 0; }
+  .cue a { color: var(--cobalt); text-decoration: underline; text-underline-offset: 3px; }
+  .form { margin-top: 14px; display: grid; gap: 10px; }
+  @media (min-width: 640px) { .form { grid-template-columns: minmax(0,1fr) auto; } }
+  .fine, .risk { margin: 10px 0 0; color: var(--graphite-2); font-size: 14px; }
+  .risk { margin-top: 6px; }
+
+  /* The schematic sheet */
+  .sheet { background: #fff; border: 1px solid var(--line); border-radius: var(--r-card); box-shadow: var(--shadow-card); padding: 20px; position: relative; }
+  @media (min-width: 640px) { .sheet { padding: 26px; } }
+  .sheet-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 13px; color: var(--graphite-2); font-family: var(--mono); }
+  .sheet-head b { color: var(--graphite); font-weight: 500; }
+  .schem { width: 100%; height: auto; display: block; margin-top: 10px; }
+  .schem text { font-family: var(--font); fill: var(--graphite); }
+  .schem .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .schem .muted { fill: var(--graphite-2); }
+  .schem .ok { fill: var(--green); }
+  .schem .warm { fill: var(--warm-text); }
+  .schem .line { stroke: var(--graphite); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .schem .lead { stroke: var(--cobalt); fill: none; stroke-width: 1.25; stroke-dasharray: 4 3; }
+  .schem .flow-in { stroke: var(--green); fill: none; stroke-width: 2.5; }
+  .schem .flow-out { stroke: var(--red); fill: none; stroke-width: 2; }
+  .schem .dim { stroke: var(--cobalt); stroke-width: 1; }
+
+  .track { position: relative; margin: 18px 10px 0; height: 60px; }
+  .track .rail { position: absolute; left: 0; right: 0; top: 30px; height: 0; border-top: 1.5px solid var(--graphite); }
+  .track .tick { position: absolute; top: 24px; width: 1px; height: 13px; background: var(--graphite); }
+  .track .meets { position: absolute; left: 0; top: 27px; height: 7px; width: {{ceilingPct}}%; background: var(--warm); opacity: .85; }
+  .track .mark { position: absolute; top: 0; transform: translateX(-50%); font: 500 12px var(--mono); white-space: nowrap; color: var(--graphite-2); }
+  .track .mark.ceil { left: {{ceilingPct}}%; color: var(--warm-text); }
+  .track .mark.ask { left: {{askingPct}}%; }
+  .track .mark.ceil::after, .track .mark.ask::after { content: ""; display: block; width: 1px; height: 12px; margin: 2px auto 0; background: currentColor; }
+  .handle { position: absolute; top: 20px; left: {{ceilingPct}}%; transform: translateX(-50%) rotate(45deg); width: 20px; height: 20px; background: #fff; border: 2px solid var(--cobalt); cursor: grab; touch-action: none; }
+  .track .lbl { position: absolute; top: 44px; font: 500 12px var(--mono); color: var(--graphite-2); }
+  .readout { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 0; margin-top: 18px; border-top: 1px solid var(--line); }
+  .ro { padding: 12px 10px 10px; border-right: 1px solid var(--line); min-width: 0; }
+  .ro:last-child { border-right: 0; }
+  .ro .k { font-size: 12px; color: var(--graphite-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ro .v { font-size: clamp(20px, 1rem + 1vw, 28px); font-weight: 700; letter-spacing: -.02em; line-height: 1.1; margin-top: 2px; }
+  .chip { display: inline-block; font: 600 12px/1 var(--font); padding: 5px 8px; border-radius: 4px; margin-top: 8px; white-space: nowrap; }
+  .chip.ok { background: #e4f3ea; color: var(--green); }
+  .chip.miss { background: var(--warm-wash); color: var(--warm-text); }
+  .ceiling-line { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 16px; padding-top: 12px; border-top: 2px solid var(--graphite); }
+  .ceiling-line .lbl { font-weight: 700; font-size: 18px; }
+  .ceiling-line .fig { font-size: clamp(36px, 2rem + 1.6vw, 52px); font-weight: 800; letter-spacing: -.03em; line-height: 1; background: linear-gradient(transparent 62%, var(--warm) 62%, var(--warm) 88%, transparent 88%); padding: 0 4px; }
+  .ceiling-line .note { font-size: 14px; color: var(--graphite-2); width: 100%; }
+
+  /* Result card */
+  .specimen { padding: 48px 0; }
+  .result { background: #fff; border: 1px solid var(--line); border-radius: var(--r-card); box-shadow: var(--shadow-card); padding: 24px; max-width: 760px; }
+  .result .headline { font-size: 24px; font-weight: 750; letter-spacing: -.02em; margin: 0; }
+  .result .headline span { color: var(--warm-text); }
+  .result .ceil { margin-top: 16px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .result .ceil .lbl { font-weight: 600; }
+  .result .ceil .fig { font-size: 48px; font-weight: 800; letter-spacing: -.03em; line-height: 1; background: linear-gradient(transparent 62%, var(--warm) 62%, var(--warm) 88%, transparent 88%); padding: 0 4px; }
+  .result .ceil .d { font-size: 14px; color: var(--graphite-2); }
+  .dimline { position: relative; margin: 22px 6px 0; height: 34px; }
+  .dimline .l { position: absolute; left: 0; right: 0; top: 16px; border-top: 1px solid var(--cobalt); }
+  .dimline .e { position: absolute; top: 10px; width: 1px; height: 13px; background: var(--cobalt); }
+  .dimline .t { position: absolute; top: -4px; font: 500 12px var(--mono); color: var(--cobalt); transform: translateX(-50%); background: #fff; padding: 0 4px; }
+  .metrics { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); margin-top: 16px; border-top: 1px solid var(--line); }
+  .metrics .m { padding: 12px 10px; border-right: 1px solid var(--line); }
+  .metrics .m:last-child { border-right: 0; }
+  .metrics .k { font-size: 12px; color: var(--graphite-2); }
+  .metrics .v { font-size: clamp(19px, 0.9rem + 1.3vw, 26px); font-weight: 700; letter-spacing: -.02em; }
+  .result .next { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+  /* Plan card */
+  .plans { display: grid; gap: 16px; max-width: 760px; }
+  @media (min-width: 640px) { .plans { grid-template-columns: 1fr 1fr; } }
+  .plan { background: #fff; border: 1.5px solid var(--line); border-radius: var(--r-card); padding: 24px; transition: transform .2s, box-shadow .2s, border-color .2s; }
+  .plan:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); border-color: var(--cobalt); }
+  .plan.featured { border-color: var(--cobalt); }
+  .plan h3 { margin: 0; font-size: 22px; letter-spacing: -.02em; font-weight: 750; }
+  .plan .aud { color: var(--graphite-2); margin: 4px 0 0; }
+  .toggle { display: inline-flex; border: 1.5px solid var(--graphite); border-radius: var(--r-control); overflow: hidden; margin-bottom: 16px; }
+  .toggle span { padding: 7px 12px; font-size: 13px; font-weight: 600; color: var(--graphite-2); }
+  .toggle span.on { background: var(--graphite); color: #fff; }
+  .plan .price { margin-top: 16px; display: flex; align-items: baseline; gap: 4px; }
+  .plan .amt { font-size: 40px; font-weight: 800; letter-spacing: -.03em; }
+  .plan .per, .plan .alt { color: var(--graphite-2); }
+  .plan .alt { font-size: 14px; margin-top: 4px; }
+  .plan ul { list-style: none; padding: 0; margin: 16px 0 0; border-top: 1px solid var(--line); }
+  .plan li { padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 15px; display: flex; gap: 10px; }
+  .plan li::before { content: "—"; color: var(--cobalt); }
+  .plan .btn { width: 100%; margin-top: 20px; }
+
+  /* Dark band: the blueprint inverted */
+  .band { background: var(--navy); color: var(--navy-text); padding: 72px 0; background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px); background-size: 16px 16px; }
+  .band .container { display: grid; gap: 28px; }
+  @media (min-width: 1024px) { .band .container { grid-template-columns: minmax(0,5fr) minmax(0,7fr); align-items: center; } }
+  .band h2 { font-size: clamp(30px, 1.6rem + 1.5vw, 44px); letter-spacing: -.025em; line-height: 1.05; margin: 0; color: #fff; }
+  .band p { color: var(--navy-text-2); font-size: 17px; max-width: 48ch; }
+  .band .field { background: transparent; border-color: rgba(255,255,255,.5); color: #fff; }
+  .band .field::placeholder { color: var(--navy-text-2); }
+  .band svg text { fill: var(--navy-text); font-family: var(--font); }
+  .band svg .muted { fill: var(--navy-text-2); }
+  .band svg .mono { font-family: var(--mono); }
+  .band svg .line { stroke: #fff; fill: none; stroke-width: 1.25; }
+  .band svg .lead { stroke: #7ea0ec; fill: none; stroke-width: 1.25; stroke-dasharray: 4 3; }
+  .band svg .warm { fill: var(--warm); }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="container">
+    <div class="logo">True<b>cap</b>.</div>
+    <nav class="nav" aria-label="Main"><a href="#" aria-current="page">Analyze</a><a href="#">For agents</a><a href="#">For investors</a><a href="#">Pricing</a><a href="#">Learn</a></nav>
+    <div class="actions"><a class="btn btn-ghost" href="#">Sign in</a><a class="btn btn-primary" href="#">Create account</a></div>
+  </div>
+</header>
+
+<section class="hero grid-bg">
+  <div class="container">
+    <div>
+      <h1>Stop forwarding listings. Start sending deals that already pencil.</h1>
+      <p class="sub">Paste the rental listing. See whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded with Pro.</p>
+      <p class="verdict-line">Sample deal. Offer Ceiling <b class="num">{{ceiling}}</b>, {{belowAsking}} below asking. Meets the Buy Box: <b>no</b> at asking, <b>yes</b> at the ceiling.</p>
+      <p class="cue">Buying for your own portfolio? Same analyzer, your own Buy Box. <a href="#">For investors</a></p>
+      <form class="form" onsubmit="return false"><input class="field" placeholder="Address or listing link" aria-label="Property address or listing link"><button class="btn btn-primary btn-cta" type="submit">Analyze a deal free</button></form>
+      <p class="fine">A listing link fills in the address. You enter the asking price and bedrooms; a paid Pro or Agent Pro plan can fill them.</p>
+      <p class="risk">Free. No account. Your first full decision is included.</p>
+    </div>
+
+    <figure class="sheet" style="margin:0" aria-label="Sample deal schematic">
+      <div class="sheet-head"><span><b>{{title}}</b> · sample deal</span><span>Sheet 1 of 1 · every input editable</span></div>
+      <svg class="schem" viewBox="0 0 720 300" role="img" aria-label="Rent flows in, expenses flow out, cash flow lands at the bottom">
+        <!-- house schematic -->
+        <path class="line" d="M300 150 L360 100 L420 150 M310 150 V215 H410 V150 M350 215 V180 H370 V215 M375 165 h20 v18 h-20z M380 100 V86 H392 V110" />
+        <!-- rent in -->
+        <path class="flow-in" d="M160 120 C 220 120, 240 128, 296 136" marker-end="url(#arrowG)" />
+        <text x="60" y="110" font-size="13" font-weight="600">Rent in</text>
+        <text class="mono ok" x="60" y="130" font-size="16" font-weight="700">{{rent}}/mo</text>
+        <text class="muted" x="60" y="146" font-size="11">HUD FMR · {{bedrooms}} bed · replace with comps</text>
+        <!-- mortgage out -->
+        <path class="flow-out" d="M418 170 C 470 170, 490 150, 560 150" marker-end="url(#arrowR)" />
+        <text x="570" y="146" font-size="13" font-weight="600">Mortgage out</text>
+        <text class="muted" x="570" y="162" font-size="11">FRED rate {{rate}} · {{downPaymentPct}} down</text>
+        <!-- taxes out -->
+        <path class="flow-out" d="M418 198 C 470 198, 490 210, 560 210" marker-end="url(#arrowR)" />
+        <text x="570" y="206" font-size="13" font-weight="600">Tax, insurance, reserves</text>
+        <text class="warm" x="570" y="222" font-size="11" font-weight="600">Property tax: your input</text>
+        <!-- cash flow lands -->
+        <path class="lead" d="M360 215 V258" />
+        <text x="360" y="276" text-anchor="middle" font-size="13" font-weight="600">Cash flow after reserves</text>
+        <text class="mono" x="360" y="294" text-anchor="middle" font-size="16" font-weight="700" id="cfText">{{cashFlowCeiling}} at {{ceiling}}</text>
+        <!-- dimension line: price -->
+        <path class="dim" d="M300 60 H420 M300 54 V66 M420 54 V66" />
+        <text class="mono muted" x="360" y="50" text-anchor="middle" font-size="11">price · drag below</text>
+        <defs>
+          <marker id="arrowG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#0a7e3b"/></marker>
+          <marker id="arrowR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#c0272e"/></marker>
+        </defs>
+      </svg>
+
+      <div class="track" id="track">
+        <div class="rail"></div>
+        <div class="tick" style="left:0"></div><div class="tick" style="right:0"></div>
+        <div class="meets"></div>
+        <div class="mark ceil">Offer Ceiling {{ceiling}}</div>
+        <div class="mark ask">Asking {{asking}}</div>
+        <div class="handle" id="handle" role="slider" tabindex="0" aria-label="Offer price" aria-valuemin="{{trackLow}}" aria-valuemax="{{trackHigh}}" aria-valuenow="{{ceilingRaw}}"></div>
+        <span class="lbl" style="left:0">{{trackLowFmt}}</span><span class="lbl" style="right:0">{{trackHighFmt}}</span>
+      </div>
+      <div class="readout">
+        <div class="ro"><div class="k">Cash flow after reserves</div><div class="v num" id="cfV">{{cashFlowCeiling}}</div><span class="chip ok" id="cfC">Meets ≥ {{targetCashFlow}}</span></div>
+        <div class="ro"><div class="k">DSCR</div><div class="v num" id="dV">{{dscrCeiling}}</div><span class="chip ok" id="dC">Meets ≥ {{targetDscr}}</span></div>
+        <div class="ro"><div class="k">Cash-on-cash</div><div class="v num" id="cV">{{cocCeiling}}</div><span class="chip ok">Year 1</span></div>
+      </div>
+      <div class="ceiling-line">
+        <span class="lbl">Offer Ceiling</span>
+        <span class="fig num">{{ceiling}}</span>
+        <span class="note num">{{belowAsking}} below asking. Binding target: {{bindingTarget}}. Meets the Buy Box: <b id="verdict">Yes</b>.</span>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<div class="spec-label">SPECIMEN · analyzer result card</div>
+<section class="specimen">
+  <div class="container">
+    <div class="result">
+      <p class="headline">Doesn't meet your targets at asking. <span>Asking price is {{belowAsking}} above your ceiling.</span></p>
+      <div class="ceil"><span class="lbl">Offer Ceiling</span><span class="fig num">{{ceiling}}</span><span class="d">the highest price that still meets your targets · binding: {{bindingTarget}}</span></div>
+      <div class="dimline"><div class="l"></div><div class="e" style="left:{{ceilingPct}}%"></div><div class="e" style="left:{{askingPct}}%"></div><span class="t" style="left:{{ceilingPct}}%">{{ceiling}}</span><span class="t" style="left:{{askingPct}}%">asking {{asking}}</span></div>
+      <div class="metrics">
+        <div class="m"><div class="k">Cash flow after reserves</div><div class="v num">{{cashFlowAsking}}</div><span class="chip miss">Misses by {{shortfallAsking}}</span></div>
+        <div class="m"><div class="k">DSCR</div><div class="v num">{{dscrAsking}}</div><span class="chip ok">Meets ≥ {{targetDscr}}</span></div>
+        <div class="m"><div class="k">Cash-on-cash</div><div class="v num">{{cocAsking}}</div><span class="chip ok">Deal score {{dealScore}}</span></div>
+      </div>
+      <div class="next"><a class="btn btn-primary" href="#">Send to client</a><span>or edit the assumptions and rerun.</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="spec-label">SPECIMEN · plan card</div>
+<section class="specimen">
+  <div class="container">
+    <div class="toggle"><span>Monthly</span><span class="on">Annual · 2 months free</span></div>
+    <div class="plans">
+      <div class="plan featured"><h3>Pro</h3><p class="aud">Know what to offer on every deal.</p><div class="price"><span class="amt num">{{proAnnualPerMonth}}</span><span class="per">/mo</span></div><p class="alt num">{{proAnnual}} billed annually · {{proMonthly}} month to month</p><ul><li>Buy Box fit on every deal</li><li>The Offer Ceiling on every deal</li><li>Downside sensitivity checks</li><li>The decision memo, co-branded</li></ul><a class="btn btn-primary" href="#">See Pro pricing</a></div>
+      <div class="plan"><h3>Agent Pro</h3><p class="aud">Screen listings for every client.</p><div class="price"><span class="amt num">{{agentProAnnualPerMonth}}</span><span class="per">/mo</span></div><p class="alt num">{{agentProAnnual}} billed annually · {{agentProMonthly}} month to month</p><ul><li>Everything in Pro</li><li>A roster of clients, each with a Buy Box</li><li>Co-branded share pages and memos</li></ul><a class="btn btn-outline" href="#">See Agent Pro pricing</a></div>
+    </div>
+  </div>
+</section>
+
+<div class="spec-label">SPECIMEN · dark band</div>
+<section class="band">
+  <div class="container">
+    <div>
+      <h2>Every number has a receipt.</h2>
+      <p>HUD sets the rent benchmark, FRED sets the rate, you set the property tax. Each flows into one answer, and each is yours to replace.</p>
+      <form class="form" onsubmit="return false"><input class="field" placeholder="Address or listing link" aria-label="Property address or listing link"><button class="btn btn-primary btn-cta">Analyze a deal free</button></form>
+    </div>
+    <svg viewBox="0 0 720 220" width="100%" role="img" aria-label="Sources flowing into the result">
+      <text x="0" y="30" font-size="13" font-weight="600">HUD FMR</text><text class="mono" x="0" y="52" font-size="18" font-weight="700">{{rent}}</text><text class="muted" x="0" y="70" font-size="11">rent benchmark</text>
+      <text x="0" y="110" font-size="13" font-weight="600">FRED</text><text class="mono" x="0" y="132" font-size="18" font-weight="700">{{rate}}</text><text class="muted" x="0" y="150" font-size="11">30-year rate</text>
+      <text x="0" y="190" font-size="13" font-weight="600">Your input</text><text class="mono warm" x="0" y="212" font-size="18" font-weight="700">Property tax</text>
+      <path class="lead" d="M150 44 C 300 44, 300 110, 430 110 M150 124 C 300 124, 300 110, 430 110 M150 204 C 300 204, 300 110, 430 110" />
+      <path class="line" d="M440 60 H720 V160 H440z" />
+      <text x="460" y="92" font-size="13" font-weight="600">Offer Ceiling</text>
+      <text class="mono" x="460" y="128" font-size="30" font-weight="800">{{ceiling}}</text>
+      <text class="muted mono" x="460" y="150" font-size="11">cash flow {{cashFlowCeiling}} · DSCR {{dscrCeiling}} · CoC {{cocCeiling}}</text>
+    </svg>
+  </div>
+</section>
+
+<script>
+  (function () {
+    const sweep = {{sweepJson}};
+    const lo = sweep[0].p, hi = sweep[sweep.length - 1].p;
+    const track = document.getElementById('track'), handle = document.getElementById('handle');
+    const $ = (id) => document.getElementById(id);
+    const usd = (n) => '$' + Math.round(n).toLocaleString('en-US');
+    const cfTarget = {{targetCashFlowRaw}};
+    function render(price) {
+      const pt = sweep.reduce((a, b) => Math.abs(b.p - price) < Math.abs(a.p - price) ? b : a);
+      handle.style.left = ((pt.p - lo) / (hi - lo)) * 100 + '%';
+      handle.setAttribute('aria-valuenow', pt.p);
+      $('cfV').textContent = usd(pt.cf) + '/mo'; $('dV').textContent = pt.d.toFixed(2); $('cV').textContent = pt.c.toFixed(1) + '%';
+      $('cfText').textContent = usd(pt.cf) + '/mo at ' + usd(pt.p);
+      $('cfC').className = 'chip ' + (pt.cf >= cfTarget ? 'ok' : 'miss');
+      $('cfC').textContent = pt.cf >= cfTarget ? 'Meets ≥ ' + usd(cfTarget) + '/mo' : 'Misses by ' + usd(cfTarget - pt.cf);
+      $('dC').className = 'chip ' + (pt.d >= {{targetDscr}} ? 'ok' : 'miss');
+      $('verdict').textContent = pt.m ? 'Yes' : 'No';
+      handle.setAttribute('aria-valuetext', usd(pt.p) + ': cash flow ' + usd(pt.cf) + ' a month, ' + (pt.cf >= cfTarget ? 'meets' : 'misses') + ' the ' + usd(cfTarget) + ' target');
+    }
+    function fromX(x) { const r = track.getBoundingClientRect(); const t = Math.min(1, Math.max(0, (x - r.left) / r.width)); return Math.round((lo + t * (hi - lo)) / 1000) * 1000; }
+    let dragging = false;
+    handle.addEventListener('pointerdown', (e) => { dragging = true; handle.setPointerCapture(e.pointerId); });
+    handle.addEventListener('pointermove', (e) => { if (dragging) render(fromX(e.clientX)); });
+    handle.addEventListener('pointerup', () => { dragging = false; });
+    track.addEventListener('click', (e) => { if (e.target !== handle) render(fromX(e.clientX)); });
+    handle.addEventListener('keydown', (e) => { const now = +handle.getAttribute('aria-valuenow'); if (e.key === 'ArrowRight' || e.key === 'ArrowUp') render(now + 1000); if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') render(now - 1000); });
+  })();
+</script>
+</body>
+</html>
