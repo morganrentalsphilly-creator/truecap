@@ -9,7 +9,7 @@ import { extendTailwindMerge } from 'tailwind-merge'
  * fell to 16px on phones). Every custom size and shadow token is listed so a
  * color class never evicts a size, and a size never evicts a color.
  */
-const twMerge = extendTailwindMerge<'font-display' | 'font-figure'>({
+const twMerge = extendTailwindMerge<'font-display' | 'font-figure' | 'bg-grid'>({
   extend: {
     theme: {
       text: ['3xs', '2xs', 'h3-sm', 'section-sm', 'section', 'key-sm', 'key', 'display-sm', 'display'],
@@ -23,6 +23,10 @@ const twMerge = extendTailwindMerge<'font-display' | 'font-figure'>({
     classGroups: {
       'font-display': ['font-display'],
       'font-figure': ['font-figure'],
+      // The two grid tiles (globals.css) are background images, not colors:
+      // without their own group, cn("bg-background", "bg-sheet-grid") kept
+      // only the grid and a section lost its paper.
+      'bg-grid': ['bg-sheet-grid', 'bg-navy-grid'],
     },
   },
 })

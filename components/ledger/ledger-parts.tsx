@@ -80,8 +80,8 @@ export function LedgerTotal({
   return (
     <span
       className={cn(
-        "ledger-rule inline-block font-display font-figure leading-none",
-        draw && "ledger-rule-draw",
+        "inline-block font-display font-figure leading-none",
+        draw && "highlight-stroke-draw",
         className,
       )}
     >
@@ -127,7 +127,7 @@ export function LedgerCaption({
     <figcaption
       id={id}
       className={cn(
-        "flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b-2 border-foreground pb-2.5",
+        "flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-foreground pb-2.5",
         className,
       )}
     >

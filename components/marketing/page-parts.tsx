@@ -10,7 +10,7 @@
  *   phone capture, a fixed column on the container's right edge).
  * - RuledList: term and detail rows on rules instead of a grid of cards (the
  *   "What your client receives" pattern), one or two columns.
- * - StepList: a real sequence, numbered in DM Mono on rules.
+ * - StepList: a real sequence, numbered in the figure face on rules.
  * - ActionRow: the primary and secondary actions side by side.
  * - Note: a ruled aside for a caveat or a boundary statement, instead of a
  *   tinted box.
@@ -67,7 +67,7 @@ export function PageHero({
   return (
     // data-page-hero: the hero's bottom rule is the one rule under it; a ruled
     // Section that follows drops its own (components/marketing/section.tsx).
-    <section data-page-hero="" className={cn("border-b border-border bg-background", className)} {...props}>
+    <section data-page-hero="" className={cn("border-b border-border bg-background bg-sheet-grid", className)} {...props}>
       <div
         className={cn(
           PAGE_CONTAINER,
@@ -140,7 +140,7 @@ export function RuledList({
   return (
     <dl
       className={cn(
-        "border-t-2 border-foreground",
+        "border-t border-foreground",
         columns === 2 && "grid sm:grid-cols-2 sm:gap-x-12",
         className,
       )}
@@ -166,12 +166,12 @@ export function StepList({ steps, className }: { steps: readonly ReactNode[]; cl
   return (
     // role="list": Safari drops list semantics from a list-style:none list,
     // and the step count is part of what a real sequence tells you.
-    <ol role="list" className={cn("max-w-[68ch] border-t-2 border-foreground", className)}>
+    <ol role="list" className={cn("max-w-[68ch] border-t border-foreground", className)}>
       {steps.map((step, index) => (
         // items-baseline: the 16px numeral sits on the first line of the 18px
         // step, not at the top of its taller line box.
         <li key={index} className="flex items-baseline gap-4 border-b border-rule-soft py-4">
-          <span aria-hidden className="w-6 shrink-0 font-mono text-base tabular-nums text-muted-foreground">
+          <span aria-hidden className="w-6 shrink-0 font-figure text-base font-semibold text-muted-foreground">
             {index + 1}
           </span>
           <span className="min-w-0 text-pretty text-lg leading-relaxed">{step}</span>
@@ -265,7 +265,7 @@ export function CloseSection({
     </>
   );
   return (
-    <Section rule="heavy" aria-labelledby={headingId} containerClassName="pb-6 sm:pb-12">
+    <Section rule="heavy" aria-labelledby={headingId} className="bg-sheet-grid" containerClassName="pb-6 sm:pb-12">
       {resolved === "stack" ? (
         <div data-close-layout="stack" className="max-w-[68ch]">
           {theCase}

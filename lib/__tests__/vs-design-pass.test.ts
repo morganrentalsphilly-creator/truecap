@@ -177,13 +177,15 @@ describe("the retired /vs look stays gone", () => {
 describe("the vs frame's text blocks (components/marketing/vs-page.tsx)", () => {
   it("styles a plain <ul> and <ol> in a reading column, so a list needs no constant or import", () => {
     for (const rule of [
-      "[&>ul]:border-t-2",
+      // Re-anchored: vs-page.tsx — lists open on a 1px graphite line and the
+      // step number is in the figure face (Phase 5).
+      "[&>ul]:border-t",
       "[&>ul]:border-foreground",
       "[&>ul>li]:border-b",
-      "[&>ol]:border-t-2",
+      "[&>ol]:border-t",
       "[&>ol>li]:border-b",
       "[&>ol]:[counter-reset:vs-step]",
-      "[&>ol>li]:before:font-mono",
+      "[&>ol>li]:before:font-figure",
       "[&>ol>li]:before:content-[counter(vs-step)]",
     ]) {
       expect(VS_PROSE.split(" ")).toContain(rule);

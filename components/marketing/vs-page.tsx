@@ -101,7 +101,7 @@ export const VS_TLDR_LABEL = "text-lg font-semibold";
  * added to the page needs no class of its own.
  */
 export const VS_TLDR_LIST =
-  "mt-3 border-t-2 border-foreground text-base leading-relaxed [&>li]:border-b [&>li]:border-rule-soft [&>li]:py-3 [&>li]:text-pretty [&_a]:tc-link";
+  "mt-3 border-t border-foreground text-base leading-relaxed [&>li]:border-b [&>li]:border-rule-soft [&>li]:py-3 [&>li]:text-pretty [&_a]:tc-link";
 
 /** A note under the TL;DR lists (a roundup link, an honest take). */
 export const VS_FOOTNOTE =
@@ -126,7 +126,7 @@ export const VS_SOURCES =
  *     row (RuledList's grammar). Alternatives whose order carries nothing
  *     ("if you want X", "if you want Y") are a <ul>;
  *   · an <ol> is a real sequence (how the two tools are used in turn), on the
- *     same rules and numbered in DM Mono Ink 2 (StepList's grammar). The
+ *     same rules and numbered in the figure face (StepList's grammar). The
  *     numbers are CSS counters, so its <li>s stay plain.
  * Only the column's direct children are styled, so the TL;DR and small-print
  * lists elsewhere on the page keep their own grammar.
@@ -134,10 +134,10 @@ export const VS_SOURCES =
 export const VS_PROSE = [
   "mt-6 max-w-[60ch] text-pretty text-lg leading-relaxed [&>*+*]:mt-6 [&_a]:tc-link [&_strong]:font-semibold",
   // <ul> and <ol>: on the ink rule, a soft rule under each row.
-  "[&>ul]:border-t-2 [&>ul]:border-foreground [&>ul>li]:border-b [&>ul>li]:border-rule-soft [&>ul>li]:py-4",
-  "[&>ol]:border-t-2 [&>ol]:border-foreground [&>ol>li]:border-b [&>ol>li]:border-rule-soft [&>ol>li]:py-4",
-  // <ol> only: the DM Mono step number.
-  "[&>ol]:[counter-reset:vs-step] [&>ol>li]:relative [&>ol>li]:pl-10 [&>ol>li]:[counter-increment:vs-step] [&>ol>li]:before:absolute [&>ol>li]:before:left-0 [&>ol>li]:before:font-mono [&>ol>li]:before:text-base [&>ol>li]:before:tabular-nums [&>ol>li]:before:text-muted-foreground [&>ol>li]:before:content-[counter(vs-step)]",
+  "[&>ul]:border-t [&>ul]:border-foreground [&>ul>li]:border-b [&>ul>li]:border-rule-soft [&>ul>li]:py-4",
+  "[&>ol]:border-t [&>ol]:border-foreground [&>ol>li]:border-b [&>ol>li]:border-rule-soft [&>ol>li]:py-4",
+  // <ol> only: the step number in the figure face.
+  "[&>ol]:[counter-reset:vs-step] [&>ol>li]:relative [&>ol>li]:pl-10 [&>ol>li]:[counter-increment:vs-step] [&>ol>li]:before:absolute [&>ol>li]:before:left-0 [&>ol>li]:before:font-figure [&>ol>li]:before:text-base [&>ol>li]:before:font-semibold [&>ol>li]:before:text-muted-foreground [&>ol>li]:before:content-[counter(vs-step)]",
 ].join(" ");
 
 /** A standalone link row: a tc-link with a 44px target ("Other comparisons"). */
@@ -153,7 +153,7 @@ export const VS_LINK_ROW = "tc-link inline-flex min-h-11 items-center text-base"
  */
 export function VsHero({ children }: { children: ReactNode }) {
   return (
-    <section className="border-b border-border bg-background">
+    <section className="border-b border-border bg-background bg-sheet-grid">
       <div className={cn(PAGE_CONTAINER, "pb-12 pt-6 sm:pb-16 sm:pt-10 lg:pb-18 lg:pt-12")}>
         <div className="min-w-0 max-w-3xl">{children}</div>
       </div>
@@ -243,7 +243,7 @@ export function VsMatrixTable({
   winnerMark?: "ink" | "positive";
 }) {
   return (
-    <table className="w-full table-fixed border-collapse border-t-2 border-foreground text-sm break-words sm:text-base">
+    <table className="w-full table-fixed border-collapse border-t border-foreground text-sm break-words sm:text-base">
       <colgroup>
         <col className="w-1/4" />
         <col className="w-3/8" />

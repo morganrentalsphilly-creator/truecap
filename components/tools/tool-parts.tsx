@@ -6,22 +6,24 @@
  * page or widget, so the copy guards that scan app/tools and the widget
  * sources keep reading it where it is written.
  *
- * - ToolFrame: the widget's shell. A printed object on the 2px ink rule, no
- *   card, fill, radius or shadow. The same widget renders inside the
+ * - ToolFrame: the widget's shell. An instrument the visitor acts on, so a
+ *   card: white, 1px line, the object radius, the rest shadow (DESIGN.md
+ *   "Card"). The same widget renders inside the
  *   /embed/<slug> iframe page, so it brings its own layout and never relies
  *   on a page Section; `@container` lets its grids size off the frame's own
  *   width (the hero column, a full-width phone, a partner's iframe) instead
  *   of the viewport's.
- * - ToolResult: the calculator's one result. A sentence-case label, the key
- *   figure in DM Mono over the ledger's double rule (LedgerTotal, no draw:
- *   the homepage keeps the site's one motion), then the verdict and a note.
+ * - ToolResult: the calculator's one result. A sentence-case label on the
+ *   2px graphite rule (the one place it survives: under a key figure's label
+ *   row), the key figure in the display face (LedgerTotal, no draw: the
+ *   highlight is the Offer Ceiling's), then the verdict and a note.
  *   The figure is in ink; green and orange belong to the verdict, and only
  *   when it is a pass or miss against a rule (LedgerVerdict). The block is a
  *   polite live region, read whole (label, figure, verdict, note) when an
  *   edit changes it; the text is not duplicated for screen readers, because
  *   the e2e specs find the figure and the verdict by their one text node.
- * - ToolFormula: a formula printed between rules (2px ink above, the rule
- *   below), in the text face at 600, left-aligned, with an optional worked
+ * - ToolFormula: a formula printed between two 1px lines, in the text face
+ *   at 600, left-aligned, with an optional worked
  *   example. A formula written in words ("Monthly rent ≥ 1% of purchase
  *   price") is a sentence, not a figure to compare, so it stays out of DM
  *   Mono (DESIGN.md "The Ledger Rule"), where it read as code; and neither
@@ -44,7 +46,7 @@ export function ToolFrame({
 } & Omit<ComponentProps<"section">, "className" | "children">) {
   return (
     <section
-      className={cn("@container min-w-0 border-t-2 border-foreground pt-5", className)}
+      className={cn("@container min-w-0 rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6", className)}
       {...props}
     >
       {children}
@@ -82,7 +84,7 @@ export function ToolResult({
       aria-atomic="true"
       className={cn("min-w-0", className)}
     >
-      <p className="text-sm leading-snug font-semibold text-foreground">{label}</p>
+      <p className="border-b-2 border-foreground pb-2 text-sm leading-snug font-semibold text-foreground">{label}</p>
       {/* The color sits on the line, not on LedgerTotal: cn (tailwind-merge)
           reads the custom text-key-sm as a text color, so a color class
           merged beside it would silently drop the phone size. The double
@@ -122,7 +124,7 @@ export function ToolFormula({
   return (
     <div
       className={cn(
-        "not-prose my-8 border-t-2 border-b border-t-foreground border-b-border py-4",
+        "not-prose my-8 border-y border-border py-4",
         className,
       )}
     >

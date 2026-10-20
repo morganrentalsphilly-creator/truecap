@@ -404,10 +404,10 @@ textarea,
       color: var(--primary-deep);
     }
   }
-  /* Tables: the ruled table (a 2px ink rule opens it, sentence-case heads in
-     Ink 2 on the rule, rows on soft rules, the last one too). */
+  /* Tables: the ruled table (a 1px graphite line opens it, sentence-case
+     heads on the rule, rows on soft rules, the last one too). */
   &.prose :where(table):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
-    border-top: 2px solid var(--foreground);
+    border-top: 1px solid var(--foreground);
     font-size: var(--text-base);
     line-height: var(--text-base--line-height);
   }
@@ -424,7 +424,7 @@ textarea,
   /* Blockquote: a ruled aside in Note's grammar, not an italic pull quote. */
   &.prose :where(blockquote):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
     border-inline-start-width: 0;
-    border-top: 2px solid var(--tw-prose-quote-borders);
+    border-top: 1px solid var(--tw-prose-quote-borders);
     padding-inline-start: 0;
     padding-top: calc(var(--spacing) * 3);
     font-size: var(--text-base);
@@ -448,24 +448,6 @@ textarea,
   }
 }
 
-/* The ledger's one total sits over a double rule (accounting convention for a
-   final total). It is the homepage's only motion: the rule draws in once, from
-   the right, after the figure has painted. Reduced motion shows it static. */
-.ledger-rule {
-  position: relative;
-  padding-bottom: 0.3em;
-}
-/* Two 1px ink lines 3px apart (DESIGN.md "Rules carry the structure"); the
-   box is border-box, so 5px = 1 + 3 + 1. */
-.ledger-rule::after {
-  content: "";
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  height: 5px;
-  border-block: 1px solid currentColor;
-  transform-origin: right center;
-}
 /* The binding row's band runs 0.5rem past the ledger on both sides, so the
    row's text keeps the left edge of the rows around it. A flat offset fill,
    not an elevation: no blur, no spread. -start and -end serve table rows,
@@ -495,13 +477,18 @@ textarea,
   }
 }
 
-@keyframes ledger-rule-in {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
+/* The key figure's highlight stroke draws in once, from the left, after the
+   figure has painted (`highlight-stroke-draw` on LedgerTotal): the stroke's
+   background-size runs from 0 to the figure's width. Reduced motion shows
+   it drawn. */
+@keyframes tc-stroke-in {
+  from { background-size: 0% 100%; }
+  to { background-size: 100% 100%; }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .ledger-rule-draw::after {
-    animation: ledger-rule-in var(--duration-draw) var(--ease-out) 200ms both;
+  .highlight-stroke-draw {
+    background-repeat: no-repeat;
+    animation: tc-stroke-in var(--duration-draw) var(--ease-out) 200ms both;
   }
 }
 
