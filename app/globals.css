@@ -777,28 +777,19 @@ textarea,
      site; only the navy rail below is its own (kept by the founder).
      Status colors come from :root too. */
   /* The rail is the dark band's navy (:root --sidebar), nothing of its own. */
-  --gradient-premium: linear-gradient(135deg, oklch(0.54 0.18 240), oklch(0.66 0.13 210));
-  --gradient-success: linear-gradient(135deg, oklch(0.68 0.17 158), oklch(0.72 0.18 180));
-  --gradient-gold: linear-gradient(135deg, oklch(0.82 0.14 85), oklch(0.72 0.16 50));
   --gradient-sidebar: var(--navy);
-  --gradient-card-glow: radial-gradient(circle at top right, oklch(0.54 0.18 240 / 0.08), transparent 60%);
-  --shadow-lg: 0 12px 32px -8px oklch(0.2 0.04 260 / 0.12), 0 4px 8px -4px oklch(0.2 0.04 260 / 0.06);
   --shadow-glow: var(--shadow-md);
   --shadow-gold-glow: var(--shadow-md);
-  /* AIInsights panel background (previously hardcoded in the component). */
-  --ai-insights-bg: linear-gradient(135deg, oklch(0.99 0.005 260), oklch(0.97 0.02 280));
-  /* Compare page xl background (previously a hardcoded light gradient). */
-  --compare-surface: radial-gradient(circle at top right, rgba(0, 112, 196, 0.08), transparent 32%), linear-gradient(180deg, #f8fbff, #eef4f8);
   font-family: var(--font-sans-variable), "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* The mobile nav sheet is portaled OUTSIDE .dashboard-shell and can't
    inherit the tokens above — re-declare the subset the sidebar needs. */
 .dashboard-mobile-sheet {
-  --sidebar-foreground: oklch(0.85 0.02 250);
-  --sidebar-accent: oklch(0.24 0.05 262);
-  --sidebar-accent-foreground: oklch(0.99 0 0);
-  --sidebar-border: oklch(0.28 0.04 262);
+  --sidebar-foreground: var(--navy-foreground);
+  --sidebar-accent: oklch(0.27 0.04 262);
+  --sidebar-accent-foreground: oklch(0.995 0 0);
+  --sidebar-border: var(--navy-line);
   --gradient-sidebar: var(--navy);
   font-family: var(--font-sans-variable), "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
 }
