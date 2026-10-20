@@ -1,0 +1,12 @@
+[
+  {
+    "antipattern": "first-viewport-column-overflow",
+    "name": "One column stretches the first viewport",
+    "description": "A multi-column opening section lets one column run far past the fold while its sibling fits in a single viewport, so the short column floats in dead space and the fold falls deep inside one section. Balance the columns, cap the tall one, or let the long content flow below the opening row.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "http://127.0.0.1:3100/auth/login",
+    "line": 0,
+    "snippet": "div.grid.grid-cols-[minmax(0,1fr)].gap-x-12.gap-y-10.pb-16.pt-8.sm:pt-12.lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)].xl:gap-x-16 opens the page with one column running 174% of the viewport tall while a sibling fits in 61% — the fold falls deep inside the section"
+  }
+]
