@@ -1,0 +1,12 @@
+[
+  {
+    "antipattern": "tight-leading",
+    "name": "Tight line height",
+    "description": "Line height below 1.3x the font size makes multi-line text hard to read. Use 1.5 to 1.7 for body text so lines have room to breathe.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "http://127.0.0.1:3100/playbook",
+    "line": 0,
+    "snippet": "line-height 1.20x (need >=1.3)"
+  }
+]

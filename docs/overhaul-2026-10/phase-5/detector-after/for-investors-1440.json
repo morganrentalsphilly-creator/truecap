@@ -1,0 +1,32 @@
+[
+  {
+    "antipattern": "heading-rhythm",
+    "name": "Heading crowded against the previous block",
+    "description": "A heading binds to the content it introduces, so the rendered space above it should exceed the space below it. When headings across a page sit as close or closer to the block above than to their own content, every section reads as if it captions the previous one. Open up the space above each heading.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "http://127.0.0.1:3100/for-investors",
+    "line": 0,
+    "snippet": "h3 \"House hacking\" has 27px above vs 47px below — it reads as bound to the block above (3 headings on page)"
+  },
+  {
+    "antipattern": "heading-rhythm",
+    "name": "Heading crowded against the previous block",
+    "description": "A heading binds to the content it introduces, so the rendered space above it should exceed the space below it. When headings across a page sit as close or closer to the block above than to their own content, every section reads as if it captions the previous one. Open up the space above each heading.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "http://127.0.0.1:3100/for-investors",
+    "line": 0,
+    "snippet": "h3 \"BRRRR\" has 27px above vs 73px below — it reads as bound to the block above (3 headings on page)"
+  },
+  {
+    "antipattern": "heading-rhythm",
+    "name": "Heading crowded against the previous block",
+    "description": "A heading binds to the content it introduces, so the rendered space above it should exceed the space below it. When headings across a page sit as close or closer to the block above than to their own content, every section reads as if it captions the previous one. Open up the space above each heading.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "http://127.0.0.1:3100/for-investors",
+    "line": 0,
+    "snippet": "h3 \"Fix and flip\" has 27px above vs 143px below — it reads as bound to the block above (3 headings on page)"
+  }
+]
