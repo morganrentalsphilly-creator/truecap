@@ -463,10 +463,40 @@ Phase 5 restyles their internals and the pages follow.
 The app reads the same tokens: the sheet, graphite, cobalt, white cards with
 the rest shadow, tabular figures, the radius scale. It is denser (14 to 16px
 text, 44px controls) and quieter. The navy rail is the marketing band's navy,
-so marketing and app are one product. The analyzer's result (Phase 4) is a
-choreographed reveal that plays once per run; the input is a stepped flow
-with a progress rail and source chips on defaults; charts animate their first
-draw only; skeletons match the final layout.
+so marketing and app are one product.
+
+### The analyzer and the result (Phase 4)
+
+- **Input.** The address field is hero-sized (48px, 56px from `sm:`), the
+  first and largest field on the page; the page heading is the display face.
+  Cards on the form are the 12px object radius with the rest shadow; the Run
+  button is a control (8px). Source chips on defaults are Geist Mono tags
+  (4px radius) with a dot-free badge; the advanced block eases in when it
+  opens (`tc-disclosure`). The step rail is the existing jump-nav, restyled;
+  it shows after a run.
+- **Result card.** One white card at the object radius with the rest shadow
+  (no coloured border, no blue wash). The verdict is the display face; the
+  Offer Ceiling sits under the 2px graphite rule on the highlight stroke at
+  the key-figure size, then the price track (asking against the ceiling and
+  the gap), then the first-year figures on soft rules, the target state as a
+  dot and a label, and the best next step on a 2px cobalt left rule. Nothing
+  on the card is uppercase or monospaced except the "Base analysis" tag.
+- **The reveal.** `ResultReveal` plays once per run (the inputs' fingerprint
+  is the key): the verdict, the ceiling rolling in through `AnimatedNumber`,
+  the price track, the figures, the chips, the next step, 150ms apart, about
+  a second in all; nothing under reduced motion, and never again until the
+  inputs change. After that, figures animate between values (the live
+  preview's cash flow, cap rate and DSCR roll on every keystroke).
+- **The summary bar.** Once the decision card scrolls under the header, a
+  zero-height sticky slot shows the card's own headline (read from its h2),
+  the ceiling and the asking price, and a "Decision" button back; hidden, it
+  is inert.
+- **Charts** animate their first draw only (`useChartDrawAnimation`): a
+  scenario toggle redraws without an entrance. Skeletons share the card
+  radius.
+- **The share page and the memo** are documents: the same card and figure
+  grammar, the brand colour's text picked by contrast (`textOnBrand`), the
+  chrome hidden in print (`data-print-hide`).
 
 ## Token strategy
 
@@ -508,6 +538,13 @@ draw only; skeletons match the final layout.
   their own groups; the legacy `--brand-*` and `--metric-*` names stay as
   literal values for the contrast guards; Stripe Checkout branding sends the
   sheet and cobalt; emails keep Newsprint until Phase 7.
+- 2026-10-20, Phase 4 build notes: React 19.2.6 (stable) does not export
+  `ViewTransition` (only Next's vendored canary does, and the unit tests run
+  against the stable copy), so the hero-to-analyzer address morph is skipped
+  per OVERHAUL.md §4 rather than shimmed; the phone bottom sheet for
+  assumptions is a proposal (the form's DOM and react-hook-form registration
+  would have to move); the step rail keeps its post-run-only rule (the hero
+  and the source chips carry input-phase wayfinding, per its code comment).
 
 ## Do and don't
 
