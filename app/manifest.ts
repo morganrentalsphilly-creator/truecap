@@ -20,8 +20,8 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     // The Newsprint paper (--background), as the page itself (DESIGN.md).
-    background_color: "#efece8",
-    theme_color: "#efece8",
+    background_color: "#fbfaf7",
+    theme_color: "#fbfaf7",
     orientation: "portrait",
     categories: ["finance", "productivity", "business"],
     icons: [

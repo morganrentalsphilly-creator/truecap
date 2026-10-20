@@ -56,7 +56,7 @@ export const viewport = {
   viewportFit: "cover",
   // The browser chrome takes the Newsprint paper (--background, #efece8),
   // not Signal Blue: blue is for actions only (DESIGN.md).
-  themeColor: "#efece8",
+  themeColor: "#fbfaf7",
 };
 
 const siteUrl = getSiteUrl();
