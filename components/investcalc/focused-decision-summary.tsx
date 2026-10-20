@@ -1191,7 +1191,10 @@ export function FocusedDecisionSummary({
             "Keep reusable financing and operating assumptions, then enter the next property"
           }
         >
-          <CopyPlus className="size-4" aria-hidden />
+          {/* No icon in the 320-639px two-up grid: with Hanken Grotesk the
+              label needs the icon's width to stay on two lines, and a third
+              line pushed the actions row under the 844px fold at 390. */}
+          <CopyPlus className="size-4 max-sm:hidden" aria-hidden />
           Next deal · keep assumptions
         </Button>
       </div>
