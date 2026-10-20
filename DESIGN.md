@@ -494,6 +494,37 @@ the parts and the pages followed:
 
 ## The app (Operate mode)
 
+### What Phase 6 set
+
+- **The shell.** The rail is the navy band's navy (`--sidebar` is the band's
+  token); its links are 8px controls with the cobalt focus ring, the active
+  link on the accent surface, the deal count and the "Pro" tag as 4px tags
+  (figure face for the count, Geist Mono for the tag). The top bar is the
+  sheet at 90% with a blur and one bottom line; its search is the field
+  (white, 1px line, 8px); its action is a primary control. The mobile drawer
+  carries the same navy tokens.
+- **Stat cards** are white cards at the object radius with the rest shadow:
+  a 12px medium label, the figure in the display face, a signed change in
+  the direction's colour, no icon tile and no trend pill.
+- **Page headings** are the display face at the section sizes (the deal
+  workspace and the shortlist at the H3 step). Route-error cards use the
+  same face.
+- **Panels and tables.** Every card is the object radius; inner blocks and
+  fields are 8px; pills are 4px tags; figures are `font-figure`; the only
+  monospace left is metadata (a share URL, a file name). Table rows take a
+  soft hover (`hover:bg-muted/40`) and keep the 3px focus ring.
+- **Status chips** follow the Sign Rule: meets on the positive wash in green,
+  misses on the highlight wash in the highlight text colour; nothing is
+  white-on-green or white-on-orange.
+- **Empty states** name the next action and offer the sample deal
+  (`/dashboard/new?sample=1`) beside it: the dashboard home, My Deals and
+  Compare. No illustration, no icon tile.
+- **The auth screens** keep the paper split layout and gain the live mini
+  instrument: the homepage's sample-deal sheet (`HeroSheet`) beside the
+  form, above the three trust rows.
+- **Link text** carries no arrow; the arrows that remain are data (a stage
+  change, an axis label).
+
 The app reads the same tokens: the sheet, graphite, cobalt, white cards with
 the rest shadow, tabular figures, the radius scale. It is denser (14 to 16px
 text, 44px controls) and quieter. The navy rail is the marketing band's navy,
@@ -587,6 +618,13 @@ so marketing and app are one product.
   `STRIPE_PRICE_AGENT_PRO_MONTHLY` to render it; the product shots in
   `public/product/*` still show the ledger-era analyzer until Phase 7
   regenerates them.
+- 2026-10-20, Phase 6 build notes: no local Supabase or Docker on the
+  founder's machine, so the signed-in e2e specs run in CI only; the shell
+  and the auth screens were checked through a render harness (a vitest file
+  renders a surface with mock data to HTML beside the built stylesheet;
+  `docs/overhaul-2026-10/tools/static-shot.mjs` screenshots it). The
+  `rehab-estimator-card` default rendering stays byte-pinned; the agent
+  branding form's default colour is the brand's data, not a token.
 
 ## Do and don't
 

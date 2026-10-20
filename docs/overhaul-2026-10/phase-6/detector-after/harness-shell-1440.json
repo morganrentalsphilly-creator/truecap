@@ -1,0 +1,14 @@
+[
+  {
+    "antipattern": "design-system-color",
+    "name": "Color outside DESIGN.md",
+    "description": "A literal color is outside the DESIGN.md palette and sidecar tonal ramps. This may be legitimate, but it should be an intentional design-system addition rather than drift.",
+    "severity": "advisory",
+    "category": "quality",
+    "file": "docs/overhaul-2026-10/phase-6/harness/shell.html",
+    "line": 0,
+    "snippet": "border-bottom oklab(0.31 -0.00487106 -0.0346594 / 0.6) on div \"Rental property underwriting\" is outside DESIGN.md colors",
+    "advisory": true,
+    "ignoreValue": "oklab(0.31 -0.00487106 -0.0346594 / 0.6)"
+  }
+]
