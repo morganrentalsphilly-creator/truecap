@@ -12,7 +12,7 @@
  * Set on the calculator parts (components/tools/tool-parts.tsx), like the
  * 1% rule widget: the frame opens on the 2px ink rule with no card, the four
  * fields are the shared ToolNumberField, and the months are the key figure
- * in DM Mono over the double rule (LedgerTotal). The band's name is in ink
+ * in the display face over the 2px rule (LedgerTotal). The band's name is in ink
  * at 600 with no color: a recovery period is a description of the entered
  * scenario, not a pass or a miss against a rule, and green and orange are
  * kept for those (DESIGN.md). The result is announced by its own one-line

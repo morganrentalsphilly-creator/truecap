@@ -10,7 +10,7 @@
  *
  * Layout: the wordmark over a heavy rule with "Tools · <label>", the tool's
  * short facts as 2px chips, the tool name in the display voice, the tagline,
- * and the tools URL in DM Mono over a soft rule.
+ * and the tools URL in Geist Mono over a soft rule.
  */
 
 import { ImageResponse } from "next/og";

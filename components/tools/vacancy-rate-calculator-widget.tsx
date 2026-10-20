@@ -12,7 +12,7 @@
  * Set on the calculator parts (components/tools/tool-parts.tsx), like the
  * 1% rule widget: the frame opens on the 2px ink rule with no card, the
  * three fields are the shared ToolNumberField, and the rate is the key
- * figure in DM Mono over the double rule, in ink. The band's name is in ink
+ * figure in the display face over the 2px rule, in ink. The band's name is in ink
  * at 600 with no color: a band is a rule-of-thumb reading of the entered
  * scenario, not a pass or a miss against a rule, and green and orange are
  * kept for those (DESIGN.md). The breakdown is a ruled disclosure row after

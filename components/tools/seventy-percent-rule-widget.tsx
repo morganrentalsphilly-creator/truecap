@@ -239,7 +239,7 @@ export function SeventyPercentRuleWidget() {
               <p className="text-sm leading-snug font-semibold text-foreground">
                 70%-rule price screen ({result.mult}%)
               </p>
-              {/* The key figure in DM Mono over the double rule, in ink: a
+              {/* The key figure in the display face over the 2px rule, in ink: a
                   price screen is not a pass or a miss, so it takes no color.
                   The color sits on the line, not on LedgerTotal (see
                   ToolResult). */}
@@ -294,7 +294,7 @@ export function SeventyPercentRuleWidget() {
               )}
 
               {/* The ladder on rules: the label opens it, each multiplier is
-                  a row, the figures in DM Mono so they compare down the
+                  a row, the figures in the figure face so they compare down the
                   column. The chosen multiplier's row is the one in 600. */}
               <div className="mt-6">
                 <p className="border-b border-border pb-2 text-sm font-semibold text-foreground">

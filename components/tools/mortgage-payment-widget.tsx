@@ -8,7 +8,7 @@
  * Set on the calculator parts (components/tools/tool-parts.tsx), like the
  * 1% rule widget: the frame opens on the 2px ink rule with no card, the six
  * fields are the shared ToolNumberField, and the payment is the key figure
- * in DM Mono over the double rule (LedgerTotal), in ink. The result is
+ * in the display face over the 2px rule (LedgerTotal), in ink. The result is
  * announced by its own one-line status, so the visible block is not a
  * second live region (ToolResult is one, and has no switch for that). The
  * seven lines behind the payment sit under the result on soft rules (after
@@ -405,7 +405,7 @@ export function MortgagePaymentWidget() {
   );
 }
 
-/** One line of the payment on a soft rule: the name in Ink 2, the figure in DM Mono. */
+/** One line of the payment on a soft rule: the name in Ink 2, the figure in the figure face. */
 function Row({
   label,
   value,

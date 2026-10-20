@@ -168,7 +168,7 @@ const PROOF_LINKS: [href: string, title: string, body: string][] = [
   ["/reviews", "Proof & methodology", "How quotes get published here: real account activity, consent, first name and market."],
 ];
 
-/** Prices are compared figures: DM Mono, tabular (the Ledger Rule). */
+/** Prices are compared figures: tabular, in the figure face (LedgerFigure). */
 const CLOSE_PRICE_FIGURE = "text-section-sm font-medium tracking-[-0.02em]";
 
 export default async function ForAgentsPage() {
@@ -283,7 +283,7 @@ export default async function ForAgentsPage() {
           }
         >
           {/* The price strip on a soft rule, the homepage investor cue's
-              form: labels in the text face, amounts in DM Mono. A grid at
+              form: labels in the text face, amounts in the figure face. A grid at
               every width: the two prices side by side (packed left from
               640px), the roster on its own row. */}
           <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-rule-soft pt-2.5 text-base sm:grid-cols-[auto_auto] sm:justify-start sm:gap-x-8">
