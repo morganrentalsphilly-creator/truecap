@@ -49,8 +49,10 @@ describe("advocacy decision accessibility and reflow guards", () => {
   });
 
   it("preserves 44px controls and visible keyboard focus", () => {
-    expect(summary).toContain("h-11 w-full gap-2 rounded-xl");
-    expect(summary).toContain('className="h-11 rounded-xl px-4"');
+    // Re-anchored: focused-decision-summary.tsx — Blueprint controls carry
+    // the 8px control radius (rounded-md), the same 44px height.
+    expect(summary).toContain("h-11 w-full gap-2 rounded-md");
+    expect(summary).toContain('className="h-11 rounded-md px-4"');
     expect(ledger).toContain("min-h-11");
     expect(ledger).toContain("focus-visible:ring-[3px] focus-visible:ring-ring/50");
   });
@@ -153,8 +155,11 @@ describe("advocacy decision accessibility and reflow guards", () => {
     expect(normalizeSource(summary)).toContain(
       normalizeSource("const dscrApplies = result.monthlyPayment > 0"),
     );
-    expect(normalizeSource(summary)).toContain(
-      normalizeSource("dscrApplies ? result.dscr.toFixed(2) : NO_DEBT_SERVICE_DSCR_LABEL"),
+    // Re-anchored: focused-decision-summary.tsx — the DSCR figure rolls in
+    // through AnimatedNumber (two decimals, "ratio"); the no-debt label is
+    // still the other branch of the same ternary.
+    expect(normalizeSource(summary)).toMatch(
+      /dscrApplies\?\(<AnimatedNumbervalue=\{result\.dscr\}kind="ratio"[^)]*\):\(NO_DEBT_SERVICE_DSCR_LABEL\)/,
     );
     expect(summary).not.toContain("Screening Index");
     expect(summary).not.toContain("Deal score");

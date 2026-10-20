@@ -46,6 +46,8 @@ import {
   type WhatIfState,
 } from "@/components/investcalc/what-if-sliders";
 import { BreakpointSuggestionCard } from "@/components/investcalc/breakpoint-suggestion-card";
+import { ResultSummaryBar } from "@/components/investcalc/result-summary-bar";
+import { ResultReveal } from "@/components/motion/result-reveal";
 import { StressSurvivabilityCard } from "@/components/investcalc/stress-survivability-card";
 
 // The three Pro snapshot panels each pull in recharts (~90 KB gzipped
@@ -62,7 +64,7 @@ const TenYearProjectionsPanel = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <Skeleton className="h-[420px] w-full rounded-2xl" />,
+    loading: () => <Skeleton className="h-[420px] w-full rounded-lg" />,
   },
 );
 const TaxStrategyPanel = dynamic(
@@ -72,7 +74,7 @@ const TaxStrategyPanel = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <Skeleton className="h-[420px] w-full rounded-2xl" />,
+    loading: () => <Skeleton className="h-[420px] w-full rounded-lg" />,
   },
 );
 const ExitScenariosPanel = dynamic(
@@ -82,7 +84,7 @@ const ExitScenariosPanel = dynamic(
     ),
   {
     ssr: false,
-    loading: () => <Skeleton className="h-[420px] w-full rounded-2xl" />,
+    loading: () => <Skeleton className="h-[420px] w-full rounded-lg" />,
   },
 );
 import {
@@ -549,6 +551,9 @@ export function AnalysisDashboard({
   recordedOfferCeiling = null,
   advocacyContractEligible = false,
 }: AnalysisDashboardProps) {
+  // The decision card's element, for the sticky summary bar that shows once
+  // it has scrolled away (a callback ref: the card mounts conditionally).
+  const [decisionEl, setDecisionEl] = useState<HTMLElement | null>(null);
   const showInputConfidence = isFeatureEnabled("input_confidence");
   const showOfferReadyStatus = isFeatureEnabled("offer_ready_status");
   const showDecisionThresholds = isFeatureEnabled("what_needs_to_be_true_v2");
@@ -1486,13 +1491,20 @@ export function AnalysisDashboard({
   const decisionFirst = isFeatureEnabled("decision_first_results");
   return (
     <div className="space-y-6">
+      {result && values ? (
+        <ResultSummaryBar
+          anchor={decisionEl}
+          ceiling={exactOfferCeiling?.presentation?.ceiling ?? null}
+          asking={Number(values.purchasePrice)}
+        />
+      ) : null}
       {/* Sample-deal Pro preview banner - slimmed to a one-line dismissible
           strip (Phase 2) so it no longer pushes the answer below the fold on
           the 375px first paint. Still explains why every Pro tab is open on
           the demo and converts the "wow" into a pricing visit; gradient +
           border language still matches ProInlineGate. */}
       {isSampleProPreview && !sampleBannerDismissed && (
-        <div className="flex items-center gap-2 rounded-2xl border border-primary/25 bg-gradient-to-r from-[var(--brand-blue-light)] via-card to-card py-1 pl-3 pr-1">
+        <div className="flex items-center gap-2 rounded-md border border-border bg-card py-1 pl-3 pr-1">
           <Sparkles className="size-3.5 shrink-0 text-primary" aria-hidden />
           {/* Wraps instead of truncating: at 390px the sentence was cut off
               mid-word ("the full Pro repor…"). */}
@@ -1580,7 +1592,7 @@ export function AnalysisDashboard({
           </h2>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-border bg-muted/20 p-3">
-              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-xs font-medium text-muted-foreground">
                 Cash flow after reserve
               </p>
               <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
@@ -1592,7 +1604,7 @@ export function AnalysisDashboard({
               </p>
             </div>
             <div className="rounded-xl border border-border bg-muted/20 p-3">
-              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-xs font-medium text-muted-foreground">
                 Model DSCR
               </p>
               <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
@@ -1613,7 +1625,11 @@ export function AnalysisDashboard({
         <section
           aria-labelledby="analysis-decision-title"
           className="space-y-3"
+          ref={setDecisionEl}
         >
+          <ResultReveal
+            runKey={`${values.purchasePrice}|${result.netCashFlow}|${result.dscr}`}
+          >
           <FocusedDecisionSummary
             values={values}
             result={result}
@@ -1709,6 +1725,7 @@ export function AnalysisDashboard({
             analyzerStrategyKey={activeStrategy?.key ?? "buy-hold"}
             adoptedDecisionBasis={normalizedDecisionBasis}
           />
+          </ResultReveal>
           {/* Screening Index — the FREE 0-100 heuristic sold on /pricing and
               computed on every run, which the decision-first rebuild left
               with no rendering surface. It lives OUTSIDE the decision card
@@ -1720,7 +1737,7 @@ export function AnalysisDashboard({
               id="screening-index"
               className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-xl border border-border bg-muted/20 px-4 py-2.5"
             >
-              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-xs font-medium text-muted-foreground">
                 Deal score
               </p>
               <p className="font-mono text-sm font-extrabold tabular-nums text-foreground">
@@ -1879,7 +1896,7 @@ export function AnalysisDashboard({
             </span>
             <span
               className={cn(
-                "rounded-full border px-2 py-0.5 text-3xs font-bold uppercase tracking-wide",
+                "rounded-sm border px-1.5 py-0.5 font-mono text-xs",
                 isSaved
                   ? "border-positive/30 bg-positive-light text-positive"
                   : isExistingSavedDeal
@@ -1947,7 +1964,7 @@ export function AnalysisDashboard({
               )}
               <span>Save</span>
               {isSaveLockedByPlan && (
-                <span className="ml-0.5 sm:ml-1 rounded-full bg-[var(--brand-orange)] px-1 sm:px-1 py-0.5 text-3xs font-bold uppercase text-white sm:ml-1.5 sm:px-1.5">
+                <span className="ml-0.5 sm:ml-1 rounded-sm bg-[var(--brand-orange)] px-1 sm:px-1 py-0.5 font-mono text-2xs font-semibold text-white sm:ml-1.5 sm:px-1.5">
                   PRO
                 </span>
               )}
@@ -2028,7 +2045,7 @@ export function AnalysisDashboard({
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent align="end" className="w-64 p-1.5">
-                  <p className="px-2 py-1 text-2xs font-semibold uppercase tracking-widest text-muted-foreground">
+                  <p className="px-2 py-1 font-mono text-xs text-muted-foreground">
                     Export as…
                   </p>
                   {REPORT_MODES.map((m) => (
@@ -2173,7 +2190,7 @@ export function AnalysisDashboard({
                 </button>
                 {canExportPdf && isSaved ? (
                   <>
-                    <p className="px-2 pt-2 pb-1 text-2xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    <p className="px-2 pt-2 pb-1 font-mono text-xs text-muted-foreground">
                       Export as…
                     </p>
                     {REPORT_MODES.map((m) => (
@@ -2330,7 +2347,7 @@ export function AnalysisDashboard({
                 <Target className="size-4" aria-hidden />
                 <h2
                   id="max-offer-summary-title"
-                  className="text-xs font-extrabold uppercase tracking-widest"
+                  className="text-xs font-semibold"
                 >
                   Offer Ceiling
                 </h2>
@@ -2422,7 +2439,7 @@ export function AnalysisDashboard({
           >
             <h2
               id="numbers-section-title"
-              className="text-sm font-extrabold uppercase tracking-widest text-muted-foreground"
+              className="font-display text-lg text-foreground"
             >
               {deferredWhatIfState?.isAdjusted ? "Scenario numbers" : "Numbers"}
             </h2>
@@ -2560,7 +2577,7 @@ export function AnalysisDashboard({
             collapsed by default so the first read stays uncrowded. One tap
             reveals the full metric set. */}
             <details className="group">
-              <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-1 py-2 text-3xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-1 py-2 text-xs font-medium text-muted-foreground hover:text-foreground">
                 <ChevronRight
                   aria-hidden
                   className="size-3.5 shrink-0 transition-transform group-open:rotate-90"
@@ -2580,7 +2597,7 @@ export function AnalysisDashboard({
           >
             <h2
               id="risks-section-title"
-              className="text-sm font-extrabold uppercase tracking-widest text-muted-foreground"
+              className="font-display text-lg text-foreground"
             >
               {deferredWhatIfState?.isAdjusted
                 ? advocacyDecisionContract
@@ -2617,7 +2634,7 @@ export function AnalysisDashboard({
             >
               <h2
                 id="downside-section-title"
-                className="text-sm font-extrabold uppercase tracking-widest text-muted-foreground"
+                className="font-display text-lg text-foreground"
               >
                 Downside scenario
               </h2>
@@ -2777,7 +2794,7 @@ export function AnalysisDashboard({
         >
           <h2
             id="long-term-section-title"
-            className="text-sm font-extrabold uppercase tracking-widest text-muted-foreground"
+            className="font-display text-lg text-foreground"
           >
             {deferredWhatIfState?.isAdjusted
               ? "Base long-term analysis"
@@ -3094,7 +3111,7 @@ function ProFeaturePreview({
                 key={metric}
                 className="rounded-2xl border border-border bg-card p-4"
               >
-                <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+                <p className="text-xs font-medium text-muted-foreground">
                   {metric}
                 </p>
                 {/* Real numbers can be negative — don't tint a loss green. */}
@@ -3298,7 +3315,7 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
       className="@container rounded-2xl border border-border bg-card p-4 sm:p-5"
     >
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+        <p className="text-xs font-medium text-muted-foreground">
           Cash flow over time
         </p>
         <p className="text-3xs font-medium text-muted-foreground hidden sm:block">
@@ -3327,7 +3344,7 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
                 index === 0 ? "border-primary/30 bg-primary/[0.03]" : null,
               )}
             >
-              <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+              <p className="text-xs font-medium text-muted-foreground">
                 {point.label}
               </p>
               <p
@@ -3385,8 +3402,8 @@ function CashFlowTab({
     // all, which made the loading state feel like a glitch.
     return (
       <div className="space-y-5 sm:space-y-6">
-        <Skeleton className="h-20 w-full rounded-2xl sm:h-24" />
-        <Skeleton className="h-40 w-full rounded-2xl sm:h-48" />
+        <Skeleton className="h-20 w-full rounded-lg sm:h-24" />
+        <Skeleton className="h-40 w-full rounded-lg sm:h-48" />
         <Skeleton className="h-6 w-40" />
       </div>
     );
@@ -3429,7 +3446,7 @@ function CashFlowTab({
           aria-expanded={showBreakdown}
           className="group flex w-full items-center justify-between gap-2 rounded-xl px-1 py-1.5 text-left hover:bg-muted/50"
         >
-          <span className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+          <span className="text-xs font-medium text-muted-foreground">
             Full breakdown
           </span>
           <ChevronDown
@@ -3447,7 +3464,7 @@ function CashFlowTab({
           <div>
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp className="w-4 h-4 text-[var(--metric-positive)]" />
-              <span className="text-xs font-bold uppercase tracking-widest text-foreground">
+              <span className="text-xs font-semibold text-foreground">
                 Monthly Income
               </span>
             </div>
@@ -3470,7 +3487,7 @@ function CashFlowTab({
           {/* Operating expenses */}
           <div>
             <div className="mb-4">
-              <span className="text-xs font-bold uppercase tracking-widest text-foreground">
+              <span className="text-xs font-semibold text-foreground">
                 Operating Expenses
               </span>
 
@@ -3478,7 +3495,7 @@ function CashFlowTab({
                 result &&
                 (result.maintenanceAgeAdjusted || result.capexAgeAdjusted) && (
                   <div className="rounded-2xl border border-[var(--brand-orange)]/25 bg-[var(--brand-orange-light)] py-2 px-3 ">
-                    <p className="text-xs font-bold uppercase tracking-widest text-[var(--brand-orange)]">
+                    <p className="text-xs font-semibold text-[var(--brand-orange)]">
                       Age Impact on Expenses
                     </p>
                     <div className="mt-2 space-y-1 text-xs">
@@ -3539,7 +3556,7 @@ function CashFlowTab({
           {/* Debt service */}
           <div>
             <div className="mb-4">
-              <span className="text-xs font-bold uppercase tracking-widest text-foreground">
+              <span className="text-xs font-semibold text-foreground">
                 Debt Service
               </span>
             </div>
@@ -3582,7 +3599,7 @@ function CashFlowTab({
               number. "Cash to close" is the canonical label (the deal list
               + dashboard already used it). */}
             <div className="mt-6 pt-5 border-t border-border">
-              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
+              <p className="text-xs font-medium text-muted-foreground mb-3">
                 Cash to Close
               </p>
               <div className="flex justify-between text-sm mb-1">

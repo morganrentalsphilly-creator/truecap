@@ -168,12 +168,14 @@ describe("non-pointer help and concise announcements", () => {
 
   it("uses AA-safe small text on the focused result's blue panels", () => {
     const source = read("components/investcalc/focused-decision-summary.tsx");
+    // Re-anchored: focused-decision-summary.tsx — the Offer Ceiling panel is
+    // no longer a blue wash; its label is foreground text on the card.
     expect(source).toContain(
-      "uppercase tracking-widest text-[var(--brand-blue-text)]",
+      'className="text-sm font-semibold text-foreground">',
     );
     expect(normalizeSource(source)).toContain(
       normalizeSource(
-        'uppercase tracking-widest text-foreground/75">Best next step',
+        'text-xs font-medium text-foreground/75">Best next step',
       ),
     );
     expect(normalizeSource(source)).toContain(

@@ -36,9 +36,11 @@ function withResult(overrides: Partial<AnalysisResult>): AnalysisResult {
   };
 }
 
-/** The tile's figure: the one mono, tabular span in a MetricCard. */
+/** The tile's figure: the one font-figure (tabular) span in a MetricCard.
+ *  Re-anchored: metrics-band.tsx — the figure utility replaced the literal
+ *  mono/tabular-nums classes. */
 function figure(html: string): string {
-  const match = html.match(/tabular-nums[^>]*>([^<]*)</);
+  const match = html.match(/font-figure[^>]*>([^<]*)</);
   if (!match) throw new Error(`no figure in ${html}`);
   return match[1];
 }

@@ -86,7 +86,7 @@ function MetricCard({
   onSelect?: () => void;
 }) {
   const labelEl = (
-    <span className="text-3xs sm:text-2xs font-bold uppercase tracking-widest text-muted-foreground leading-tight">
+    <span className="text-xs font-medium leading-tight text-muted-foreground">
       {label}
     </span>
   );
@@ -100,7 +100,7 @@ function MetricCard({
   return (
     <div
       className={cn(
-        "relative flex flex-col gap-1 rounded-2xl border border-border bg-card p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:p-5",
+        "relative flex flex-col gap-1 rounded-lg border border-border bg-card p-3 shadow-xs sm:p-5",
         onSelect &&
           "transition-colors hover:border-primary/40 focus-within:border-primary/40",
       )}
@@ -111,7 +111,7 @@ function MetricCard({
           onClick={onSelect}
           aria-label={`${label} — jump to the section that explains this number`}
           title="Jump to the section that explains this number"
-          className="absolute inset-0 cursor-pointer rounded-2xl focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className="absolute inset-0 cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
       ) : null}
       {glossaryTerm ? (
@@ -128,7 +128,7 @@ function MetricCard({
       ) : (
         <span
           className={cn(
-            "font-mono text-xl font-bold tabular-nums tracking-tight sm:text-2xl",
+            "font-display font-figure text-xl sm:text-2xl",
             color ?? "text-foreground",
           )}
         >
@@ -464,7 +464,7 @@ export function MetricsBand({
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 px-1">
-        <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+        <span className="text-xs font-medium text-muted-foreground">
           Overview
         </span>
         <span className="h-px flex-1 bg-border" />
