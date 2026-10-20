@@ -245,12 +245,12 @@ export function Topbar({
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-20 flex h-16 shrink-0 items-center gap-3 px-4 sm:px-6 lg:sticky lg:inset-auto lg:top-0 lg:gap-4 lg:px-8 bg-background/80 backdrop-blur-xl border-b border-border">
+      <header className="fixed inset-x-0 top-0 z-20 flex h-16 shrink-0 items-center gap-3 px-4 sm:px-6 lg:sticky lg:inset-auto lg:top-0 lg:gap-4 lg:px-8 bg-background/90 backdrop-blur border-b border-border">
         <SheetTrigger asChild>
           <Button
             variant="ghost"
             size="icon"
-            className="size-11 shrink-0 rounded-xl border border-border bg-background/70 backdrop-blur lg:hidden"
+            className="size-11 shrink-0 rounded-md border border-border bg-card lg:hidden"
             aria-label="Open navigation menu"
           >
             <Menu className="h-5 w-5" />
@@ -291,7 +291,7 @@ export function Topbar({
                 : undefined
             }
             autoComplete="off"
-            className="w-full h-11 pl-10 pr-4 rounded-lg bg-muted/60 border border-transparent focus:border-primary focus:bg-background outline-none text-base sm:text-sm transition focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="h-11 w-full rounded-md border border-input bg-field pr-4 pl-10 text-base outline-none transition-[border-color,box-shadow] duration-150 focus:border-primary sm:text-sm focus-visible:ring-[3px] focus-visible:ring-ring/50"
           />
           <span
             id="dashboard-search-status"
@@ -384,7 +384,7 @@ export function Topbar({
                 requestMountedNewAnalysis();
               }
             }}
-            className="inline-flex size-11 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-colors hover:bg-primary/90 md:hidden"
+            className="inline-flex size-11 items-center justify-center rounded-md bg-primary text-primary-foreground transition-colors hover:bg-primary-deep md:hidden"
           >
             <Plus className="h-5 w-5" />
           </Link>
@@ -397,7 +397,7 @@ export function Topbar({
                 requestMountedNewAnalysis();
               }
             }}
-            className="hidden min-h-11 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 md:inline-flex"
+            className="hidden min-h-11 items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-deep md:inline-flex"
           >
             <Plus className="h-4 w-4" />
             New Analysis

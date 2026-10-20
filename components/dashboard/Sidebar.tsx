@@ -95,7 +95,7 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
           onDark
           className="max-w-[150px]"
           imageClassName="h-auto"
-          subtitleClassName="text-2xs"
+          subtitleClassName="text-xs"
         />
       </div>
 
@@ -138,23 +138,23 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
                   }
                 }}
                 title={item.enabled ? undefined : `${item.label} is included with TrueCap Pro`}
-                className={`group flex min-h-11 items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                className={`group flex min-h-11 items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-[color,background-color] duration-150 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
                   item.active
-                    ? "bg-sidebar-accent text-white shadow-[inset_0_1px_0_oklch(1_0_0_/_0.06)]"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-white"
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
                 } ${item.enabled ? "" : "opacity-75 hover:opacity-100"}`}
               >
                 <Icon className="h-[18px] w-[18px]" />
                 <span className="flex-1">{item.label}</span>
                 {item.badge && (
-                  <span className="text-3xs font-semibold px-1.5 py-0.5 rounded bg-sidebar-accent text-sidebar-foreground/80">
+                  <span className="rounded-sm bg-sidebar-accent px-1.5 py-0.5 font-figure text-xs font-semibold text-sidebar-foreground/80">
                     {item.badge}
                   </span>
                 )}
                 {!item.enabled ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-sidebar-accent px-1.5 py-0.5 text-3xs font-bold text-sidebar-foreground/80">
-                    <LockKeyhole className="size-2.5" aria-hidden />
-                    PRO
+                  <span className="inline-flex items-center gap-1 rounded-sm bg-sidebar-accent px-1.5 py-0.5 font-figure text-xs text-sidebar-foreground/80">
+                    <LockKeyhole className="size-3" aria-hidden />
+                    Pro
                   </span>
                 ) : null}
                 {item.active && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
@@ -171,7 +171,7 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
           href="/profile"
           prefetch={false}
           onClick={onNavigate}
-          className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/70 transition hover:bg-sidebar-accent/50 hover:text-white"
+          className="flex min-h-11 w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-sidebar-foreground/70 transition-[color,background-color] duration-150 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           <CircleUserRound className="h-[18px] w-[18px]" />
           <span>Profile</span>

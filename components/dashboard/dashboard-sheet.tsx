@@ -55,7 +55,7 @@ export function DashboardSheet({
       {children}
       <SheetContent
         side="left"
-        className="dashboard-mobile-sheet w-64 max-w-[85vw] border-r-0 p-0 lg:hidden [&>button]:flex [&>button]:size-11 [&>button]:items-center [&>button]:justify-center [&>button]:rounded-lg [&>button]:border [&>button]:border-white/25 [&>button]:bg-white/10 [&>button]:text-white [&>button]:opacity-100 [&>button]:shadow-[0_0_0_1px_rgba(0,112,196,0.45)] [&>button:hover]:bg-white/20 [&>button>svg]:size-5 [&>button>svg]:stroke-[2.25]"
+        className="dashboard-mobile-sheet w-64 max-w-[85vw] border-r-0 p-0 lg:hidden [&>button]:flex [&>button]:size-11 [&>button]:items-center [&>button]:justify-center [&>button]:rounded-md [&>button]:border [&>button]:border-navy-line [&>button]:bg-white/10 [&>button]:text-navy-foreground [&>button]:opacity-100 [&>button:hover]:bg-white/20 [&>button>svg]:size-5 [&>button>svg]:stroke-[2.25]"
       >
         <SheetTitle className="sr-only">Dashboard navigation</SheetTitle>
         <Sidebar
