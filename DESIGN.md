@@ -574,10 +574,38 @@ so marketing and app are one product.
   `app/globals.css` (root, `.dashboard-shell`, `.dashboard-mobile-sheet`).
 - `lib/motion.ts` and `components/motion/` are the motion system; no
   component defines a duration or an easing of its own.
-- Still to convert (later phases): the analyzer's own class strings, the
-  dashboard's gradients and the `.dashboard-shell` scope, the OG frame
-  (`lib/og/newsprint.tsx`, hex constants for `next/og`), `public/product/*`,
-  the email templates (which keep the old palette until Phase 7 decides).
+- Converted since: the analyzer's class strings (Phase 4), the dashboard's
+  gradients and the `.dashboard-shell` scope (Phase 6), the OG frame
+  (`lib/og/newsprint.tsx`, the tokens as hex constants for `next/og`),
+  `public/product/*`, the PDF palette and the email templates (Phase 7).
+
+## The assets (Phase 7)
+
+- **Social cards.** One frame (`lib/og/newsprint.tsx`, its historical name)
+  draws every card: the sheet with its faint cobalt grid (two 1px
+  gradients on a 32px tile, as `bg-sheet-grid`), the wordmark over one
+  graphite line, the label in Geist Mono, the content, a soft line over the
+  footer with the URL in cobalt Geist Mono. Hanken Grotesk at 750 is the
+  display face, 400 and 600 the text and figures, Geist Mono the metadata;
+  the faces are fetched from Google Fonts once per server process, and a
+  card without them still renders. Tags are 4px Geist Mono tags; a key
+  figure (the homepage card's Offer Ceiling) sits on the highlight stroke
+  under the one 2px rule. `public/home.jpg` is a snapshot of `/og/home`.
+- **Product shots** (`public/product/*`) are captured from the local
+  production build of the sample flow and the memo by
+  `scripts/capture-screenshots.ts`; they picture the Blueprint result card,
+  the rent breakdown and the memo. The PDF cover shot is the real first
+  page of the sample report (`scripts/render-pdf-cover-shot.ts`).
+- **The PDF** keeps its layout and Helvetica; its palette is the Blueprint
+  hex (graphite ink and its muted step, the sheet and its lines, one
+  cobalt, the text-safe green and highlight-text), so the cover shot and the
+  site agree.
+- **Theme colour** and the manifest's colours are the sheet (`#fbfaf7`).
+- **Emails** (the lifecycle, rate and rent alerts, the weekly summary, the
+  five Supabase auth templates, the memo email) are on the Blueprint hex
+  with system fonts: the sheet, the card, the band, the soft line, graphite,
+  cobalt with white on it, the positive green and the negative red. The
+  retired newsletter's template keeps its own palette.
 
 ## Decisions log
 
@@ -618,6 +646,13 @@ so marketing and app are one product.
   `STRIPE_PRICE_AGENT_PRO_MONTHLY` to render it; the product shots in
   `public/product/*` still show the ledger-era analyzer until Phase 7
   regenerates them.
+- 2026-10-20, Phase 7 build notes: the card frame keeps its module and
+  export names (`lib/og/newsprint.tsx`, `NEWSPRINT`, `NewsprintFrame`,
+  `loadNewsprintFonts`) because 130 card files, the SEO loop's skills and
+  a share-page guard import them; the values are the Blueprint tokens. The
+  ten-year and comparison shots stay deferred (they need a seeded account).
+  The site's icons (black mark, `#2a7bbf` accent) predate the Ledger and
+  were left for a separate brand decision.
 - 2026-10-20, Phase 6 build notes: no local Supabase or Docker on the
   founder's machine, so the signed-in e2e specs run in CI only; the shell
   and the auth screens were checked through a render harness (a vitest file
