@@ -76,7 +76,7 @@ export function FaqSection<Item extends { q: string; a: string }>({
       </p>
     );
   const rows = items.map((faq) => (
-    <details key={faq.q} className="group border-b border-border">
+    <details key={faq.q} className="tc-accordion group border-b border-border">
       <summary className="flex min-h-12 cursor-pointer list-none items-start justify-between gap-4 py-4 [&::-webkit-details-marker]:hidden">
         {/* The question is the row's heading: balanced, so "…need this?"
             never leaves "this?" alone on the last line. The answer is body:

@@ -54,7 +54,24 @@ describe("P1-73: no content opacity follows scroll", () => {
     // Rules and keyframes, not the comment that records why they were removed.
     const rules = css.replace(/\/\*[\s\S]*?\*\//g, "");
     expect(rules).not.toMatch(/tc-reveal/);
-    expect(rules).not.toMatch(/animation-timeline\s*:\s*view\(/);
+    // A scroll timeline may drive a drawing (a leader's stroke, 2026-10
+    // overhaul) but never the visibility of content: every keyframes block
+    // a view() timeline animates must leave opacity and visibility alone,
+    // and the rule must sit behind @supports and no-preference so the
+    // finished state is what every other browser and visitor gets.
+    const timelineRules = [...rules.matchAll(/\.([\w-]+)\s*\{[^}]*animation:\s*([\w-]+)[^}]*animation-timeline\s*:\s*view\([^}]*\}/g)];
+    for (const [, , keyframes] of timelineRules) {
+      const block = rules.match(new RegExp(`@keyframes ${keyframes}\\s*\\{[\\s\\S]*?\\n\\s*\\}`))?.[0] ?? "";
+      expect(block, `@keyframes ${keyframes}`).not.toBe("");
+      expect(block, `${keyframes} animates opacity`).not.toMatch(/opacity|visibility/);
+    }
+    for (const match of rules.matchAll(/animation-timeline\s*:\s*view\(/g)) {
+      const before = rules.slice(0, match.index);
+      // The @supports condition names the feature itself; it is not a rule.
+      if (/@supports \($/.test(before)) continue;
+      expect(before, "a view() timeline outside @supports").toMatch(/@supports \(animation-timeline: view\(\)\)/);
+      expect(before, "a view() timeline outside no-preference").toMatch(/prefers-reduced-motion: no-preference/);
+    }
     const users = [...filesUnder("app"), ...filesUnder("components")]
       .filter((file) => file !== "app/globals.css")
       .filter((file) => /tc-reveal/.test(read(file)));
