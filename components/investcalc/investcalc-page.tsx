@@ -296,7 +296,10 @@ import {
 } from "@/lib/hero-handoff";
 
 import { enrichPropertyAction } from "@/app/actions/enrich-property";
-import { getPropertyCompsAction } from "@/app/actions/property-comps";
+import {
+  getCompsAvailabilityAction,
+  getPropertyCompsAction,
+} from "@/app/actions/property-comps";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import {
   boxesForPersonalAnalyzerStrategy,
@@ -1245,6 +1248,27 @@ export function InvestCalcPage({
   const [listingLookupRefusedToken, setListingLookupRefusedToken] = useState<
     string | null
   >(null);
+  // The handoff token whose listing lookup found the shared live-comps pool
+  // paused (nothing was sent), with the day it is back ("Nov 21"; "" when
+  // unknown) so the listing panel can say why the price was not filled.
+  const [listingLookupPaused, setListingLookupPaused] = useState<{
+    token: string;
+    resumesOn: string;
+  } | null>(null);
+  // Shared live-comps pool state, read ONCE on mount for signed-in users
+  // (getCompsAvailabilityAction: one DB read, no reservation) so the Autofill
+  // button shows the paused state BEFORE a click. Updated from any CAP_REACHED
+  // result afterwards. null = unknown / signed out.
+  const [compsAvailability, setCompsAvailability] = useState<{
+    available: boolean;
+    resumesOn: string | null;
+  } | null>(null);
+  const compsPaused = compsAvailability !== null && !compsAvailability.available;
+  // What the Autofill note says: the date when known, "" when paused with no
+  // date, null when open.
+  const autofillPausedUntil = compsPaused
+    ? (compsAvailability.resumesOn ?? "")
+    : null;
   // ── Progressive disclosure (financing + operating expenses) ──────────
   // Cold visitors start with just the basics (property type, address,
   // price, beds/rent); financing + operating expenses collapse behind a
@@ -3504,6 +3528,28 @@ export function InvestCalcPage({
    */
   const [isAutofilling, setIsAutofilling] = useState(false);
   const [autofillUnavailable, setAutofillUnavailable] = useState(false);
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let active = true;
+    void (async () => {
+      try {
+        const r = await getCompsAvailabilityAction();
+        if (!active || !r.ok) return;
+        if (!r.configured) {
+          // Provider not provisioned on this deployment — the same self-hide
+          // a NOT_CONFIGURED click would trigger, just before the click.
+          setAutofillUnavailable(true);
+          return;
+        }
+        setCompsAvailability({ available: r.available, resumesOn: r.resumesOn });
+      } catch {
+        // Best-effort read; the click path still handles every state.
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated]);
   const [pendingAutofillReview, setPendingAutofillReview] = useState<{
     enrichment: PropertyEnrichment;
     conflicts: AutofillConflict[];
@@ -3763,9 +3809,11 @@ export function InvestCalcPage({
         toast({
           title: "Free lookup used",
           description: r.message,
-          action: (
+          // Upgrading doesn't unlock a paused pool, so /pricing is offered
+          // only while live comps are actually available.
+          action: compsPaused ? undefined : (
             <ToastAction
-              altText="See Pro plans with up to 50 lookups per month"
+              altText="See Pro plans with comps lookups included"
               onClick={() => {
                 router.push("/pricing");
               }}
@@ -3776,12 +3824,16 @@ export function InvestCalcPage({
         });
         return;
       }
+      if (r.code === "CAP_REACHED") {
+        // The pool emptied between mount and click. Show the paused state
+        // inline where the button is — no toast, nothing red; the rest of
+        // the analysis works exactly as before.
+        setCompsAvailability({ available: false, resumesOn: r.resumesOn });
+        return;
+      }
+      if (r.code === "AUTOPULL_OFF") return;
       const title =
-        r.code === "CAP_REACHED"
-          ? "Monthly limit reached"
-          : r.code === "NOT_FOUND"
-            ? "No data for this address"
-            : "Couldn't autofill";
+        r.code === "NOT_FOUND" ? "No data for this address" : "Couldn't autofill";
       toast({ title, description: r.message, variant: "destructive" });
     } catch {
       toast({
@@ -3792,7 +3844,7 @@ export function InvestCalcPage({
     } finally {
       setIsAutofilling(false);
     }
-  }, [form, applyComps, findAutofillConflicts, toast, router]);
+  }, [form, applyComps, findAutofillConflicts, toast, router, compsPaused]);
 
   // Paste a Zillow/Redfin/Realtor link → parse the address from the URL slug
   // (we never fetch the page — those sites block bots with a captcha) and run it
@@ -6992,16 +7044,22 @@ export function InvestCalcPage({
           // (savedDealCount was already bumped above, pre-fork-guard.)
           // Auto-pull RentCast comps ONCE for a Pro user's newly-saved deal so
           // the comps appear on its report without a manual lookup. Fire-and-
-          // forget - never blocks the save. The action enforces entitlement +
-          // monthly caps + 30-day cache and persists the set onto the deal.
-          // Gated to Pro (canUseProjections) so a free user's one-lifetime
-          // comps freebie is never silently spent on save.
-          if (canUseProjections && parsedValues.success && result.id) {
+          // forget - never blocks the save. OFF by default: it spends 2
+          // RentCast requests nobody clicked for, out of a shared pool of 50
+          // a period. `autoPull: true` makes the action refuse (AUTOPULL_OFF)
+          // before any work unless RENTCAST_AUTOPULL_ON_SAVE=on. Skipped
+          // outright while the pool is known to be paused. The action still
+          // enforces entitlement + the per-user cap + the 30-day cache and
+          // persists the set onto the deal. Gated to Pro (canUseProjections)
+          // so a free user's one-lifetime comps freebie is never silently
+          // spent on save.
+          if (canUseProjections && parsedValues.success && result.id && !compsPaused) {
             void getPropertyCompsAction({
               address: parsedValues.data.address,
               propertyType: parsedValues.data.propertyType,
               dealId: result.id,
-            });
+              autoPull: true,
+            }).catch(() => undefined);
           }
           // Only fire the conversion event on a true first-save, not
           // on subsequent updates of an existing deal. Otherwise a
@@ -8929,7 +8987,17 @@ export function InvestCalcPage({
       // is a RentCast lookup by address. proOnly → a free user's one freebie is
       // never spent here; they fall through to the address + estimate path.
       let compsFilled = false;
-      if (isListingHandoff && isAuthenticated) {
+      if (isListingHandoff && isAuthenticated && compsPaused) {
+        // The shared live-comps pool is known to be paused: don't ask, say so
+        // at the listing panel and fall through to the address + estimate
+        // path exactly as before.
+        if (handoffStillCurrent()) {
+          setListingLookupPaused({
+            token: detail.token,
+            resumesOn: compsAvailability?.resumesOn ?? "",
+          });
+        }
+      } else if (isListingHandoff && isAuthenticated) {
         try {
           const r = await getPropertyCompsAction({
             address,
@@ -8950,6 +9018,13 @@ export function InvestCalcPage({
             // The lookup is refused for free and trial accounts. Say so at
             // the listing panel instead of dropping the refusal.
             setListingLookupRefusedToken(detail.token);
+          } else if (!r.ok && r.code === "CAP_REACHED") {
+            // The pool is paused (nothing was sent). Remember it for the
+            // Autofill button too, and say so at the listing panel.
+            setCompsAvailability({ available: false, resumesOn: r.resumesOn });
+            if (handoffStillCurrent()) {
+              setListingLookupPaused({ token: detail.token, resumesOn: r.resumesOn });
+            }
           }
         } catch (err) {
           console.warn("[listing comps] lookup failed:", err);
@@ -10204,6 +10279,7 @@ export function InvestCalcPage({
                     // graceful "Sign in to autofill" toast for signed-out users, so
                     // the button becomes a sign-in CTA instead of being hidden.
                     showAutofill={!autofillUnavailable}
+                    autofillPausedUntil={autofillPausedUntil}
                     // Year built is out of the hero for every mode (Phase 4) —
                     // it renders in the "Property extras" panel instead
                     // (#step-extras for SF, the #step-type panel for MF).
@@ -10248,6 +10324,14 @@ export function InvestCalcPage({
                           listingImportStatus !== null &&
                           listingImportStatus.token ===
                             listingLookupRefusedToken
+                        }
+                        priceLookupPausedUntil={
+                          listingImportStatus !== null &&
+                          listingLookupPaused !== null &&
+                          listingImportStatus.token ===
+                            listingLookupPaused.token
+                            ? listingLookupPaused.resumesOn
+                            : null
                         }
                       />
                     }

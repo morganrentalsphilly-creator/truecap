@@ -6,11 +6,26 @@
  *   2. Value AVM        (GET /avm/value)             → value estimate + SALE comps
  *   3. Long-term rent   (GET /avm/rent/long-term)    → rent estimate + RENTAL comps
  *
- * Dormant without RENTCAST_API_KEY (returns null), mirroring the optional
+ * Dormant without RENTCAST_API_KEY (`not_configured`), mirroring the optional
  * FRED/HUD keys in enrich-property.ts. All fetches are timeout-wrapped and
  * null-safe — one failing lookup never sinks the others. Parsing is
  * defensive: unknown/renamed fields degrade to null rather than throwing.
+ *
+ * BUDGET. RentCast's free plan is 50 requests per billing period and every
+ * request past that is billed. `fetchJson` below is the ONLY code that reaches
+ * api.rentcast.io, and it refuses to run without a `RentCastReservation` from
+ * lib/property-enrichment/rentcast-budget.ts. Each exported fetcher reserves
+ * its exact request count up front (2 or 3 for an enrichment, 1 for a rent
+ * estimate) and returns `capped` instead of sending when the pool is empty.
+ * Nothing is refunded after a request leaves: timeouts, non-200s and empty
+ * 200s all stay counted (over-counting is free, under-counting costs money).
  */
+
+import {
+  consumeReservedRequest,
+  reserveRentCastRequests,
+  type RentCastReservation,
+} from "@/lib/property-enrichment/rentcast-budget";
 
 export type EnrichmentComp = {
   address: string;
@@ -197,7 +212,16 @@ export function parseSaleListing(raw: unknown): SaleListing | null {
   };
 }
 
-async function fetchJson(path: string, apiKey: string): Promise<unknown | null> {
+/**
+ * The one RentCast HTTP call. `reservation` is proof the request was reserved
+ * against the budget; consuming it past its count throws BEFORE the fetch.
+ */
+async function fetchJson(
+  path: string,
+  apiKey: string,
+  reservation: RentCastReservation
+): Promise<unknown | null> {
+  consumeReservedRequest(reservation);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REMOTE_TIMEOUT_MS);
   // `path` contains the URL-encoded subject address. Logs must retain only
@@ -233,11 +257,6 @@ function buildQuery(q: RentCastQuery): string {
 }
 
 /**
- * Fetch + assemble enrichment for an address. Returns null when no API key
- * is configured (feature dormant) or every lookup failed. Each of the three
- * lookups is independent and null-safe.
- */
-/**
  * RentCast wants "Street, City, State, Zip"; Google Places appends a country
  * ("…, USA"), which can break the address match — strip it.
  */
@@ -245,24 +264,79 @@ function sanitizeAddress(address: string): string {
   return address.replace(/,?\s*(united states|usa|us)\s*$/i, "").trim();
 }
 
+/** Why a RentCast fetch returned no data. `capped` means the request budget
+ *  is exhausted (or unreadable) and NO request was sent — callers can tell
+ *  that apart from `not_found` (requests sent, nothing came back). */
+export type RentCastCapped = {
+  status: "capped";
+  reason: "cap" | "unavailable";
+  /** ISO instant at which the pool reopens. */
+  resumesAt: string;
+};
+
+export type RentCastEnrichmentResult =
+  | { status: "ok"; enrichment: PropertyEnrichment }
+  | RentCastCapped
+  | { status: "not_found" }
+  | { status: "not_configured" }
+  | { status: "error" };
+
+/** Requests an enrichment sends: /avm/value + /avm/rent/long-term, plus
+ *  /listings/sale when the caller wants the real asking price. */
+export function enrichmentRequestCount(opts?: { includeListing?: boolean }): number {
+  return opts?.includeListing ? 3 : 2;
+}
+
+/**
+ * Fetch + assemble enrichment for an address. `not_configured` without an API
+ * key (feature dormant), `capped` when the request budget refuses (nothing
+ * sent), `not_found` when every lookup came back empty. Each lookup is
+ * independent and null-safe.
+ */
 export async function fetchRentCastEnrichment(
   q: RentCastQuery,
   opts?: { includeListing?: boolean }
-): Promise<PropertyEnrichment | null> {
+): Promise<RentCastEnrichmentResult> {
   const apiKey = process.env.RENTCAST_API_KEY;
-  if (!apiKey) return null;
+  if (!apiKey) return { status: "not_configured" };
   const address = sanitizeAddress(q.address ?? "");
-  if (!address) return null;
+  if (!address) return { status: "not_found" };
 
+  // Reserve the exact request count BEFORE anything leaves. This is the
+  // authoritative reservation — callers hold no budget of their own.
+  const reserved = await reserveRentCastRequests(enrichmentRequestCount(opts), {
+    lookupType: "property_comps",
+  });
+  if (!reserved.ok) {
+    return { status: "capped", reason: reserved.reason, resumesAt: reserved.resumesAt };
+  }
+
+  try {
+    return await fetchReservedEnrichment(q, address, apiKey, reserved.reservation, opts);
+  } catch (err) {
+    console.warn("[rentcast] enrichment failed:", (err as Error)?.message ?? err);
+    return { status: "error" };
+  }
+}
+
+async function fetchReservedEnrichment(
+  q: RentCastQuery,
+  address: string,
+  apiKey: string,
+  reservation: RentCastReservation,
+  opts?: { includeListing?: boolean }
+): Promise<RentCastEnrichmentResult> {
   // Two AVM calls (each carries the subject `facts`, so we skip a /properties
   // call). When the caller needs the REAL asking price (e.g. a pasted listing
   // link), add a third call to /listings/sale — the MLS-sourced for-sale
   // listing — so we can fill the actual list price instead of the AVM estimate.
   const qs = buildQuery({ ...q, address });
   const [valueRaw, rentRaw, listingRaw] = await Promise.all([
-    fetchJson(`/avm/value?${qs}`, apiKey),
-    fetchJson(`/avm/rent/long-term?${qs}`, apiKey),
-    opts?.includeListing ? fetchJson(`/listings/sale?${qs}`, apiKey) : Promise.resolve(null),
+    fetchJson(`/avm/value?${qs}`, apiKey, reservation),
+    fetchJson(`/avm/rent/long-term?${qs}`, apiKey, reservation),
+    opts?.includeListing
+      ? fetchJson(`/listings/sale?${qs}`, apiKey, reservation)
+      : Promise.resolve(null),
   ]);
 
   const value = parseAvm(valueRaw, "value");
@@ -290,35 +364,61 @@ export async function fetchRentCastEnrichment(
     };
   }
 
-  if (!facts && !value && !rent && !listing) return null;
+  if (!facts && !value && !rent && !listing) return { status: "not_found" };
 
   return {
-    facts,
-    valueEstimate: value?.estimate ?? null,
-    valueRange: value?.range ?? null,
-    saleComps: value?.comps ?? [],
-    rentEstimate: rent?.estimate ?? null,
-    rentRange: rent?.range ?? null,
-    rentComps: rent?.comps ?? [],
-    listPrice: listing?.listPrice ?? null,
-    listingStatus: listing?.status ?? null,
-    listingChecked: opts?.includeListing === true,
-    fetchedAt: new Date().toISOString(),
+    status: "ok",
+    enrichment: {
+      facts,
+      valueEstimate: value?.estimate ?? null,
+      valueRange: value?.range ?? null,
+      saleComps: value?.comps ?? [],
+      rentEstimate: rent?.estimate ?? null,
+      rentRange: rent?.range ?? null,
+      rentComps: rent?.comps ?? [],
+      listPrice: listing?.listPrice ?? null,
+      listingStatus: listing?.status ?? null,
+      listingChecked: opts?.includeListing === true,
+      fetchedAt: new Date().toISOString(),
+    },
   };
 }
 
+export type RentCastRentEstimateResult =
+  | { status: "ok"; rent: number }
+  | RentCastCapped
+  | { status: "not_found" }
+  | { status: "not_configured" }
+  | { status: "error" };
+
 /**
- * Rent-only lookup — fetches JUST /avm/rent/long-term (one call, vs two for the
- * full enrichment). Used by the rent-alert cron, which only needs the current
- * market rent and is cost-sensitive (one call per saved deal it re-prices).
- * Returns null when dormant (no key), the address is blank/unmatched, or
- * RentCast has no rent figure.
+ * Rent-only lookup — fetches JUST /avm/rent/long-term (one request, vs two for
+ * the full enrichment). Used by the rent-alert cron, which only needs the
+ * current market rent and is cost-sensitive (one request per saved deal it
+ * re-prices). Reserves that one request first; `capped` means nothing was
+ * sent. `not_found` when the address is blank/unmatched or RentCast has no
+ * positive rent figure — the request was still sent and stays counted.
  */
-export async function fetchRentCastRentEstimate(q: RentCastQuery): Promise<number | null> {
+export async function fetchRentCastRentEstimate(q: RentCastQuery): Promise<RentCastRentEstimateResult> {
   const apiKey = process.env.RENTCAST_API_KEY;
-  if (!apiKey) return null;
+  if (!apiKey) return { status: "not_configured" };
   const address = sanitizeAddress(q.address ?? "");
-  if (!address) return null;
-  const raw = await fetchJson(`/avm/rent/long-term?${buildQuery({ ...q, address })}`, apiKey);
-  return parseAvm(raw, "rent")?.estimate ?? null;
+  if (!address) return { status: "not_found" };
+  const reserved = await reserveRentCastRequests(1, { lookupType: "rent_alert" });
+  if (!reserved.ok) {
+    return { status: "capped", reason: reserved.reason, resumesAt: reserved.resumesAt };
+  }
+  try {
+    const raw = await fetchJson(
+      `/avm/rent/long-term?${buildQuery({ ...q, address })}`,
+      apiKey,
+      reserved.reservation
+    );
+    const rent = parseAvm(raw, "rent")?.estimate ?? null;
+    if (rent == null || rent <= 0) return { status: "not_found" };
+    return { status: "ok", rent };
+  } catch (err) {
+    console.warn("[rentcast] rent estimate failed:", (err as Error)?.message ?? err);
+    return { status: "error" };
+  }
 }

@@ -24,7 +24,8 @@ import {
  *  - P1-58 / P2-119: two agent FAQ answers.
  *  - P1-71: the range sentence is true for a deal that misses its targets.
  *  - P2-156: the blurred Pro preview is hidden from assistive technology.
- *  - P1-10: comps are "up to 50" a month.
+ *  - P1-10: comps lookups carry no monthly number (the shared RentCast pool
+ *    is 50 requests a period site-wide); they are "subject to monthly availability".
  */
 
 const read = (file: string) =>
@@ -200,7 +201,10 @@ describe("listing paste says who gets the price (P1-39)", () => {
     );
     expect(analyzer).toContain("setListingLookupRefusedToken(detail.token);");
     const input = flat(read("components/investcalc/listing-link-input.tsx"));
-    expect(input).toContain("{priceLookupRefused ? (");
+    // The refusal note yields to the paused-pool note (2026-10-19): while the
+    // shared RentCast pool is empty, no plan fills the price, so /pricing is
+    // not offered there.
+    expect(input).toContain("{priceLookupRefused && priceLookupPausedUntil == null ? (");
     expect(input).toContain(
       "Filling the asking price and property facts from a listing link needs a Pro or Agent Pro subscription.",
     );
@@ -286,35 +290,52 @@ describe("blurred Pro preview is hidden from assistive technology (P2-156)", () 
   });
 });
 
-describe("comps are up to 50 a month (P1-10)", () => {
-  it("the /vs and blog sentences say up to", () => {
-    for (const file of [
-      "app/vs/rentometer/page.tsx",
-      "app/vs/bricked/page.tsx",
-      "app/vs/rentcast/page.tsx",
-      "app/vs/mashvisor/page.tsx",
-      "app/vs/privy/page.tsx",
-      "app/blog/dealcheck-vs-biggerpockets-vs-truecap/page.tsx",
-      "app/blog/best-free-rental-property-calculator-2026/page.tsx",
-      "app/blog/dealcheck-vs-stessa-vs-truecap/page.tsx",
-    ]) {
+describe("comps carry no monthly allowance number (P1-10, re-anchored 2026-10-19)", () => {
+  // The RentCast subscription moved to the free Developer plan: 50 REQUESTS a
+  // billing period for the whole site (about 25 lookups). "Up to 50 comps
+  // lookups per month" per account is false, so no page may name a monthly
+  // comps number; they say "included, subject to monthly availability".
+  const SURFACES = [
+    "app/vs/rentometer/page.tsx",
+    "app/vs/bricked/page.tsx",
+    "app/vs/rentcast/page.tsx",
+    "app/vs/mashvisor/page.tsx",
+    "app/vs/privy/page.tsx",
+    "app/blog/dealcheck-vs-biggerpockets-vs-truecap/page.tsx",
+    "app/blog/best-free-rental-property-calculator-2026/page.tsx",
+    "app/blog/dealcheck-vs-stessa-vs-truecap/page.tsx",
+    "app/pricing/page.tsx",
+    "app/actions/property-comps.ts",
+    "components/investcalc/property-comps-card.tsx",
+    "components/investcalc/investcalc-page.tsx",
+    "lib/entitlements-catalog.ts",
+  ];
+
+  it("no surface promises a number of comps lookups per month", () => {
+    for (const file of SURFACES) {
       const source = flat(read(file));
-      const mentions = source.match(/.{0,12}\b50 (?:per month|comps? lookups per month)/g) ?? [];
-      expect(mentions.length, file).toBeGreaterThan(0);
-      for (const mention of mentions) {
-        expect(mention, file).toMatch(/up to 50 /);
-      }
+      expect(source, file).not.toMatch(
+        /\b\d+ (?:comps? )?lookups? (?:per|a) month|\bup to \d+ (?:per month|comps?|lookups?)|\d+ ?\/ ?mo\b.{0,40}comps|comps.{0,60}\d+ ?\/ ?mo\b/i,
+      );
     }
   });
 
-  it("the /pricing table cell says up to, in the Pro and Agent Pro columns", () => {
+  it("the /vs and blog sentences say the lookups are subject to monthly availability", () => {
+    for (const file of SURFACES.slice(0, 8)) {
+      expect(flat(read(file)), file).toMatch(/subject to monthly availability/);
+    }
+  });
+
+  it("the /pricing table cell says included, subject to availability, in the Pro and Agent Pro columns", () => {
     // The Agent Pro column inherits the Pro cell (AGENT_PRO_CELLS has no
     // comps entry), so one cell covers both paid columns.
     const page = read("app/pricing/page.tsx");
     expect(page).toContain(
-      '["Sale + rent comps from the address", "1 free", "Up to 50 / mo"],',
+      '["Sale + rent comps from the address", "1 free", "Included, subject to availability"],',
     );
-    expect(page).not.toMatch(/"50 ?\/ ?mo"/);
     expect(page).not.toMatch(/"Sale \+ rent comps from the address":/);
+    expect(read("lib/entitlements-catalog.ts")).toContain(
+      'proLimit: "included, subject to availability"',
+    );
   });
 });

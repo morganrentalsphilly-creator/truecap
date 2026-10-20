@@ -117,7 +117,7 @@ const MATRIX: Row[] = [
   },
   {
     feature: "Comps + ARV / market value",
-    truecap: "One free sale and rent comps lookup; Pro includes up to 50 per month",
+    truecap: "One free sale and rent comps lookup; Pro includes comps lookups, subject to monthly availability",
     bricked:
       "Yes: comps from MLS, county records and public listing sites, with as-is value and ARV",
     winner: "bricked",
@@ -498,8 +498,8 @@ const BRICKED_FAQ: FaqItem[] = [
         3-day free trial and there is no free tier (as of October 2026).
         TrueCap&apos;s core analyzer is free with no
         analysis cap and no account required. Pro adds advanced analysis and
-        reporting with published limits, including up to 50 comp lookups per month and
-        comparison of up to four saved deals. PDF reports are included with Pro.
+        reporting with published limits, including comps lookups subject to monthly
+        availability and comparison of up to four saved deals. PDF reports are included with Pro.
         See TrueCap&apos;s live pricing page for current rates and terms.
       </>
     ),

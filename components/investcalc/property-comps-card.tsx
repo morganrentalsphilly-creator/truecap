@@ -6,11 +6,23 @@
  * quota - so nothing fetches until the user clicks. Paid-gated + address-
  * gated for visibility; hides itself if the provider isn't configured yet
  * (NOT_CONFIGURED), keeping it invisible until actually enabled.
+ *
+ * PAUSED POOL. Live lookups draw on a shared pool of 50 RentCast requests per
+ * billing period. The card reads the pool once on mount
+ * (getCompsAvailabilityAction: one DB read, no reservation) so an empty pool
+ * shows BEFORE a click: a cached or saved set stays on screen with "Comps from
+ * Oct 3"; without one, a quiet line replaces the Run button. A CAP_REACHED
+ * result after a click lands in the same inline state — never a toast, never
+ * red; nothing about the analysis is broken.
  */
 import { useEffect, useRef, useState, useTransition } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { Building2, Loader2 } from "lucide-react";
-import { getPropertyCompsAction, getSavedDealCompsAction } from "@/app/actions/property-comps";
+import {
+  getCompsAvailabilityAction,
+  getPropertyCompsAction,
+  getSavedDealCompsAction,
+} from "@/app/actions/property-comps";
 import type { EnrichmentComp, PropertyEnrichment } from "@/lib/property-enrichment/rentcast";
 import { buildCompWarnings } from "@/lib/comps-summary";
 import { getCompsFreshness } from "@/lib/comps-freshness";
@@ -20,6 +32,20 @@ import { Button } from "@/components/ui/button";
 import { ToastAction } from "@/components/ui/toast";
 
 const money = (n: number | null) => (n == null ? "—" : `$${Math.round(n).toLocaleString()}`);
+
+/** "Oct 3" (with the year once it is not this year). Null when unparseable. */
+export function formatCompsDate(iso: string | null | undefined, now: Date = new Date()): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (!Number.isFinite(d.getTime())) return null;
+  const sameYear = d.getUTCFullYear() === now.getUTCFullYear();
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    ...(sameYear ? {} : { year: "numeric" }),
+    timeZone: "UTC",
+  });
+}
 
 function compMeta(c: EnrichmentComp): string {
   const parts: string[] = [];
@@ -67,6 +93,7 @@ export function PropertyCompsCard({
   onApply,
   onDataChange,
   onUnavailableChange,
+  onPausedChange,
 }: {
   enabled: boolean;
   address: string | null;
@@ -93,12 +120,27 @@ export function PropertyCompsCard({
    *  hide its shell too — otherwise the row header fronts a card that
    *  renders null (provider not configured on this deployment). */
   onUnavailableChange?: (unavailable: boolean) => void;
+  /** Reports the paused pool up so the hosting ledger row's collapsed summary
+   *  can say so instead of inviting a pull: the day it is back, null when
+   *  paused with no date, undefined when open. */
+  onPausedChange?: (pausedUntil: string | null | undefined) => void;
 }) {
   const { toast } = useToast();
   const [data, setData] = useState<PropertyEnrichment | null>(null);
   const [source, setSource] = useState<"cache" | "live" | "saved" | null>(null);
+  const [fetchedAt, setFetchedAt] = useState<string | null>(null);
   const [unavailable, setUnavailable] = useState(false);
+  // The shared pool is paused: the day it is back ("Nov 21"), or null for
+  // "paused, date unknown". `undefined` = open.
+  const [pausedUntil, setPausedUntil] = useState<string | null | undefined>(undefined);
+  const paused = pausedUntil !== undefined;
   const [loading, startLoading] = useTransition();
+  useEffect(() => {
+    onPausedChange?.(pausedUntil);
+    // onPausedChange is a stable setter in practice (see the clear effect
+    // below); keying on it would re-report on every parent render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pausedUntil]);
 
   // Comps belong to ONE address. When the analyzed address changes, the
   // previous pull must not survive — on screen OR in the Deal Q&A grounding
@@ -110,12 +152,40 @@ export function PropertyCompsCard({
     lastAddressRef.current = address;
     setData(null);
     setSource(null);
+    setFetchedAt(null);
     setUnavailable(false);
     onDataChange?.(null);
     // onDataChange is a stable setter in practice; keying on it would
     // re-fire the clear on parent re-renders with inline handlers.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address]);
+
+  // Read the shared pool ONCE on mount (signed-in, one DB read, no
+  // reservation) so the paused state shows before anyone clicks.
+  useEffect(() => {
+    if (!enabled) return;
+    let active = true;
+    void (async () => {
+      try {
+        const r = await getCompsAvailabilityAction();
+        if (!active || !r.ok) return;
+        if (!r.configured) {
+          setUnavailable(true);
+          onUnavailableChange?.(true);
+          return;
+        }
+        if (!r.available) setPausedUntil(r.resumesOn);
+      } catch {
+        // Best-effort read; the click path still handles every state.
+      }
+    })();
+    return () => {
+      active = false;
+    };
+    // onUnavailableChange is a stable setter in practice (see the clear
+    // effect above); keying on it would re-read the pool on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled]);
 
   // On a saved deal, load any previously-saved comp set (no API call / quota).
   useEffect(() => {
@@ -133,6 +203,7 @@ export function PropertyCompsCard({
               : r.enrichment;
           setData(enrichment);
           setSource("saved");
+          setFetchedAt(enrichment.fetchedAt ?? r.fetchedAt ?? null);
           onDataChange?.(enrichment);
         }
       } catch {
@@ -178,51 +249,40 @@ export function PropertyCompsCard({
             onUnavailableChange?.(true);
             return;
           }
-          // Hitting the plan limit is not an error the user caused — a red
-          // failure toast at the moment they wanted more data buried the
-          // upgrade path. Route it constructively; real failures stay red.
-          if (r.code === "ENTITLEMENT_REQUIRED" || r.code === "CAP_REACHED") {
+          if (r.code === "CAP_REACHED") {
+            // The shared pool is paused. Nothing was sent, nothing is broken:
+            // show it inline where the button was. No toast — a red failure
+            // toast at the moment they wanted more data is the wrong story,
+            // and no plan lifts a site-wide pause, so there is nothing to sell.
+            setPausedUntil(r.resumesOn);
+            return;
+          }
+          if (r.code === "ENTITLEMENT_REQUIRED") {
+            // The free lookup is spent. Route to plans — unless the pool is
+            // paused, where upgrading unlocks nothing.
             toast({
-              title:
-                r.code === "ENTITLEMENT_REQUIRED"
-                  ? "Free comps lookup used"
-                  : "Monthly comps limit reached",
+              title: "Free comps lookup used",
               description: r.message,
-              // A monthly cap is not lifted by any plan (Pro and Agent Pro
-              // carry the same allowance, and the site-wide cap applies to
-              // everyone), so /pricing has nothing to offer there: a capped
-              // account gets support instead. Only the free-lookup wall
-              // routes to plans.
-              action:
-                r.code === "CAP_REACHED" ? (
-                  <ToastAction
-                    altText="Email TrueCap support about the monthly comps limit"
-                    onClick={() => {
-                      window.location.assign(
-                        "mailto:hello@usetruecap.com?subject=Monthly%20comps%20limit",
-                      );
-                    }}
-                  >
-                    Contact support
-                  </ToastAction>
-                ) : (
-                  <ToastAction
-                    altText="See Pro plans with up to 50 comps lookups per month"
-                    onClick={() => {
-                      window.location.assign("/pricing");
-                    }}
-                  >
-                    See plans
-                  </ToastAction>
-                ),
+              action: paused ? undefined : (
+                <ToastAction
+                  altText="See Pro plans with comps lookups included"
+                  onClick={() => {
+                    window.location.assign("/pricing");
+                  }}
+                >
+                  See plans
+                </ToastAction>
+              ),
             });
             return;
           }
+          if (r.code === "AUTOPULL_OFF") return;
           toast({ title: "Couldn't pull comps", description: r.message, variant: "destructive" });
           return;
         }
         setData(r.enrichment);
         setSource(r.source);
+        setFetchedAt(r.fetchedAt ?? r.enrichment.fetchedAt ?? null);
         onDataChange?.(r.enrichment);
       } catch (err) {
         // The action REJECTED rather than returning {ok:false} (network blip,
@@ -244,6 +304,10 @@ export function PropertyCompsCard({
   // Stage-aware staleness hint (display-only — the Refresh button above is
   // the action; nothing refetches on its own). No stage = loosest window.
   const freshness = data ? getCompsFreshness(data.fetchedAt, stage ?? null) : null;
+  const compsDate = formatCompsDate(fetchedAt ?? data?.fetchedAt);
+  const pausedLine = pausedUntil
+    ? `Live comps are paused until ${pausedUntil}.`
+    : "Live comps are paused for now.";
 
   return (
     <section aria-label="Sale and rent comps" className="rounded-2xl border border-border bg-card p-4 sm:p-5">
@@ -252,26 +316,44 @@ export function PropertyCompsCard({
           <Building2 className="size-4 text-primary" />
           <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Sale &amp; rent comps</h3>
         </div>
-        <Button
-          type="button"
-          size="sm"
-          variant={data ? "outline" : "default"}
-          className="h-8"
-          disabled={loading}
-          onClick={pull}
-        >
-          {loading ? <Loader2 className="size-4 animate-spin" /> : data ? "Refresh" : "Run comps"}
-        </Button>
+        {paused ? (
+          data && compsDate ? (
+            <span data-comps-from="" className="shrink-0 text-xs text-muted-foreground">
+              Comps from {compsDate}
+            </span>
+          ) : null
+        ) : (
+          <Button
+            type="button"
+            size="sm"
+            variant={data ? "outline" : "default"}
+            className="h-8"
+            disabled={loading}
+            onClick={pull}
+          >
+            {loading ? <Loader2 className="size-4 animate-spin" /> : data ? "Refresh" : "Run comps"}
+          </Button>
+        )}
       </div>
 
       {!data ? (
-        <p className="mt-2 text-xs text-muted-foreground">
-          Pull live sale and rental comparables for this address - value + rent estimates from nearby
-          properties to sanity-check your assumptions.
-        </p>
+        paused ? (
+          <p data-comps-paused="" className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            {pausedLine} Your analysis still runs. Enter beds, baths and price yourself.
+          </p>
+        ) : (
+          <p className="mt-2 text-xs text-muted-foreground">
+            Pull live sale and rental comparables for this address - value + rent estimates from nearby
+            properties to sanity-check your assumptions.
+          </p>
+        )
       ) : (
         <div className="mt-3 space-y-3">
-          {freshness?.stale ? (
+          {paused ? (
+            <p data-comps-paused="" className="text-2xs leading-relaxed text-muted-foreground">
+              {pausedLine} These comps were pulled earlier for this address; your analysis still runs.
+            </p>
+          ) : freshness?.stale ? (
             <div className="rounded-lg border border-caution/40 bg-caution-light px-3 py-2 text-2xs leading-relaxed text-foreground">
               Comps are {freshness.ageDays} days old — refresh to re-check against today&apos;s
               market.
@@ -339,8 +421,10 @@ export function PropertyCompsCard({
           <CompList title="Rent comps" comps={data.rentComps} suffix="/mo" />
 
           <p className="text-3xs text-muted-foreground">
-            Source: RentCast · {source === "live" ? "live" : source === "saved" ? "saved to this deal" : "cached"}.
-            Automated estimates - verify against local comps before relying on them.
+            Source: RentCast ·{" "}
+            {source === "live" ? "live" : source === "saved" ? "saved to this deal" : "cached"}
+            {compsDate ? ` · pulled ${compsDate}` : ""}. Automated estimates - verify against local
+            comps before relying on them.
           </p>
         </div>
       )}

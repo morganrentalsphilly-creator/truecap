@@ -48,6 +48,10 @@ type ListingLinkInputProps = {
   /** The signed-in listing lookup was refused because the account has no
    *  paid plan (free and trial accounts). Shown where the price is needed. */
   priceLookupRefused?: boolean;
+  /** The shared live-comps pool is paused, so the asking price and facts
+   *  were not filled from the link. The day it is back ("Nov 21"), or an
+   *  empty string when the date is unknown. Null = not paused. */
+  priceLookupPausedUntil?: string | null;
 };
 
 function formatMissingFields(fields: ListingImportMissingField[]) {
@@ -67,6 +71,7 @@ export function ListingLinkInput({
   importStatus,
   onFocusMissingField,
   priceLookupRefused = false,
+  priceLookupPausedUntil = null,
 }: ListingLinkInputProps) {
   const urlInputRef = useRef<HTMLInputElement | null>(null);
   // Focus follows the toggle, but ONLY on user-driven transitions (tracked
@@ -126,7 +131,18 @@ export function ListingLinkInput({
           Continue with {firstMissingField.label}
         </button>
       ) : null}
-      {priceLookupRefused ? (
+      {priceLookupPausedUntil != null ? (
+        <p
+          data-listing-lookup-paused=""
+          className="mt-2 text-xs leading-relaxed text-muted-foreground"
+        >
+          {priceLookupPausedUntil
+            ? `Live comps are paused until ${priceLookupPausedUntil}, so the asking price and property facts were not filled from the link.`
+            : "Live comps are paused for now, so the asking price and property facts were not filled from the link."}{" "}
+          Type them in. Your analysis still runs.
+        </p>
+      ) : null}
+      {priceLookupRefused && priceLookupPausedUntil == null ? (
         <p
           data-listing-lookup-refused=""
           className="mt-2 text-xs leading-relaxed text-muted-foreground"

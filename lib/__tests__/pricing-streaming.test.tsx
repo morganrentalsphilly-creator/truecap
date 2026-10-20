@@ -152,7 +152,7 @@ describe("/pricing: what the first bytes carry", () => {
     expect(html).toContain("Analyze a property free");
     expect(html).toContain("See Pro plans");
     expect(html).toContain("Sale + rent comps from the address");
-    expect(html).toContain("Up to 50 / mo");
+    expect(html).toContain("Included, subject to availability");
     expect(html).toContain("How does the free trial work?");
     expect(ldTypes(html)).toEqual(["FAQPage"]);
     expect(html).toContain("data-pricing-trust-row");

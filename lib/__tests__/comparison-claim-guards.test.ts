@@ -121,14 +121,17 @@ describe("comparison claim truth", () => {
     );
     // The comps lookup returns a value estimate and a rent estimate with the
     // comps (lib/property-enrichment/rentcast.ts), so the cell these two pages
-    // carried, "…; no AVM", was untrue. The allowances are the catalog's.
+    // carried, "…; no AVM", was untrue. The allowances are the catalog's. Since
+    // 2026-10-19 the RentCast pool is 50 REQUESTS a period site-wide, so no
+    // per-account monthly number is honest: the catalog says "included,
+    // subject to availability" and the pages say the same.
     const comps = read("lib/entitlements-catalog.ts");
     expect(comps).toMatch(
-      /comps: \{[^}]*tiers: \["free", "pro", "agent_pro"\][^}]*freeLimit: "1 lifetime lookup"[^}]*proLimit: "50\/mo"/,
+      /comps: \{[^}]*tiers: \["free", "pro", "agent_pro"\][^}]*freeLimit: "1 lifetime lookup"[^}]*proLimit: "included, subject to availability"/,
     );
     for (const file of ["app/vs/mashvisor/page.tsx", "app/vs/privy/page.tsx"]) {
       expect(read(file), file).toContain(
-        "One free lookup with an account; Pro and Agent Pro include up to 50 per month; each returns sale and rent comps with a value estimate and a rent estimate",
+        "One free lookup with an account; Pro and Agent Pro include comps lookups, subject to monthly availability; each returns sale and rent comps with a value estimate and a rent estimate",
       );
     }
     expect(comparisonCopy).not.toMatch(/\bno AVM\b/i);
@@ -138,7 +141,7 @@ describe("comparison claim truth", () => {
     expect(rentcast).not.toContain("Purchase price as user input");
     expect(rentcast).not.toMatch(/\$15-\$74/);
     expect(rentcast).toContain(
-      "one free lookup with an account, up to 50 per month on Pro and Agent Pro",
+      "one free lookup with an account; included on Pro and Agent Pro, subject to monthly availability",
     );
     // The short-term mode is live as a beta revenue screen, so "coming" was untrue.
     expect(read("app/vs/mashvisor/page.tsx")).not.toMatch(/STR-specific fields coming/i);

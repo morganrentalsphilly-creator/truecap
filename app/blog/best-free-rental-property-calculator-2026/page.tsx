@@ -92,7 +92,7 @@ const TOOLS = [
       "10-year cash-flow and equity projection (Pro); sensitivity is included in your first decision, then Pro",
       "Offer Ceiling included in your first decision, then Pro; saved-deal comparison (Pro)",
       "Editing, unlimited saves, and comparison of up to 4 deals (Pro)",
-      "Additional comps lookups: Pro includes up to 50 per month",
+      "Additional comps lookups: included with Pro, subject to monthly availability",
       "PDF export included in your first decision, then Pro",
     ],
     pickIf:

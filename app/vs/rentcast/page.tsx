@@ -110,7 +110,7 @@ const MATRIX: Row[] = [
   {
     feature: "Property value estimate",
     truecap:
-      "You enter the price; the comps lookup adds a value estimate from third-party data (one free lookup with an account, up to 50 per month on Pro and Agent Pro)",
+      "You enter the price; the comps lookup adds a value estimate from third-party data (one free lookup with an account; included on Pro and Agent Pro, subject to monthly availability)",
     rentcast: "Yes: property value estimates (AVM) through its API",
     winner: "rentcast",
   },

@@ -136,7 +136,7 @@ This becomes the single source `lib/entitlements-catalog.ts`. Tiers: **Free**, *
 | Address auto‑fill defaults (HUD rent · FRED rate · state tax) | ✅ | ✅ | ✅ | always |
 | **Deal Score 0–100 + subscore breakdown** (`deal_score`) | ✅ **(make canonical)** | ✅ | ✅ | runtime free; **JSON stale** |
 | Plain‑English verdict | ✅ | ✅ | ✅ | always |
-| 1 free RentCast comps lookup | ✅ (1 lifetime) | — | ✅ (50/mo) | `comps_free_used` + cap |
+| 1 free RentCast comps lookup | ✅ (1 lifetime) | — | ✅ (included, subject to the shared per-period request budget) | `comps_free_used` + cap |
 | Save deals (`save_deal`) | ✅ **up to 5** | — | ✅ unlimited | `max_saved_deals` |
 | Dashboard access (`dashboard_access`) | ✅ | — | ✅ | feature flag |
 | Dashboard insights (`dashboard_insights`) | ❌ | — | ✅ | feature flag |
