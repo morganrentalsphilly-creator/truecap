@@ -56,7 +56,7 @@ export function Section({
         // already keeps a fragment target clear of the sticky header.
         "bg-background",
         rule === "rule" && `border-t border-border ${HERO_ADJACENT}`,
-        rule === "heavy" && "border-t-2 border-foreground",
+        rule === "heavy" && "border-t border-foreground",
         className,
       )}
       {...props}

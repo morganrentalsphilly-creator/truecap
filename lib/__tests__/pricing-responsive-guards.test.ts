@@ -8,10 +8,12 @@ describe("pricing responsive hierarchy", () => {
   it("uses ruled rows on phones and a table only from the small breakpoint", () => {
     // Phones: one ruled row per feature (DESIGN.md: rules, not a stack of
     // cards), hidden from 640px. The table appears only from 640px.
-    expect(page).toContain('<ul className="mt-8 border-t-2 border-foreground sm:hidden">');
+    // Re-anchored: app/pricing/page.tsx — the rows open on a 1px graphite
+    // line (Phase 5).
+    expect(page).toContain('<ul className="mt-8 border-t border-foreground sm:hidden">');
     expect(page).toContain('<li key={label} className="border-b border-rule-soft py-3">');
     expect(page).toContain(
-      '<ScrollX label="Table" className="mt-8 hidden border-t-2 border-foreground sm:block">',
+      '<ScrollX label="Table" className="mt-8 hidden border-t border-foreground sm:block">',
     );
     expect(page).toContain("MobileFeatureValue");
     expect(page).not.toContain('min-w-[520px]');

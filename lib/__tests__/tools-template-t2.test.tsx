@@ -71,9 +71,10 @@ describe("the rehab estimator has two renderings of one estimate", () => {
   it("the tool rendering says the same words on the calculator parts", () => {
     const card = renderToStaticMarkup(createElement(RehabEstimatorCard));
     const tool = renderToStaticMarkup(createElement(RehabEstimatorCard, { variant: "tool" }));
-    // ToolFrame: a section on the 2px ink rule, no card, radius or shadow.
-    expect(tool).toMatch(/^<section class="@container min-w-0 border-t-2 border-foreground pt-5" aria-labelledby="[^"]+">/);
-    expect(tool).not.toMatch(/bg-card|rounded-2xl|shadow-sm|uppercase|tracking-widest/);
+    // Re-anchored: tool-parts.tsx — ToolFrame is a card (white, 1px line,
+    // the object radius, the rest shadow) since Phase 5; no uppercase.
+    expect(tool).toMatch(/^<section class="@container min-w-0 rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6" aria-labelledby="[^"]+">/);
+    expect(tool).not.toMatch(/rounded-2xl|uppercase|tracking-widest/);
     // No icon: the title is for the outline, the switch says what it does.
     expect(tool).not.toContain("<svg");
     expect(tool).toMatch(/<h2 id="[^"]+" class="sr-only">Rehab cost estimator<\/h2>/);
@@ -218,9 +219,10 @@ describe("the second group of calculator pages is on the calculator template", (
     expect(source).not.toMatch(/--metric-(?:positive|negative)/);
     expect(source).toContain("<ToolNumberField");
     const html = renderToStaticMarkup(createElement(Widget));
-    expect(html).toMatch(/^<section class="@container min-w-0 border-t-2 border-foreground pt-5"/);
-    // One key figure in DM Mono over the double rule.
-    expect(html.match(/class="ledger-rule /g)).toHaveLength(1);
+    // Re-anchored: tool-parts.tsx — the card frame (Phase 5).
+    expect(html).toMatch(/^<section class="@container min-w-0 rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6"/);
+    // One key figure in the display face (LedgerTotal, no double rule).
+    expect(html.match(/class="inline-block font-display font-figure /g)).toHaveLength(1);
     // Every field is the 48px field with 16px text.
     const inputs = html.match(/<input\b[^>]*>/g) ?? [];
     expect(inputs.length).toBeGreaterThan(0);

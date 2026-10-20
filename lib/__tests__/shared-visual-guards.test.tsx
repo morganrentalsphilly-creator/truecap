@@ -191,7 +191,9 @@ describe("the close", () => {
 
   it("gives the site footer's top margin back from its bottom padding", () => {
     const html = renderToStaticMarkup(<CloseSection heading="H" headingId="h" actions={buttons} />);
-    expect(html).toMatch(/<section class="bg-background border-t-2 border-foreground"[^>]*><div class="[^"]*py-18 sm:py-24 pb-6 sm:pb-12">/);
+    // Re-anchored: page-parts.tsx — the close sits on a 1px graphite line over
+    // the sheet grid (Phase 5); the padding contract is unchanged.
+    expect(html).toMatch(/<section class="bg-background border-t border-foreground bg-sheet-grid"[^>]*><div class="[^"]*py-18 sm:py-24 pb-6 sm:pb-12">/);
     // Pinned so a change to the footer's margin revisits the close's padding.
     expect(read("components/marketing/site-footer.tsx")).toContain('className="mt-12 border-t border-border bg-background"');
   });
@@ -263,9 +265,11 @@ describe("the /why-truecap comparison", () => {
     expect(count(html, "<section")).toBe(2);
   });
 
-  it("opens each block on one heavy rule at every width", () => {
-    expect(count(html, "border-t-2 border-foreground")).toBe(2);
-    expect(html).not.toMatch(/(?:lg|md):border-t-2/);
+  it("opens each block on one graphite line at every width", () => {
+    // Re-anchored: landing-sections.tsx — the blocks open on a 1px graphite
+    // line (Phase 5), still one per block and none that appears at a width.
+    expect(count(html, "border-t border-foreground")).toBe(2);
+    expect(html).not.toMatch(/(?:lg|md):border-t(?:-2)? border-foreground/);
     expect(count(html, "border-t border-border pt-5 first:border-t-0")).toBe(3);
   });
 
