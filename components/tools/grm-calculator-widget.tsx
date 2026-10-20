@@ -13,7 +13,7 @@
  * Set on the calculator parts (components/tools/tool-parts.tsx), like the
  * 1% rule widget: the frame opens on the 2px ink rule with no card, the two
  * fields are the shared ToolNumberField, and the multiple is the key figure
- * in DM Mono over the double rule. The band's name is in ink at 600 with no
+ * in the display face over the 2px rule. The band's name is in ink at 600 with no
  * color: a band is a description of the market, not a pass or a miss
  * against a rule, and green and orange are kept for those (DESIGN.md). The
  * three inputs behind the multiple follow the action on soft rules. The grid reads the
@@ -222,7 +222,7 @@ export function GrmCalculatorWidget() {
   );
 }
 
-/** One input row on a soft rule: the name in Ink 2, the figure in DM Mono. */
+/** One input row on a soft rule: the name in Ink 2, the figure in the figure face. */
 function Row({
   label,
   value,

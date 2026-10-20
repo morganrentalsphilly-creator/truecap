@@ -244,7 +244,7 @@ export default function OnePercentRulePage() {
                 steps:
               </p>
               {/* A real sequence (the paragraph below names steps 4 and 5):
-                  DM Mono numerals on rules. */}
+                  figure numerals on rules. */}
               <StepList
                 className="not-prose my-8"
                 steps={[

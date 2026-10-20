@@ -9,8 +9,8 @@
  *
  * Set on the calculator parts (components/tools/tool-parts.tsx), like the 1%
  * rule widget: the frame opens on the 2px ink rule with no card, the fields
- * are the shared ToolNumberField, the total is the key figure in DM Mono
- * over the double rule, in ink, the breakdown is rows on rules, and the
+ * are the shared ToolNumberField, the total is the key figure in the display
+ * face over the 2px rule, in ink, the breakdown is rows on rules, and the
  * analyzer handoff is one plain button with a line under it.
  */
 
@@ -36,7 +36,7 @@ const fmtPct = (n: number) => `${n.toFixed(2)}%`;
 // the hero column on the tool page, a partner's iframe on /embed).
 const FIELD_GRID_CLASS =
   "mt-3 grid grid-cols-[minmax(0,1fr)] gap-x-4 gap-y-5 @sm:grid-cols-2";
-// A breakdown line: the item, then its amount in DM Mono, on a soft rule.
+// A breakdown line: the item, then its amount in the figure face, on a soft rule.
 const BREAKDOWN_ROW_CLASS =
   "flex justify-between gap-3 border-b border-rule-soft py-2";
 
@@ -341,7 +341,7 @@ export function ClosingCostCalculatorWidget() {
         <p className="text-sm leading-snug font-semibold text-foreground">
           Total closing costs
         </p>
-        {/* The key figure in DM Mono over the double rule, in ink (Ink 2 for
+        {/* The key figure in the display face over the 2px rule, in ink (Ink 2 for
             the placeholder); the caution color stays on the line under it.
             The color sits on the line, not on LedgerTotal (see ToolResult). */}
         <p

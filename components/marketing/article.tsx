@@ -92,7 +92,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * The ledger's figure and verdict, for a post's prose (DESIGN.md "Do and
- * don't": compared figures in DM Mono tabular; green and orange only for a
+ * don't": compared figures in the figure face, tabular; green and orange only for a
  * pass or a miss against a target). A post takes them from the frame: the SEO
  * loop's import allow-list (seo/config.json paths.importAllow) covers
  * @/components/marketing/* but not @/components/ledger/*, so a direct import

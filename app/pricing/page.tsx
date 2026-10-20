@@ -409,7 +409,7 @@ function PricingStages({
     /* The stage chooser, set as a ledger in the hero's wider column
        (the homepage's 5/7 grid from 1024px; it follows the text on
        phones): a caption on the heavy rule, then one ruled row per
-       plan with the job, the plan and its price in DM Mono, and what
+       plan with the job, the plan and its price in the figure face, and what
        it answers. It puts every price in the first screen. */
     <div data-pricing-stages="">
       <h2

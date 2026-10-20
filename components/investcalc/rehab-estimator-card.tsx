@@ -24,7 +24,7 @@
  *   - "tool": the public /tools/rehab-cost-estimator page, set on the
  *     calculator parts (components/tools/tool-parts.tsx) like the 1% rule
  *     widget: no card, the fields at the 48px Field size, the work items as
- *     rows on rules, the total as the key figure in DM Mono over the double
+ *     rows on rules, the total as the key figure in the display face over the 2px
  *     rule. Same words, same inputs, same estimateRehab call, and after
  *     the total the analyzer handoff the other calculators carry: one plain
  *     button and one line. The analyzer handoff has no rehab field

@@ -9,7 +9,7 @@
  *
  * Layout: the wordmark over a heavy rule with "Comparison" beside it,
  * "TrueCap vs <Competitor>" in the display voice, the positioning tagline
- * under it, and the page URL in DM Mono over a soft rule. The footer carries
+ * under it, and the page URL in Geist Mono over a soft rule. The footer carries
  * the URL alone: the card names the comparison and does not grade it.
  */
 

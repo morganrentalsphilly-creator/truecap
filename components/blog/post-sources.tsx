@@ -43,9 +43,10 @@ export type PostSource = {
 };
 
 // Inline, so a long title wraps with its host after it. Vertical padding on
-// an inline link grows its hit box without moving the text: at 16px Archivo
-// the content box is 17.5px, so 14px each side gives a 45.5px target (44px
-// floor), measured in Chrome, and it stays inside the row's 10px padding.
+// an inline link grows its hit box without moving the text: at 16px Hanken Grotesk
+// the content box is 21px, so 14px each side gives a 49px target (44px
+// floor), measured in Chrome on the built page (2026-10-20), and it stays
+// inside the row's 10px padding.
 const LINK_CLASS = "tc-link py-3.5";
 
 /** "https://www.irs.gov/publications/p527" → "irs.gov" (shown beside the title). */

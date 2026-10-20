@@ -17,8 +17,8 @@
  *
  * Set on the calculator parts (components/tools/tool-parts.tsx), like the 1%
  * rule widget: the frame opens on the 2px ink rule with no card, the fields
- * are the shared ToolNumberField, the ARV is the key figure in DM Mono over
- * the double rule, in ink, and the other figures are rows on rules. Green
+ * are the shared ToolNumberField, the ARV is the key figure in the display face over
+ * the 2px rule, in ink, and the other figures are rows on rules. Green
  * and orange belong to the comps-range check, a pass or a miss, and to the
  * warnings. The grids read the frame's own width (@container), so the
  * widget lays out the same in the tool page's hero column and in the /embed
@@ -349,7 +349,7 @@ export function ArvCalculatorWidget() {
           </p>
         ) : (
           <>
-            {/* The ARV is the key figure, in DM Mono over the double rule, in
+            {/* The ARV is the key figure, in the display face over the 2px rule, in
                 ink; the two figures it leads to follow as ruled rows. */}
             <Metric label="Estimated ARV" value={fmt(result.arv)} />
             <div className="mt-5 border-t border-border">
@@ -537,7 +537,7 @@ function Plain({ label, value, setValue, max, error }: FieldProps) {
     />
   );
 }
-/** The key figure: its sentence-case label, then DM Mono over the double rule. */
+/** The key figure: its sentence-case label, then the display face over the 2px rule. */
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div>
@@ -551,7 +551,7 @@ function Metric({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-/** A ruled row: what was measured, then its figure in DM Mono. */
+/** A ruled row: what was measured, then its figure in the figure face. */
 function Row({
   label,
   value,

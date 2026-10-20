@@ -143,7 +143,7 @@ export const DATA_BREADCRUMB_CURRENT_CLASS = "text-foreground";
 
 /**
  * A HUD table on rules: the 2px ink rule opens it, sentence-case heads in
- * Ink 2 on the rule, rows on soft rules, figures in DM Mono (LedgerFigure).
+ * Ink 2 on the rule, rows on soft rules, figures in the figure face (LedgerFigure).
  * No minimum width and no card. The ScrollX wrapper pins the first column;
  * its pinned cells take the paper the table sits on, not ScrollX's raised
  * card and band.

@@ -6,7 +6,7 @@
  *
  * Set on the calculator parts (components/tools/tool-parts.tsx): the frame
  * opens on the 2px ink rule with no card; the two fields are the shared
- * ToolNumberField; the ratio is the key figure in DM Mono over the double
+ * ToolNumberField; the ratio is the key figure in the display face over the 2px
  * rule, in ink; only the verdict takes a color, green for a pass and orange
  * for a miss (LedgerVerdict), because it is a pass or miss against the rule.
  * The frame's grid reads its own width (@container), so the same widget
