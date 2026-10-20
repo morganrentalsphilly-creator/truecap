@@ -773,6 +773,10 @@ export function AnalysisDashboard({
   // an empty row). Sticky for the session — the provider won't appear
   // mid-session.
   const [compsUnavailable, setCompsUnavailable] = useState(false);
+  // The shared live-comps pool is paused (reported up by PropertyCompsCard):
+  // the day it is back, null for "paused, date unknown", undefined = open. The
+  // collapsed row must not invite a pull that cannot run.
+  const [compsPausedUntil, setCompsPausedUntil] = useState<string | null | undefined>(undefined);
   // Comps already on screen shouldn't stay hidden behind a click. When a saved
   // deal loads its previously-saved comp set — free, no RentCast quota (see the
   // mount effect in property-comps-card) — open the row once so the finding is
@@ -1460,14 +1464,19 @@ export function AnalysisDashboard({
           deferredWhatIfState.vacancyPp,
         )}: ${fmtSignedMonthly(deferredWhatIfState.result.netCashFlow)}`
       : "Stress it — see what happens when assumptions get worse",
-    comps: buildCompsRowSummary(
-      compsQaData,
-      values?.monthlyRent ?? null,
-      values?.purchasePrice ?? null,
-      {
-        propertyType: values?.propertyType,
-      },
-    ),
+    comps:
+      compsQaData == null && compsPausedUntil !== undefined
+        ? compsPausedUntil
+          ? `Live comps are paused until ${compsPausedUntil} — your analysis still runs`
+          : "Live comps are paused for now — your analysis still runs"
+        : buildCompsRowSummary(
+            compsQaData,
+            values?.monthlyRent ?? null,
+            values?.purchasePrice ?? null,
+            {
+              propertyType: values?.propertyType,
+            },
+          ),
     notes: "Your private notes on this deal",
   };
 
@@ -2947,6 +2956,7 @@ export function AnalysisDashboard({
                   onApply={onApplyComps}
                   onDataChange={setCompsQaData}
                   onUnavailableChange={setCompsUnavailable}
+                  onPausedChange={setCompsPausedUntil}
                 />
               </DrillRow>
             ) : null}

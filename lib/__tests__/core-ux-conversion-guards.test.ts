@@ -213,21 +213,29 @@ describe("free-tier walls answer with a next step", () => {
     expect(saveClick).toContain("See Pro plans");
   });
 
-  it("comps entitlement walls route to plans, not a failure toast", () => {
+  it("comps entitlement walls route to plans, and a paused pool is inline, not a toast", () => {
     const comps = read("components/investcalc/property-comps-card.tsx");
-    expect(comps).toContain(
-      'if (r.code === "ENTITLEMENT_REQUIRED" || r.code === "CAP_REACHED") {',
-    );
+    // The free-lookup wall still opens /pricing (unless the pool is paused,
+    // where upgrading unlocks nothing).
+    expect(comps).toContain('if (r.code === "ENTITLEMENT_REQUIRED") {');
     expect(comps).toContain("See plans");
-    // Row P1-10: no plan lifts a monthly cap, so a capped account is sent to
-    // support, and only the free-lookup wall opens /pricing.
     const flat = comps.replace(/\s+/g, " ");
-    expect(flat).toMatch(
-      /r\.code === "CAP_REACHED" \? \( <ToastAction altText="Email TrueCap support about the monthly comps limit"/,
-    );
-    expect(flat).toContain('"mailto:hello@usetruecap.com?subject=Monthly%20comps%20limit"');
+    expect(flat).toContain("action: paused ? undefined : ( <ToastAction");
     expect(flat.match(/window\.location\.assign\("\/pricing"\)/g)).toHaveLength(1);
-    expect(comps).toContain('altText="See Pro plans with up to 50 comps lookups per month"');
+    expect(comps).toContain('altText="See Pro plans with comps lookups included"');
+    // 2026-10-19: the shared RentCast pool is 50 requests a period. An empty
+    // pool is a paused state the card shows inline (with the date it is
+    // back), never a toast, never a support mailto, never a plan pitch.
+    const capStart = comps.indexOf('if (r.code === "CAP_REACHED") {');
+    const capEnd = comps.indexOf("return;\n          }", capStart);
+    expect(capStart).toBeGreaterThan(-1);
+    const capBranch = comps.slice(capStart, capEnd);
+    expect(capBranch).toContain("setPausedUntil(r.resumesOn);");
+    expect(capBranch).not.toContain("toast(");
+    expect(comps).not.toContain("mailto:");
+    expect(comps).not.toContain("Contact support");
+    expect(comps).toContain('data-comps-paused=""');
+    expect(comps).toContain("Comps from {compsDate}");
   });
 
   it("decision-first results pitch the Offer Ceiling once, not twice", () => {

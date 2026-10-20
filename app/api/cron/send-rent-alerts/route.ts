@@ -13,13 +13,17 @@
  *                          to do a real (paid, capped) fetched preview instead.
  *       - "live"         → fetch (capped) + send via Resend.
  *     the founder flips off → dry → live after reviewing.
- *  3. COST GUARD: each re-priced deal = ONE RentCast rent lookup. We share the
- *     SAME global monthly RentCast budget as live comps (app_counters key
- *     `rentcast_enrichments_${month}`, cap RENTCAST_MONTHLY_ENRICHMENT_CAP) so
- *     this cron can never blow the plan limit, plus a per-run ceiling
- *     (RENT_ALERTS_MAX_LOOKUPS_PER_RUN). Single-family deals only (the rent
- *     core handles one rent figure) — we never spend a call on a deal we can't
- *     price.
+ *  3. COST GUARD: each re-priced deal = ONE RentCast request. The request is
+ *     reserved INSIDE fetchRentCastRentEstimate against the same per-period
+ *     budget live comps spend (lib/property-enrichment/rentcast-budget.ts,
+ *     RENTCAST_MONTHLY_REQUEST_CAP, 50 by default), so this cron can never
+ *     blow the plan limit. It may only spend while
+ *     `remaining > RENTCAST_INTERACTIVE_RESERVE` (30 by default), so
+ *     interactive users keep most of the pool, plus a per-run ceiling
+ *     (RENT_ALERTS_MAX_LOOKUPS_PER_RUN). Nothing is refunded after a request
+ *     is sent — an empty result still counted on RentCast's side. Single-
+ *     family deals only (the rent core handles one rent figure) — we never
+ *     spend a request on a deal we can't price.
  *  4. Per-deal gating in lib/rent-alerts.ts (pure, tested): only STATE changes
  *     alert (tier / DSCR band / cash-flow sign).
  *  5. Consent: reuses profiles.rate_alert_emails — the existing "deal alert
@@ -39,6 +43,7 @@ import {
   type RentAlertDeal,
 } from "@/lib/rent-alerts";
 import { fetchRentCastRentEstimate } from "@/lib/property-enrichment/rentcast";
+import { getRentCastBudgetStatus } from "@/lib/property-enrichment/rentcast-budget";
 import { normalizeReleasedInvestmentFormSnapshot } from "@/lib/underwriting-model-release";
 import { getPaidUserIds } from "@/lib/paid-user-ids";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
@@ -57,16 +62,28 @@ function resolveMode(): Mode {
   return "off";
 }
 
-/** Shared global monthly RentCast budget (same counter live comps spends). */
-const MONTHLY_ENRICHMENT_CAP = Number.parseInt(
-  process.env.RENTCAST_MONTHLY_ENRICHMENT_CAP ?? "300",
+/** Requests the cron must leave in the shared pool for interactive users. */
+const INTERACTIVE_RESERVE_RAW = Number.parseInt(
+  process.env.RENTCAST_INTERACTIVE_RESERVE ?? "30",
   10
 );
-/** Per-run ceiling on lookups, independent of the monthly budget. */
-const MAX_LOOKUPS_PER_RUN = Number.parseInt(
+const INTERACTIVE_RESERVE = Number.isFinite(INTERACTIVE_RESERVE_RAW)
+  ? Math.max(0, INTERACTIVE_RESERVE_RAW)
+  : 30;
+/** Per-run ceiling on lookups, independent of the period budget. */
+const MAX_LOOKUPS_PER_RUN_RAW = Number.parseInt(
   process.env.RENT_ALERTS_MAX_LOOKUPS_PER_RUN ?? "100",
   10
 );
+const MAX_LOOKUPS_PER_RUN = Number.isFinite(MAX_LOOKUPS_PER_RUN_RAW)
+  ? Math.max(0, MAX_LOOKUPS_PER_RUN_RAW)
+  : 100;
+
+/** How many requests the cron may spend right now: what's left in the pool
+ *  above the interactive reserve, never negative. */
+function cronSpendable(remaining: number): number {
+  return Math.max(0, remaining - INTERACTIVE_RESERVE);
+}
 
 function maskEmail(email: string): string {
   const [user, domain] = email.split("@");
@@ -157,20 +174,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ skipped: true, reason: "no_priceable_deals" });
     }
 
-    // 5. Cost budget — read the shared monthly counter; never exceed it.
-    const month = new Date().toISOString().slice(0, 7);
-    const monthKey = `rentcast_enrichments_${month}`;
-    const { data: counterRow } = await admin
-      .from("app_counters")
-      .select("count")
-      .eq("key", monthKey)
-      .maybeSingle();
-    const used = Number((counterRow as { count?: number } | null)?.count ?? 0);
-    const capFinite = Number.isFinite(MONTHLY_ENRICHMENT_CAP) && MONTHLY_ENRICHMENT_CAP > 0;
-    const budgetRemaining = capFinite
-      ? Math.max(0, MONTHLY_ENRICHMENT_CAP - used)
-      : Number.POSITIVE_INFINITY;
-    const lookupBudget = Math.max(0, Math.min(MAX_LOOKUPS_PER_RUN, budgetRemaining, priceable.length));
+    // 5. Cost budget — read the shared per-period request pool (read-only;
+    // the reservation itself happens inside fetchRentCastRentEstimate). The
+    // cron only spends what sits ABOVE the interactive reserve.
+    const budget = await getRentCastBudgetStatus();
+    const lookupBudget = Math.max(
+      0,
+      Math.min(MAX_LOOKUPS_PER_RUN, cronSpendable(budget.remaining), priceable.length)
+    );
 
     // 5a. Truly-free dry preview: report scale + cost WITHOUT any RentCast
     // calls, unless RENT_ALERTS_DRY_FETCH=1 opts into a real (paid) preview.
@@ -181,8 +192,10 @@ export async function GET(request: Request) {
         note: "Scale preview only — no RentCast calls made. Set RENT_ALERTS_DRY_FETCH=1 for a real (paid, capped) preview.",
         eligibleUsers: optedInIds.length,
         priceableDeals: priceable.length,
-        monthlyBudgetUsed: used,
-        monthlyBudgetCap: MONTHLY_ENRICHMENT_CAP,
+        periodRequestsUsed: budget.used,
+        periodRequestCap: budget.cap,
+        periodRequestsRemaining: budget.remaining,
+        interactiveReserve: INTERACTIVE_RESERVE,
         wouldLookUp: lookupBudget,
       });
     }
@@ -190,45 +203,42 @@ export async function GET(request: Request) {
     // 6. Re-price up to the budget; group state-change alerts per user.
     const alertsByUser = new Map<string, RentAlertDeal[]>();
     let lookups = 0;
-    let rpcMissing = false;
+    let stoppedForBudget = false;
     for (const deal of priceable) {
       if (lookups >= lookupBudget) break;
-      // RESERVE one unit of the shared monthly budget BEFORE the (billable)
-      // call — atomic, so a failed or duplicate run can't re-read a stale-low
-      // counter and overshoot the cap (the previous fire-and-forget increment
-      // could). NULL = at cap → stop; reserveErr = the atomic RPC isn't
-      // deployed → fail SAFE by stopping (a background cron should under-send
-      // rather than risk overspending the RentCast budget).
-      if (capFinite) {
-        const { data: reserved, error: reserveErr } = await admin.rpc(
-          "increment_app_counter_if_under",
-          { counter_key: monthKey, max_value: MONTHLY_ENRICHMENT_CAP, amount: 1 }
-        );
-        if (reserveErr) {
-          rpcMissing = true;
+      // Re-read the pool before each request so interactive users who spent
+      // since the run began still keep their reserve. One SELECT per lookup;
+      // the cron is small. The request itself is reserved atomically inside
+      // fetchRentCastRentEstimate — `capped` means nothing was sent.
+      if (lookups > 0) {
+        const live = await getRentCastBudgetStatus();
+        if (!live.available || cronSpendable(live.remaining) <= 0) {
+          stoppedForBudget = true;
           break;
         }
-        if (reserved == null) break; // monthly cap reached
+      } else if (!budget.available || cronSpendable(budget.remaining) <= 0) {
+        stoppedForBudget = true;
+        break;
       }
-      lookups += 1;
-      const marketRent = await fetchRentCastRentEstimate({
+      const estimate = await fetchRentCastRentEstimate({
         address: deal.address,
         propertyType: "Single Family",
         bedrooms: typeof deal.values.bedrooms === "number" ? deal.values.bedrooms : null,
         bathrooms: typeof deal.values.bathrooms === "number" ? deal.values.bathrooms : null,
         squareFootage: typeof deal.values.sqft === "number" ? deal.values.sqft : null,
       });
-      // A null/<=0 result (no API key, or address un-indexed) is NOT a billable
-      // RentCast call — refund the unit we reserved so phantom lookups don't
-      // drain the shared monthly budget.
-      if (marketRent == null || marketRent <= 0) {
-        if (capFinite) {
-          await admin
-            .rpc("decrement_app_counter", { counter_key: monthKey, amount: 1 })
-            .then(() => undefined, () => undefined);
-        }
-        continue;
+      if (estimate.status === "capped") {
+        // The pool refused: no request went out. Stop — a background cron
+        // under-sends rather than competing with people for the last units.
+        stoppedForBudget = true;
+        break;
       }
+      if (estimate.status === "not_configured") break;
+      lookups += 1;
+      // An empty or failed result still sent a request (or tried to), and
+      // stays counted. NEVER refund after a send.
+      if (estimate.status !== "ok") continue;
+      const marketRent = estimate.rent;
 
       const alert = buildRentAlertForDeal({
         id: deal.id,
@@ -243,22 +253,13 @@ export async function GET(request: Request) {
       alertsByUser.set(deal.userId, list);
     }
 
-    if (rpcMissing) {
-      // The atomic-counter migration (20260628150000) isn't applied in this
-      // env, so we stopped early to avoid overspending. Surface it rather than
-      // silently degrade (the cron will under-send until the migration lands).
-      Sentry.captureMessage(
-        "rent-alerts cron: atomic counter RPC missing — stopped early to avoid overspend (apply migration 20260628150000)",
-        { level: "warning", tags: { feature: "rent-alerts" } }
-      );
-    }
-
     if (alertsByUser.size === 0) {
       return NextResponse.json({
         skipped: true,
-        reason: "no_state_changes",
+        reason: stoppedForBudget && lookups === 0 ? "budget_reserved_for_interactive" : "no_state_changes",
         lookups,
         lookupBudget,
+        stoppedForBudget,
       });
     }
 

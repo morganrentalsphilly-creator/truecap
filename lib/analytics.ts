@@ -111,6 +111,7 @@ export type FunnelEvent =
   | "data_lookup_started"
   | "data_lookup_succeeded"
   | "data_lookup_failed"
+  | "data_lookup_capped"
   | "evidence_grade_changed"
   | "decision_readiness_changed"
   | "material_change_detected"

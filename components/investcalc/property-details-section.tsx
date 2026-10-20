@@ -32,6 +32,10 @@ interface PropertyDetailsSectionProps {
   autofillRequiresAccount?: boolean;
   /** Show the autofill button (signed-in + provider configured). */
   showAutofill?: boolean;
+  /** The shared live-comps pool is paused: the button stays visible but
+   *  disabled, with one inline line saying when it is back ("Nov 21"). An
+   *  empty string means paused with no known date. Null/undefined = open. */
+  autofillPausedUntil?: string | null;
   /** Show the (optional) Year Built field. Hidden in strategy-focus mode. */
   showYearBuilt?: boolean;
   /** Override the "Purchase Price" label (e.g. "Asking price" for wholesale). */
@@ -74,6 +78,7 @@ export function PropertyDetailsSection({
   isAutofilling,
   autofillRequiresAccount = false,
   showAutofill,
+  autofillPausedUntil = null,
   showYearBuilt = true,
   priceLabel,
   priceSourceLabel,
@@ -149,7 +154,7 @@ export function PropertyDetailsSection({
             size="sm"
             className="h-auto min-h-11 max-w-full gap-1.5 whitespace-normal px-3 py-2 text-left leading-snug sm:text-center"
             onClick={onAutofillFromAddress}
-            disabled={isAutofilling}
+            disabled={isAutofilling || autofillPausedUntil != null}
             aria-describedby="property-lookup-help"
           >
             {isAutofilling ? (
@@ -164,16 +169,31 @@ export function PropertyDetailsSection({
               ? "Looking up property details…"
               : "Look up property details"}
           </Button>
-          <p
-            id="property-lookup-help"
-            className="mt-1.5 max-w-prose text-2xs leading-snug text-muted-foreground"
-          >
-            {autofillRequiresAccount
-              ? "Optional. A free account is required to look up available property facts and estimates."
-              : "Optional. Look up available property facts and estimates."}{" "}
-            You&apos;ll review any changes; values you entered will not be
-            replaced silently.
-          </p>
+          {autofillPausedUntil != null ? (
+            // The shared live-comps pool is paused. Say when it is back and
+            // that the rest of the analysis works; nothing else changes.
+            <p
+              id="property-lookup-help"
+              data-autofill-paused=""
+              className="mt-1.5 max-w-prose text-2xs leading-snug text-muted-foreground"
+            >
+              {autofillPausedUntil
+                ? `Autofill is back ${autofillPausedUntil}.`
+                : "Autofill is paused for now."}{" "}
+              Your analysis still runs with the values you enter.
+            </p>
+          ) : (
+            <p
+              id="property-lookup-help"
+              className="mt-1.5 max-w-prose text-2xs leading-snug text-muted-foreground"
+            >
+              {autofillRequiresAccount
+                ? "Optional. A free account is required to look up available property facts and estimates."
+                : "Optional. Look up available property facts and estimates."}{" "}
+              You&apos;ll review any changes; values you entered will not be
+              replaced silently.
+            </p>
+          )}
         </div>
       ) : null}
     </div>

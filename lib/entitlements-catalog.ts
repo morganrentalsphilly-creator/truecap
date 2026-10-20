@@ -74,7 +74,7 @@ export interface FeatureSpec {
   tiers: Tier[];
   /** Limit qualifier shown on the free tier (e.g. "up to 5", "1 lifetime"). */
   freeLimit?: string;
-  /** Limit qualifier shown on the pro tier (e.g. "unlimited", "50/mo"). */
+  /** Limit qualifier shown on the pro tier (e.g. "unlimited", "up to 4"). */
   proLimit?: string;
   /** Limit qualifier shown on the $9 one-time tier (e.g. "One deal", "In the PDF"). */
   oneTimeLimit?: string;
@@ -134,7 +134,9 @@ export const FEATURE_CATALOG: Record<FeatureKey, FeatureSpec> = {
     label: "Sale + rent comps from the address",
     tiers: ["free", "pro", "agent_pro"],
     freeLimit: "1 lifetime lookup",
-    proLimit: "50/mo",
+    // The shared RentCast pool is 50 requests a period site-wide, so no
+    // per-account monthly number is honest. Say what is true.
+    proLimit: "included, subject to availability",
     category: "data",
     gate: "flag",
   },

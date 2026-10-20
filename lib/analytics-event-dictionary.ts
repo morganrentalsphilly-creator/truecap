@@ -285,6 +285,12 @@ export const ANALYTICS_EVENT_DICTIONARY = {
     "lookup_type",
     "failure_class",
   ]),
+  // The shared request pool refused a lookup (nothing was sent). Aggregate
+  // only — the period and the counts live in Sentry, never here.
+  data_lookup_capped: define("data-quality", "operational-no-customer-data", [
+    "provider",
+    "lookup_type",
+  ]),
   evidence_grade_changed: define("data-quality", "account-aggregate", [
     "field_key",
     "from_grade",
