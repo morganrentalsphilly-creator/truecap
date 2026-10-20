@@ -412,9 +412,10 @@ export function Header({
         `sticky top-0` here or the header's paper background overlays the
         upgrade strip above it (visible on mobile as a box covering the
         strip). */}
-    {/* DESIGN.md "Header": paper and a single bottom rule. No blur, no
+    {/* DESIGN.md "Header": the sheet at 90% with a blur behind it, so the
+        content shows through as it scrolls under, and one bottom line. No
         shadow; the gutter is the marketing page container's. */}
-    <header className="border-b border-border bg-background">
+    <header className="border-b border-border bg-background/90 backdrop-blur-md">
       <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:h-16 sm:px-6 lg:px-12">
         <div className="flex items-center justify-start gap-0 sm:gap-3 min-w-0">
           <AppLogo priority subtitleClassName="hidden sm:block" />

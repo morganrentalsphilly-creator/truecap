@@ -103,12 +103,12 @@ describe("/blog/1-percent-rule-rental-property renders in the article frame", ()
     expect(main).toContain("<h2>The bottom line</h2>");
   });
 
-  it("sets the compared figures in DM Mono, held with their term, and pass/fail in the verdict colors", () => {
+  it("sets the compared figures in the figure voice, held with their term, and pass/fail in the verdict colors", () => {
     // JSX dropped the space at the line break after the colon ("price screen:100").
     // The rule-of-thumb price is a price screen, not an Offer Ceiling
     // (released-tool-surface-guards.test.ts holds that line).
     expect(main).toContain("price screen: <strong>100 × the monthly rent</strong>");
-    const figure = (value: string) => `<span class="font-mono tabular-nums">${value}</span>`;
+    const figure = (value: string) => `<span class="font-figure">${value}</span>`;
     for (const ratio of ["1.00%", "1.04%", "0.69%"]) expect(main).toContain(`<strong>${figure(ratio)}</strong>`);
     expect(count(main, '<span class="font-semibold text-positive">Passes</span>.')).toBe(2);
     expect(count(main, '<span class="font-semibold text-caution-text">Fails</span>.')).toBe(1);
