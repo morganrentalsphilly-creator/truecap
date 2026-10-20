@@ -1,0 +1,62 @@
+{
+  "390": {
+    "h1": "Stop forwarding listings. Start sending deals that already pencil.",
+    "heroSheet": {
+      "present": true,
+      "visible": true,
+      "sliderValue": "236000",
+      "sliderText": "$236,000: cash flow $750 a month, meets the $750 target",
+      "figures": 12
+    },
+    "receiptFlow": {
+      "nodes": 3,
+      "allVisible": true
+    },
+    "cobranding": {
+      "formPresent": true,
+      "inputs": 2
+    },
+    "plans": {
+      "radios": 2,
+      "monthlyPrice": false,
+      "annualPrice": true
+    },
+    "faq": {
+      "details": 10
+    },
+    "hiddenByOpacity": 0,
+    "offsetByTransform": 18,
+    "horizontalOverflow": 0,
+    "words": 1502
+  },
+  "1440": {
+    "h1": "Stop forwarding listings. Start sending deals that already pencil.",
+    "heroSheet": {
+      "present": true,
+      "visible": true,
+      "sliderValue": "236000",
+      "sliderText": "$236,000: cash flow $750 a month, meets the $750 target",
+      "figures": 12
+    },
+    "receiptFlow": {
+      "nodes": 3,
+      "allVisible": true
+    },
+    "cobranding": {
+      "formPresent": true,
+      "inputs": 2
+    },
+    "plans": {
+      "radios": 2,
+      "monthlyPrice": false,
+      "annualPrice": true
+    },
+    "faq": {
+      "details": 10
+    },
+    "hiddenByOpacity": 0,
+    "offsetByTransform": 18,
+    "horizontalOverflow": 0,
+    "words": 1298
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "heroRestsAtCeiling": {
+    "atLoad": "236000",
+    "after2500ms": "236000",
+    "sameValue": true
+  },
+  "leadersDrawn": [
+    {
+      "animation": "none",
+      "dashoffset": "0px"
+    },
+    {
+      "animation": "none",
+      "dashoffset": "0px"
+    },
+    {
+      "animation": "none",
+      "dashoffset": "0px"
+    }
+  ],
+  "heroStrokeAnimation": "none",
+  "resultRevealAttribute": "absent",
+  "resultStepsVisible": [
+    {
+      "step": "1",
+      "opacity": "1",
+      "animation": "none"
+    },
+    {
+      "step": "2",
+      "opacity": "1",
+      "animation": "none"
+    },
+    {
+      "step": "3",
+      "opacity": "1",
+      "animation": "none"
+    },
+    {
+      "step": "4",
+      "opacity": "1",
+      "animation": "none"
+    },
+    {
+      "step": "4",
+      "opacity": "1",
+      "animation": "none"
+    },
+    {
+      "step": "5",
+      "opacity": "1",
+      "animation": "none"
+    }
+  ]
+}
