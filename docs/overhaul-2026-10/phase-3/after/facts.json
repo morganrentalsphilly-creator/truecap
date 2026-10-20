@@ -1,0 +1,278 @@
+[
+  {
+    "label": "after",
+    "page": "/",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/",
+    "title": "Rental Property Calculator & Max Offer | TrueCap",
+    "h1": "Stop forwarding listings. Start sending deals that already pencil.",
+    "overflowX": false,
+    "docHeight": 13563,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\"",
+      "\"Geist Mono\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "after",
+    "page": "/pricing",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 9906,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "after",
+    "page": "/analyze",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/analyze",
+    "title": "Analyze a Rental Property Free | TrueCap",
+    "h1": "Underwrite a Buy & Hold Rental",
+    "overflowX": false,
+    "docHeight": 3286,
+    "arrowLinks": 0,
+    "upperSmall": 20,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 0
+  },
+  {
+    "label": "after",
+    "page": "/for-agents",
+    "width": 375,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 9906,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "after",
+    "page": "/",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/",
+    "title": "Rental Property Calculator & Max Offer | TrueCap",
+    "h1": "Stop forwarding listings. Start sending deals that already pencil.",
+    "overflowX": false,
+    "docHeight": 11444,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\"",
+      "\"Geist Mono\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "after",
+    "page": "/pricing",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 7267,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "after",
+    "page": "/analyze",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/analyze",
+    "title": "Analyze a Rental Property Free | TrueCap",
+    "h1": "Underwrite a Buy & Hold Rental",
+    "overflowX": false,
+    "docHeight": 2717,
+    "arrowLinks": 0,
+    "upperSmall": 20,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 0
+  },
+  {
+    "label": "after",
+    "page": "/for-agents",
+    "width": 768,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 7267,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "after",
+    "page": "/",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/",
+    "title": "Rental Property Calculator & Max Offer | TrueCap",
+    "h1": "Stop forwarding listings. Start sending deals that already pencil.",
+    "overflowX": false,
+    "docHeight": 8160,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\"",
+      "\"Geist Mono\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "after",
+    "page": "/pricing",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 6404,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "after",
+    "page": "/analyze",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/analyze",
+    "title": "Analyze a Rental Property Free | TrueCap",
+    "h1": "Underwrite a Buy & Hold Rental",
+    "overflowX": false,
+    "docHeight": 2352,
+    "arrowLinks": 0,
+    "upperSmall": 20,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 0
+  },
+  {
+    "label": "after",
+    "page": "/for-agents",
+    "width": 1095,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 6404,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "after",
+    "page": "/",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/",
+    "title": "Rental Property Calculator & Max Offer | TrueCap",
+    "h1": "Stop forwarding listings. Start sending deals that already pencil.",
+    "overflowX": false,
+    "docHeight": 8177,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\"",
+      "\"Geist Mono\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "after",
+    "page": "/pricing",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 6521,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  },
+  {
+    "label": "after",
+    "page": "/analyze",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/analyze",
+    "title": "Analyze a Rental Property Free | TrueCap",
+    "h1": "Underwrite a Buy & Hold Rental",
+    "overflowX": false,
+    "docHeight": 2300,
+    "arrowLinks": 0,
+    "upperSmall": 20,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 0
+  },
+  {
+    "label": "after",
+    "page": "/for-agents",
+    "width": 1440,
+    "status": 200,
+    "finalUrl": "http://127.0.0.1:3100/pricing",
+    "title": "Pricing — Screen Free, Know Your Offer with Pro | TrueCap",
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar of rent.",
+    "overflowX": false,
+    "docHeight": 6521,
+    "arrowLinks": 0,
+    "upperSmall": 0,
+    "fonts": [
+      "\"Hanken Grotesk\""
+    ],
+    "disclaimers": 1
+  }
+]
