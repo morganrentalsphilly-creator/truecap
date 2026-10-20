@@ -879,51 +879,74 @@ and let the founder say yes.
 ## 9. Design workflow (any UI change)
 
 TrueCap's look is decided in `DESIGN.md`, not inferred from whatever the code
-does today. Sessions that skip this section drift back to shadcn defaults.
+does today. Sessions that skip this section drift back to shadcn defaults, or
+back to the retired Underwriter's Ledger.
 
 1. **Load the Impeccable skill** (`.claude/skills/impeccable`, v4.3.1) for any
    UI work and run its setup once:
    `.claude/skills/impeccable/scripts/impeccable context`. Do not use
    ui-ux-pro-max, frontend-design, taste-skill, Hallmark or interface-design
    as standing skills; overlapping design rule sets degrade the output.
-2. **Read `DESIGN.md` first.** It records decisions (paper, ink, type, radius
-   by role, the chrome rules). When code and `DESIGN.md` disagree, the code is
-   wrong unless the founder changed the decision. `PRODUCT.md` holds the
-   audience, constraints and copy guardrails.
-3. **Tokens over raw Tailwind.** Colors, fonts, radii and shadows come from the
-   tokens in `app/globals.css`, the one stylesheet the marketing site and the
-   app share (`styles/globals.css` is dead and imported by nothing). No raw
-   palette classes, no hex, no arbitrary `shadow-[…]` or `rgba(…)` glows. A fix
-   lands in a token or a shared component (header, footer, section wrapper,
-   FAQ, plan card, ledger primitives, `components/ui/*`), never as a page-local
-   override.
+2. **Read `DESIGN.md` first.** It records the Blueprint decisions (2026-10-20):
+   the sheet and its cobalt grid, graphite ink, one cobalt for actions, one
+   warm highlight for the Offer Ceiling, Hanken Grotesk for display and text
+   with tabular figures, Geist Mono for metadata, radius by role, three
+   elevation steps, the motion tokens. When code and `DESIGN.md` disagree, the
+   code is wrong unless the founder changed the decision. `PRODUCT.md` holds
+   the audience, constraints and copy guardrails; `OVERHAUL.md` is the
+   founder's brief for the 2026-10 overhaul and its phases.
+3. **Tokens over raw values.** Colors, fonts, radii, shadows, durations and
+   easings come from the tokens in `app/globals.css` (`:root`, `@theme`, the
+   utilities `font-display`, `font-figure`, `bg-sheet-grid`, `bg-navy-grid`,
+   `highlight-stroke`) and from `lib/motion.ts`. No raw palette classes, no
+   hex, no arbitrary `shadow-[…]`, `rgba(…)` or duration values in a
+   component. A fix lands in a token or a shared component (header, footer,
+   `Section`, `page-parts`, `PlanCard`, FAQ, the ledger and result primitives,
+   `components/motion/*`, `components/ui/*`), never as a page-local override.
 4. **Chrome rules.** No eyebrow or kicker above a heading. No "→" in link text
    and no trailing arrow icon on buttons. Sentence case everywhere, table heads
-   included (acronyms stay acronyms). Cards only for objects the user compares
-   (plan cards); feature lists, sources and FAQs use rules and space. Radius
-   follows the role scale in `DESIGN.md`. No shadow at rest. No
-   `transition-all`. At most one motion moment per page, and
-   `prefers-reduced-motion` always wins.
-5. **Detect before committing.**
+   included (acronyms stay acronyms). Cards for objects the visitor compares or
+   acts on (plan cards, a result, a saved deal); lists, sources and FAQs sit on
+   lines. Radius by role (4 tags, 8 controls, 12 objects, 14-16 floats). A
+   resting card carries the rest shadow, a float the float shadow, a panel the
+   panel shadow; no colored halo. Every figure is `font-figure`; a changing
+   figure goes through `AnimatedNumber`. No `transition-all`; transitions name
+   their properties at the token durations.
+5. **Motion rules.** One animation library (Motion for React through
+   `MotionProvider`), NumberFlow for figures, CSS scroll timelines for simple
+   reveals behind `@supports` and `no-preference`. Transform and opacity only;
+   the resting state is the complete page; nothing above the fold starts
+   hidden and the H1 never animates; one authored moment per surface; figures
+   announce on release, not per tick; `prefers-reduced-motion` always wins.
+   No GSAP, Lenis, Three.js, Lottie, particles, cursor followers or auto-play.
+6. **Detect before committing.**
    `.claude/skills/impeccable/scripts/impeccable detect --json <changed files>`
    must report no primary findings. For a page change, also scan the rendered
    page from a local production build at `--viewport 1440x900` and
    `--viewport 390x844`: most tells live in computed layout, and the source
    scan cannot see them.
-6. **Look at the real widths.** 375, 768, 1095 (the founder's laptop window)
+7. **Look at the real widths.** 375, 768, 1095 (the founder's laptop window)
    and 1440: no horizontal scroll, controls at least 44px, the homepage
    investor cue visible in the first screen at 390px. The capture harness is
-   `docs/design-pass/tools/capture.mjs`.
-7. **Guards pin markup.** Many tests assert marketing class strings and copy
-   (`lib/__tests__/*guards*`, `public-funnel-trust-guards`,
-   `site-overhaul-*`, `structured-data-f4`, `internal-link-graph`,
-   `e2e/site-overhaul-conversion.spec.ts`). When a design change moves them,
-   re-anchor them in the same commit and say so in the message.
-8. **Checkpoints of the 2026 design pass** (`docs/design-pass/`): (1) the brief,
-   where `DESIGN.md` becomes decisions and the founder picks type and paper;
-   (2) three homepage directions, chosen by looking; (3) the homepage before
-   rollout, with before/after screenshots, scores and the app's key screens at
-   the new tokens. Do not build past a checkpoint that has not been approved.
+   `docs/design-pass/tools/capture.mjs`; the overhaul's measurement recipe
+   (perf:homepage, Lighthouse against a running server, the detector) is in
+   `docs/overhaul-2026-10/brief.md` §2 and `docs/overhaul-2026-10/tools/`.
+8. **Guards pin markup.** Many tests assert class strings and copy
+   (`lib/__tests__/*guards*`, `*design-pass*`, `shared-visual-guards`,
+   `public-funnel-trust-guards`, `site-overhaul-*`, `structured-data-f4`,
+   `internal-link-graph`, `e2e/site-overhaul-conversion.spec.ts`).
+   `docs/overhaul-2026-10/test-reanchor-list.md` classifies every one as
+   visual (re-anchorable) or truth (must stay). When a design change moves a
+   visual pin, re-anchor it in the same commit with a `Re-anchored: <file> —
+   <reason>` line in the message; never delete or weaken a truth pin, and
+   never skip or `.only` a test to get green.
+9. **Checkpoints of the 2026-10 overhaul** (`OVERHAUL.md` §8,
+   `docs/overhaul-2026-10/`): (1) the directions, chosen by the founder on
+   2026-10-20 (Blueprint); (2) the homepage before rollout, with before/after
+   screenshots, Lighthouse and `perf:homepage` against the baseline and the
+   list of re-anchored tests; (3) the final QA. Do not build past a checkpoint
+   that has not been approved. Work on `design/overhaul-2026-10`, one PR per
+   phase.
 
 ---
 
