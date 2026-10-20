@@ -16,16 +16,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  Compass,
-  Calculator,
-  Search as SearchIcon,
-  BookOpen,
-  TrendingUp,
-  HelpCircle,
-  MapPin,
-} from "lucide-react";
+import { Search as SearchIcon } from "lucide-react";
 import { NotFoundTracker } from "@/components/marketing/not-found-tracker";
 import { GLOSSARY } from "@/lib/glossary";
 import { linkableGlossaryTerms } from "@/lib/seo/link-policy";
@@ -41,32 +32,27 @@ const GLOSSARY_TERM_COUNT = linkableGlossaryTerms(
 ).length;
 
 const POPULAR_PAGES = [
-  { href: "/tools", label: "Free calculators", icon: Calculator, blurb: "Mortgage, vacancy, rent-to-price, rehab, and cost screens." },
-  { href: "/blog", label: "Blog", icon: BookOpen, blurb: "Deep dives on rental analysis + underwriting." },
-  { href: "/glossary", label: "Glossary", icon: HelpCircle, blurb: `Plain-English definitions for ${GLOSSARY_TERM_COUNT} terms.` },
-  { href: "/markets", label: "Market guides", icon: MapPin, blurb: "City-level rental market intel." },
-  { href: "/pricing", label: "Pricing", icon: TrendingUp, blurb: "Free + Pro plans." },
-  { href: "/analyze", label: "Run a free analysis", icon: ArrowUpRight, blurb: "An address, the asking price and a bedroom count: a first-pass underwrite." },
+  { href: "/tools", label: "Free calculators", blurb: "Mortgage, vacancy, rent-to-price, rehab, and cost screens." },
+  { href: "/blog", label: "Blog", blurb: "Deep dives on rental analysis + underwriting." },
+  { href: "/glossary", label: "Glossary", blurb: `Plain-English definitions for ${GLOSSARY_TERM_COUNT} terms.` },
+  { href: "/markets", label: "Market guides", blurb: "City-level rental market intel." },
+  { href: "/pricing", label: "Pricing", blurb: "Free + Pro plans." },
+  { href: "/analyze", label: "Run a free analysis", blurb: "An address, the asking price and a bedroom count: a first-pass underwrite." },
 ];
 
 export default function NotFound() {
   return (
-    <main id="main" className="min-h-screen bg-background flex flex-col items-center px-4 pt-16 pb-12 sm:pt-24">
+    <main id="main" className="min-h-screen bg-background bg-sheet-grid px-4 pt-16 pb-12 sm:pt-24">
       {/* Client-only tracker — captures the requested pathname to Sentry
           so we can triage broken inbound links in operational dashboards
           instead of discovering them weeks later via analytics. */}
       <NotFoundTracker />
-      <div className="w-full max-w-2xl text-center">
-        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-[var(--brand-blue-light)] text-primary">
-          <Compass className="size-6" />
-        </div>
-        <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-2">
-          TrueCap
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground">
+      <div className="mx-auto w-full max-w-2xl">
+        <p className="font-mono text-xs text-muted-foreground">404</p>
+        <h1 className="mt-2 font-display text-balance text-display-sm text-foreground">
           404 — page not found
         </h1>
-        <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
+        <p className="mt-4 max-w-[52ch] text-pretty text-lg text-muted-foreground">
           The page you&apos;re looking for doesn&apos;t exist or has moved.
           Search the site or jump to one of the most-visited sections below.
         </p>
@@ -79,10 +65,10 @@ export default function NotFound() {
           method="get"
           role="search"
           aria-label="Search TrueCap"
-          className="mt-6 relative max-w-lg mx-auto"
+          className="relative mt-6 max-w-lg"
         >
           <SearchIcon
-            className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none"
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
             aria-hidden="true"
           />
           <input
@@ -91,7 +77,7 @@ export default function NotFound() {
             placeholder="Search blog, glossary, calculators…"
             aria-label="Search the site"
             // 16px: iOS Safari zooms the page when a focused field is smaller.
-            className="w-full h-11 pl-10 pr-4 rounded-xl border border-border bg-card text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+            className="h-12 w-full rounded-md border border-input bg-field pr-4 pl-10 text-base text-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           />
         </form>
 
@@ -100,36 +86,32 @@ export default function NotFound() {
           <Link
             href="/analyze"
             prefetch={false}
-            className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-primary text-primary-foreground px-5 py-2.5 text-sm font-bold hover:opacity-90"
+            className="inline-flex min-h-11 items-center justify-center rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-[background-color] duration-150 hover:bg-primary-deep"
           >
             Run a free analysis
-            <ArrowUpRight className="size-4" />
           </Link>
         </div>
-      </div>
 
-      {/* Popular pages — 6-card grid. Covers every major content area
-          so any user, regardless of intent, has a relevant next step. */}
-      <div className="mt-12 grid w-full max-w-3xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {POPULAR_PAGES.map((page) => {
-          const Icon = page.icon;
-          return (
-            <Link
-              key={page.href}
-              href={page.href}
-              prefetch={false}
-              className="group rounded-xl border border-border bg-card p-4 text-left transition hover:border-primary hover:shadow-sm"
-            >
-              <div className="flex items-center gap-2">
-                <Icon className="size-4 text-primary" aria-hidden="true" />
-                <div className="text-sm font-bold text-foreground">{page.label}</div>
-              </div>
-              <p className="mt-1.5 text-xs text-muted-foreground line-clamp-2">
-                {page.blurb}
-              </p>
-            </Link>
-          );
-        })}
+        {/* Popular pages — a ruled list. Covers every major content area
+            so any user, regardless of intent, has a relevant next step. */}
+        <ul className="mt-12 border-t border-border">
+          {POPULAR_PAGES.map((page) => (
+            <li key={page.href} className="border-b border-rule-soft">
+              <Link
+                href={page.href}
+                prefetch={false}
+                className="group flex min-h-11 flex-col gap-0.5 py-3 sm:flex-row sm:items-baseline sm:gap-4"
+              >
+                <span className="text-base font-semibold text-primary underline-offset-[3px] group-hover:underline sm:w-44 sm:shrink-0">
+                  {page.label}
+                </span>
+                <span className="text-pretty text-sm text-muted-foreground">
+                  {page.blurb}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
     </main>
   );

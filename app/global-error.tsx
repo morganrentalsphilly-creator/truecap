@@ -32,15 +32,15 @@ export default function GlobalError({
 
   return (
     <html lang="en">
-      <body style={{ fontFamily: "system-ui, -apple-system, sans-serif", padding: "2rem", margin: 0, background: "#f8fafc" }}>
+      <body style={{ fontFamily: "system-ui, -apple-system, sans-serif", padding: "2rem", margin: 0, background: "#fbfaf7" }}>
         <div style={{ maxWidth: 480, margin: "10vh auto", textAlign: "center" }}>
-          <div style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#64748b", marginBottom: "0.5rem" }}>
+          <div style={{ fontSize: "0.75rem", fontFamily: "ui-monospace, monospace", color: "#5b6069", marginBottom: "0.5rem" }}>
             TrueCap
           </div>
-          <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0f172a", margin: "0 0 0.5rem" }}>
+          <h1 style={{ fontSize: "1.75rem", fontWeight: 750, letterSpacing: "-0.025em", color: "#26292e", margin: "0 0 0.5rem" }}>
             Something went very wrong
           </h1>
-          <p style={{ fontSize: "0.875rem", color: "#475569", lineHeight: 1.5 }}>
+          <p style={{ fontSize: "1rem", color: "#5b6069", lineHeight: 1.55 }}>
             We hit a serious error and can&apos;t recover gracefully. Try
             reloading the page.{" "}
             {error?.digest ? (
@@ -52,10 +52,10 @@ export default function GlobalError({
           <button
             type="button"
             onClick={() => reset()}
-            // Brand primary (#0070c4), not the default blue, so this
+            // The Blueprint cobalt (#1853c6, DESIGN.md "Color") as hex, so this
             // last-resort page still feels like TrueCap. Inline styles
             // only — globals.css isn't loaded by global-error.tsx.
-            style={{ marginTop: "1.5rem", background: "#0070c4", color: "#fff", border: "none", padding: "0.625rem 1rem", borderRadius: "0.75rem", fontWeight: 700, cursor: "pointer" }}
+            style={{ marginTop: "1.5rem", background: "#1853c6", color: "#fff", border: "none", padding: "0.75rem 1.25rem", borderRadius: "8px", fontWeight: 600, minHeight: 44, cursor: "pointer" }}
           >
             Try again
           </button>
@@ -63,7 +63,7 @@ export default function GlobalError({
             {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- global-error renders its own <html>/<body> outside the App Router, so next/link has no router context here; a plain <a> is required. */}
             <a
               href="/"
-              style={{ fontSize: "0.8125rem", color: "#475569", textDecoration: "underline" }}
+              style={{ fontSize: "0.875rem", color: "#1853c6", textDecoration: "underline", textUnderlineOffset: 3 }}
             >
               or go to the homepage
             </a>

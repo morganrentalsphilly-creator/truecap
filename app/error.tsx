@@ -13,7 +13,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { captureExceptionLazy } from "@/lib/sentry/lazy";
-import { ArrowUpRight, AlertTriangle, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 export default function GlobalAppError({
   error,
@@ -37,21 +37,16 @@ export default function GlobalAppError({
   }, [error]);
 
   return (
-    <main id="main" className="min-h-screen bg-background flex flex-col items-center justify-center px-4 text-center">
-      <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-negative/10 text-[var(--metric-negative)]">
-        <AlertTriangle className="size-6" />
-      </div>
-      <div className="text-xs uppercase tracking-widest text-muted-foreground font-bold mb-2">
-        TrueCap
-      </div>
-      <h1 className="text-xl sm:text-2xl font-bold text-foreground">
+    <main id="main" className="flex min-h-screen flex-col items-center justify-center bg-background bg-sheet-grid px-4 text-center">
+      <p className="font-mono text-xs text-muted-foreground">Error</p>
+      <h1 className="mt-2 font-display text-balance text-2xl text-foreground sm:text-3xl">
         Something went wrong on our end
       </h1>
-      <p className="text-sm text-muted-foreground mt-2 max-w-md">
+      <p className="mt-3 max-w-md text-pretty text-base text-muted-foreground">
         We hit an unexpected error while loading this page. Try again — most
         issues clear on a retry.{" "}
         {error?.digest ? (
-          <span className="block mt-1 text-xs opacity-70">
+          <span className="mt-1 block font-mono text-xs">
             Reference: {error.digest}
           </span>
         ) : null}
@@ -60,17 +55,16 @@ export default function GlobalAppError({
         <button
           type="button"
           onClick={() => reset()}
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-primary text-primary-foreground px-4 py-2 text-sm font-bold hover:opacity-90"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-[background-color] duration-150 hover:bg-primary-deep"
         >
-          <RefreshCw className="size-4" />
+          <RefreshCw className="size-4" aria-hidden />
           Try again
         </button>
         <Link
           href="/"
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-md text-sm font-bold text-primary hover:underline"
+          className="tc-link inline-flex min-h-11 items-center text-sm font-medium"
         >
           Go home
-          <ArrowUpRight className="size-4" />
         </Link>
       </div>
     </main>
