@@ -72,6 +72,7 @@ import {
   AdvancedBuyAndHoldSummary,
   RenovationModelDisclosure,
 } from "@/components/investcalc/advanced-buy-and-hold-summary";
+import { PriceTrack } from "@/components/investcalc/price-track";
 
 interface ReadOnlyAnalysisViewProps {
   values: InvestmentFormValues;
@@ -136,13 +137,13 @@ function MetricTile({
   glossaryTerm?: keyof typeof GLOSSARY;
 }) {
   const labelEl = (
-    <span className="text-3xs font-bold uppercase tracking-widest text-muted-foreground leading-tight">
+    <span className="text-xs font-medium leading-tight text-muted-foreground">
       {label}
     </span>
   );
   const toneClass = tone ? METRIC_TONE_TEXT_CLASS[tone] : undefined;
   return (
-    <div className="bg-card rounded-2xl border border-border p-3 sm:p-5 flex flex-col gap-1">
+    <div className="bg-card rounded-lg border border-border p-3 sm:p-5 flex flex-col gap-1">
       {glossaryTerm ? (
         <span className="self-start">
           <GlossaryTip term={glossaryTerm} className="!no-underline">
@@ -154,7 +155,7 @@ function MetricTile({
       )}
       <span
         className={cn(
-          "font-mono text-xl font-bold tabular-nums tracking-tight sm:text-2xl",
+          "font-display font-figure text-xl sm:text-2xl",
           toneClass,
           !toneClass && positive && "text-[var(--metric-positive)]",
           !toneClass && negative && "text-[var(--metric-negative)]",
@@ -189,12 +190,12 @@ function FrozenStrategyMetric({
 }) {
   return (
     <div className="rounded-xl border border-border bg-background p-3 sm:p-4">
-      <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="text-xs font-medium text-muted-foreground">
         {label}
       </p>
       <p
         className={cn(
-          "mt-1 font-mono text-xl font-extrabold tabular-nums sm:text-2xl",
+          "mt-1 font-display font-figure text-xl sm:text-2xl",
           tone === "positive" && "text-[var(--metric-positive)]",
           tone === "negative" && "text-[var(--metric-negative)]",
           tone === "neutral" && "text-foreground",
@@ -228,7 +229,7 @@ function FrozenAssumption({
           {SPECIALIST_SOURCE_LABEL[source]}
         </p>
       </div>
-      <p className="shrink-0 font-mono text-xs font-bold tabular-nums text-foreground">
+      <p className="shrink-0 font-figure text-xs font-semibold text-foreground">
         {value}
       </p>
     </div>
@@ -263,7 +264,7 @@ function FrozenSpecialistAnalysis({
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
         </div>
-        <p className="w-fit rounded-full border border-primary/25 bg-[var(--brand-blue-light)] px-3 py-1.5 text-3xs font-bold uppercase tracking-wide text-primary">
+        <p className="w-fit rounded-sm border border-border px-2 py-1 font-mono text-xs text-muted-foreground">
           Model v{snapshot.modelVersion} · core v
           {snapshot.coreMethodologyVersion}
         </p>
@@ -583,8 +584,8 @@ function SharedDealComps({ comps }: { comps: ReportComps }) {
       </div>
       <div className="p-5 space-y-4">
         <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+          <div className="border-t border-border pt-2">
+            <p className="text-xs font-medium text-muted-foreground">
               Est. value
             </p>
             <p className="mt-0.5 text-lg font-bold tabular-nums text-foreground">
@@ -594,8 +595,8 @@ function SharedDealComps({ comps }: { comps: ReportComps }) {
               <p className="text-2xs text-muted-foreground">{valueRange}</p>
             ) : null}
           </div>
-          <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+          <div className="border-t border-border pt-2">
+            <p className="text-xs font-medium text-muted-foreground">
               Est. rent
             </p>
             <p className="mt-0.5 text-lg font-bold tabular-nums text-foreground">
@@ -610,7 +611,7 @@ function SharedDealComps({ comps }: { comps: ReportComps }) {
         </div>
         {sale.length > 0 ? (
           <div>
-            <p className="mb-1 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="mb-1 text-xs font-medium text-muted-foreground">
               Comparable sales
             </p>
             <ul className="divide-y divide-border/70">
@@ -622,7 +623,7 @@ function SharedDealComps({ comps }: { comps: ReportComps }) {
         ) : null}
         {rent.length > 0 ? (
           <div>
-            <p className="mb-1 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="mb-1 text-xs font-medium text-muted-foreground">
               Comparable rentals
             </p>
             <ul className="divide-y divide-border/70">
@@ -787,13 +788,13 @@ export function ReadOnlyAnalysisView({
     <div className="space-y-5">
       <section
         aria-labelledby="shared-decision-title"
-        className="rounded-2xl border-2 border-primary/30 bg-card p-5 shadow-sm sm:p-6"
+        className="rounded-lg border border-border bg-card p-5 shadow-md sm:p-6"
       >
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.8fr)]">
           <div>
             <h2
               id="shared-decision-title"
-              className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl"
+              className="font-display text-balance text-2xl text-foreground sm:text-3xl"
             >
               {decisionLabel}
             </h2>
@@ -809,13 +810,27 @@ export function ReadOnlyAnalysisView({
             </p>
           </div>
 
-          <div className="rounded-xl border border-primary/25 bg-[var(--brand-blue-light)] p-4">
-            <p className="text-2xs font-extrabold uppercase tracking-widest text-primary">
+          <div className="border-t-2 border-foreground pt-3">
+            <p className="text-sm font-semibold text-foreground">
               Offer Ceiling
             </p>
-            <p className="mt-1 font-mono text-3xl font-extrabold tabular-nums text-primary">
-              {ceilingDisplay}
-            </p>
+            {offerCeiling ? (
+              <p className="mt-1 font-display text-key-sm text-foreground [overflow-wrap:anywhere]">
+                <span className="highlight-stroke font-figure">{ceilingDisplay}</span>
+              </p>
+            ) : (
+              <p className="mt-1 font-display font-figure text-2xl text-foreground [overflow-wrap:anywhere]">
+                {ceilingDisplay}
+              </p>
+            )}
+            {offerCeiling && Number(values.purchasePrice) > 0 ? (
+              <PriceTrack
+                asking={Number(values.purchasePrice)}
+                ceiling={offerCeiling.ceiling}
+                compact
+                className="mt-3"
+              />
+            ) : null}
             {adoptedMaoTarget ? (
               <>
                 <p className="mt-1 text-xs font-semibold text-foreground">
@@ -872,11 +887,11 @@ export function ReadOnlyAnalysisView({
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+          <div className="border-t border-border pt-2">
+            <p className="text-xs font-medium text-muted-foreground">
               Criteria fit
             </p>
-            <p className="mt-1 text-sm font-extrabold text-foreground">
+            <p className="mt-1 text-sm font-semibold text-foreground">
               {criteriaMet == null
                 ? "No adopted target"
                 : criteriaMet
@@ -884,27 +899,27 @@ export function ReadOnlyAnalysisView({
                   : "Misses"}
             </p>
           </div>
-          <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+          <div className="border-t border-border pt-2">
+            <p className="text-xs font-medium text-muted-foreground">
               Decision readiness
             </p>
-            <p className="mt-1 text-sm font-extrabold text-foreground">
+            <p className="mt-1 text-sm font-semibold text-foreground">
               Screening only
             </p>
           </div>
-          <div className="rounded-xl border border-border bg-muted/30 p-3">
-            <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+          <div className="border-t border-border pt-2">
+            <p className="text-xs font-medium text-muted-foreground">
               Margin of safety
             </p>
-            <p className="mt-1 text-sm font-extrabold text-foreground">
+            <p className="mt-1 text-sm font-semibold text-foreground">
               {priceGap}
             </p>
           </div>
-          <div className="rounded-xl border border-primary/20 bg-[var(--brand-blue-light)] p-3">
-            <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+          <div className="border-t-2 border-primary pt-2">
+            <p className="text-xs font-medium text-muted-foreground">
               Next action
             </p>
-            <p className="mt-1 text-sm font-extrabold text-foreground">
+            <p className="mt-1 text-sm font-semibold text-foreground">
               {assumptionBreakpoints[0]
                 ? `Verify ${assumptionBreakpoints[0].label.toLowerCase()}`
                 : "Verify material assumptions"}
@@ -912,8 +927,8 @@ export function ReadOnlyAnalysisView({
           </div>
         </div>
 
-        <div className="mt-4 rounded-xl border border-caution/40 bg-caution-light p-3">
-          <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+        <div className="mt-4 border-l-2 border-caution py-0.5 pl-3">
+          <p className="text-xs font-medium text-muted-foreground">
             What could break the deal
           </p>
           {assumptionBreakpoints.length > 0 ? (

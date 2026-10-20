@@ -29,6 +29,7 @@ import type { OfferCeilingTargetSource } from "@/lib/offer-ceiling-contract";
 import type { PublicShareAnalysisPayload } from "@/lib/public-share-analysis-result";
 import type { AnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
 import type { SpecialistAnalysisSnapshot } from "@/lib/specialist-analysis-snapshot";
+import { textOnBrand } from "@/lib/brand-contrast";
 
 export type SharedDealLeadCapture = {
   ownerId: string;
@@ -143,9 +144,15 @@ export function SharedDealShell({
       {isMemo ? null : <TrackSharedDealView referralSource={shareSurface} />}
       {/* Top banner — agent-branded when a Pro owner shared it, else TrueCap. */}
       {agent ? (
+        // The agent's brand color as the band, with white or graphite text,
+        // whichever clears the higher contrast (lib/brand-contrast.ts).
         <div
-          className="flex items-center justify-center gap-2 py-2.5 px-4 text-center text-xs font-semibold text-white sm:text-sm"
-          style={{ background: agent.primaryColor ?? "var(--primary)" }}
+          data-print-hide=""
+          className="flex items-center justify-center gap-2 py-2.5 px-4 text-center text-xs font-semibold sm:text-sm"
+          style={{
+            background: agent.primaryColor ?? "var(--primary)",
+            color: agent.primaryColor ? textOnBrand(agent.primaryColor) : "var(--primary-foreground)",
+          }}
         >
           {agent.logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -158,7 +165,7 @@ export function SharedDealShell({
           <span>Shared by {agent.displayName}</span>
         </div>
       ) : (
-        <div className="bg-primary text-primary-foreground py-2 px-4 text-center text-xs sm:text-sm">
+        <div data-print-hide="" className="bg-primary text-primary-foreground py-2 px-4 text-center text-xs sm:text-sm">
           {isMemo ? "Your decision memo from" : "Shared via"}{" "}
           <Link href="/" className="font-bold underline underline-offset-2">
             TrueCap
@@ -179,7 +186,7 @@ export function SharedDealShell({
               one line saying why there is no address. `values.address` then
               holds a placeholder the lead form's signature is bound to
               (app/s/[token]/page.tsx), which is not a heading. */}
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground">
+          <h1 className="font-display text-balance text-section-sm text-foreground sm:text-section">
             {addressIncluded ? values.address : HIDDEN_ADDRESS_HEADING}
           </h1>
           {addressIncluded ? null : (
@@ -268,7 +275,7 @@ export function SharedDealShell({
             above renders <Disclaimer /> and, below it, the page's one
             TrueCap call to action, so this footer carries only the brand
             line. */}
-        <footer className="mt-10 pb-8 text-center text-xs text-muted-foreground">
+        <footer data-print-hide="" className="mt-10 pb-8 text-center text-xs text-muted-foreground">
           <p>
             Built with{" "}
             <Link

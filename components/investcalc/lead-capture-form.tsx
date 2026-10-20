@@ -30,6 +30,7 @@ import * as Sentry from "@sentry/nextjs";
 import { Loader2, Check, Send } from "lucide-react";
 import { captureDealLeadAction } from "@/app/actions/capture-deal-lead";
 import { trackEvent } from "@/lib/analytics";
+import { textOnBrand } from "@/lib/brand-contrast";
 
 /** The agent's public contact details from their branding (lib/agent-share.ts). */
 export type LeadFormAgentContact = {
@@ -348,8 +349,8 @@ export function LeadCaptureForm({
       <button
         type="submit"
         disabled={status === "sending"}
-        className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
-        style={{ background: accent }}
+        className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold disabled:opacity-60"
+        style={{ background: accent, color: textOnBrand(accent) }}
       >
         {status === "sending" ? (
           <Loader2 aria-hidden="true" className="size-4 animate-spin" />
