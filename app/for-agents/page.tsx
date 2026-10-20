@@ -576,7 +576,7 @@ export default async function ForAgentsPage() {
             actions={
               <>
                 {agentProConfigured ? (
-                  <dl className="grid border-t-2 border-foreground sm:grid-cols-3 sm:gap-x-8">
+                  <dl className="grid border-t border-foreground sm:grid-cols-3 sm:gap-x-8">
                     <div className="border-b border-rule-soft py-3">
                       <dt className="text-base font-semibold">Billed annually</dt>
                       <dd className="mt-1">

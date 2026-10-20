@@ -414,7 +414,7 @@ function PricingStages({
     <div data-pricing-stages="">
       <h2
         id="pricing-stage-title"
-        className="text-balance border-b-2 border-foreground pb-2.5 text-base font-semibold"
+        className="text-balance border-b border-foreground pb-2.5 text-base font-semibold"
       >
         Which stage are you at?
       </h2>
@@ -743,7 +743,7 @@ export default function PricingPage() {
           {/* Phones use ruled rows (the tiers side by side under each
               feature); tablet and desktop keep the denser semantic table.
               No narrow viewport has to pan sideways. */}
-          <ul className="mt-8 border-t-2 border-foreground sm:hidden">
+          <ul className="mt-8 border-t border-foreground sm:hidden">
             {FEATURE_COMPARISON.map(([label, free, pro]) =>
               !alertsLive &&
               label === "Rate-drop alerts on saved deals" ? null : (
@@ -783,7 +783,7 @@ export default function PricingPage() {
           </ul>
           {/* The homepage ladder's grammar: opens on the heavy rule, a rule
               under the heads, soft rules between rows, marks in ink. */}
-          <ScrollX label="Table" className="mt-8 hidden border-t-2 border-foreground sm:block">
+          <ScrollX label="Table" className="mt-8 hidden border-t border-foreground sm:block">
             <table className="w-full border-collapse text-sm sm:text-base">
               <caption className="sr-only">
                 Features included with Free, {proOfferName}

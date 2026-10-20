@@ -284,7 +284,7 @@ export default function RehabEstimatorPage() {
           }
           actions={
             <>
-              <ul className="border-t-2 border-foreground">
+              <ul className="border-t border-foreground">
                 {[
                   "Line-item rehab range by scope of work",
                   "Separate dated ledger for construction-period cash flows",

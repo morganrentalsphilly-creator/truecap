@@ -466,7 +466,7 @@ export default function RentalPropertySpreadsheetPage() {
           lede="The spreadsheet is the manual version. TrueCap takes an address, can pre-fill editable rent and rate benchmarks, keeps property tax as a manual local input, runs the same math, and adds PMI modeling, 10-year cash-flow and equity projections, sensitivity, Offer Ceiling, and a Deal score."
           actions={
             <>
-              <ul className="border-t-2 border-foreground">
+              <ul className="border-t border-foreground">
                 {[
                   "Cash flow, cap rate, CoC, DSCR — auto-calculated",
                   "Editable HUD rent + FRED rate benchmarks; manual local property tax",

@@ -230,7 +230,7 @@ export default function BlogIndexPage() {
                       recipe), not cards. The title is the row's one link;
                       its padding, pulled back by the negative margin, makes
                       a 44px target without moving the rhythm. */}
-                  <ul className="min-w-0 border-t-2 border-foreground">
+                  <ul className="min-w-0 border-t border-foreground">
                     {group.posts.map((post) => (
                       <li key={post.slug} className="border-b border-rule-soft py-4">
                         {/* A row term (RuledList's dt): text-pretty fills the

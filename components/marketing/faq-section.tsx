@@ -127,7 +127,7 @@ export function FaqSection<Item extends { q: string; a: string }>({
               {intro}
             </p>
           ) : null}
-          <div className="mt-8 border-t-2 border-foreground">{rows}</div>
+          <div className="mt-8 border-t border-foreground">{rows}</div>
           {contact}
         </section>
         {/* Only one URL should claim this exact FAQ block in structured data. */}
@@ -161,7 +161,7 @@ export function FaqSection<Item extends { q: string; a: string }>({
             ) : null}
             {layout === "split" ? contact : null}
           </div>
-          <div className={layout === "split" ? "border-t-2 border-foreground" : "mt-8 border-t-2 border-foreground"}>
+          <div className={layout === "split" ? "border-t border-foreground" : "mt-8 border-t border-foreground"}>
             {rows}
           </div>
           {layout === "split" ? null : contact}

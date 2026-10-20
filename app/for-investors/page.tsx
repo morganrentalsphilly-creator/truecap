@@ -246,7 +246,7 @@ export default function ForInvestorsPage() {
           {/* The homepage source table's grid (11rem term, 16rem link), so
               the body column starts at the same x as the source table below;
               the titles are row terms in RuledList's voice. */}
-          <ul className="mt-8 border-t-2 border-foreground">
+          <ul className="mt-8 border-t border-foreground">
             {STRATEGIES.map(({ title, body, href, cta }) => (
               <li
                 key={title}
@@ -284,7 +284,7 @@ export default function ForInvestorsPage() {
           <SectionHeading id="sources-heading">
             Where the starting numbers come from
           </SectionHeading>
-          <dl className="mt-8 border-t-2 border-foreground">
+          <dl className="mt-8 border-t border-foreground">
             {SOURCES.map((s) => (
               <div key={s.label} className={cn(SOURCE_ROW_GRID, "border-b border-rule-soft py-4")}>
                 <dt className="font-semibold">{s.label}</dt>

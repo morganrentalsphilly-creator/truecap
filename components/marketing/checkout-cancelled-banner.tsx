@@ -43,7 +43,7 @@ export function CheckoutCancelledBanner({
   return (
     <div
       role="status"
-      className="mb-6 flex items-start gap-2.5 border-t-2 border-foreground py-3 text-base text-foreground"
+      className="mb-6 flex items-start gap-2.5 border-t border-foreground py-3 text-base text-foreground"
     >
       <Info aria-hidden className="mt-1 size-4 shrink-0 text-foreground" />
       <p className="max-w-[68ch] flex-1 text-pretty leading-relaxed">

@@ -309,7 +309,7 @@ export default function OnePercentRulePage() {
           lede="Passing the 1% rule earns a deal a closer look. TrueCap runs the full underwrite — cap rate, CoC, DSCR, cash flow, 10-year cash-flow and equity projections, sensitivity, and Offer Ceiling — free to start."
           actions={
             <>
-              <ul className="border-t-2 border-foreground">
+              <ul className="border-t border-foreground">
                 {[
                   "Cap rate + CoC + DSCR + monthly cash flow",
                   "10-year projection with rent growth (Pro)",

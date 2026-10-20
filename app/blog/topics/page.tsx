@@ -110,7 +110,7 @@ export default function BlogTopicsIndexPage() {
             grid), not cards. The title is the row's one link; its padding,
             pulled back by the negative margin, makes a 44px target. */}
         <Section rhythm="tight" rule="none">
-          <ul className="grid grid-cols-[minmax(0,1fr)] break-words border-t-2 border-foreground sm:grid-cols-[repeat(2,minmax(0,1fr))] sm:gap-x-12">
+          <ul className="grid grid-cols-[minmax(0,1fr)] break-words border-t border-foreground sm:grid-cols-[repeat(2,minmax(0,1fr))] sm:gap-x-12">
             {BLOG_TOPICS.map((topic) => (
               <li key={topic.slug} className="border-b border-rule-soft py-4">
                 <h2 className="text-pretty text-lg font-semibold">

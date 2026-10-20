@@ -47,7 +47,7 @@ function metricLine(record: VerifiedTestimonial): string | null {
 export function TestimonialCard({ record }: { record: VerifiedTestimonial }) {
   const metrics = metricLine(record);
   return (
-    <figure className="flex h-full flex-col border-t-2 border-foreground pt-4">
+    <figure className="flex h-full flex-col border-t border-foreground pt-4">
       <blockquote className="flex-1 text-pretty text-lg leading-relaxed text-foreground">
         &ldquo;{record.quote}&rdquo;
       </blockquote>

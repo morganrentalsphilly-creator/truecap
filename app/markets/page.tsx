@@ -121,7 +121,7 @@ export default function MarketsIndexPage() {
         <PageHero
           title="Rental property markets"
           aside={
-            <section aria-labelledby="markets-ask-heading" className="border-t-2 border-foreground pt-6">
+            <section aria-labelledby="markets-ask-heading" className="border-t border-foreground pt-6">
               <h2 id="markets-ask-heading" className={DATA_SUBHEADING_CLASS}>
                 Already have an address?
               </h2>
@@ -182,7 +182,7 @@ export default function MarketsIndexPage() {
                   key={group.slug}
                   id={`markets-${group.slug}`}
                   aria-labelledby={rangeHeadingId}
-                  className="border-t-2 border-foreground pt-6"
+                  className="border-t border-foreground pt-6"
                 >
                   <SectionHeading id={rangeHeadingId}>
                     States {group.label}

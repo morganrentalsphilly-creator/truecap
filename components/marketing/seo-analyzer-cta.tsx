@@ -76,7 +76,7 @@ export function SeoAnalyzerCta({
   return (
     <aside
       aria-label="Analyze your own deal"
-      className="border-t-2 border-foreground pt-6 sm:grid sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:gap-x-8"
+      className="border-t border-foreground pt-6 sm:grid sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:gap-x-8"
     >
       <div className="min-w-0">
         <p className="font-display text-balance text-h3-sm sm:text-2xl">

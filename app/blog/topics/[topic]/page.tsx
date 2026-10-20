@@ -166,7 +166,7 @@ export default async function BlogTopicHubPage({
             <div className="min-w-0 lg:sticky lg:top-24 lg:self-start">
               <SectionHeading id="topic-guides-heading">Guides</SectionHeading>
             </div>
-            <ul className="min-w-0 border-t-2 border-foreground">
+            <ul className="min-w-0 border-t border-foreground">
               {posts.map((post) => (
                 <li key={post.slug} className="border-b border-rule-soft py-4">
                   <h3 className="text-pretty text-lg font-semibold">
@@ -222,7 +222,7 @@ export default async function BlogTopicHubPage({
               <div className="min-w-0">
                 <SectionHeading id="topic-calculators-heading">Calculators for this</SectionHeading>
               </div>
-              <ul className="min-w-0 border-t-2 border-foreground">
+              <ul className="min-w-0 border-t border-foreground">
                 {calculators.map((calc) => (
                   <li key={calc.slug} className="border-b border-rule-soft py-4">
                     <h3 className="text-pretty text-lg font-semibold">

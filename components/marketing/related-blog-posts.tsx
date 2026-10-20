@@ -66,7 +66,7 @@ export function RelatedBlogPosts({ currentSlug, limit = 3 }: Props) {
           Keep reading
         </h2>
         <BlogHubLink postSlug={currentSlug} />
-        <ul className="mt-5 border-t-2 border-foreground">
+        <ul className="mt-5 border-t border-foreground">
           {related.map((post) => (
             <li key={post.slug} className="border-b border-rule-soft py-4">
               <h3 className="text-balance text-lg font-semibold">

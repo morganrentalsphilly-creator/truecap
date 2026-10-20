@@ -32,7 +32,7 @@ export function TestimonialFigure({ testimonial }: { testimonial: PublicTestimon
   const who = attribution(testimonial);
   const when = formatPublishedMonth(testimonial.publishedAt);
   return (
-    <figure className="flex h-full flex-col border-t-2 border-foreground pt-4">
+    <figure className="flex h-full flex-col border-t border-foreground pt-4">
       <blockquote className="flex-1 text-pretty text-lg leading-relaxed text-foreground">
         &ldquo;{testimonial.quote}&rdquo;
       </blockquote>

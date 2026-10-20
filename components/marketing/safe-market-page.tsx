@@ -150,7 +150,7 @@ export const DATA_BREADCRUMB_CURRENT_CLASS = "text-foreground";
  */
 export const DATA_TABLE_SCROLL_CLASS =
   "mt-6 [&_table_td:first-child]:bg-background [&_table_th:first-child]:bg-background";
-export const DATA_TABLE_CLASS = "w-full border-t-2 border-foreground text-base";
+export const DATA_TABLE_CLASS = "w-full border-t border-foreground text-base";
 export const DATA_TABLE_HEAD_ROW_CLASS = "border-b border-border text-left align-bottom";
 export const DATA_TABLE_HEAD_CELL_CLASS = "py-2.5 pr-4 text-sm font-semibold text-muted-foreground";
 export const DATA_TABLE_HEAD_FIGURE_CLASS = "py-2.5 pl-4 text-right text-sm font-semibold text-muted-foreground";
@@ -160,7 +160,7 @@ export const DATA_TABLE_FIGURE_CELL_CLASS = "py-2.5 pl-4 text-right text-foregro
 export const DATA_TABLE_PRIOR_FIGURE_CELL_CLASS = "py-2.5 pl-4 text-right text-muted-foreground";
 
 /** Labeled figures side by side (the sample underwrite, a state's facts): a ruled list, three columns from 640px. */
-export const DATA_FIGURES_CLASS = "mt-6 grid border-t-2 border-foreground sm:grid-cols-3 sm:gap-x-8";
+export const DATA_FIGURES_CLASS = "mt-6 grid border-t border-foreground sm:grid-cols-3 sm:gap-x-8";
 export const DATA_FIGURE_ITEM_CLASS = "border-b border-rule-soft py-4";
 export const DATA_FIGURE_LABEL_CLASS = "text-sm font-semibold text-muted-foreground";
 export const DATA_FIGURE_VALUE_CLASS = "mt-1 text-2xl font-medium text-foreground";
@@ -585,7 +585,7 @@ export function MarketLocalData({
   return (
     <section data-market-local-data="" className={DATA_SECTION_CLASS}>
       <SectionHeading>Local data for {city}</SectionHeading>
-      <dl className="mt-6 border-t-2 border-foreground">
+      <dl className="mt-6 border-t border-foreground">
         {tax ? (
           <div className={DATA_FIGURE_ITEM_CLASS}>
             <dt className={DATA_FIGURE_LABEL_CLASS}>

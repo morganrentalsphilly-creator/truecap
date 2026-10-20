@@ -192,7 +192,7 @@ export function OpenLedger({
     <ScrollX label="The sample deal, every row open" className="-mx-2 px-2">
       <div
         data-open-ledger=""
-        className="min-w-[16rem] border-t-2 border-foreground"
+        className="min-w-[16rem] border-t border-foreground"
       >
         <div
           aria-hidden

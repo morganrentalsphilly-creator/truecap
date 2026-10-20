@@ -399,72 +399,72 @@ export default function BlogPost() {
                 <tbody>
                   <tr>
                     <td>Down payment (20%)</td>
-                    <td className="text-right font-mono">$30,000</td>
+                    <td className="text-right font-figure">$30,000</td>
                     <td>Loan of $120,000</td>
                   </tr>
                   <tr>
                     <td>Origination (1% of loan)</td>
-                    <td className="text-right font-mono">$1,200</td>
+                    <td className="text-right font-figure">$1,200</td>
                     <td>Negotiable at some lenders</td>
                   </tr>
                   <tr>
                     <td>Appraisal</td>
-                    <td className="text-right font-mono">$650</td>
+                    <td className="text-right font-figure">$650</td>
                     <td>Often paid upfront</td>
                   </tr>
                   <tr>
                     <td>Underwriting, processing, credit</td>
-                    <td className="text-right font-mono">$900</td>
+                    <td className="text-right font-figure">$900</td>
                     <td>Junk-fee territory</td>
                   </tr>
                   <tr>
                     <td>Lender title policy + settlement</td>
-                    <td className="text-right font-mono">$1,400</td>
+                    <td className="text-right font-figure">$1,400</td>
                     <td></td>
                   </tr>
                   <tr>
                     <td>Recording + transfer tax</td>
-                    <td className="text-right font-mono">$600</td>
+                    <td className="text-right font-figure">$600</td>
                     <td>Wildly state-dependent</td>
                   </tr>
                   <tr>
                     <td>Inspection</td>
-                    <td className="text-right font-mono">$600</td>
+                    <td className="text-right font-figure">$600</td>
                     <td>Spent before you own it</td>
                   </tr>
                   <tr>
                     <td>Prepaid interest (15 days)</td>
-                    <td className="text-right font-mono">$358</td>
+                    <td className="text-right font-figure">$358</td>
                     <td>Depends on closing date</td>
                   </tr>
                   <tr>
                     <td>Hazard insurance (12 months)</td>
-                    <td className="text-right font-mono">$1,500</td>
+                    <td className="text-right font-figure">$1,500</td>
                     <td>Paid in full at closing</td>
                   </tr>
                   <tr>
                     <td>Initial tax escrow deposit (4 months)</td>
-                    <td className="text-right font-mono">$750</td>
+                    <td className="text-right font-figure">$750</td>
                     <td></td>
                   </tr>
                   <tr>
                     <td>Make-ready before first tenant</td>
-                    <td className="text-right font-mono">$6,000</td>
+                    <td className="text-right font-figure">$6,000</td>
                     <td>Paint, floors, appliances</td>
                   </tr>
                   <tr>
                     <td className="font-semibold">Cash actually spent</td>
-                    <td className="text-right font-mono font-semibold">$43,958</td>
+                    <td className="text-right font-figure font-semibold">$43,958</td>
                     <td>Your basis in the deal</td>
                   </tr>
                   <tr>
                     <td>Reserves (6 × $1,131 PITIA)</td>
-                    <td className="text-right font-mono">$6,786</td>
+                    <td className="text-right font-figure">$6,786</td>
                     <td>Shown, not spent</td>
                   </tr>
                   <tr>
                     <td className="font-semibold">Total cash required</td>
-                    <td className="text-right font-mono font-semibold">$50,744</td>
+                    <td className="text-right font-figure font-semibold">$50,744</td>
                     <td>33.8% of price</td>
                   </tr>
                 </tbody>
@@ -504,38 +504,38 @@ export default function BlogPost() {
                 <tbody>
                   <tr>
                     <td>Down payment (20%)</td>
-                    <td className="text-right font-mono">$60,000</td>
-                    <td className="text-right font-mono">20.0%</td>
+                    <td className="text-right font-figure">$60,000</td>
+                    <td className="text-right font-figure">20.0%</td>
                   </tr>
                   <tr>
                     <td>Closing costs</td>
-                    <td className="text-right font-mono">$8,250</td>
-                    <td className="text-right font-mono">2.8%</td>
+                    <td className="text-right font-figure">$8,250</td>
+                    <td className="text-right font-figure">2.8%</td>
                   </tr>
                   <tr>
                     <td>Prepaids + escrow setup</td>
-                    <td className="text-right font-mono">$3,715</td>
-                    <td className="text-right font-mono">1.2%</td>
+                    <td className="text-right font-figure">$3,715</td>
+                    <td className="text-right font-figure">1.2%</td>
                   </tr>
                   <tr>
                     <td>Make-ready</td>
-                    <td className="text-right font-mono">$5,000</td>
-                    <td className="text-right font-mono">1.7%</td>
+                    <td className="text-right font-figure">$5,000</td>
+                    <td className="text-right font-figure">1.7%</td>
                   </tr>
                   <tr>
                     <td className="font-semibold">Cash actually spent</td>
-                    <td className="text-right font-mono font-semibold">$76,965</td>
-                    <td className="text-right font-mono font-semibold">25.7%</td>
+                    <td className="text-right font-figure font-semibold">$76,965</td>
+                    <td className="text-right font-figure font-semibold">25.7%</td>
                   </tr>
                   <tr>
                     <td>Reserves (6 × $2,071)</td>
-                    <td className="text-right font-mono">$12,423</td>
-                    <td className="text-right font-mono">4.1%</td>
+                    <td className="text-right font-figure">$12,423</td>
+                    <td className="text-right font-figure">4.1%</td>
                   </tr>
                   <tr>
                     <td className="font-semibold">Total cash required</td>
-                    <td className="text-right font-mono font-semibold">$89,388</td>
-                    <td className="text-right font-mono font-semibold">29.8%</td>
+                    <td className="text-right font-figure font-semibold">$89,388</td>
+                    <td className="text-right font-figure font-semibold">29.8%</td>
                   </tr>
                 </tbody>
               </table>
@@ -582,38 +582,38 @@ export default function BlogPost() {
                 <tbody>
                   <tr>
                     <td>Down payment (20%)</td>
-                    <td className="text-right font-mono">$100,000</td>
-                    <td className="text-right font-mono">20.0%</td>
+                    <td className="text-right font-figure">$100,000</td>
+                    <td className="text-right font-figure">20.0%</td>
                   </tr>
                   <tr>
                     <td>Closing costs</td>
-                    <td className="text-right font-mono">$12,600</td>
-                    <td className="text-right font-mono">2.5%</td>
+                    <td className="text-right font-figure">$12,600</td>
+                    <td className="text-right font-figure">2.5%</td>
                   </tr>
                   <tr>
                     <td>Prepaids + escrow setup</td>
-                    <td className="text-right font-mono">$5,459</td>
-                    <td className="text-right font-mono">1.1%</td>
+                    <td className="text-right font-figure">$5,459</td>
+                    <td className="text-right font-figure">1.1%</td>
                   </tr>
                   <tr>
                     <td>Make-ready</td>
-                    <td className="text-right font-mono">$4,000</td>
-                    <td className="text-right font-mono">0.8%</td>
+                    <td className="text-right font-figure">$4,000</td>
+                    <td className="text-right font-figure">0.8%</td>
                   </tr>
                   <tr>
                     <td className="font-semibold">Cash actually spent</td>
-                    <td className="text-right font-mono font-semibold">$122,059</td>
-                    <td className="text-right font-mono font-semibold">24.4%</td>
+                    <td className="text-right font-figure font-semibold">$122,059</td>
+                    <td className="text-right font-figure font-semibold">24.4%</td>
                   </tr>
                   <tr>
                     <td>Reserves (6 × $3,362)</td>
-                    <td className="text-right font-mono">$20,172</td>
-                    <td className="text-right font-mono">4.0%</td>
+                    <td className="text-right font-figure">$20,172</td>
+                    <td className="text-right font-figure">4.0%</td>
                   </tr>
                   <tr>
                     <td className="font-semibold">Total cash required</td>
-                    <td className="text-right font-mono font-semibold">$142,231</td>
-                    <td className="text-right font-mono font-semibold">28.4%</td>
+                    <td className="text-right font-figure font-semibold">$142,231</td>
+                    <td className="text-right font-figure font-semibold">28.4%</td>
                   </tr>
                 </tbody>
               </table>
@@ -650,24 +650,24 @@ export default function BlogPost() {
                 <tbody>
                   <tr>
                     <td>$150,000</td>
-                    <td className="text-right font-mono">$30,000</td>
-                    <td className="text-right font-mono">$50,744</td>
-                    <td className="text-right font-mono">33.8%</td>
-                    <td className="text-right font-mono">1.69×</td>
+                    <td className="text-right font-figure">$30,000</td>
+                    <td className="text-right font-figure">$50,744</td>
+                    <td className="text-right font-figure">33.8%</td>
+                    <td className="text-right font-figure">1.69×</td>
                   </tr>
                   <tr>
                     <td>$300,000</td>
-                    <td className="text-right font-mono">$60,000</td>
-                    <td className="text-right font-mono">$89,388</td>
-                    <td className="text-right font-mono">29.8%</td>
-                    <td className="text-right font-mono">1.49×</td>
+                    <td className="text-right font-figure">$60,000</td>
+                    <td className="text-right font-figure">$89,388</td>
+                    <td className="text-right font-figure">29.8%</td>
+                    <td className="text-right font-figure">1.49×</td>
                   </tr>
                   <tr>
                     <td>$500,000</td>
-                    <td className="text-right font-mono">$100,000</td>
-                    <td className="text-right font-mono">$142,231</td>
-                    <td className="text-right font-mono">28.4%</td>
-                    <td className="text-right font-mono">1.42×</td>
+                    <td className="text-right font-figure">$100,000</td>
+                    <td className="text-right font-figure">$142,231</td>
+                    <td className="text-right font-figure">28.4%</td>
+                    <td className="text-right font-figure">1.42×</td>
                   </tr>
                 </tbody>
               </table>
@@ -804,24 +804,24 @@ export default function BlogPost() {
                 <tbody>
                   <tr>
                     <td>15% ($45,000)</td>
-                    <td className="text-right font-mono">$62,160</td>
-                    <td className="text-right font-mono">$14,440</td>
-                    <td className="text-right font-mono">$76,600</td>
-                    <td className="text-right font-mono">0.67</td>
+                    <td className="text-right font-figure">$62,160</td>
+                    <td className="text-right font-figure">$14,440</td>
+                    <td className="text-right font-figure">$76,600</td>
+                    <td className="text-right font-figure">0.67</td>
                   </tr>
                   <tr>
                     <td>20% ($60,000)</td>
-                    <td className="text-right font-mono">$76,965</td>
-                    <td className="text-right font-mono">$12,423</td>
-                    <td className="text-right font-mono">$89,388</td>
-                    <td className="text-right font-mono">0.81</td>
+                    <td className="text-right font-figure">$76,965</td>
+                    <td className="text-right font-figure">$12,423</td>
+                    <td className="text-right font-figure">$89,388</td>
+                    <td className="text-right font-figure">0.81</td>
                   </tr>
                   <tr>
                     <td>25% ($75,000)</td>
-                    <td className="text-right font-mono">$91,770</td>
-                    <td className="text-right font-mono">$11,809</td>
-                    <td className="text-right font-mono">$103,579</td>
-                    <td className="text-right font-mono">0.86</td>
+                    <td className="text-right font-figure">$91,770</td>
+                    <td className="text-right font-figure">$11,809</td>
+                    <td className="text-right font-figure">$103,579</td>
+                    <td className="text-right font-figure">0.86</td>
                   </tr>
                 </tbody>
               </table>
@@ -929,31 +929,31 @@ export default function BlogPost() {
                 <tbody>
                   <tr>
                     <td>Down payment (5%)</td>
-                    <td className="text-right font-mono">$20,000</td>
+                    <td className="text-right font-figure">$20,000</td>
                   </tr>
                   <tr>
                     <td>Closing costs</td>
-                    <td className="text-right font-mono">$11,700</td>
+                    <td className="text-right font-figure">$11,700</td>
                   </tr>
                   <tr>
                     <td>Prepaids + escrow setup</td>
-                    <td className="text-right font-mono">$4,721</td>
+                    <td className="text-right font-figure">$4,721</td>
                   </tr>
                   <tr>
                     <td>Make-ready</td>
-                    <td className="text-right font-mono">$3,000</td>
+                    <td className="text-right font-figure">$3,000</td>
                   </tr>
                   <tr>
                     <td className="font-semibold">Cash actually spent</td>
-                    <td className="text-right font-mono font-semibold">$39,421</td>
+                    <td className="text-right font-figure font-semibold">$39,421</td>
                   </tr>
                   <tr>
                     <td>Reserves (6 × $3,268)</td>
-                    <td className="text-right font-mono">$19,608</td>
+                    <td className="text-right font-figure">$19,608</td>
                   </tr>
                   <tr>
                     <td className="font-semibold">Total cash required</td>
-                    <td className="text-right font-mono font-semibold">$59,029</td>
+                    <td className="text-right font-figure font-semibold">$59,029</td>
                   </tr>
                 </tbody>
               </table>

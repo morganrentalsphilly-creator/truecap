@@ -91,7 +91,7 @@ export default function StatesIndexPage() {
             the link style, the lines under it are its meta. The hero's bottom rule
             opens the section. */}
         <Section rule="none" rhythm="tight">
-          <ul className="grid grid-cols-[minmax(0,1fr)] border-t-2 border-foreground sm:grid-cols-2 sm:gap-x-12 lg:grid-cols-3">
+          <ul className="grid grid-cols-[minmax(0,1fr)] border-t border-foreground sm:grid-cols-2 sm:gap-x-12 lg:grid-cols-3">
             {linkableStates(Object.values(STATES))
               .sort((a, b) => a.name.localeCompare(b.name))
               .map((s) => (
