@@ -17,7 +17,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { ChartCard } from "@/components/investcalc/analysis-panels/shared/chart-card";
-import { usePrefersReducedMotion } from "@/components/investcalc/analysis-panels/shared/use-prefers-reduced-motion";
+import { useChartDrawAnimation } from "@/components/investcalc/analysis-panels/shared/use-prefers-reduced-motion";
 import {
   formatCompactCurrency,
   formatCurrency,
@@ -40,7 +40,7 @@ export function TaxStrategyCharts({
 }) {
   // Recharts animates from JavaScript, which the reduced-motion CSS rule
   // cannot stop, so every mark is told directly.
-  const animate = !usePrefersReducedMotion();
+  const animate = useChartDrawAnimation();
   return (
     <div className="grid min-w-0 gap-3 sm:gap-4 xl:grid-cols-2">
       <ChartCard title="Modeled Annual Tax Savings">

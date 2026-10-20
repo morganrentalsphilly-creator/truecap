@@ -13,7 +13,7 @@ import {
   ReferenceLine,
 } from "recharts";
 import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
-import { usePrefersReducedMotion } from "@/components/investcalc/analysis-panels/shared/use-prefers-reduced-motion";
+import { useChartDrawAnimation } from "@/components/investcalc/analysis-panels/shared/use-prefers-reduced-motion";
 
 /**
  * One point per saved deal, with BOTH candidate return metrics carried so
@@ -139,7 +139,7 @@ export function RiskReturn({
   const [metric, setMetric] = useState<ReturnMetricId>("coc");
   // Recharts animates from JavaScript, which the reduced-motion CSS rule
   // cannot stop, so the mark is told directly (as the analyzer's charts are).
-  const animate = !usePrefersReducedMotion();
+  const animate = useChartDrawAnimation();
   const effectiveMetric: ReturnMetricId = showLongTermRoi ? metric : "coc";
   const availableMetrics = showLongTermRoi
     ? RETURN_METRICS

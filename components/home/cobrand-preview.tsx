@@ -11,24 +11,8 @@
  */
 
 import { useId, useState } from "react";
+import { textOnBrand } from "@/lib/brand-contrast";
 import { cn } from "@/lib/utils";
-
-/** Relative luminance of a #rrggbb color, for the text-on-brand choice. */
-function luminance(hex: string): number {
-  const channel = (i: number) => {
-    const v = parseInt(hex.slice(i, i + 2), 16) / 255;
-    return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-  };
-  return 0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5);
-}
-
-/** White or graphite, whichever clears the higher contrast on the brand color. */
-export function textOn(hex: string): "#ffffff" | "#26292e" {
-  const l = luminance(hex);
-  const white = 1.05 / (l + 0.05);
-  const graphite = (l + 0.05) / (0.027 + 0.05);
-  return white >= graphite ? "#ffffff" : "#26292e";
-}
 
 const DEFAULT_COLOR = "#1853c6";
 
@@ -37,7 +21,7 @@ export function CoBrandPreview({ className }: { className?: string }) {
   const [name, setName] = useState("");
   const [color, setColor] = useState(DEFAULT_COLOR);
   const shown = name.trim() || "Your name or brokerage";
-  const onBrand = textOn(color);
+  const onBrand = textOnBrand(color);
   const initials = shown
     .split(/\s+/)
     .slice(0, 2)
