@@ -30,11 +30,19 @@ import { Check } from "lucide-react";
 import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { HOMEPAGE_WALKTHROUGH_ID } from "@/components/marketing/marketing-hero";
-import { PlanCard, type PlanCardAnswer } from "@/components/marketing/plan-card";
+import { CoBrandPreview } from "@/components/home/cobrand-preview";
+import { PlansToggle } from "@/components/home/plans-toggle";
+import { ReceiptFlow } from "@/components/home/receipt-flow";
+import { StoryObserver } from "@/components/home/story-observer";
+import { DisclosureMark, LedgerVerdict } from "@/components/ledger/ledger-parts";
+import { formatDscr } from "@/lib/financial-presentation";
+import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
+import type { ReactNode } from "react";
+import type { PlanCardAnswer } from "@/components/marketing/plan-card";
 import { ClientPdfCover } from "@/components/marketing/client-pdf-cover";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { Note } from "@/components/marketing/page-parts";
-import { Section, SectionHeading } from "@/components/marketing/section";
+import { PAGE_CONTAINER, Section, SectionHeading } from "@/components/marketing/section";
 import { OpenLedger } from "@/components/ledger/open-ledger";
 import { buttonVariants } from "@/components/ui/button";
 import { CLIENT_RECEIVES } from "@/lib/client-receives";
@@ -45,12 +53,11 @@ import {
   PUBLIC_PRO_ANNUAL_USD,
   PUBLIC_PRO_MONTHLY_USD,
 } from "@/lib/public-pricing";
-import { buildSampleDealLedger } from "@/lib/sample-deal-ledger";
+import { buildSampleDealLedger, formatLedgerDollars, type SampleDealLedger } from "@/lib/sample-deal-ledger";
 import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
 import { cn } from "@/lib/utils";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { VERIFIED_TESTIMONIALS, isPublicationReady } from "@/lib/proof-records";
-import { DATA_SOURCE_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
 import { JsonLd } from "@/components/seo/json-ld";
 import { AGENT_FAQS } from "@/lib/agent-faqs";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
@@ -59,91 +66,189 @@ import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 // this file's client islands; the pages that import it from here keep working.
 export { FaqSection };
 
-// ─────────────────────────────────────────────────────── How It Works
-// ───────────────────────────────────────── Why not a spreadsheet
-// The rows that lived here were consolidated into the merged WhyTrueCap table
-// below (alongside DealCheck / BiggerPockets) and kept only as a dead `void`
-// reference. Removed 2026-08-28: one row claimed tax and depreciation
-// modelling as a TrueCap capability, and that output belongs to the
-// tax_strategy feature which entitlements-catalog marks shipped:false. Note the
-// phrase itself is not repeated here — lib/__tests__/unshipped-feature-claims
-// greps this file for it, and a comment quoting the claim would trip the very
-// guard that keeps it gone. Dead code that asserts
-// something untrue is one careless re-render away from being a live false
-// claim, so it does not get to sit here waiting.
-
+// ─────────────────────────────────────────────────────── From listing to offer
 /**
- * THE SPINE — "Analyze the deal. Know your number. Make the offer."
- *
- * Set as the expandable ledger (DESIGN.md "Homepage structure" 2): the hero's
- * sample deal opened row by row, with the three steps as notes against the
- * rows they explain. It replaces the three step cards and the problem block's
- * three question cards, which told the same progression a slice at a time.
- * The step copy is unchanged.
+ * The scroll story (OVERHAUL.md §6.2, DESIGN.md "The homepage" 2): one pinned
+ * sheet, built from real parts with the sample deal's figures, that changes
+ * as three steps scroll past. Step 1 pastes the listing and the starting
+ * values fill in with their source chips; step 2 runs the Buy Box check and
+ * the binding target lights up; step 3 resolves the Offer Ceiling and the
+ * send-to-client card arrives. From 1024px the sheet is sticky beside the
+ * steps and StoryObserver picks the active step; on phones, and without
+ * JavaScript, each step keeps its own sheet in flow. The full line items
+ * stay behind "See every line": they are the proof.
  */
-const SPINE_STEPS = [
+const STORY_STEPS = [
   {
-    key: "analyze",
-    label: "Analyze",
+    n: 1,
     title: "Paste the listing at the showing",
-    body: "A rent benchmark and a national owner-occupied mortgage-rate benchmark can fill from HUD and FRED. Property tax stays manual because a state aggregate is not a parcel bill. Switch the financing to the client's, and every assumption stays yours to review and change.",
+    body: "Rent fills from HUD and the rate from FRED, each labeled. Property tax stays your input, because a state average is not a parcel bill. Every assumption is yours to change.",
   },
   {
-    key: "decide",
-    label: "Screen",
+    n: 2,
     title: "Screen it against the client's Buy Box",
     body: "Cash flow, cap rate, cash-on-cash and DSCR at the asking price, a 0–100 Deal score, and whether it meets the client's targets, with the criterion it misses if it doesn't.",
   },
   {
-    key: "offer",
-    label: "Ceiling",
+    n: 3,
     title: "Send the Offer Ceiling, co-branded",
-    body: "The highest price that still meets the client's targets under the assumptions shown, the assumptions most likely to break the deal, and a memo the client opens without an account and can rerun with their own numbers.",
-    // The Offer Ceiling and the memo PDF have an anonymous first-decision
-    // allowance (FEATURE_CATALOG mao, pdf_export); co-branding
-    // (custom_branding) has none and is not in the no-card trial either
-    // (lib/entitlements.ts evaluationFeatures), so the note scopes the free
-    // part and names the plans that carry the rest.
-    proNote:
-      "The Offer Ceiling and the memo are included in your first complete decision; co-branding comes with Pro and Agent Pro",
+    body: "The highest price that still meets the client's targets, the assumptions most likely to break the deal, and a memo the client opens without an account and can rerun with their own numbers. The Offer Ceiling and the memo are included in your first complete decision; co-branding comes with Pro and Agent Pro.",
   },
 ] as const;
 
-function spineNote(step: (typeof SPINE_STEPS)[number]) {
-  return {
-    lead: `${step.title}.`,
-    body: "proNote" in step ? `${step.body} ${step.proNote}.` : step.body,
-  };
+/** A row of the story's sheet: a label, a figure and its source chip. */
+function SheetRow({ label, value, chip, tone }: { label: string; value: ReactNode; chip?: string; tone?: "flag" }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3 border-b border-rule-soft py-2 text-sm last:border-b-0">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="text-right">
+        <span className="font-figure font-semibold text-foreground">{value}</span>
+        {chip ? (
+          <span
+            className={cn(
+              "ml-2 font-mono text-xs leading-4",
+              tone === "flag" ? "text-highlight-text" : "text-muted-foreground",
+            )}
+          >
+            {chip}
+          </span>
+        ) : null}
+      </span>
+    </div>
+  );
+}
+
+function StoryFrames({ ledger }: { ledger: SampleDealLedger }) {
+  const values = SAMPLE_DEAL_FIXTURE.values;
+  const frameClass = "rounded-lg bg-card p-4 shadow-lg sm:p-5";
+  const caption = "flex justify-between gap-3 border-b border-border pb-2 font-mono text-xs text-muted-foreground";
+  const shortfall = ledger.cashFlowShortfall;
+  return (
+    <>
+      <div data-story-frame="1" className={frameClass}>
+        <p className={caption}>
+          <span>Step 1 · the listing</span>
+          <span>{ledger.title}</span>
+        </p>
+        <div className="mt-2">
+          <SheetRow label="Asking price" value={formatLedgerDollars(ledger.askingPrice)} chip="Your input" />
+          <SheetRow label="Rent" value={`${formatLedgerDollars(values.monthlyRent ?? 0)}/mo`} chip="HUD FMR" />
+          <SheetRow label="Mortgage rate" value={`${values.interestRate}%`} chip="FRED rate" />
+          <SheetRow label="Property tax" value={`${values.propertyTaxPct}% of price`} chip="Your input" tone="flag" />
+          <SheetRow label="Down payment" value={`${values.downPaymentPct}%`} chip="TrueCap default" />
+        </div>
+      </div>
+      <div data-story-frame="2" className={frameClass}>
+        <p className={caption}>
+          <span>Step 2 · the Buy Box</span>
+          <span>at asking</span>
+        </p>
+        <div className="mt-2">
+          <div className="flex items-baseline justify-between gap-3 border-b border-rule-soft py-2 text-sm">
+            <span>
+              Cash flow after reserves
+              <span className="block text-xs text-muted-foreground">Target ≥ {formatLedgerDollars(ledger.target.monthlyCashFlow ?? 0)}/mo · binding</span>
+            </span>
+            <span className="text-right">
+              <span className="font-figure font-semibold">{formatLedgerDollars(ledger.cashFlowMonthly.asking)}/mo</span>
+              <span className="block text-xs font-semibold text-highlight-text">
+                {shortfall != null ? `Misses by ${formatLedgerDollars(shortfall)}` : "Meets"}
+              </span>
+            </span>
+          </div>
+          <div className="flex items-baseline justify-between gap-3 py-2 text-sm">
+            <span>
+              DSCR
+              <span className="block text-xs text-muted-foreground">Target ≥ {ledger.target.dscr}</span>
+            </span>
+            <span className="text-right">
+              <span className="font-figure font-semibold">{formatDscr(ledger.dscr.asking, true)}</span>
+              <span className="block text-xs font-semibold text-positive">Meets</span>
+            </span>
+          </div>
+          <p className="mt-2 border-t border-border pt-2 text-sm">
+            Meets the Buy Box at asking:{" "}
+            <LedgerVerdict pass={ledger.meetsTargets.asking}>{ledger.meetsTargets.asking ? "Yes" : "No"}</LedgerVerdict>
+          </p>
+        </div>
+      </div>
+      <div data-story-frame="3" className={frameClass}>
+        <p className={caption}>
+          <span>Step 3 · the Offer Ceiling</span>
+          <span>send to client</span>
+        </p>
+        <div className="mt-3 flex items-baseline justify-between gap-3">
+          <span className="font-display text-lg">Offer Ceiling</span>
+          <span className="highlight-stroke font-display font-figure text-key-sm">{formatLedgerDollars(ledger.offerCeiling)}</span>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {ledger.belowAsking > 0 ? `${formatLedgerDollars(ledger.belowAsking)} below asking.` : "Asking clears the targets."}{" "}
+          Meets the Buy Box: <LedgerVerdict pass={ledger.meetsTargets.ceiling}>{ledger.meetsTargets.ceiling ? "Yes" : "No"}</LedgerVerdict>.
+        </p>
+        <div className="mt-3 border-t border-border pt-3 text-sm">
+          <p className="font-semibold">Send to client</p>
+          <p className="text-muted-foreground">A share link that opens without an account, and the decision memo, co-branded with Pro.</p>
+        </div>
+      </div>
+    </>
+  );
 }
 
 export function HowTrueCapWorks() {
   const ledger = buildSampleDealLedger();
-  const [analyze, screen, ceiling] = SPINE_STEPS;
+  const [analyze, screen, ceiling] = STORY_STEPS;
+  const notes = {
+    price: { lead: `${analyze.title}.`, body: analyze.body },
+    buyBox: { lead: `${screen.title}.`, body: screen.body },
+    ceiling: { lead: `${ceiling.title}.`, body: ceiling.body },
+  };
   return (
-    <Section id={HOMEPAGE_WALKTHROUGH_ID} rhythm="open" aria-labelledby="how-it-works-heading">
-      <SectionHeading id="how-it-works-heading">
-        From listing to offer in three steps.
-      </SectionHeading>
+    <Section id={HOMEPAGE_WALKTHROUGH_ID} rhythm="open" aria-labelledby="how-it-works-heading" data-story-root="">
+      <SectionHeading id="how-it-works-heading">From listing to offer in three steps.</SectionHeading>
       {ledger ? (
-        <div className="mt-8 sm:mt-12">
-          <OpenLedger
-            ledger={ledger}
-            notes={{
-              price: spineNote(analyze),
-              buyBox: spineNote(screen),
-              ceiling: spineNote(ceiling),
-            }}
-          />
-        </div>
+        <StoryObserver rootId={HOMEPAGE_WALKTHROUGH_ID}>
+          <div className="mt-8 grid gap-x-12 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start xl:gap-x-16">
+            <ol className="grid gap-10 lg:gap-0">
+              {STORY_STEPS.map((step) => (
+                <li key={step.n} data-story-step={step.n} className="grid gap-4 lg:min-h-[20rem] lg:py-8">
+                  <div className="flex gap-4">
+                    <span aria-hidden className="mt-1 w-8 shrink-0 font-figure text-sm font-semibold text-muted-foreground">
+                      {step.n}
+                    </span>
+                    <div>
+                      <h3 className="font-display text-h3-sm sm:text-2xl">{step.title}</h3>
+                      <p className="mt-2 max-w-[56ch] text-pretty text-base leading-relaxed text-muted-foreground">{step.body}</p>
+                    </div>
+                  </div>
+                  {/* The step's own sheet, in flow below 1024px and without JavaScript. */}
+                  <div className="lg:hidden" data-story-inline-frame={step.n}>
+                    <StoryFrames ledger={ledger} />
+                  </div>
+                </li>
+              ))}
+            </ol>
+            {/* The pinned sheet from 1024px: the three frames stack and the active one shows (globals.css). */}
+            <div className="hidden lg:sticky lg:top-24 lg:grid" aria-hidden data-story-panel="">
+              <StoryFrames ledger={ledger} />
+            </div>
+          </div>
+          <details className="tc-accordion group mt-10 border-t border-border">
+            <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 py-3 text-base font-semibold [&::-webkit-details-marker]:hidden">
+              See every line
+              <DisclosureMark />
+            </summary>
+            <div className="pb-4">
+              <OpenLedger ledger={ledger} notes={notes} />
+            </div>
+          </details>
+        </StoryObserver>
       ) : (
         // The sample deal failed to compute: the steps still read in order.
         <ol className="mt-8 border-t-2 border-foreground">
-          {SPINE_STEPS.map((step) => (
-            <li key={step.key} className="border-b border-border py-5">
+          {STORY_STEPS.map((step) => (
+            <li key={step.n} className="border-b border-border py-5">
               <h3 className="text-lg font-semibold">{step.title}</h3>
-              <p className="mt-1 max-w-[62ch] leading-relaxed text-muted-foreground">
-                {spineNote(step).body}
-              </p>
+              <p className="mt-1 max-w-[62ch] leading-relaxed text-muted-foreground">{step.body}</p>
             </li>
           ))}
         </ol>
@@ -158,18 +263,12 @@ export function HowTrueCapWorks() {
   );
 }
 
-// ───────────────────────────────────────── Retired: the module grid
-// OfferEngineSection (eight feature tiles) and Personas (three persona cards)
-// were unmounted before the 2026-09 design pass and deleted in it. Dead
-// sections that describe features are a live claim waiting to be re-rendered
-// (see the note at the top of this file), and both were built from the icon
-// tiles and card grids DESIGN.md retires.
-
 /**
- * Founder/trust block (2026-09 positioning pass). Facts come from /about only:
- * one rental investor in Philadelphia, built for their own underwriting. The
- * founder is described, never named (their request, 2026-09-07) — no name,
- * photo, portfolio size, returns, or customer counts belong here.
+ * Founder/trust block (2026-09 positioning pass), condensed in the 2026-10
+ * overhaul. Facts come from /about only: one rental investor in Philadelphia,
+ * built for their own underwriting. The founder is described, never named
+ * (their request, 2026-09-07): no name, photo, portfolio size, returns, or
+ * customer counts belong here.
  */
 export function BuiltByInvestor() {
   return (
@@ -179,11 +278,9 @@ export function BuiltByInvestor() {
           Built by a rental investor. Now built for the agents who serve them, too.
         </SectionHeading>
         <p className="mt-4 text-lg leading-relaxed">
-          TrueCap is built by one person, a rental investor in Philadelphia. It
-          started as a way to answer one practical question before every
-          offer: what price actually makes this property work? The same
-          analyzer now serves agents who screen and present deals for investor
-          clients. The defaults lean conservative, every assumption is
+          TrueCap is built by one person, a rental investor in Philadelphia, to
+          answer one question before every offer: what price makes this
+          property work? The defaults lean conservative, every assumption is
           editable, and the core formulas are published.
         </p>
         <p className="mt-3 flex flex-wrap gap-x-6 text-base">
@@ -200,37 +297,34 @@ export function BuiltByInvestor() {
 }
 
 /**
- * Closing ask. The page has made its case by here; the one job left is the
- * address field again (DESIGN.md "Homepage structure" 8), not a button that
- * scrolls back up to it.
+ * Closing ask on the navy band (DESIGN.md "The homepage" 6): the sheet
+ * inverted, the address field again, not a button that scrolls back up.
  */
 export function FinalCta() {
   return (
-    // The hero's grid, with the hero's gaps: the case on the left, the field
-    // on the right, where the ledger stood at the top of the page.
-    <Section rule="heavy" aria-labelledby="final-cta-heading">
-      <div className="grid gap-x-12 gap-y-2 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-end xl:gap-x-16">
+    <section className="bg-navy-grid text-navy-foreground" aria-labelledby="final-cta-heading">
+      <div className={cn(PAGE_CONTAINER, "grid gap-x-12 gap-y-6 py-18 sm:py-24 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-end xl:gap-x-16")}>
         <div>
-          <SectionHeading id="final-cta-heading">
+          <h2 id="final-cta-heading" className="font-display text-balance text-section-sm text-white sm:text-section">
             Paste the listing. Send the deal that already pencils.
-          </SectionHeading>
-          <p className="mt-4 max-w-[56ch] text-pretty text-lg leading-relaxed text-muted-foreground">
+          </h2>
+          <p className="mt-4 max-w-[56ch] text-pretty text-lg leading-relaxed text-navy-muted">
             Your first complete decision includes cash flow, cap rate, CoC, DSCR,
             Buy Box fit, the Offer Ceiling, downside checks, and next
             steps. No account or card required.
           </p>
         </div>
         <div>
-          <HeroAddressForm placement="close" className="max-w-none lg:mt-0" />
-          <p className="mt-4 border-t border-rule-soft pt-2.5 text-base">
+          <HeroAddressForm placement="close" tone="dark" className="max-w-none lg:mt-0" />
+          <p className="mt-4 border-t border-navy-line pt-2.5 text-base text-navy-muted">
             Buying for your own portfolio?{" "}
-            <IntentPrefetchLink href="/for-investors" className="tc-link -my-3 inline-block py-3">
+            <IntentPrefetchLink href="/for-investors" className="-my-3 inline-block py-3 text-white underline underline-offset-[3px]">
               See TrueCap for investors
             </IntentPrefetchLink>
           </p>
         </div>
       </div>
-    </Section>
+    </section>
   );
 }
 
@@ -639,130 +733,72 @@ export function HomepageFaq({
     </>
   );
 }
-
-// ───────────────────────────────────────── Final pre-calculator CTA
-// ───────────────────────────────────────── Data sources / accuracy
+// ───────────────────────────────────────── Every number has a receipt
 /**
- * Where the numbers come from, set as a source table in FRED's grammar
- * (DESIGN.md "Components"): each row gives the starting value's name, where it
- * comes from and on what basis, and what to replace it with. It answers the
- * question a client asks about any number, and the rows read from
- * lib/product-facts.ts so the claims cannot drift from the product.
+ * Where the numbers come from (OVERHAUL.md §6.3): the sources drawn as a flow
+ * into the result (components/home/receipt-flow.tsx). Each node is read from
+ * lib/product-facts.ts so the claims cannot drift from the product, and each
+ * opens its source, its basis and what to replace it with.
  */
-const DATA_SOURCES: {
-  label: string;
-  /** Where the starting value comes from, in lib/product-facts.ts's words. */
-  source: string;
-  /** Rendered as the row's flag: the default the model uses until replaced. */
-  flag?: string;
-  replace: string;
-}[] = [
-  {
-    label: "Rent",
-    source: `${DATA_SOURCE_FACTS.rent}.`,
-    replace: "Local rent comps",
-  },
-  {
-    label: "Mortgage rate",
-    source: `${DATA_SOURCE_FACTS.mortgageRate}, with its date shown.`,
-    replace: "An investor lender quote, before deciding",
-  },
-  {
-    label: "Property tax",
-    source: `Your input. ${PROPERTY_TAX_FACTS.notAutoFilled}`,
-    flag: PROPERTY_TAX_FACTS.blankFieldBehavior,
-    replace: "A local annual bill or reviewed effective rate",
-  },
-];
-
-const SOURCE_TABLE_GRID =
-  "grid gap-x-8 gap-y-1 sm:grid-cols-[9rem_minmax(0,1fr)] lg:grid-cols-[11rem_minmax(0,1fr)_16rem]";
-
 export function DataSourcesSection() {
+  const ledger = buildSampleDealLedger();
   return (
     <Section rhythm="tight" aria-labelledby="data-sources-heading">
       <div className="max-w-3xl">
-        <SectionHeading id="data-sources-heading">
-          Visible sources. Editable assumptions.
-        </SectionHeading>
+        <SectionHeading id="data-sources-heading">Every number has a receipt.</SectionHeading>
         <p className="mt-3 max-w-[62ch] text-lg leading-relaxed text-muted-foreground">
-          TrueCap labels sourced benchmarks and its own defaults, and keeps
-          every assumption editable. Start fast, then replace starting values
-          with verified property facts, local comps, and lender terms.
+          HUD sets the rent benchmark, FRED sets the rate, you set the property
+          tax. Each is labeled, each flows into the result, and each is yours to
+          replace with verified property facts, local comps and lender terms.
         </p>
       </div>
-      <div className="mt-8 border-t-2 border-foreground">
-        <div
-          aria-hidden
-          className={cn(
-            SOURCE_TABLE_GRID,
-            "hidden border-b border-border py-2.5 text-sm font-semibold text-muted-foreground sm:grid",
-          )}
-        >
-          <span>Starting value</span>
-          <span>Source</span>
-          <span className="hidden lg:block">Replace it with</span>
+      {ledger ? (
+        <div className="mt-8">
+          <ReceiptFlow ledger={ledger} />
         </div>
-        <dl>
-          {DATA_SOURCES.map((s) => (
-            <div key={s.label} className={cn(SOURCE_TABLE_GRID, "border-b border-rule-soft py-4")}>
-              <dt className="font-semibold">{s.label}</dt>
-              <dd className="min-w-0 text-base leading-relaxed">
-                {s.source}
-                {s.flag ? (
-                  // Flagged in ink at 600: orange means a miss and
-                  // nothing else (DESIGN.md color).
-                  <span className="mt-1 block font-semibold">{s.flag}</span>
-                ) : null}
-              </dd>
-              <dd className="text-base leading-relaxed sm:col-start-2 lg:col-start-auto">
-                <span className="lg:sr-only">Replace it with: </span>
-                {s.replace}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-      <p className="mt-5 max-w-[68ch] text-sm text-muted-foreground">
-        Fast starting point. Transparent assumptions. Final control stays with
-        you. This is what you show a client who asks where a number came from.
-      </p>
+      ) : null}
     </Section>
   );
 }
 
-// ───────────────────────────────────────── What the client receives
+// ───────────────────────────────────────── Make it yours
 /**
- * What the agent's client receives (DESIGN.md "Homepage structure" 4): the
- * co-branding facts (the /for-agents list, lib/client-receives.ts) beside
- * page 1 of the real PDF report, shown as a document. The picture, its alt
- * text and its caption live in ClientPdfCover, shared with /for-agents: the
- * cover is rendered from the sample deal with no branding, so the caption
- * says what branding changes and does not call it an agent's report.
+ * The co-branding preview (OVERHAUL.md §6.4): the visitor types a name and
+ * picks a color, and a mock share page and PDF cover recolor live
+ * (components/home/cobrand-preview.tsx). What the client receives, exactly
+ * (lib/client-receives.ts) and page 1 of the real PDF report (ClientPdfCover,
+ * shared with /for-agents) sit behind one disclosure: the facts stay on the
+ * page and the section keeps its weight.
  */
 export function ClientReceivesSection() {
   return (
     <Section id="what-your-client-receives" aria-labelledby="client-receives-heading">
-      <div className="grid gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-        <div>
-          <SectionHeading id="client-receives-heading">What your client receives</SectionHeading>
-          <p className="mt-3 max-w-[60ch] text-lg leading-relaxed text-muted-foreground">
-            No account on their side, nothing hidden on yours. Branding is set
-            up once in Settings and applies to every link and report.
-          </p>
-          <dl className="mt-8 border-t-2 border-foreground">
+      <div className="max-w-3xl">
+        <SectionHeading id="client-receives-heading">Make it yours.</SectionHeading>
+        <p className="mt-3 max-w-[60ch] text-lg leading-relaxed text-muted-foreground">
+          Type a name and pick a color: this is what your client opens, with no
+          account on their side and nothing hidden on yours. Branding is set up
+          once in Settings and applies to every link and report.
+        </p>
+      </div>
+      <CoBrandPreview className="mt-8" />
+      <details className="tc-accordion group mt-10 border-t border-border">
+        <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 py-3 text-base font-semibold [&::-webkit-details-marker]:hidden">
+          What your client receives, exactly
+          <DisclosureMark />
+        </summary>
+        <div className="grid gap-x-16 gap-y-10 pb-4 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+          <dl className="border-t border-border">
             {CLIENT_RECEIVES.map((item) => (
               <div key={item.key} className="border-b border-rule-soft py-4">
                 <dt className="text-lg font-semibold">{item.title}</dt>
-                <dd className="mt-1 max-w-[64ch] text-base leading-relaxed text-muted-foreground">
-                  {item.body}
-                </dd>
+                <dd className="mt-1 max-w-[64ch] text-base leading-relaxed text-muted-foreground">{item.body}</dd>
               </div>
             ))}
           </dl>
+          <ClientPdfCover className="lg:pt-2" />
         </div>
-        <ClientPdfCover className="lg:pt-2" />
-      </div>
+      </details>
     </Section>
   );
 }
@@ -825,6 +861,14 @@ function proCell(key: FeatureKey) {
  * public catalog as the documented fallback (the /for-agents pattern), and
  * what each tier includes comes from lib/entitlements-catalog.
  */
+
+/** A Stripe display label ("$29.99") as a number, for the cadence toggle; null when it is not a plain amount. */
+function parseAmount(label: string | undefined): number | null {
+  if (!label) return null;
+  const n = Number(label.replace(/[^0-9.]/g, ""));
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
 export async function PdfProUpsell() {
   const { proOfferName } = getMarketingOfferConfig();
   const ladderHeaders = ["Free", proOfferName] as const;
@@ -883,6 +927,20 @@ export async function PdfProUpsell() {
     variant: "outline",
     className: "w-full",
   });
+  const prices = {
+    pro: {
+      monthly: parseAmount(proMonthly?.amountLabel) ?? PUBLIC_PRO_MONTHLY_USD,
+      annual: parseAmount(proAnnual?.amountLabel) ?? PUBLIC_PRO_ANNUAL_USD,
+      monthlyLabel: price.proMonthly,
+      annualLabel: price.proAnnual,
+    },
+    agentPro: {
+      monthly: parseAmount(agentMonthly?.amountLabel) ?? PUBLIC_AGENT_PRO_MONTHLY_USD,
+      annual: parseAmount(agentAnnual?.amountLabel) ?? PUBLIC_AGENT_PRO_ANNUAL_USD,
+      monthlyLabel: price.agentMonthly,
+      annualLabel: price.agentAnnual,
+    },
+  };
 
   return (
     <Section aria-labelledby="plans-heading">
@@ -903,37 +961,30 @@ export async function PdfProUpsell() {
         </p>
       </div>
 
-      <div
-        className={cn(
-          "mt-10 grid gap-4 sm:gap-5",
-          agentProConfigured ? "md:grid-cols-3" : "md:grid-cols-2 lg:max-w-4xl",
-        )}
-      >
-        <PlanCard
-          name="Free"
-          audience="See the economics before you spend more time on a property."
-          price="$0"
-          priceNote="No account or card required."
-          answers={freeAnswers}
-          action={
+      {/* The toggle and the cards (components/home/plans-toggle.tsx): the
+          figures roll between cadences; every answer and action is set here. */}
+      <PlansToggle
+        freeCard={{
+          audience: "See the economics before you spend more time on a property.",
+          priceNote: "No account or card required.",
+          answers: freeAnswers,
+          action: (
             <AnalyzeCtaLink analyticsSource="plans_free" className={cta}>
               Analyze a deal free
             </AnalyzeCtaLink>
-          }
-        />
-        <PlanCard
-          name={proOfferName}
-          audience="Know what to offer on every deal."
-          price={price.proMonthly}
-          period="/mo"
-          priceNote={<>or {price.proAnnual}&nbsp;a&nbsp;year</>}
-          answers={proAnswers}
-          action={
+          ),
+        }}
+        proCard={{
+          name: proOfferName,
+          audience: "Know what to offer on every deal.",
+          answers: proAnswers,
+          prices: prices.pro,
+          action: (
             <IntentPrefetchLink href="/pricing" className={ctaSecondary}>
               See Pro pricing
             </IntentPrefetchLink>
-          }
-          footnote={
+          ),
+          footnote: (
             <>
               Create an account for a {PRODUCT_EVALUATION_DAYS}-day free trial:{" "}
               {PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and{" "}
@@ -941,48 +992,47 @@ export async function PdfProUpsell() {
               changed inputs counts as a new analysis. No card and no automatic
               subscription.
             </>
-          }
-        />
-        {agentProConfigured ? (
-          <PlanCard
-            data-homepage-agent-pro=""
-            name="Agent Pro"
-            audience="Win investor clients."
-            price={price.agentMonthly}
-            period="/mo"
-            priceNote={<>or {price.agentAnnual}&nbsp;a&nbsp;year</>}
-            // Only what Agent Pro adds, with the caps the code enforces: 100
-            // clients (app/actions/agent-clients.ts MAX_CLIENTS) and 12 Buy
-            // Boxes per account (app/actions/user-buy-boxes.ts MAX_BUY_BOXES).
-            // Co-branding is Pro too, so it is the note, not a row.
-            answers={[
-              {
-                term: "Client Buy Boxes",
-                detail: "Up to 100 clients on your roster; up to 12 Buy Boxes per account.",
-              },
-              {
-                term: "Deals screened to their targets",
-                detail: "Assign a deal to a client and it is screened against their Buy Box, not yours.",
-              },
-              {
-                term: "Client-report share links",
-                detail: "Open without an account; the address stays hidden unless you include it.",
-              },
-            ]}
-            note={
-              <>
-                Plus everything in {proOfferName}, including co-branded share
-                pages and PDFs.
-              </>
-            }
-            action={
-              <IntentPrefetchLink href="/for-agents" className={ctaSecondary}>
-                See TrueCap for agents
-              </IntentPrefetchLink>
-            }
-          />
-        ) : null}
-      </div>
+          ),
+        }}
+        agentProCard={
+          agentProConfigured
+            ? {
+                rootProps: { "data-homepage-agent-pro": "" },
+                audience: "Win investor clients.",
+                prices: prices.agentPro,
+                // Only what Agent Pro adds, with the caps the code enforces: 100
+                // clients (app/actions/agent-clients.ts MAX_CLIENTS) and 12 Buy
+                // Boxes per account (app/actions/user-buy-boxes.ts MAX_BUY_BOXES).
+                // Co-branding is Pro too, so it is the note, not a row.
+                answers: [
+                  {
+                    term: "Client Buy Boxes",
+                    detail: "Up to 100 clients on your roster; up to 12 Buy Boxes per account.",
+                  },
+                  {
+                    term: "Deals screened to their targets",
+                    detail: "Assign a deal to a client and it is screened against their Buy Box, not yours.",
+                  },
+                  {
+                    term: "Client-report share links",
+                    detail: "Open without an account; the address stays hidden unless you include it.",
+                  },
+                ],
+                note: (
+                  <>
+                    Plus everything in {proOfferName}, including co-branded share
+                    pages and PDFs.
+                  </>
+                ),
+                action: (
+                  <IntentPrefetchLink href="/for-agents" className={ctaSecondary}>
+                    See TrueCap for agents
+                  </IntentPrefetchLink>
+                ),
+              }
+            : null
+        }
+      />
 
       {/* The ladder under the cards: what exactly each tier includes, from
           the catalog, so no visitor guesses where the line is. */}
@@ -1009,11 +1059,11 @@ export async function PdfProUpsell() {
           </caption>
           <thead>
             <tr className="border-b border-border">
-              <th scope="col" className="py-2.5 pr-2 text-left">
+              <th scope="col" className="sticky top-[4.5rem] bg-background py-2.5 pr-2 text-left">
                 <span className="sr-only">Feature</span>
               </th>
               {ladderHeaders.map((h, i) => (
-                <th key={h} scope="col" className="px-1 py-2.5 text-center font-semibold">
+                <th key={h} scope="col" className="sticky top-[4.5rem] bg-background px-1 py-2.5 text-center font-semibold">
                   {h}
                   <span className="block text-sm font-normal text-muted-foreground">
                     {LADDER_SUBHEADERS[i]}

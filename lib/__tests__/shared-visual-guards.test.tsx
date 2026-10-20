@@ -96,7 +96,7 @@ describe("page parts", () => {
     );
     // The hook only works if the Note is the rows' next sibling and the rows
     // end on a <details>: pin that structure, not just the class.
-    expect(html).toMatch(/<details class="group border-b border-border">(?:(?!<details)[\s\S])*<\/details><\/div><aside class="max-w-\[68ch\] border-t border-border pt-3 \[:has\(&gt;details:last-child\)\+&amp;\]:border-t-0 mt-10">/);
+    expect(html).toMatch(/<details class="tc-accordion group border-b border-border">(?:(?!<details)[\s\S])*<\/details><\/div><aside class="max-w-\[68ch\] border-t border-border pt-3 \[:has\(&gt;details:last-child\)\+&amp;\]:border-t-0 mt-10">/);
   });
 
   it("sets a text-only hero in one column, an aside on the 5/7 grid, and a phone capture in a fixed right column", () => {

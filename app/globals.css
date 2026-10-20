@@ -241,11 +241,11 @@
      the float shadow; the hero panel and dark instruments the panel shadow. */
   --shadow-2xs: 0 1px 1px oklch(0.28 0.01 262 / 0.04);
   --shadow-xs: 0 1px 2px oklch(0.28 0.01 262 / 0.06);
-  --shadow-sm: 0 1px 1px oklch(0.28 0.01 262 / 0.05), 0 12px 32px -14px oklch(0.48 0.19 262 / 0.22);
-  --shadow-md: 0 12px 32px -12px oklch(0.28 0.01 262 / 0.2), 0 2px 6px -2px oklch(0.28 0.01 262 / 0.08);
-  --shadow-lg: 0 2px 4px oklch(0.28 0.01 262 / 0.1), 0 20px 48px -16px oklch(0.28 0.01 262 / 0.35);
+  --shadow-sm: 0 1px 2px oklch(0.28 0.01 262 / 0.05), 0 6px 14px -8px oklch(0.48 0.19 262 / 0.2);
+  --shadow-md: 0 6px 12px -6px oklch(0.28 0.01 262 / 0.22), 0 2px 4px -2px oklch(0.28 0.01 262 / 0.08);
+  --shadow-lg: 0 2px 4px oklch(0.28 0.01 262 / 0.08), 0 12px 24px -12px oklch(0.28 0.01 262 / 0.3);
   /* The float, cast upward, for bars fixed to the bottom edge. */
-  --shadow-float-up: 0 -12px 32px -12px oklch(0.28 0.01 262 / 0.18), 0 -2px 6px -2px oklch(0.28 0.01 262 / 0.08);
+  --shadow-float-up: 0 -6px 12px -6px oklch(0.28 0.01 262 / 0.18), 0 -2px 4px -2px oklch(0.28 0.01 262 / 0.08);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -291,18 +291,17 @@ textarea,
 /* The drafting sheet's grid: 16px minor lines and 80px major lines in cobalt
    at low alpha, for the marketing hero and the close. A band inverts it. */
 @utility bg-sheet-grid {
-  background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(var(--grid-line-major) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line-major) 1px, transparent 1px);
-  background-size: 16px 16px, 16px 16px, 80px 80px, 80px 80px;
+  /* One 80px SVG tile: four minor lines at 9% cobalt and the major line at
+     16%, drawn as an image rather than stacked gradients so contrast tools
+     read the text over it against the sheet, not against a gradient. */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><g stroke='%231853c6' stroke-width='1' shape-rendering='crispEdges'><path d='M0 16.5H80M0 32.5H80M0 48.5H80M0 64.5H80M16.5 0V80M32.5 0V80M48.5 0V80M64.5 0V80' opacity='0.09'/><path d='M0 0.5H80M0.5 0V80' opacity='0.16'/></g></svg>");
+  background-size: 80px 80px;
 }
 @utility bg-navy-grid {
-  background-color: var(--navy);
-  background-image:
-    linear-gradient(oklch(1 0 0 / 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(1 0 0 / 0.05) 1px, transparent 1px);
+  /* The navy written out (not var()), so contrast tools that cannot resolve a
+     custom property still read white text against it. */
+  background-color: oklch(0.21 0.035 262);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><path d='M0 0.5H16M0.5 0V16' stroke='white' stroke-opacity='0.05' stroke-width='1' shape-rendering='crispEdges'/></svg>");
   background-size: 16px 16px;
 }
 
@@ -916,3 +915,74 @@ summary:has([class*="rotate-"])::marker {
     padding-block: 0.625rem;
   }
 }
+
+/* ============================================================
+   The homepage's moments (OVERHAUL.md §6, DESIGN.md "Motion"). Every rule
+   below writes the finished state as the default; the animation runs only
+   where the browser supports it and the visitor has not asked for less.
+   ============================================================ */
+
+/* The scroll story's pinned frame (components/home/story-observer.tsx): from
+   1024px the three frames stack in one sticky panel and the active step's
+   frame shows; below, and without JavaScript, every step keeps its own
+   frame in flow. */
+@media (min-width: 1024px) {
+  [data-story-root] [data-story-frame] {
+    grid-area: 1 / 1;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity var(--duration-base) var(--ease-out), transform var(--duration-base) var(--ease-out);
+    pointer-events: none;
+  }
+  [data-story-root]:not([data-active-step]) [data-story-frame="1"],
+  [data-story-root][data-active-step="1"] [data-story-frame="1"],
+  [data-story-root][data-active-step="2"] [data-story-frame="2"],
+  [data-story-root][data-active-step="3"] [data-story-frame="3"] {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+}
+
+/* A leader in the receipt flow draws itself in as the section scrolls into
+   view. Drawn by default; the animation needs scroll timelines (Chrome and
+   Safari 26+) and no reduced-motion preference. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .tc-leader {
+      stroke-dashoffset: 0;
+      animation: tc-draw-leader linear both;
+      animation-timeline: view();
+      animation-range: entry 20% entry 90%;
+    }
+    @keyframes tc-draw-leader {
+      from { stroke-dasharray: 1; stroke-dashoffset: 1; }
+      to { stroke-dasharray: 1; stroke-dashoffset: 0; }
+    }
+  }
+}
+
+/* A details row's content eases in as it opens (transform and opacity,
+   never height); the row itself opens at once, as native details do. */
+@media (prefers-reduced-motion: no-preference) {
+  details.tc-accordion[open] > :not(summary) {
+    animation: tc-accordion-in var(--duration-base) var(--ease-out) both;
+  }
+  @keyframes tc-accordion-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
+/* The sticky header condenses once the page has scrolled (data-condensed on
+   its wrapper, set by components/investcalc/header.tsx). */
+[data-header-condensed="true"] header > div {
+  height: 3.25rem;
+}
+@media (min-width: 640px) {
+  [data-header-condensed="true"] header > div {
+    height: 3.5rem;
+  }
+}
+/* No height transition: a layout animation is off the motion rules
+   (transform and opacity only); the row simply takes its condensed size. */

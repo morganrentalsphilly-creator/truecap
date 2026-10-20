@@ -168,7 +168,7 @@ export function ComparisonFaq({
         </p>
         <div className="mt-8 border-t-2 border-foreground">
           {items.map((item) => (
-            <details key={item.question} className="group border-b border-border">
+            <details key={item.question} className="tc-accordion group border-b border-border">
               {/* Touch-sized (48px) and focus-visible through the global 3px
                   outline floor in app/globals.css, whose selector lists
                   summary: the row sets no focus style of its own. */}
