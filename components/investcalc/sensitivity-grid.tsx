@@ -101,14 +101,14 @@ function Row({ row }: { row: SensitivityRow }) {
     <div className="py-3 first:pt-0 last:pb-0 border-t border-border first:border-t-0">
       {/* Mobile: stacked label header + 1-col scenarios; sm+: 4-col grid */}
       <div className="sm:hidden">
-        <div className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-2">
+        <div className="text-xs font-medium text-muted-foreground mb-2">
           {row.label}
         </div>
         <div className="space-y-2.5">
           {row.scenarios.map((s) => (
             <div key={s.name} className="flex items-start justify-between gap-3">
               <div className="shrink-0 min-w-[88px]">
-                <div className="text-3xs uppercase tracking-wide font-semibold text-muted-foreground">
+                <div className="text-xs font-semibold text-muted-foreground">
                   {s.name}
                 </div>
                 <div className="text-3xs text-muted-foreground">{s.deltaLabel}</div>
@@ -124,14 +124,14 @@ function Row({ row }: { row: SensitivityRow }) {
       {/* sm+: original 4-col grid */}
       <div className="hidden sm:grid grid-cols-4 gap-4 items-start">
         <div>
-          <div className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+          <div className="text-xs font-medium text-muted-foreground">
             {row.label}
           </div>
           <div className="text-3xs text-muted-foreground mt-0.5">±change</div>
         </div>
         {row.scenarios.map((s) => (
           <div key={s.name}>
-            <div className="text-3xs uppercase tracking-wide text-muted-foreground mb-1 font-semibold">
+            <div className="text-xs text-muted-foreground mb-1 font-semibold">
               {s.name} · <span className="text-muted-foreground font-normal">{s.deltaLabel}</span>
             </div>
             <ScenarioCell result={s.result} baseResult={base.result} scenarioName={s.name} />

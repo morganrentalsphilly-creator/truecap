@@ -103,7 +103,7 @@ export function FinancingSection({
           <div className="mb-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
             <Label
               htmlFor="downPaymentPct"
-              className="min-w-0 flex-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground [overflow-wrap:anywhere]"
+              className="min-w-0 flex-1 text-xs font-semibold text-muted-foreground [overflow-wrap:anywhere]"
             >
               Down Payment %
             </Label>
@@ -149,7 +149,7 @@ export function FinancingSection({
           <div className="mb-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
             <Label
               htmlFor="interestRate"
-              className="min-w-0 flex-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground [overflow-wrap:anywhere]"
+              className="min-w-0 flex-1 text-xs font-semibold text-muted-foreground [overflow-wrap:anywhere]"
             >
               Interest Rate %
             </Label>
@@ -188,7 +188,7 @@ export function FinancingSection({
           <div className="mb-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
             <Label
               htmlFor="loanTermYears"
-              className="min-w-0 flex-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground [overflow-wrap:anywhere]"
+              className="min-w-0 flex-1 text-xs font-semibold text-muted-foreground [overflow-wrap:anywhere]"
             >
               Loan Term (Years)
             </Label>
@@ -224,7 +224,7 @@ export function FinancingSection({
           <div className="mb-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
             <Label
               htmlFor="closingCostsPct"
-              className="min-w-0 flex-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground [overflow-wrap:anywhere]"
+              className="min-w-0 flex-1 text-xs font-semibold text-muted-foreground [overflow-wrap:anywhere]"
             >
               {closingCostsInputMode === "fixed"
                 ? "Closing Costs $"
@@ -346,7 +346,7 @@ export function FinancingSection({
         <div>
           <Label
             htmlFor="rehabBudget"
-            className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground [overflow-wrap:anywhere]"
+            className="mb-1.5 block text-xs font-semibold text-muted-foreground [overflow-wrap:anywhere]"
           >
             Rehab / Initial Repairs{" "}
             <span className="text-3xs sm:text-xs text-muted-foreground">
@@ -404,7 +404,7 @@ export function FinancingSection({
             <div>
               <Label
                 htmlFor="pmiAnnualRatePct"
-                className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground [overflow-wrap:anywhere]"
+                className="mb-1.5 block text-xs font-semibold text-muted-foreground [overflow-wrap:anywhere]"
               >
                 PMI / MIP rate %
                 <span className="ml-1 normal-case font-normal text-muted-foreground">

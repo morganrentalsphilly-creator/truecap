@@ -305,7 +305,7 @@ export function MultiFamilyUnitsSection({
                 <div>
                   <Label
                     htmlFor={`unit-${index}-bedrooms`}
-                    className="text-xs font-semibold text-primary mb-1 block uppercase tracking-wide"
+                    className="text-xs font-semibold text-primary mb-1 block"
                   >
                     Bedrooms{" "}
                     <span className="font-normal normal-case tracking-normal text-muted-foreground">
@@ -343,7 +343,7 @@ export function MultiFamilyUnitsSection({
                 <div>
                   <Label
                     htmlFor={`unit-${index}-bathrooms`}
-                    className="text-xs font-semibold text-primary mb-1 block uppercase tracking-wide"
+                    className="text-xs font-semibold text-primary mb-1 block"
                   >
                     Bathrooms{" "}
                     <span className="font-normal normal-case tracking-normal text-muted-foreground">
@@ -381,7 +381,7 @@ export function MultiFamilyUnitsSection({
                 <div>
                   <Label
                     htmlFor={`unit-${index}-sqft`}
-                    className="text-xs font-semibold text-primary mb-1 block uppercase tracking-wide"
+                    className="text-xs font-semibold text-primary mb-1 block"
                   >
                     Sq Ft{" "}
                     <span className="font-normal normal-case tracking-normal text-muted-foreground">
@@ -417,7 +417,7 @@ export function MultiFamilyUnitsSection({
                 <div>
                   <Label
                     htmlFor={`unit-${index}-monthlyRent`}
-                    className="text-xs font-semibold text-primary mb-1 block uppercase tracking-wide"
+                    className="text-xs font-semibold text-primary mb-1 block"
                   >
                     {isOwner ? "Owner unit rent" : "Monthly Rent"}
                   </Label>

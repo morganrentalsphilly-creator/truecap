@@ -780,7 +780,7 @@ export function ShareLinkButton({
                grid column, and stretched every unrelated sibling — the title,
                the audience radios, the submit button — to match. */
             <div className="min-w-0 rounded-xl border border-border bg-muted/20 p-3">
-              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              <p className="text-xs font-medium text-muted-foreground">
                 Manage all share links
               </p>
               <ul className="mt-2 space-y-2">

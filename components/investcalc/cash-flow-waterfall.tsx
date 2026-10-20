@@ -93,7 +93,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
           buried at the bottom of the legend. */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-foreground">
+          <p className="text-xs font-medium text-foreground">
             Where the rent goes
           </p>
           <p className="mt-0.5 text-2xs text-muted-foreground">
@@ -103,7 +103,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
         </div>
         <div className="flex flex-wrap items-center gap-4 sm:gap-6">
           <div className="text-left sm:text-right">
-            <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="text-xs font-medium text-muted-foreground">
               Gross rent
             </p>
             <p className="text-lg font-extrabold tabular-nums text-foreground sm:text-xl">
@@ -112,7 +112,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
           </div>
           <div className="text-left sm:text-right">
             <p
-              className={`text-3xs font-bold uppercase tracking-widest ${
+              className={`text-xs font-medium ${
                 ncfPositive ? "text-[var(--metric-positive,#16a34a)]" : "text-[var(--metric-negative,#dc2626)]"
               }`}
             >
@@ -154,7 +154,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
               key={seg.key}
               title={`${seg.label}: ${fmtUsd(seg.value)}`}
               style={{ width: `${widthPct}%`, backgroundColor: seg.color }}
-              className="h-full transition-[width]"
+              className="h-full"
             />
           );
         })}

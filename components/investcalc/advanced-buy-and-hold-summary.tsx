@@ -110,7 +110,7 @@ export function AdvancedBuyAndHoldSummary({
       aria-label="Modeled buy-and-hold contract"
       className="rounded-xl border border-border bg-muted/20 p-3 sm:p-4"
     >
-      <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+      <h3 className="text-xs font-medium text-muted-foreground">
         Modeled contract and operating case
       </h3>
       <dl className="mt-3 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4">

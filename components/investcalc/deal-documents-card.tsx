@@ -380,7 +380,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Paperclip className="size-4 text-primary" />
-          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Documents</h3>
+          <h3 className="text-xs font-medium text-foreground">Documents</h3>
         </div>
         <Button
           type="button"
@@ -548,7 +548,7 @@ export function DealDocumentsCard({ savedDealId }: { savedDealId: string }) {
       {extraction && extraction.status !== "loading" ? (
         <div className="mt-3 rounded-xl border border-primary/25 bg-primary/5 p-3">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="text-xs font-medium text-muted-foreground">
               Numbers found in {extraction.fileName}
             </p>
             <button

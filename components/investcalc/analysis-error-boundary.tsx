@@ -186,7 +186,7 @@ function FallbackMetric({
         : "text-foreground";
   return (
     <div>
-      <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="text-xs font-medium text-muted-foreground">
         {label}
       </p>
       <p className={`mt-0.5 text-base font-extrabold tabular-nums ${color}`}>{value}</p>

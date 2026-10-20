@@ -228,7 +228,7 @@ export function DecisionTier({
           {/* --brand-blue-text, not --primary: the label is small uppercase
               text and --primary measures 4.34:1 here, under the 4.5:1 AA bar.
               The codebase already ships this AA-safe sibling token. */}
-          <p className="text-2xs font-bold uppercase tracking-widest text-[var(--brand-blue-text)]">
+          <p className="text-xs font-medium text-[var(--brand-blue-text)]">
             Offer Ceiling
           </p>
           {isLoading ? (

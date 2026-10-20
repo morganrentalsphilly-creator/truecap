@@ -285,7 +285,7 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
       <div className="mb-3 flex flex-col items-start gap-2 min-[360px]:flex-row min-[360px]:items-center min-[360px]:justify-between min-[360px]:gap-3">
         <div className="flex items-center gap-2">
           <ClipboardCheck className="size-4 text-primary" />
-          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Due diligence</h3>
+          <h3 className="text-xs font-medium text-foreground">Due diligence</h3>
         </div>
         <div role="status" aria-live="polite" className="flex flex-wrap items-center gap-2 text-2xs text-muted-foreground">
           {dueSummary.overdue > 0 ? (
@@ -353,11 +353,11 @@ export function DueDiligenceCard({ savedDealId }: { savedDealId: string }) {
                       {item.label}
                     </span>
                     {status === "overdue" ? (
-                      <span className="mt-1 inline-flex shrink-0 rounded-full bg-[var(--metric-negative)]/10 px-1.5 py-0.5 text-3xs font-bold uppercase tracking-wide text-[var(--metric-negative)] sm:mt-0">
+                      <span className="mt-1 inline-flex shrink-0 rounded-full bg-[var(--metric-negative)]/10 px-1.5 py-0.5 text-xs font-medium text-[var(--metric-negative)] sm:mt-0">
                         Overdue
                       </span>
                     ) : status === "due-soon" ? (
-                      <span className="mt-1 inline-flex shrink-0 rounded-full bg-caution-light px-1.5 py-0.5 text-3xs font-bold uppercase tracking-wide text-caution-text sm:mt-0">
+                      <span className="mt-1 inline-flex shrink-0 rounded-full bg-caution-light px-1.5 py-0.5 text-xs font-medium text-caution-text sm:mt-0">
                         Due soon
                       </span>
                     ) : null}

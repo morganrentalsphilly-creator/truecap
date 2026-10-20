@@ -60,7 +60,7 @@ function CompList({ title, comps, suffix }: { title: string; comps: EnrichmentCo
   if (comps.length === 0) return null;
   return (
     <div>
-      <div className="mb-1 text-3xs font-bold uppercase tracking-widest text-muted-foreground">{title}</div>
+      <div className="mb-1 text-xs font-medium text-muted-foreground">{title}</div>
       <ul className="divide-y divide-border/60">
         {comps.map((c, i) => (
           <li key={`${c.address}-${i}`} className="flex items-center justify-between gap-2 py-1.5 text-xs">
@@ -314,7 +314,7 @@ export function PropertyCompsCard({
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Building2 className="size-4 text-primary" />
-          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Sale &amp; rent comps</h3>
+          <h3 className="text-xs font-medium text-foreground">Sale &amp; rent comps</h3>
         </div>
         {paused ? (
           data && compsDate ? (
@@ -361,7 +361,7 @@ export function PropertyCompsCard({
           ) : null}
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-xl border border-border bg-muted/20 p-3">
-              <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">Est. value</div>
+              <div className="text-xs font-medium text-muted-foreground">Est. value</div>
               <div className="mt-1 text-lg font-bold text-foreground">{money(data.valueEstimate)}</div>
               {data.valueRange && (data.valueRange.low != null || data.valueRange.high != null) ? (
                 <div className="text-2xs text-muted-foreground">
@@ -370,7 +370,7 @@ export function PropertyCompsCard({
               ) : null}
             </div>
             <div className="rounded-xl border border-border bg-muted/20 p-3">
-              <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">Est. rent</div>
+              <div className="text-xs font-medium text-muted-foreground">Est. rent</div>
               <div className="mt-1 text-lg font-bold text-foreground">
                 {money(data.rentEstimate)}
                 {data.rentEstimate != null ? <span className="text-xs font-medium text-muted-foreground">/mo</span> : null}

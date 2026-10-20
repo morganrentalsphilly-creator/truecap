@@ -28,7 +28,7 @@ export function ReturnsExplainer({
 
   return (
     <div className="rounded-2xl border border-border bg-card/60 p-4 sm:p-5">
-      <p className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="text-xs font-medium text-muted-foreground">
         How the {s.years}-yr ROI is built
       </p>
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -76,7 +76,7 @@ export function ReturnsExplainer({
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">{label}</div>
+      <div className="text-xs font-medium text-muted-foreground">{label}</div>
       <div className="mt-0.5 text-base font-extrabold tabular-nums text-foreground">{value}</div>
     </div>
   );

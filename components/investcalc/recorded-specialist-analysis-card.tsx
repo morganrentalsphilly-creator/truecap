@@ -25,7 +25,7 @@ function RecordedMetric({
 }) {
   return (
     <div className="rounded-xl border border-border bg-background p-3">
-      <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="text-xs font-medium text-muted-foreground">
         {label}
       </p>
       <p
@@ -77,7 +77,7 @@ export function RecordedSpecialistAnalysisCard({
         className="rounded-2xl border border-caution/40 bg-caution-light p-5 sm:p-6"
         aria-labelledby={titleId}
       >
-        <p className="text-3xs font-extrabold uppercase tracking-widest text-caution-text dark:text-caution-light">
+        <p className="text-xs font-semibold text-caution-text dark:text-caution-light">
           Recorded strategy analysis
         </p>
         <h2
@@ -112,7 +112,7 @@ export function RecordedSpecialistAnalysisCard({
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-3xs font-extrabold uppercase tracking-widest text-primary">
+          <p className="text-xs font-semibold text-primary">
             Recorded strategy analysis
           </p>
           <h2
@@ -122,7 +122,7 @@ export function RecordedSpecialistAnalysisCard({
             Frozen {label} result
           </h2>
         </div>
-        <span className="w-fit rounded-full border border-primary/25 bg-[var(--brand-blue-light)] px-3 py-1.5 text-3xs font-bold uppercase tracking-wide text-primary">
+        <span className="w-fit rounded-full border border-primary/25 bg-[var(--brand-blue-light)] px-3 py-1.5 text-xs font-medium text-primary">
           Model v{snapshot.modelVersion} · core v
           {snapshot.coreMethodologyVersion}
         </span>

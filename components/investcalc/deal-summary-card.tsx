@@ -72,7 +72,7 @@ export function DealSummaryCard({
             <WandSparkles className="size-4" />
           </span>
           AI summary
-          <span className="rounded-full bg-muted px-1.5 py-0.5 text-3xs font-extrabold uppercase tracking-widest text-muted-foreground">
+          <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs font-semibold text-muted-foreground">
             Beta
           </span>
         </p>

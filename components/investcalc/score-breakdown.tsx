@@ -74,7 +74,7 @@ export function ScoreBreakdown({
   const applicabilityAdjustment = breakdown.applicabilityAdjustment;
   return (
     <div className="w-[min(20rem,78vw)] text-sm">
-      <p className="mb-2 text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+      <p className="mb-2 text-xs font-medium text-muted-foreground">
         Deal score factors
       </p>
       <ul className="space-y-2">

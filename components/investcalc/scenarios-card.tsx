@@ -250,7 +250,7 @@ export function ScenariosCard({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-semibold text-foreground">{s.scenarioName}</span>
-                  <span className="rounded-full border border-border px-2 py-0.5 text-3xs font-bold uppercase tracking-wide text-muted-foreground">
+                  <span className="rounded-full border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground">
                     {kindLabel}
                   </span>
                   {s.strategyKind &&
@@ -260,7 +260,7 @@ export function ScenariosCard({
                     </span>
                   ) : null}
                   {s.isSource ? (
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-3xs font-bold uppercase tracking-wide text-primary">
+                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                       Viewing
                     </span>
                   ) : null}
@@ -295,7 +295,7 @@ export function ScenariosCard({
         <div className="mt-4 rounded-xl border border-border bg-background p-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1">
-              <Label htmlFor="scenario-name" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+              <Label htmlFor="scenario-name" className="text-xs font-medium text-muted-foreground">
                 Scenario name
               </Label>
               <Input
@@ -307,7 +307,7 @@ export function ScenariosCard({
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="scenario-strategy" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+              <Label htmlFor="scenario-strategy" className="text-xs font-medium text-muted-foreground">
                 Strategy (optional)
               </Label>
               <select

@@ -24,7 +24,7 @@ type SummaryItem = {
 function SummaryLabelHint({ label, hint }: { label: string; hint: string }) {
   const tip = useTapTooltip();
   return (
-    <p className="text-left text-3xs font-bold uppercase tracking-widest text-muted-foreground">
+    <p className="text-left text-xs font-medium text-muted-foreground">
       <Tooltip delayDuration={200} open={tip.open} onOpenChange={tip.onOpenChange}>
         <TooltipTrigger asChild>
           <span
@@ -66,7 +66,7 @@ export function SummaryCardGrid({
           {item.labelTooltip ? (
             <SummaryLabelHint label={item.label} hint={item.labelTooltip} />
           ) : (
-            <p className="text-3xs font-bold uppercase tracking-widest text-muted-foreground">{item.label}</p>
+            <p className="text-xs font-medium text-muted-foreground">{item.label}</p>
           )}
           <p
             className={cn(

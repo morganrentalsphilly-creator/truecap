@@ -216,7 +216,7 @@ export function FixFlipCard({
           <div>
             <Label
               htmlFor={rehabId}
-              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-xs font-medium text-muted-foreground mb-1.5 block"
             >
               Rehab Budget
             </Label>
@@ -260,7 +260,7 @@ export function FixFlipCard({
           <div>
             <Label
               htmlFor={arvId}
-              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-xs font-medium text-muted-foreground mb-1.5 block"
             >
               ARV
             </Label>
@@ -298,7 +298,7 @@ export function FixFlipCard({
           <div>
             <Label
               htmlFor={holdId}
-              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-xs font-medium text-muted-foreground mb-1.5 block"
             >
               Hold Time
             </Label>
@@ -334,7 +334,7 @@ export function FixFlipCard({
           <div>
             <Label
               htmlFor={sellPctId}
-              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-xs font-medium text-muted-foreground mb-1.5 block"
             >
               Selling Costs
             </Label>
@@ -371,7 +371,7 @@ export function FixFlipCard({
           <div>
             <Label
               htmlFor={dpId}
-              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-xs font-medium text-muted-foreground mb-1.5 block"
             >
               Down Payment
             </Label>
@@ -410,7 +410,7 @@ export function FixFlipCard({
           <div>
             <Label
               htmlFor={carryId}
-              className="text-2xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block"
+              className="text-xs font-medium text-muted-foreground mb-1.5 block"
             >
               Carry / mo (optional)
             </Label>
@@ -506,7 +506,7 @@ export function FixFlipCard({
           {/* Breakdown */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div>
-              <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
+              <div className="text-xs text-muted-foreground font-medium mb-1.5">
                 Cash going in
               </div>
               <Row label="Cash at close" value={fmt(analysis.cashAtClose)} />
@@ -519,7 +519,7 @@ export function FixFlipCard({
               />
             </div>
             <div>
-              <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold mb-1.5">
+              <div className="text-xs text-muted-foreground font-medium mb-1.5">
                 Sale
               </div>
               <Row label="Selling costs" value={fmt(analysis.sellingCosts)} />
@@ -554,7 +554,7 @@ function Metric({
 }) {
   return (
     <div>
-      <div className="text-3xs uppercase tracking-widest text-muted-foreground font-bold">
+      <div className="text-xs text-muted-foreground font-medium">
         {label}
       </div>
       <div

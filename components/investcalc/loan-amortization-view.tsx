@@ -137,32 +137,32 @@ export function LoanAmortizationView({
             <tr className="border-b border-border text-left">
               <th
                 scope="col"
-                className="py-2 pr-3 text-3xs font-bold uppercase tracking-widest text-muted-foreground"
+                className="py-2 pr-3 text-xs font-medium text-muted-foreground"
               >
                 Year
               </th>
               <th
                 scope="col"
-                className="py-2 px-3 text-right text-3xs font-bold uppercase tracking-widest text-muted-foreground"
+                className="py-2 px-3 text-right text-xs font-medium text-muted-foreground"
               >
                 Interest paid
               </th>
               <th
                 scope="col"
-                className="py-2 px-3 text-right text-3xs font-bold uppercase tracking-widest text-muted-foreground"
+                className="py-2 px-3 text-right text-xs font-medium text-muted-foreground"
               >
                 Principal paid
               </th>
               <th
                 scope="col"
-                className="py-2 pl-3 text-right text-3xs font-bold uppercase tracking-widest text-muted-foreground"
+                className="py-2 pl-3 text-right text-xs font-medium text-muted-foreground"
               >
                 Ending balance
               </th>
               {hasBalloon ? (
                 <th
                   scope="col"
-                  className="py-2 pl-3 text-right text-3xs font-bold uppercase tracking-widest text-muted-foreground"
+                  className="py-2 pl-3 text-right text-xs font-medium text-muted-foreground"
                 >
                   Balloon due
                 </th>

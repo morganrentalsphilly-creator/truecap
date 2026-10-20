@@ -173,7 +173,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
       <div className="mb-3 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <MapPin className="size-4 text-primary" />
-          <h3 className="text-xs font-bold uppercase tracking-widest text-foreground">Deal details</h3>
+          <h3 className="text-xs font-medium text-foreground">Deal details</h3>
         </div>
         <span aria-live="polite" aria-atomic="true" className="inline-flex min-h-6 items-center gap-1 text-2xs text-muted-foreground">
           {isSaving || saveStatus === "saving" ? (
@@ -213,7 +213,7 @@ export function DealDetailsCard({ savedDealId }: { savedDealId: string }) {
       <div className="grid gap-3 sm:grid-cols-3">
         {fields.map((f) => (
           <label key={f.key} className="flex flex-col gap-1">
-            <span className="text-2xs font-semibold uppercase tracking-wide text-muted-foreground">{f.label}</span>
+            <span className="text-xs font-semibold text-muted-foreground">{f.label}</span>
             <Input
               type="text"
               value={drafts[f.key] ?? ""}

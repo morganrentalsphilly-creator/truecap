@@ -208,7 +208,7 @@ export function ClientsWorkspace({
         aria-label="Agent Pro workflow"
         className="mt-4 rounded-2xl border border-primary/20 bg-primary/5 p-4"
       >
-        <p className="text-3xs font-bold uppercase tracking-widest text-primary">
+        <p className="text-xs font-medium text-primary">
           Agent workflow
         </p>
         <ol className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-2 text-xs font-semibold text-foreground">
@@ -251,7 +251,7 @@ export function ClientsWorkspace({
       {editor ? (
         <div className="mt-4 space-y-3 rounded-2xl border border-border bg-muted/20 p-4">
           <div className="space-y-1">
-            <Label htmlFor="cw-name" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+            <Label htmlFor="cw-name" className="text-xs font-medium text-muted-foreground">
               Name
             </Label>
             <Input
@@ -264,7 +264,7 @@ export function ClientsWorkspace({
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1">
-              <Label htmlFor="cw-email" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+              <Label htmlFor="cw-email" className="text-xs font-medium text-muted-foreground">
                 Email (optional)
               </Label>
               <Input
@@ -276,7 +276,7 @@ export function ClientsWorkspace({
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="cw-phone" className="text-2xs font-bold uppercase tracking-widest text-muted-foreground">
+              <Label htmlFor="cw-phone" className="text-xs font-medium text-muted-foreground">
                 Phone (optional)
               </Label>
               <Input
@@ -405,7 +405,7 @@ export function ClientsWorkspace({
                 <div className="mt-2">
                   <label
                     htmlFor={`portal-link-${c.id}`}
-                    className="text-3xs font-bold uppercase tracking-widest text-muted-foreground"
+                    className="text-xs font-medium text-muted-foreground"
                   >
                     Portal link — select and copy
                   </label>

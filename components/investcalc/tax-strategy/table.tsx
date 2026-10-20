@@ -98,7 +98,7 @@ export function TaxStrategyTable({
               {COLUMNS.map((label) => (
                 <th
                   key={label}
-                  className="px-4 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground"
+                  className="px-4 text-left text-xs font-medium text-muted-foreground"
                 >
                   {label}
                 </th>

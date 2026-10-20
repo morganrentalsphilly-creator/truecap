@@ -89,7 +89,7 @@ export function PropertyTypeSection({
           dropdown: inline segments are one tap, always visible, and drop the
           icon+title+subtitle density the old dropdown carried. */}
       <div className="space-y-2">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+        <p className="text-xs font-semibold text-muted-foreground">
           Property Type
         </p>
         <div
