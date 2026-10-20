@@ -180,7 +180,7 @@ export function CookieConsentBanner() {
         handleReject();
       }}
       data-cookie-consent-banner=""
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-float-up outline-none sm:px-4 sm:pt-3 sm:pb-[max(env(safe-area-inset-bottom),0.75rem)]"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-float-up outline-none sm:inset-x-auto sm:left-4 sm:bottom-4 sm:max-w-xl sm:rounded-lg sm:border sm:px-4 sm:pt-3 sm:pb-3 sm:shadow-md"
     >
       {/* Compact single row on phones: text + buttons side by side, so the
           bar never reaches the hero's primary action in a 375×667 first
@@ -192,7 +192,7 @@ export function CookieConsentBanner() {
           wherever the desktop sentence wrapped. Measured with the link
           fixed: 61px from 360px to 414px, 69px from 768px, and the desktop
           sentence on one line from 1080px. */}
-      <div className="mx-auto flex max-w-6xl flex-row items-center gap-1.5 sm:gap-3">
+      <div className="mx-auto flex max-w-6xl flex-row items-center gap-1.5 sm:flex-wrap sm:gap-3">
         <div className="flex min-w-0 flex-1 items-center">
           <p className="text-sm leading-snug text-foreground">
             <strong className="font-semibold">We use cookies</strong>
