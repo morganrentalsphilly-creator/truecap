@@ -8,7 +8,7 @@
  * Serial: the action caches a successful FRED observation for 24 h per
  * server process, so the failure modes run before the first success.
  */
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import {
   MOCK_FRED_RATE,
   MOCK_MI_3BR,
@@ -29,6 +29,42 @@ test.beforeAll(async () => {
 test.afterAll(async () => {
   await mock?.close();
 });
+
+/**
+ * The result's figures roll in through NumberFlow (the 2026-10 overhaul): the
+ * digits live in the host's shadow root, outside innerText, and each digit
+ * column holds every numeral with the others marked inert. Reads the current
+ * symbol, digits and suffix, the way assistive technology does.
+ */
+function readNumberFlow(host: Locator): Promise<string> {
+  return host.evaluate((h) => {
+    const root = h.shadowRoot;
+    if (!root) return h.textContent ?? "";
+    let out = "";
+    const walk = (node: Node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        out += node.textContent ?? "";
+        return;
+      }
+      if (node.nodeType !== Node.ELEMENT_NODE) return;
+      const el = node as HTMLElement;
+      if (el.tagName === "STYLE" || el.hasAttribute("inert")) return;
+      el.childNodes.forEach(walk);
+    };
+    root.childNodes.forEach(walk);
+    return out;
+  });
+}
+
+/**
+ * A fresh result reveals its figures from zero (ResultReveal marks the card
+ * `data-result-reveal="play"` for the 1.4 s it plays); a figure read during
+ * the reveal is the roll-in's zero, not the value.
+ */
+async function settledAfterReveal(page: Page) {
+  await page.waitForTimeout(300);
+  await expect(page.locator('[data-result-reveal="play"]')).toHaveCount(0, { timeout: 10_000 });
+}
 
 async function openAnalyzer(page: Page) {
   await page.goto("/analyze", { waitUntil: "domcontentloaded" });
@@ -185,11 +221,12 @@ test("manual property tax (annual $) replaces the 1.1% default and moves cash fl
   const summary = page.locator("section[aria-labelledby='decision-summary-title']");
   await expect(summary).toBeVisible({ timeout: 30_000 });
   const readCashFlow = async () => {
-    const text = await summary.innerText();
-    const m = text.match(/(-?\$-?[\d,]+)\s*\/\s*mo/i) ?? text.match(/cash flow[^$]*(-?\$-?[\d,]+)/i);
+    const text = await readNumberFlow(summary.locator('[data-decision-metric="cash-flow"] number-flow-react').first());
+    const m = text.match(/-?\$-?[\d,]+/);
     expect(m, `cash flow figure in: ${text.slice(0, 300)}`).not.toBeNull();
-    return Number(m![1].replace(/[^0-9-]/g, ""));
+    return Number(m![0].replace(/[^0-9-]/g, ""));
   };
+  await settledAfterReveal(page);
   const before = await readCashFlow();
 
   await summary.getByRole("button", { name: "Edit assumptions", exact: true }).click();
