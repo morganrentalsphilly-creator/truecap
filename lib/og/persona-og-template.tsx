@@ -53,7 +53,7 @@ export async function renderPersonaOgImage(config: PersonaOgConfig): Promise<Ima
                 fontFamily: ogFamily("display"),
                 fontSize: headlineSize,
                 lineHeight: 1.02,
-                letterSpacing: "-0.012em",
+                letterSpacing: "-0.025em",
                 maxWidth: 1072,
               }}
             >

@@ -1,6 +1,6 @@
 /**
  * Shared template for per-post /blog/<slug>/opengraph-image.tsx dynamic OG
- * cards, on the Newsprint frame (lib/og/newsprint.tsx). A wrapper restates
+ * cards, on the shared Blueprint frame (lib/og/newsprint.tsx). A wrapper restates
  * its post and nothing else: a title the post carries and only figures the
  * post prints. lib/__tests__/blog-social-card-truth.test.ts fails when the
  * two drift apart, so a rewrite of a post updates its card in the same
@@ -20,9 +20,9 @@
 import { ImageResponse } from "next/og";
 import {
   loadNewsprintFonts,
-  NEWSPRINT,
   NewsprintFrame,
   OG_SIZE,
+  OG_TAG,
   ogFamily,
 } from "@/lib/og/newsprint";
 
@@ -58,18 +58,7 @@ export async function renderBlogOgImage(config: BlogOgConfig): Promise<ImageResp
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", flexGrow: 1 }}>
             {tag ? (
               <div style={{ display: "flex", marginBottom: 24 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    padding: "6px 12px",
-                    border: `1px solid ${NEWSPRINT.rule}`,
-                    borderRadius: 2,
-                    fontSize: 22,
-                    color: NEWSPRINT.ink2,
-                  }}
-                >
-                  {tag}
-                </div>
+                <div style={OG_TAG}>{tag}</div>
               </div>
             ) : null}
             <div
@@ -78,7 +67,7 @@ export async function renderBlogOgImage(config: BlogOgConfig): Promise<ImageResp
                 fontFamily: ogFamily("display"),
                 fontSize: headlineSize,
                 lineHeight: 1.04,
-                letterSpacing: "-0.012em",
+                letterSpacing: "-0.025em",
                 maxWidth: 1072,
               }}
             >

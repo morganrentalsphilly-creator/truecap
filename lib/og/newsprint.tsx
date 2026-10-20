@@ -1,38 +1,51 @@
 /**
- * The shared frame for every TrueCap social card (DESIGN.md "Token strategy":
- * the OG images move to Archivo, DM Mono and the Newsprint paper).
+ * The shared frame for every TrueCap social card, on the Blueprint system
+ * (DESIGN.md, 2026-10-20): the sheet with its faint cobalt grid, graphite
+ * ink, one cobalt, the warm highlight as a stroke under a key figure,
+ * Hanken Grotesk for display and text, Geist Mono for metadata. The module
+ * keeps its historical name (CLAUDE.md §3.6 and the card files refer to it);
+ * the values are the Blueprint tokens.
  *
  * Constraints (CLAUDE.md §3.6): the next/og JSX subset only (divs, inline
  * styles, text), no Tailwind, no server-only imports, and every card must
  * still render when something fails. next/og cannot read CSS variables or the
  * site's woff2 files, so the palette is the DESIGN.md tokens as hex, and the
- * faces are fetched from Google Fonts per card, subset to the card's own
- * text. A failed font fetch falls back to next/og's built-in sans; the card
- * still renders.
+ * faces are fetched from Google Fonts once per server process. A failed font
+ * fetch falls back to next/og's built-in sans; the card still renders.
  */
 
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 export const OG_SIZE = { width: 1200, height: 630 } as const;
 
-/** DESIGN.md tokens as sRGB hex (converted from the OKLCH values). */
+/**
+ * DESIGN.md tokens as sRGB hex (converted from the OKLCH values in
+ * app/globals.css). The keys keep their historical names so the templates
+ * read the same: `paper` is the sheet, `ink` graphite, `blue` cobalt.
+ */
 export const NEWSPRINT = {
-  paper: "#efece8",
-  raised: "#f6f5f2",
-  band: "#e9e6e0",
-  rule: "#bab7b0",
-  ruleSoft: "#d8d5d0",
-  ink: "#1b1b1b",
-  ink2: "#51504c",
-  blue: "#0066ba",
-  positive: "#006d32",
-  miss: "#a93800",
+  paper: "#fbfaf7",
+  raised: "#ffffff",
+  band: "#f1f0ec",
+  rule: "#d6d4ce",
+  ruleSoft: "#e9e8e4",
+  ink: "#26292e",
+  ink2: "#585b61",
+  blue: "#1853c6",
+  positive: "#00792f",
+  miss: "#bb4900",
+  highlight: "#ec7c0e",
+  navy: "#0f1828",
+  navyForeground: "#e5e8ed",
 } as const;
 
+/** The faint cobalt grid behind the sheet, as `bg-sheet-grid` draws it. */
+const GRID_LINE = "rgba(24, 83, 198, 0.09)";
+
 export const OG_FONT = {
-  display: "Archivo Display",
-  text: "Archivo",
-  mono: "DM Mono",
+  display: "Hanken Grotesk Display",
+  text: "Hanken Grotesk",
+  mono: "Geist Mono",
 } as const;
 
 type OgFont = {
@@ -100,9 +113,11 @@ function loadGoogleFont(family: string, axes: string): Promise<ArrayBuffer | nul
 }
 
 /**
- * The three faces a card uses: Archivo at 82% width and 750 for the display
- * voice, Archivo 400 for text, DM Mono 500 for figures. The `parts` say which
- * faces the card draws (a card with no figures skips the mono face).
+ * The faces a card uses: Hanken Grotesk at 750 for the display voice (its
+ * own family name, so a template need not set a weight), Hanken Grotesk at
+ * 400 and 600 for text and labels, Geist Mono at 500 for metadata. The
+ * `parts` say which faces the card draws (a card with no metadata skips the
+ * mono face); the text is not used for subsetting any more.
  *
  * Returns undefined, never an empty list, when no face loads: next/og reads
  * `options.fonts || defaultFonts`, so an empty array is truthy, replaces its
@@ -114,14 +129,16 @@ export async function loadNewsprintFonts(parts: {
   text: string;
   mono?: string;
 }): Promise<OgFont[] | undefined> {
-  const [display, text, mono] = await Promise.all([
-    loadGoogleFont("Archivo", "wdth,wght@82,750"),
-    loadGoogleFont("Archivo", "wdth,wght@100,400"),
-    parts.mono ? loadGoogleFont("DM+Mono", "wght@500") : Promise.resolve(null),
+  const [display, text, label, mono] = await Promise.all([
+    loadGoogleFont("Hanken+Grotesk", "wght@750"),
+    loadGoogleFont("Hanken+Grotesk", "wght@400"),
+    loadGoogleFont("Hanken+Grotesk", "wght@600"),
+    parts.mono ? loadGoogleFont("Geist+Mono", "wght@500") : Promise.resolve(null),
   ]);
   const fonts: OgFont[] = [];
   if (display) fonts.push({ name: OG_FONT.display, data: display, weight: 700, style: "normal" });
   if (text) fonts.push({ name: OG_FONT.text, data: text, weight: 400, style: "normal" });
+  if (label) fonts.push({ name: OG_FONT.text, data: label, weight: 600, style: "normal" });
   if (mono) fonts.push({ name: OG_FONT.mono, data: mono, weight: 500, style: "normal" });
   return fonts.length ? fonts : undefined;
 }
@@ -131,11 +148,31 @@ export function ogFamily(face: keyof typeof OG_FONT): string {
   return `"${OG_FONT[face]}", sans-serif`;
 }
 
+/** A figure: the text face at 600 (the figure voice; next/og has no tabular numerals). */
+export const OG_FIGURE: CSSProperties = { fontFamily: ogFamily("text"), fontWeight: 600 };
+
+/** The warm highlighter stroke under a key figure: a fill behind the lower third of the glyphs. */
+export const OG_HIGHLIGHT_STROKE: CSSProperties = {
+  backgroundImage: `linear-gradient(transparent 62%, ${NEWSPRINT.highlight} 62%, ${NEWSPRINT.highlight} 88%, transparent 88%)`,
+  padding: "0 0.06em",
+};
+
+/** A metadata tag: Geist Mono on a 1px line at the 4px tag radius. */
+export const OG_TAG: CSSProperties = {
+  display: "flex",
+  padding: "5px 10px",
+  border: `1px solid ${NEWSPRINT.rule}`,
+  borderRadius: 4,
+  fontFamily: ogFamily("mono"),
+  fontSize: 20,
+  color: NEWSPRINT.ink2,
+};
+
 /**
- * The frame: paper, a heavy ink rule under the wordmark row (the way a
- * ledger opens), the card's content, and a soft rule over the footer. The
- * wordmark is typeset because next/og has no access to the logo's raster at
- * build time on every route.
+ * The frame: the sheet on its grid, the wordmark row over one graphite line,
+ * the card's content, and a soft line over the footer. The wordmark is
+ * typeset because next/og has no access to the logo's raster at build time
+ * on every route.
  */
 export function NewsprintFrame({
   label,
@@ -156,7 +193,9 @@ export function NewsprintFrame({
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        background: NEWSPRINT.paper,
+        backgroundColor: NEWSPRINT.paper,
+        backgroundImage: `linear-gradient(to right, ${GRID_LINE} 1px, transparent 1px), linear-gradient(to bottom, ${GRID_LINE} 1px, transparent 1px)`,
+        backgroundSize: "32px 32px",
         color: NEWSPRINT.ink,
         fontFamily: ogFamily("text"),
         padding: "48px 64px 40px 64px",
@@ -168,14 +207,14 @@ export function NewsprintFrame({
           alignItems: "baseline",
           justifyContent: "space-between",
           paddingBottom: 14,
-          borderBottom: `3px solid ${NEWSPRINT.ink}`,
+          borderBottom: `1px solid ${NEWSPRINT.ink}`,
         }}
       >
-        <div style={{ display: "flex", fontFamily: ogFamily("display"), fontSize: 34, letterSpacing: "-0.01em" }}>
-          TrueCap<span style={{ color: NEWSPRINT.blue, marginLeft: -4 }}>.</span>
+        <div style={{ display: "flex", fontFamily: ogFamily("display"), fontSize: 34, letterSpacing: "-0.025em" }}>
+          TrueCap<span style={{ color: NEWSPRINT.blue, marginLeft: -2 }}>.</span>
         </div>
         {label ? (
-          <div style={{ display: "flex", fontSize: 22, color: NEWSPRINT.ink2 }}>{label}</div>
+          <div style={{ display: "flex", fontFamily: ogFamily("mono"), fontSize: 20, color: NEWSPRINT.ink2 }}>{label}</div>
         ) : null}
       </div>
       <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>{children}</div>
@@ -192,7 +231,7 @@ export function NewsprintFrame({
           }}
         >
           <div style={{ display: "flex" }}>{footerLeft ?? ""}</div>
-          <div style={{ display: "flex", color: NEWSPRINT.blue, fontFamily: ogFamily("mono") }}>
+          <div style={{ display: "flex", color: NEWSPRINT.blue, fontFamily: ogFamily("mono"), fontSize: 20 }}>
             {footerRight ?? ""}
           </div>
         </div>

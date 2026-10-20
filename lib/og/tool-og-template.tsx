@@ -19,6 +19,7 @@ import {
   NEWSPRINT,
   NewsprintFrame,
   OG_SIZE,
+  OG_TAG,
   ogFamily,
 } from "@/lib/og/newsprint";
 
@@ -66,17 +67,7 @@ export async function renderToolOgImage(config: ToolOgConfig): Promise<ImageResp
             {pills.length ? (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 26 }}>
                 {pills.map((pill) => (
-                  <div
-                    key={pill}
-                    style={{
-                      display: "flex",
-                      padding: "6px 12px",
-                      border: `1px solid ${NEWSPRINT.rule}`,
-                      borderRadius: 2,
-                      fontSize: 22,
-                      color: NEWSPRINT.ink2,
-                    }}
-                  >
+                  <div key={pill} style={OG_TAG}>
                     {pill}
                   </div>
                 ))}
@@ -88,7 +79,7 @@ export async function renderToolOgImage(config: ToolOgConfig): Promise<ImageResp
                 fontFamily: ogFamily("display"),
                 fontSize: headlineSize,
                 lineHeight: 1.02,
-                letterSpacing: "-0.015em",
+                letterSpacing: "-0.025em",
                 maxWidth: 1072,
               }}
             >
