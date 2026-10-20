@@ -19,10 +19,13 @@ const slugOf = (p) => (p === "/" ? "home" : p.replace(/^\//, "").replace(/\//g, 
 const browser = await chromium.launch();
 const facts = [];
 
+// SETTLE_MS: a longer wait for a page whose hero plays once on first view
+// (the 2026-10 homepage glides the price handle for about 1.6s).
+const SETTLE_MS = Number(process.env.SETTLE_MS ?? 400);
 async function settle(page) {
   await page.waitForLoadState("networkidle", { timeout: 20000 }).catch(() => {});
   await page.evaluate(() => document.fonts && document.fonts.ready);
-  await page.waitForTimeout(400);
+  await page.waitForTimeout(SETTLE_MS);
 }
 
 async function scrollThrough(page) {
