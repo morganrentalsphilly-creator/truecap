@@ -898,7 +898,10 @@ export function FocusedDecisionSummary({
           </div>
           <h2
             id="decision-summary-title"
-            className="mt-1 font-display text-balance text-2xl text-foreground sm:text-3xl"
+            // tabIndex -1: the sticky summary bar's "Decision" button sends
+            // focus here, so a keyboard user lands on the verdict.
+            tabIndex={-1}
+            className="mt-1 font-display text-balance text-2xl text-foreground focus-visible:outline-none sm:text-3xl"
             data-reveal-step="1"
           >
             {decisionLabel}
