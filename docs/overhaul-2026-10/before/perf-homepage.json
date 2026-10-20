@@ -1,0 +1,183 @@
+{
+  "url": "http://127.0.0.1:3100/",
+  "measuredAt": "2026-10-20T13:57:10.819Z",
+  "rawHtmlBytes": 218654,
+  "firstPartyJavaScript": {
+    "requestCount": 35,
+    "transferBytes": 406585,
+    "resources": [
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1123-f55ab395859d7135.js",
+        "transferBytes": 15208
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1139-1abe0434c4676f84.js",
+        "transferBytes": 4316
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1652.bce336aaaf7df3c1.js",
+        "transferBytes": 4975
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1766-f6efa4005ce15c7d.js",
+        "transferBytes": 5307
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1820-6bbab6abb2e86315.js",
+        "transferBytes": 4418
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/2128-19f85737aabba3dc.js",
+        "transferBytes": 6966
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/2311-a04ea61f99d8ee1d.js",
+        "transferBytes": 2983
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/2503-0809c2e051532795.js",
+        "transferBytes": 4432
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/3794-4bc5594f4938d67d.js",
+        "transferBytes": 70079
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/3977-9d76dab003152531.js",
+        "transferBytes": 5758
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/4490-9e78b2d702e28d05.js",
+        "transferBytes": 10426
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/4527-49424ed3d9921153.js",
+        "transferBytes": 6170
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/4bd1b696-8a4ab4fdf0ae305a.js",
+        "transferBytes": 65065
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/5048.b96f4051dc1092ea.js",
+        "transferBytes": 72134
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/5802-0576cd1c40a2d011.js",
+        "transferBytes": 13169
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/5d015edf.7c0ac124fa9565a7.js",
+        "transferBytes": 1945
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/6183-79893f817ca57da6.js",
+        "transferBytes": 5559
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/7291-95a9db4cfef5fa43.js",
+        "transferBytes": 6353
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/7979-994cff81f054c7bf.js",
+        "transferBytes": 8031
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/8409-29c10ce4e9f7dc38.js",
+        "transferBytes": 10517
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/8437-3cc78015a4392d59.js",
+        "transferBytes": 7226
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/8500-01a63dafd809e317.js",
+        "transferBytes": 5285
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/9003-30d00ed9cb2c2d64.js",
+        "transferBytes": 13313
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/9483-caff0ba77a86bbd2.js",
+        "transferBytes": 9721
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/9673-5bb104471c563801.js",
+        "transferBytes": 3224
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/error-e35018401bfdca41.js",
+        "transferBytes": 3758
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/for-investors/page-48ca63f4db7951d8.js",
+        "transferBytes": 5583
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/global-error-da98ec251d381320.js",
+        "transferBytes": 2871
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/layout-a327b16897d9b6f6.js",
+        "transferBytes": 9031
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/not-found-ac1f0032d588e417.js",
+        "transferBytes": 2472
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/page-4ca9ed4bce4fbfca.js",
+        "transferBytes": 9317
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/privacy/page-92f000ab91a777b5.js",
+        "transferBytes": 2175
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/main-app-6a4a29fb74eaaabe.js",
+        "transferBytes": 4564
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/webpack-267fdceeee51a3d8.js",
+        "transferBytes": 4234
+      },
+      {
+        "url": "http://127.0.0.1:3100/_vercel/insights/script.js",
+        "transferBytes": 0
+      }
+    ]
+  },
+  "hydration": {
+    "analyzerReadyMs": 15090,
+    "waitAfterDomContentLoadedMs": 15002,
+    "mainThreadTaskDurationMs": 152,
+    "scriptDurationMs": 47,
+    "longTasks": {
+      "count": 0,
+      "totalDurationMs": 0
+    }
+  },
+  "coreWebVitals": {
+    "firstContentfulPaintMs": 56,
+    "lcpMs": 56,
+    "cls": 0
+  },
+  "mobileRendering": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "horizontalOverflowPx": 0,
+    "heroAddressEntryVisible": true,
+    "heroAddressEntryAboveFold": true,
+    "heroAddressEntryAcceptsText": true
+  },
+  "accessibility": {
+    "seriousOrCriticalViolationCount": 0,
+    "violations": []
+  },
+  "calculatorReady": false,
+  "blockedExternalOrigins": [],
+  "budgetFailures": []
+}

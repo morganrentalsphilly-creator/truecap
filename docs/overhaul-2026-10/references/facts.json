@@ -1,0 +1,208 @@
+[
+  {
+    "slug": "wise",
+    "url": "https://wise.com/us/",
+    "width": 1440,
+    "status": 200,
+    "title": "Wise: The international account | Money without borders | Wise United States",
+    "h1": "The fast way to send money abroad",
+    "fonts": [
+      "Inter",
+      "Wise Sans"
+    ],
+    "bg": "rgba(0, 0, 0, 0)"
+  },
+  {
+    "slug": "wise",
+    "url": "https://wise.com/us/",
+    "width": 390,
+    "status": 200,
+    "title": "Wise: The international account | Money without borders | Wise United States",
+    "h1": "The fast way to send money abroad",
+    "fonts": [
+      "Inter",
+      "Wise Sans"
+    ],
+    "bg": "rgba(0, 0, 0, 0)"
+  },
+  {
+    "slug": "stripe",
+    "url": "https://stripe.com/",
+    "width": 1440,
+    "status": 200,
+    "title": "Stripe | Financial Infrastructure to Grow Your Revenue",
+    "h1": "Financial infrastructure to grow your revenue. Accept payments, handle business banking,1 and implement custom revenue m",
+    "fonts": [
+      "sohne-var"
+    ],
+    "bg": "rgba(0, 0, 0, 0)"
+  },
+  {
+    "slug": "stripe",
+    "url": "https://stripe.com/",
+    "width": 390,
+    "status": 200,
+    "title": "Stripe | Financial Infrastructure to Grow Your Revenue",
+    "h1": "Financial infrastructure to grow your revenue.",
+    "fonts": [
+      "sohne-var"
+    ],
+    "bg": "rgba(0, 0, 0, 0)"
+  },
+  {
+    "slug": "mercury",
+    "url": "https://mercury.com/",
+    "width": 1440,
+    "status": 200,
+    "title": "Online Business Banking For Startups, Small Businesses & Scaling Companies",
+    "h1": "Radically different banking",
+    "fonts": [
+      "arcadia",
+      "arcadiaDisplay"
+    ],
+    "bg": "rgba(0, 0, 0, 0)"
+  },
+  {
+    "slug": "mercury",
+    "url": "https://mercury.com/",
+    "width": 390,
+    "status": 200,
+    "title": "Online Business Banking For Startups, Small Businesses & Scaling Companies",
+    "h1": "Radically different banking",
+    "fonts": [
+      "arcadia",
+      "arcadiaDisplay"
+    ],
+    "bg": "rgba(0, 0, 0, 0)"
+  },
+  {
+    "slug": "ramp",
+    "url": "https://ramp.com/",
+    "width": 1440,
+    "status": 200,
+    "title": "Spend Management, Corporate Cards & Accounts Payable Solutions | Ramp",
+    "h1": "Time is money. Save both.",
+    "fonts": [
+      "Lausanne"
+    ],
+    "bg": "lab(100 0 0)"
+  },
+  {
+    "slug": "ramp",
+    "url": "https://ramp.com/",
+    "width": 390,
+    "status": 200,
+    "title": "Spend Management, Corporate Cards & Accounts Payable Solutions | Ramp",
+    "h1": "Time is money. Save both.",
+    "fonts": [
+      "Lausanne"
+    ],
+    "bg": "lab(100 0 0)"
+  },
+  {
+    "slug": "plaid",
+    "url": "https://plaid.com/",
+    "width": 1440,
+    "status": 200,
+    "title": "Plaid: Enabling all companies to build fintech solutions",
+    "h1": "Turn data into revolutionary financial products",
+    "fonts": [
+      "Cern",
+      "Plaid Sans"
+    ],
+    "bg": "rgb(255, 255, 255)"
+  },
+  {
+    "slug": "plaid",
+    "url": "https://plaid.com/",
+    "width": 390,
+    "status": 200,
+    "title": "Plaid: Enabling all companies to build fintech solutions",
+    "h1": "Turn data into revolutionary financial products",
+    "fonts": [
+      "Cern",
+      "Plaid Sans"
+    ],
+    "bg": "rgb(255, 255, 255)"
+  },
+  {
+    "slug": "linear",
+    "url": "https://linear.app/",
+    "width": 1440,
+    "status": 200,
+    "title": "Linear – The system for product development",
+    "h1": "The product development\nsystem for teams and agents\nThe product development system for teams and agents",
+    "fonts": [
+      "Inter Variable",
+      "Berkeley Mono"
+    ],
+    "bg": "rgb(8, 9, 10)"
+  },
+  {
+    "slug": "linear",
+    "url": "https://linear.app/",
+    "width": 390,
+    "status": 200,
+    "title": "Linear – The system for product development",
+    "h1": "The product development system for teams and agents\nThe product development system for teams and agents",
+    "fonts": [
+      "Inter Variable",
+      "Berkeley Mono"
+    ],
+    "bg": "rgb(8, 9, 10)"
+  },
+  {
+    "slug": "dealcheck",
+    "url": "https://dealcheck.io/",
+    "width": 1440,
+    "status": 200,
+    "title": "DealCheck - The Leading Real Estate Analysis Software & Calculator",
+    "h1": "Analyze any investment property in seconds.",
+    "fonts": [
+      "Open Sans"
+    ],
+    "bg": "rgb(255, 255, 255)"
+  },
+  {
+    "slug": "dealcheck",
+    "url": "https://dealcheck.io/",
+    "width": 390,
+    "status": 200,
+    "title": "DealCheck - The Leading Real Estate Analysis Software & Calculator",
+    "h1": "Analyze any investment property in seconds.",
+    "fonts": [
+      "Open Sans"
+    ],
+    "bg": "rgb(255, 255, 255)"
+  },
+  {
+    "slug": "biggerpockets-calc",
+    "url": "https://www.biggerpockets.com/rental-property-calculator",
+    "width": 1440,
+    "status": 200,
+    "title": "Rental Real Estate Investment Calculator | BiggerPockets",
+    "h1": "Upgrade to unlock to Pro Perks",
+    "fonts": [
+      "Open Sans",
+      "Times New Roman",
+      "Instrument Sans",
+      "biggerpockets-icons"
+    ],
+    "bg": "rgb(255, 255, 255)"
+  },
+  {
+    "slug": "biggerpockets-calc",
+    "url": "https://www.biggerpockets.com/rental-property-calculator",
+    "width": 390,
+    "status": 200,
+    "title": "Rental Real Estate Investment Calculator | BiggerPockets",
+    "h1": "Upgrade to unlock to Pro Perks",
+    "fonts": [
+      "Open Sans",
+      "Times New Roman",
+      "Instrument Sans",
+      "biggerpockets-icons"
+    ],
+    "bg": "rgb(255, 255, 255)"
+  }
+]
