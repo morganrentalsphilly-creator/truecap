@@ -3,6 +3,8 @@ import {
   loadNewsprintFonts,
   NEWSPRINT,
   NewsprintFrame,
+  OG_FIGURE,
+  OG_HIGHLIGHT_STROKE,
   OG_SIZE,
   ogFamily,
 } from "@/lib/og/newsprint";
@@ -54,7 +56,7 @@ export async function GET() {
     mono: `${rows.map((r) => `${r.asking}${r.ceiling}`).join("")}${total}${URL_TEXT}`,
   });
 
-  const figure = { display: "flex", justifyContent: "flex-end", width: 150, fontFamily: ogFamily("mono") } as const;
+  const figure = { display: "flex", justifyContent: "flex-end", width: 150, ...OG_FIGURE } as const;
 
   return new ImageResponse(
     (
@@ -67,7 +69,7 @@ export async function GET() {
               fontFamily: ogFamily("display"),
               fontSize: ledger ? 54 : 76,
               lineHeight: 1.02,
-              letterSpacing: "-0.012em",
+              letterSpacing: "-0.025em",
             }}
           >
             {HEADLINE}
@@ -84,8 +86,8 @@ export async function GET() {
                   fontSize: 20,
                 }}
               >
-                <div style={{ ...figure, fontFamily: ogFamily("text") }}>At asking</div>
-                <div style={{ ...figure, width: 190, fontFamily: ogFamily("text") }}>At the Offer Ceiling</div>
+                <div style={{ ...figure, fontWeight: 400 }}>At asking</div>
+                <div style={{ ...figure, width: 190, fontWeight: 400 }}>At the Offer Ceiling</div>
               </div>
               {rows.map((row) => (
                 <div
@@ -95,7 +97,7 @@ export async function GET() {
                     alignItems: "baseline",
                     padding: "12px 8px",
                     margin: "0 -8px",
-                    background: row.band ? NEWSPRINT.band : "transparent",
+                    background: "transparent",
                     borderBottom: `1px solid ${NEWSPRINT.ruleSoft}`,
                   }}
                 >
@@ -119,25 +121,22 @@ export async function GET() {
                   alignItems: "baseline",
                   justifyContent: "space-between",
                   paddingTop: 14,
-                  borderTop: `1px solid ${NEWSPRINT.ink}`,
+                  borderTop: `2px solid ${NEWSPRINT.ink}`,
                 }}
               >
-                <div style={{ display: "flex", fontFamily: ogFamily("display"), fontSize: 32 }}>Offer Ceiling</div>
-                {/* The one total, over a double rule: two 1px ink lines 3px apart. */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-                  <div style={{ display: "flex", fontFamily: ogFamily("mono"), fontSize: 56, letterSpacing: "-0.02em", lineHeight: 1 }}>
-                    {total}
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      width: "100%",
-                      height: 5,
-                      marginTop: 6,
-                      borderTop: `1px solid ${NEWSPRINT.ink}`,
-                      borderBottom: `1px solid ${NEWSPRINT.ink}`,
-                    }}
-                  />
+                <div style={{ display: "flex", fontFamily: ogFamily("display"), fontSize: 32, letterSpacing: "-0.025em" }}>Offer Ceiling</div>
+                {/* The one key figure, on the highlight stroke (DESIGN.md "Figure"). */}
+                <div
+                  style={{
+                    display: "flex",
+                    fontFamily: ogFamily("display"),
+                    fontSize: 56,
+                    letterSpacing: "-0.025em",
+                    lineHeight: 1,
+                    ...OG_HIGHLIGHT_STROKE,
+                  }}
+                >
+                  {total}
                 </div>
               </div>
             </div>

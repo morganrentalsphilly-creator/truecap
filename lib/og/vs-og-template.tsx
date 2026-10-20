@@ -60,7 +60,7 @@ export async function renderVsOgImage(config: VsOgConfig): Promise<ImageResponse
                 fontFamily: ogFamily("display"),
                 fontSize: 92,
                 lineHeight: 1.02,
-                letterSpacing: "-0.015em",
+                letterSpacing: "-0.025em",
               }}
             >
               <span style={{ display: "flex" }}>TrueCap</span>

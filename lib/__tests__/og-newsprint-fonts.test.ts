@@ -32,10 +32,17 @@ describe("loadNewsprintFonts", () => {
     const { loadNewsprintFonts } = await import("@/lib/og/newsprint");
     const first = await loadNewsprintFonts({ display: "A", text: "B", mono: "1" });
     await loadNewsprintFonts({ display: "C", text: "D", mono: "2" });
-    expect(first?.map((f) => f.name)).toEqual(["Archivo Display", "Archivo", "DM Mono"]);
+    // Re-anchored: lib/og/newsprint.tsx — the Blueprint faces (Phase 7):
+    // Hanken Grotesk at 750 (its own display name), 400 and 600, Geist Mono.
+    expect(first?.map((f) => f.name)).toEqual([
+      "Hanken Grotesk Display",
+      "Hanken Grotesk",
+      "Hanken Grotesk",
+      "Geist Mono",
+    ]);
     expect(calls.filter((u) => u.includes("vietnamese"))).toHaveLength(0);
-    // Three faces, two requests each (CSS + file), once for both cards.
-    expect(calls).toHaveLength(6);
+    // Four faces, two requests each (CSS + file), once for both cards.
+    expect(calls).toHaveLength(8);
   });
 });
 
