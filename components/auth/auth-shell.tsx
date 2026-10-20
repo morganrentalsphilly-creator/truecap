@@ -1,6 +1,9 @@
 import { AppLogo } from "@/components/brand/app-logo";
+import { HeroSheet } from "@/components/home/hero-sheet";
 import { RuledList } from "@/components/marketing/page-parts";
 import { PAGE_CONTAINER } from "@/components/marketing/section";
+import { buildSampleDealLedger } from "@/lib/sample-deal-ledger";
+import { buildSampleDealSweep } from "@/lib/sample-deal-sweep";
 import { cn } from "@/lib/utils";
 
 type AuthShellProps = {
@@ -46,6 +49,11 @@ export function AuthShell({
   panelDescription = "Labeled assumptions. Buy Box fit. Your work saved securely.",
   className,
 }: AuthShellProps) {
+  // The live mini instrument beside the form (OVERHAUL.md §8, Phase 6): the
+  // homepage's sample-deal sheet, server-rendered at the ceiling from the
+  // precomputed sweep, so a visitor signing in sees the product it unlocks.
+  const ledger = buildSampleDealLedger();
+  const sweep = buildSampleDealSweep();
   return (
     <main id="main" className="min-h-[100dvh] bg-background text-foreground">
       <div className={PAGE_CONTAINER}>
@@ -84,6 +92,12 @@ export function AuthShell({
             <p className="mt-3 max-w-[52ch] text-pretty text-base text-muted-foreground">
               {panelDescription}
             </p>
+
+            {ledger && sweep ? (
+              <div className="mt-6">
+                <HeroSheet ledger={ledger} sweep={sweep} walkthroughHref="/#how-it-works" />
+              </div>
+            ) : null}
 
             <RuledList
               className="mt-8"
