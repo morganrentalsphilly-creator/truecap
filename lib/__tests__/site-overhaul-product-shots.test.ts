@@ -44,7 +44,7 @@ describe("product screenshots are real and wired", () => {
   // in the hero form. homepage-ledger.test.tsx renders the ledger itself.
   it("sets the hero's sample deal as an HTML ledger with a live-sample link", () => {
     const hero = read("components/marketing/marketing-hero.tsx");
-    expect(hero).toContain("<VerdictLedger");
+    expect(hero).toContain("<HeroSheet");
     expect(hero).not.toContain("findProductShot");
     expect(read("components/marketing/hero-address-form.tsx")).toContain('href="/analyze?sample=1"');
   });

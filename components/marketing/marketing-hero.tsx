@@ -1,28 +1,30 @@
 /**
- * The homepage hero for cold visitors: the sample deal's Verdict Ledger is the
- * visual (DESIGN.md "The ledger as the hero"; direction contract in
- * .impeccable/surfaces/app-page-tsx.md).
+ * The homepage hero for cold visitors: the sample deal on a drafting sheet,
+ * with the price to drag (DESIGN.md "The homepage", Blueprint; OVERHAUL.md
+ * §6.1).
  *
  * Desktop: a 5/7 grid from 1024px, headline and the address form on the
- * left, the ledger in the wider column. The display size eases between 900
+ * left, the sheet in the wider column. The display size eases between 900
  * and 1280px (--text-display) so the headline keeps to four lines and the
  * form stays in the first screen of a 1095x760 window. The investor cue sits
  * ABOVE the address form at every width (founder ruling, 2026-10-03), so the
  * cookie banner cannot cover it on a short phone. Phones: one column in
- * reading order, and the ledger starts under the risk line.
+ * reading order, and the sheet starts under the risk line.
  *
- * SERVER COMPONENT. The ledger is set from the engine's own sample-deal output
- * at build time (lib/sample-deal-ledger.ts) and ships as HTML: no screenshot,
- * no client JS. The only client island is <HeroAddressForm />.
+ * SERVER COMPONENT. The sheet is set from the engine's own sample-deal output
+ * at build time (lib/sample-deal-ledger.ts, lib/sample-deal-sweep.ts) and
+ * ships as HTML at the ceiling state; the price scrubber island hydrates onto
+ * it. The other client island is <HeroAddressForm />.
  */
 
 import Link from "next/link";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
-import { VerdictLedger } from "@/components/ledger/verdict-ledger";
+import { HeroSheet } from "@/components/home/hero-sheet";
 import { LedgerFigure, LedgerVerdict } from "@/components/ledger/ledger-parts";
 import { PAGE_CONTAINER } from "@/components/marketing/section";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { buildSampleDealLedger, formatLedgerDollars } from "@/lib/sample-deal-ledger";
+import { buildSampleDealSweep } from "@/lib/sample-deal-sweep";
 import { cn } from "@/lib/utils";
 
 /** The walkthrough section's anchor (HowTrueCapWorks in landing-sections). */
@@ -32,10 +34,11 @@ export function MarketingHero() {
   const { homepageHeadline, newHomepagePositioningEnabled } =
     getMarketingOfferConfig();
   const ledger = buildSampleDealLedger();
+  const sweep = buildSampleDealSweep();
   return (
     // data-page-hero: this bottom rule is the one rule under the hero; the
-    // walkthrough Section after it drops its own (components/marketing/section.tsx).
-    <section data-page-hero="" className="truecap-marketing-shell border-b border-border bg-background">
+    // story Section after it drops its own (components/marketing/section.tsx).
+    <section data-page-hero="" className="truecap-marketing-shell border-b border-border bg-background bg-sheet-grid">
       <div
         className={cn(
           PAGE_CONTAINER,
@@ -51,16 +54,15 @@ export function MarketingHero() {
           <h1 className="font-display hyphens-auto break-words text-balance text-display-sm text-foreground lg:text-display">
             {homepageHeadline}
           </h1>
-          <p className="mt-4 max-w-[46ch] text-pretty text-lg leading-normal text-foreground sm:mt-5">
+          <p className="mt-4 max-w-[46ch] text-pretty text-lg leading-normal text-muted-foreground sm:mt-5">
             {newHomepagePositioningEnabled
               ? "Paste the rental listing. See whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded with Pro."
               : "Enter an address, the asking price and a bedroom count for a first-pass screen with labeled, editable assumptions. Pro adds the Offer Ceiling: the highest price that still meets your targets."}
           </p>
-          {/* Phones only: the ledger's verdict in one sentence, before the
+          {/* Phones only: the sheet's verdict in one sentence, before the
               form, so a phone's first screen shows the answer and not only the
-              claim (the full ledger starts under the fold there). Set from the
-              same engine output as the ledger. It takes the metrics strip's
-              place below 640px. */}
+              claim (the sheet starts under the fold there). Set from the same
+              engine output as the sheet. */}
           {ledger ? (
             // Short phones (under 700px tall, e.g. 375x667) drop the line: there
             // the primary CTA has to clear the cookie banner, and the line is
@@ -124,9 +126,9 @@ export function MarketingHero() {
           </p>
         </div>
 
-        {ledger ? (
+        {ledger && sweep ? (
           <div className="min-w-0 lg:pt-1.5">
-            <VerdictLedger ledger={ledger} walkthroughHref={`#${HOMEPAGE_WALKTHROUGH_ID}`} />
+            <HeroSheet ledger={ledger} sweep={sweep} walkthroughHref={`#${HOMEPAGE_WALKTHROUGH_ID}`} />
           </div>
         ) : null}
       </div>

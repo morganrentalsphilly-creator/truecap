@@ -4,12 +4,13 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { OpenLedger } from "@/components/ledger/open-ledger";
-import { VerdictLedger } from "@/components/ledger/verdict-ledger";
+import { HeroSheet } from "@/components/home/hero-sheet";
 import { calculateSampleDealOutcome } from "@/lib/sample-deal-analysis";
 import {
   buildSampleDealLedger,
   formatLedgerDollars,
 } from "@/lib/sample-deal-ledger";
+import { buildSampleDealSweep } from "@/lib/sample-deal-sweep";
 
 const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
 
@@ -23,16 +24,19 @@ function text(html: string): string {
     .replace(/\s+/g, " ");
 }
 
-// The homepage hero IS the sample deal's Verdict Ledger, set as HTML from the
-// engine (DESIGN.md "The ledger as the hero"). These tests render it and read
-// the figures a visitor sees, so a ledger that drifted from the engine, or a
-// hero that went back to typing numbers, fails here.
-describe("the homepage Verdict Ledger", () => {
+// The homepage hero IS the sample deal on its sheet, set as HTML from the
+// engine (DESIGN.md "The homepage", Blueprint): the schematic, the price
+// track and the readout at the Offer Ceiling, then the ceiling itself. These
+// tests render it and read the figures a visitor sees, so a sheet that
+// drifted from the engine, or a hero that went back to typing numbers, fails
+// here.
+describe("the homepage hero sheet", () => {
   const ledger = buildSampleDealLedger()!;
+  const sweep = buildSampleDealSweep()!;
   const { analysis, maxOffer } = calculateSampleDealOutcome();
   const hero = text(
     renderToStaticMarkup(
-      <VerdictLedger ledger={ledger} walkthroughHref="#how-it-works" />,
+      <HeroSheet ledger={ledger} sweep={sweep} walkthroughHref="#how-it-works" />,
     ),
   );
 
@@ -59,14 +63,17 @@ describe("the homepage Verdict Ledger", () => {
     );
     expect(hero).not.toMatch(/Asking misses the sample targets/);
     expect(hero).not.toMatch(/Screening Index/);
-    const source = read("components/ledger/verdict-ledger.tsx");
+    const source = read("components/home/hero-sheet.tsx");
     expect(source).toContain('"Asking price clears the sample targets."');
   });
 
   it("marks the binding target and the pass or miss against the Buy Box", () => {
+    // The readout's last row: at asking, then at the handle's price (the
+    // ceiling on the server).
     expect(hero).toMatch(/Meets the Buy Box No Yes/);
-    expect(hero).toContain("binding target");
     expect(hero).toMatch(/Binding target: cash flow/i);
+    // The cash-flow target's chip reads "Meets" at the ceiling.
+    expect(hero).toContain("Meets");
   });
 
   it("calls it the sample deal, never synthetic", () => {
@@ -74,20 +81,31 @@ describe("the homepage Verdict Ledger", () => {
     expect(hero).not.toMatch(/synthetic/i);
   });
 
-  it("ships as a table with a caption, not an image", () => {
-    const html = renderToStaticMarkup(<VerdictLedger ledger={ledger} />);
+  it("ships as a table with a caption and a real slider, not an image", () => {
+    const html = renderToStaticMarkup(<HeroSheet ledger={ledger} sweep={sweep} />);
     expect(html).toContain("<table");
     expect(html).toContain("<caption");
     expect(html).not.toContain("<img");
+    // Server-rendered at the ceiling: the slider's text alternative reads
+    // the ceiling price and its cash flow (Radix adds aria-valuenow once it
+    // has measured on the client), the track spans the sweep, and a static
+    // handle stands at the ceiling until the island mounts.
+    expect(html).toContain('role="slider"');
+    expect(html).toContain(`aria-valuemin="${sweep.low}"`);
+    expect(html).toContain(`aria-valuemax="${sweep.high}"`);
+    expect(html).toMatch(/aria-valuetext="\$236,000: cash flow \$750 a month, meets the \$750 target"/);
+    expect(html).toContain('data-static-handle=""');
+    expect(html).toContain('data-hero-ledger=""');
   });
 });
 
 describe("the homepage hero", () => {
   const source = read("components/marketing/marketing-hero.tsx");
 
-  it("renders the engine's ledger, not a screenshot or typed figures", () => {
+  it("renders the engine's sheet, not a screenshot or typed figures", () => {
     expect(source).toContain("buildSampleDealLedger()");
-    expect(source).toContain("<VerdictLedger");
+    expect(source).toContain("buildSampleDealSweep()");
+    expect(source).toContain("<HeroSheet");
     expect(source).not.toMatch(
       /findProductShot|ProductShot|next\/image|priority/,
     );
