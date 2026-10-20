@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction A · Deal Desk · TrueCap comp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Direction A: Deal Desk. Cool white base, navy instrument panels, one cobalt.
+     Every figure below is injected from comp-data.json by build-comps.mjs. */
+  :root {
+    --base: #fcfdff;
+    --base-2: #f3f6fa;
+    --line: #dde3ea;
+    --line-soft: #e9edf2;
+    --ink: #161b24;
+    --ink-2: #575e69;
+    --navy: #0e182b;
+    --navy-2: #142139;
+    --navy-line: rgba(255,255,255,.10);
+    --navy-text: #e7ecf4;
+    --navy-text-2: #9aa7ba;
+    --cobalt: #1957d2;
+    --cobalt-deep: #0d45b0;
+    --cobalt-wash: #e8efff;
+    --green: #0a7e3b;
+    --green-navy: #56d57b;
+    --red: #cc272e;
+    --amber-navy: #f0a73c;
+    --amber-text: #9a5b00;
+    --r-card: 16px;
+    --r-control: 10px;
+    --r-chip: 6px;
+    --shadow-card: 0 1px 2px rgba(14,24,43,.06), 0 8px 24px -8px rgba(14,24,43,.18), 0 24px 48px -24px rgba(14,24,43,.22);
+    --shadow-panel: 0 2px 4px rgba(14,24,43,.12), 0 16px 40px -12px rgba(14,24,43,.45), 0 40px 80px -40px rgba(25,87,210,.35);
+    --ease: cubic-bezier(.2,.8,.2,1);
+    --font: "Geist", ui-sans-serif, system-ui, sans-serif;
+    --mono: "Geist Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--base); color: var(--ink); font-family: var(--font); font-size: 16px; -webkit-font-smoothing: antialiased; }
+  body { margin: 0; line-height: 1.5; }
+  ::selection { background: var(--cobalt-wash); }
+  .num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+  a { color: inherit; }
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 20px; }
+  @media (min-width: 768px) { .container { padding: 0 32px; } }
+  @media (min-width: 1200px) { .container { padding: 0 48px; } }
+
+  /* Comp chrome: labels between specimens, not part of the design. */
+  .spec-label { background: #e9edf2; color: #3b4350; font: 500 12px/1 var(--mono); letter-spacing: .02em; padding: 10px 20px; border-top: 1px solid #d5dbe3; }
+
+  /* Header */
+  .hdr { position: sticky; top: 0; z-index: 10; background: rgba(252,253,255,.86); backdrop-filter: saturate(160%) blur(10px); border-bottom: 1px solid var(--line-soft); }
+  .hdr .container { display: flex; align-items: center; gap: 28px; height: 64px; }
+  .logo { font-weight: 700; font-size: 20px; letter-spacing: -.02em; }
+  .logo b { color: var(--cobalt); }
+  .nav { display: none; gap: 22px; font-weight: 500; color: var(--ink-2); }
+  .nav a { text-decoration: none; }
+  .nav a[aria-current] { color: var(--ink); }
+  .hdr .actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .btn { white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; border-radius: var(--r-control); font-weight: 600; text-decoration: none; border: 1px solid transparent; transition: background-color .15s, box-shadow .15s, transform .15s; }
+  .btn-primary { background: var(--cobalt); color: #fff; box-shadow: 0 1px 0 rgba(255,255,255,.2) inset, 0 6px 16px -8px rgba(25,87,210,.6); }
+  .btn-primary:hover { background: var(--cobalt-deep); }
+  .btn-ghost { color: var(--ink); }
+  .btn-outline { border-color: var(--line); background: #fff; color: var(--ink); }
+  .btn-cta { min-height: 52px; padding: 0 22px; font-size: 16px; }
+  @media (min-width: 1024px) { .nav { display: flex; } }
+  @media (max-width: 639px) { .hdr .btn-ghost { display: none; } .hdr .container { height: 56px; } }
+  .verdict-line { display: none; margin: 14px 0 0; font-size: 15px; line-height: 1.4; }
+  .verdict-line b { font-weight: 700; }
+  @media (max-width: 1023px) { .verdict-line { display: block; } }
+
+  /* Hero */
+  .hero { position: relative; overflow: clip; }
+  .hero::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(circle, #cfd8e3 1px, transparent 1.2px); background-size: 22px 22px; opacity: .55; mask-image: linear-gradient(to bottom, #000 0%, transparent 90%); }
+  .hero .container { position: relative; display: grid; gap: 36px; padding-top: 36px; padding-bottom: 56px; }
+  @media (min-width: 1024px) { .hero .container { grid-template-columns: minmax(0,5fr) minmax(0,7fr); gap: 56px; padding-top: 64px; padding-bottom: 88px; align-items: start; } }
+  h1 { font-size: clamp(36px, 2.2rem + 1.6vw, 56px); line-height: 1.02; letter-spacing: -.03em; font-weight: 700; margin: 0; text-wrap: balance; }
+  .sub { font-size: 18px; color: var(--ink-2); margin: 18px 0 0; max-width: 46ch; text-wrap: pretty; }
+  .cue { margin: 18px 0 0; font-size: 16px; }
+  .cue a { color: var(--cobalt); text-decoration: underline; text-underline-offset: 3px; }
+  .form { margin-top: 14px; display: grid; gap: 10px; }
+  @media (min-width: 640px) { .form { grid-template-columns: minmax(0,1fr) auto; } }
+  .field { height: 52px; border: 1px solid var(--line); border-radius: var(--r-control); background: #fff; padding: 0 16px; font: 400 16px var(--font); color: var(--ink); box-shadow: 0 1px 2px rgba(14,24,43,.04) inset; }
+  .field::placeholder { color: #7b8491; }
+  .field:focus-visible, .btn:focus-visible, .handle:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 2px; }
+  .fine { margin: 10px 0 0; color: var(--ink-2); font-size: 14px; }
+  .risk { margin: 6px 0 0; font-size: 14px; color: var(--ink-2); }
+
+  /* The instrument */
+  .panel { background: linear-gradient(180deg, var(--navy-2), var(--navy) 60%); color: var(--navy-text); border-radius: var(--r-card); box-shadow: var(--shadow-panel); padding: 22px; border: 1px solid rgba(255,255,255,.06); }
+  @media (min-width: 640px) { .panel { padding: 28px; } }
+  .panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .panel-title { font-weight: 600; font-size: 15px; }
+  .panel-note { color: var(--navy-text-2); font-size: 13px; }
+  .ceiling { margin-top: 18px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .ceiling .lbl { font-size: 15px; color: var(--navy-text-2); font-weight: 500; }
+  .ceiling .fig { font-size: clamp(40px, 2rem + 2.4vw, 60px); font-weight: 700; letter-spacing: -.035em; line-height: 1; color: #fff; }
+  .ceiling .delta { font-size: 14px; color: var(--navy-text-2); }
+
+  .track { position: relative; margin: 26px 8px 0; height: 56px; }
+  .track .rail { position: absolute; left: 0; right: 0; top: 24px; height: 8px; border-radius: 999px; background: rgba(255,255,255,.12); }
+  .track .meets { position: absolute; left: 0; top: 24px; height: 8px; border-radius: 999px 0 0 999px; width: {{ceilingPct}}%; background: linear-gradient(90deg, rgba(86,213,123,.35), var(--green-navy)); }
+  .track .mark { position: absolute; top: 0; transform: translateX(-50%); font-size: 12px; color: var(--navy-text-2); white-space: nowrap; }
+  .track .mark::after { content: ""; display: block; width: 1px; height: 36px; background: rgba(255,255,255,.28); margin: 4px auto 0; }
+  .track .mark.ceil { left: {{ceilingPct}}%; }
+  .track .mark.ask { left: {{askingPct}}%; }
+  .track .mark.ask::after { background: rgba(255,255,255,.28); }
+  .handle { position: absolute; top: 14px; left: {{ceilingPct}}%; transform: translateX(-50%); width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 4px solid var(--cobalt); box-shadow: 0 0 0 6px rgba(25,87,210,.25), 0 6px 14px rgba(0,0,0,.4); cursor: grab; touch-action: none; }
+  .handle:active { cursor: grabbing; }
+  .price-now { margin: 10px 8px 0; font-size: 14px; color: var(--navy-text-2); }
+  .price-now b { color: #fff; font-weight: 600; }
+
+  .tiles { display: grid; gap: 10px; margin-top: 18px; grid-template-columns: repeat(3, minmax(0,1fr)); }
+  .tile { background: rgba(255,255,255,.05); border: 1px solid var(--navy-line); border-radius: 12px; padding: 12px 12px 10px; min-width: 0; }
+  .tile .k { font-size: 12px; color: var(--navy-text-2); display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tile .v { font-size: clamp(20px, 1rem + 1vw, 28px); font-weight: 650; letter-spacing: -.02em; color: #fff; margin-top: 4px; line-height: 1.1; }
+  .tile .v small { font-size: .55em; font-weight: 500; color: var(--navy-text-2); margin-left: 2px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; border-radius: var(--r-chip); padding: 3px 8px; font-size: 12px; font-weight: 600; margin-top: 8px; white-space: nowrap; }
+  .chip.ok { background: rgba(86,213,123,.14); color: var(--green-navy); }
+  .chip.miss { background: rgba(240,167,60,.14); color: var(--amber-navy); }
+  .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .src { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 16px; }
+  .src span { font: 500 12px/1 var(--mono); color: var(--navy-text-2); border: 1px solid var(--navy-line); border-radius: 999px; padding: 6px 10px; }
+  .src span b { color: var(--navy-text); font-weight: 500; }
+  .buybox { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--navy-line); display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 15px; }
+  .verdict { font-weight: 700; }
+  .verdict.yes { color: var(--green-navy); }
+  .verdict.no { color: var(--amber-navy); }
+  .hint { font-size: 13px; color: var(--navy-text-2); margin-top: 12px; }
+
+  /* Specimen: analyzer result card (light) */
+  .specimen { padding: 48px 0; }
+  .specimen .container { display: grid; gap: 28px; }
+  .result { background: #fff; border: 1px solid var(--line-soft); border-radius: var(--r-card); box-shadow: var(--shadow-card); padding: 24px; max-width: 760px; }
+  .result .headline { font-size: 24px; font-weight: 700; letter-spacing: -.02em; margin: 0; }
+  .result .headline .no { color: var(--amber-text); }
+  .result .ceil { margin-top: 18px; display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 12px; }
+  .result .ceil .lbl { color: var(--ink-2); font-size: 14px; font-weight: 500; }
+  .result .ceil .fig { font-size: 48px; font-weight: 700; letter-spacing: -.035em; line-height: 1; color: var(--cobalt); }
+  .result .ceil .delta { font-size: 14px; color: var(--ink-2); text-align: right; }
+  .result .bar { margin-top: 14px; height: 10px; border-radius: 999px; background: var(--base-2); position: relative; overflow: hidden; }
+  .result .bar i { position: absolute; left: 0; top: 0; bottom: 0; width: {{ceilingPct}}%; background: linear-gradient(90deg, #cfe0ff, var(--cobalt)); border-radius: 999px; }
+  .result .bar b { position: absolute; top: -3px; width: 2px; height: 16px; background: var(--ink); left: {{askingPct}}%; }
+  .result .metrics { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-top: 18px; }
+  .result .m { border: 1px solid var(--line-soft); border-radius: 12px; padding: 12px; background: var(--base); }
+  .result .m .k { font-size: 12px; color: var(--ink-2); }
+  .result .m .v { font-size: clamp(19px, 0.9rem + 1.3vw, 26px); font-weight: 650; letter-spacing: -.02em; margin-top: 2px; }
+  .result .m .v small { font-size: 13px; color: var(--ink-2); font-weight: 500; }
+  .chip.l-ok { background: #e6f5ec; color: var(--green); }
+  .chip.l-miss { background: #fff1dc; color: var(--amber-text); }
+  .result .next { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line-soft); display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-size: 15px; }
+
+  /* Specimen: plan card */
+  .plans { display: grid; gap: 16px; max-width: 760px; }
+  @media (min-width: 640px) { .plans { grid-template-columns: 1fr 1fr; } }
+  .plan { background: #fff; border: 1px solid var(--line-soft); border-radius: var(--r-card); padding: 24px; box-shadow: 0 1px 2px rgba(14,24,43,.05); transition: transform .2s var(--ease), box-shadow .2s var(--ease); }
+  .plan:hover { transform: translateY(-3px); box-shadow: var(--shadow-card); }
+  .plan.featured { border-color: #c9d8ff; box-shadow: 0 0 0 1px #c9d8ff, var(--shadow-card); }
+  .plan h3 { margin: 0; font-size: 22px; letter-spacing: -.02em; }
+  .plan .aud { color: var(--ink-2); margin: 4px 0 0; }
+  .toggle { display: inline-flex; background: var(--base-2); border-radius: 999px; padding: 3px; margin: 0 0 16px; border: 1px solid var(--line-soft); }
+  .toggle span { padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  .toggle span.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(14,24,43,.15); }
+  .plan .price { margin-top: 16px; display: flex; align-items: baseline; gap: 4px; }
+  .plan .price .amt { font-size: 40px; font-weight: 700; letter-spacing: -.03em; }
+  .plan .price .per { color: var(--ink-2); }
+  .plan .alt { color: var(--ink-2); font-size: 14px; margin-top: 4px; }
+  .plan ul { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 8px; }
+  .plan li { display: flex; gap: 10px; align-items: start; font-size: 15px; }
+  .plan li::before { content: ""; flex: none; width: 18px; height: 18px; border-radius: 50%; background: var(--cobalt-wash); margin-top: 2px; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'><path d='M5 9.5l2.5 2.5L13 6.5' fill='none' stroke='%231957d2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>"); }
+  .plan .btn { width: 100%; margin-top: 20px; }
+
+  /* Dark band */
+  .band { background: var(--navy); color: var(--navy-text); padding: 72px 0; position: relative; overflow: clip; }
+  .band::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,.12) 1px, transparent 1.2px); background-size: 22px 22px; mask-image: radial-gradient(60% 80% at 70% 50%, #000, transparent); }
+  .band .container { position: relative; display: grid; gap: 28px; }
+  @media (min-width: 1024px) { .band .container { grid-template-columns: minmax(0,5fr) minmax(0,7fr); align-items: center; } }
+  .band h2 { font-size: clamp(30px, 1.6rem + 1.4vw, 42px); letter-spacing: -.03em; line-height: 1.05; margin: 0; color: #fff; text-wrap: balance; }
+  .band p { color: var(--navy-text-2); font-size: 17px; max-width: 48ch; }
+  .band .field { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.14); color: #fff; }
+  .band .field::placeholder { color: var(--navy-text-2); }
+  .flow { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
+  .node { border: 1px solid var(--navy-line); border-radius: 12px; padding: 14px; background: rgba(255,255,255,.04); }
+  .node .s { font: 500 12px var(--mono); color: var(--navy-text-2); }
+  .node .v { font-size: 22px; font-weight: 650; margin-top: 4px; color: #fff; letter-spacing: -.02em; }
+  .node .w { font-size: 13px; color: var(--navy-text-2); margin-top: 2px; }
+  .arrow { height: 2px; background: linear-gradient(90deg, transparent, var(--cobalt) 40%, var(--green-navy)); margin: 14px 0; border-radius: 2px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="container">
+    <div class="logo">True<b>cap</b>.</div>
+    <nav class="nav" aria-label="Main">
+      <a href="#" aria-current="page">Analyze</a><a href="#">For agents</a><a href="#">For investors</a><a href="#">Pricing</a><a href="#">Learn</a>
+    </nav>
+    <div class="actions">
+      <a class="btn btn-ghost" href="#">Sign in</a>
+      <a class="btn btn-primary" href="#">Create account</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero" aria-labelledby="h1">
+  <div class="container">
+    <div>
+      <h1 id="h1">Stop forwarding listings. Start sending deals that already pencil.</h1>
+      <p class="sub">Paste the rental listing. See whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded with Pro.</p>
+      <p class="verdict-line">Sample deal. Offer Ceiling <b class="num">{{ceiling}}</b>, {{belowAsking}} below asking. Meets the Buy Box: <b>no</b> at asking, <b>yes</b> at the ceiling.</p>
+      <p class="cue">Buying for your own portfolio? Same analyzer, your own Buy Box. <a href="#">For investors</a></p>
+      <form class="form" onsubmit="return false">
+        <input class="field" type="text" placeholder="Address or listing link" aria-label="Property address or listing link">
+        <button class="btn btn-primary btn-cta" type="submit">Analyze a deal free</button>
+      </form>
+      <p class="fine">A listing link fills in the address. You enter the asking price and bedrooms; a paid Pro or Agent Pro plan can fill them.</p>
+      <p class="risk">Free. No account. Your first full decision is included.</p>
+    </div>
+
+    <figure class="panel" aria-label="Sample deal: drag the price" style="margin:0">
+      <div class="panel-head">
+        <span class="panel-title">{{title}}</span>
+        <span class="panel-note">Sample deal · drag the price</span>
+      </div>
+      <div class="ceiling">
+        <span class="lbl">Offer Ceiling</span>
+        <span class="fig num" id="ceilFig">{{ceiling}}</span>
+        <span class="delta num">{{belowAsking}} below asking</span>
+      </div>
+      <div class="track" id="track">
+        <div class="rail"></div>
+        <div class="meets" id="meetsFill"></div>
+        <div class="mark ceil">Offer Ceiling {{ceiling}}</div>
+        <div class="mark ask">Asking {{asking}}</div>
+        <div class="handle" id="handle" role="slider" tabindex="0" aria-label="Offer price" aria-valuemin="{{trackLow}}" aria-valuemax="{{trackHigh}}" aria-valuenow="{{ceilingRaw}}" aria-valuetext="{{ceiling}}: cash flow {{cashFlowCeiling}}, meets the {{targetCashFlow}} target"></div>
+      </div>
+      <p class="price-now">At <b class="num" id="priceNow">{{ceiling}}</b> <span id="priceNote">· the highest price that still meets the Buy Box</span></p>
+      <div class="tiles">
+        <div class="tile"><div class="k">Cash flow after reserves</div><div class="v num" id="cfV">{{cashFlowCeiling}}</div><span class="chip ok" id="cfC"><i class="dot"></i>Meets ≥ {{targetCashFlow}}</span></div>
+        <div class="tile"><div class="k">DSCR</div><div class="v num" id="dV">{{dscrCeiling}}</div><span class="chip ok" id="dC"><i class="dot"></i>Meets ≥ {{targetDscr}}</span></div>
+        <div class="tile"><div class="k">Cash-on-cash</div><div class="v num" id="cV">{{cocCeiling}}</div><span class="chip ok"><i class="dot"></i>Year 1</span></div>
+      </div>
+      <div class="src">
+        <span>Rent <b>{{rent}}</b> · HUD FMR</span><span>Rate <b>{{rate}}</b> · FRED</span><span>Property tax · Your input</span><span>Down <b>{{downPaymentPct}}</b> · TrueCap default</span>
+      </div>
+      <div class="buybox"><span>Meets the Buy Box</span><span class="verdict yes" id="verdict">Yes</span></div>
+      <p class="hint">Every figure opens its source. Binding target: {{bindingTarget}}.</p>
+    </figure>
+  </div>
+</section>
+
+<div class="spec-label">SPECIMEN · analyzer result card (Operate mode, light)</div>
+<section class="specimen">
+  <div class="container">
+    <div class="result">
+      <p class="headline">Doesn't meet your targets at asking. <span class="no">Asking price is {{belowAsking}} above your ceiling.</span></p>
+      <div class="ceil">
+        <div><div class="lbl">Offer Ceiling · the highest price that still meets your targets</div><div class="fig num">{{ceiling}}</div></div>
+        <div class="delta num">Asking {{asking}}<br>Binding target: {{bindingTarget}}</div>
+      </div>
+      <div class="bar"><i></i><b title="Asking"></b></div>
+      <div class="metrics">
+        <div class="m"><div class="k">Cash flow after reserves</div><div class="v num">{{cashFlowAsking}}</div><span class="chip l-miss">Misses by {{shortfallAsking}}</span></div>
+        <div class="m"><div class="k">DSCR</div><div class="v num">{{dscrAsking}}</div><span class="chip l-ok">Meets ≥ {{targetDscr}}</span></div>
+        <div class="m"><div class="k">Cash-on-cash</div><div class="v num">{{cocAsking}}</div><span class="chip l-ok">Deal score {{dealScore}}</span></div>
+      </div>
+      <div class="next"><a class="btn btn-primary" href="#">Send to client</a><span>or edit the assumptions and rerun.</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="spec-label">SPECIMEN · plan card with the monthly / annual toggle</div>
+<section class="specimen">
+  <div class="container">
+    <div>
+      <div class="toggle"><span>Monthly</span><span class="on">Annual · 2 months free</span></div>
+      <div class="plans">
+        <div class="plan featured">
+          <h3>Pro</h3><p class="aud">Know what to offer on every deal.</p>
+          <div class="price"><span class="amt num">{{proAnnualPerMonth}}</span><span class="per">/mo</span></div>
+          <p class="alt num">{{proAnnual}} billed annually · {{proMonthly}} month to month</p>
+          <ul><li>Buy Box fit on every deal</li><li>The Offer Ceiling on every deal</li><li>Downside sensitivity checks</li><li>The decision memo, co-branded</li></ul>
+          <a class="btn btn-primary" href="#">See Pro pricing</a>
+        </div>
+        <div class="plan">
+          <h3>Agent Pro</h3><p class="aud">Screen listings for every client.</p>
+          <div class="price"><span class="amt num">{{agentProAnnualPerMonth}}</span><span class="per">/mo</span></div>
+          <p class="alt num">{{agentProAnnual}} billed annually · {{agentProMonthly}} month to month</p>
+          <ul><li>Everything in Pro</li><li>A roster of clients, each with a Buy Box</li><li>Co-branded share pages and memos</li></ul>
+          <a class="btn btn-outline" href="#">See Agent Pro pricing</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="spec-label">SPECIMEN · dark band ("Every number has a receipt" + close)</div>
+<section class="band">
+  <div class="container">
+    <div>
+      <h2>Every number has a receipt.</h2>
+      <p>HUD sets the rent benchmark, FRED sets the rate, you set the property tax. Each flows into one answer, and each is yours to replace.</p>
+      <form class="form" onsubmit="return false"><input class="field" placeholder="Address or listing link" aria-label="Property address or listing link"><button class="btn btn-primary btn-cta">Analyze a deal free</button></form>
+    </div>
+    <div>
+      <div class="flow">
+        <div class="node"><div class="s">HUD FMR</div><div class="v num">{{rent}}</div><div class="w">rent benchmark, {{bedrooms}} bed</div></div>
+        <div class="node"><div class="s">FRED</div><div class="v num">{{rate}}</div><div class="w">30-year rate</div></div>
+        <div class="node"><div class="s">YOUR INPUT</div><div class="v">Property tax</div><div class="w">never auto-filled</div></div>
+      </div>
+      <div class="arrow"></div>
+      <div class="node" style="background:rgba(25,87,210,.14);border-color:rgba(25,87,210,.5)"><div class="s">RESULT</div><div class="v num">Offer Ceiling {{ceiling}}</div><div class="w">cash flow {{cashFlowCeiling}} · DSCR {{dscrCeiling}} · CoC {{cocCeiling}}</div></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Comp-only interaction: drag the price along the engine's precomputed sweep.
+  (function () {
+    const sweep = {{sweepJson}};
+    const lo = sweep[0].p, hi = sweep[sweep.length - 1].p;
+    const track = document.getElementById('track'), handle = document.getElementById('handle');
+    const $ = (id) => document.getElementById(id);
+    const usd = (n) => '$' + Math.round(n).toLocaleString('en-US');    function render(price) {
+      const pt = sweep.reduce((a, b) => Math.abs(b.p - price) < Math.abs(a.p - price) ? b : a);
+      const pct = ((pt.p - lo) / (hi - lo)) * 100;
+      handle.style.left = pct + '%';
+      handle.setAttribute('aria-valuenow', pt.p);
+      $('priceNow').textContent = usd(pt.p);
+      $('cfV').textContent = usd(pt.cf) + '/mo';
+      $('dV').textContent = pt.d.toFixed(2);
+      $('cV').textContent = pt.c.toFixed(1) + '%';
+      const cfTarget = {{targetCashFlowRaw}};
+      const miss = cfTarget - pt.cf;
+      $('cfC').className = 'chip ' + (pt.cf >= cfTarget ? 'ok' : 'miss');
+      $('cfC').innerHTML = '<i class="dot"></i>' + (pt.cf >= cfTarget ? 'Meets ≥ ' + usd(cfTarget) + '/mo' : 'Misses by ' + usd(miss));
+      $('dC').className = 'chip ' + (pt.d >= {{targetDscr}} ? 'ok' : 'miss');
+      $('verdict').textContent = pt.m ? 'Yes' : 'No';
+      $('verdict').className = 'verdict ' + (pt.m ? 'yes' : 'no');
+      $('priceNote').textContent = pt.p === {{ceilingRaw}} ? '· the highest price that still meets the Buy Box' : (pt.p === {{askingRaw}} ? '· the asking price' : (pt.m ? '· meets the Buy Box' : '· misses the Buy Box'));
+      handle.setAttribute('aria-valuetext', usd(pt.p) + ': cash flow ' + usd(pt.cf) + ' a month, ' + (pt.cf >= cfTarget ? 'meets' : 'misses') + ' the ' + usd(cfTarget) + ' target');
+    }
+    function fromX(x) { const r = track.getBoundingClientRect(); const t = Math.min(1, Math.max(0, (x - r.left) / r.width)); return Math.round((lo + t * (hi - lo)) / 1000) * 1000; }
+    let dragging = false;
+    handle.addEventListener('pointerdown', (e) => { dragging = true; handle.setPointerCapture(e.pointerId); });
+    handle.addEventListener('pointermove', (e) => { if (dragging) render(fromX(e.clientX)); });
+    handle.addEventListener('pointerup', () => { dragging = false; });
+    track.addEventListener('click', (e) => { if (e.target !== handle) render(fromX(e.clientX)); });
+    handle.addEventListener('keydown', (e) => { const now = +handle.getAttribute('aria-valuenow'); if (e.key === 'ArrowRight' || e.key === 'ArrowUp') render(now + 1000); if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') render(now - 1000); });
+  })();
+</script>
+</body>
+</html>
