@@ -1,0 +1,75 @@
+{
+  "label": "before",
+  "widths": {
+    "375": {
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "overflow": false,
+      "listTop": 605,
+      "viewportHeight": 812,
+      "sections": [
+        "div: Welcome back, Sam @80",
+        "section: Decision center @221",
+        "section: Your deals @583",
+        "section: Your screening record @3858"
+      ],
+      "smallTargets": [],
+      "gaps": []
+    },
+    "768": {
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "overflow": false,
+      "listTop": 544,
+      "viewportHeight": 1024,
+      "sections": [
+        "div: Welcome back, Sam @88",
+        "section: Decision center @187",
+        "section: Your deals @522",
+        "section: Your screening record @3707"
+      ],
+      "smallTargets": [],
+      "gaps": []
+    },
+    "1095": {
+      "scrollWidth": 1095,
+      "clientWidth": 1095,
+      "overflow": false,
+      "listTop": 544,
+      "viewportHeight": 760,
+      "sections": [
+        "div: Welcome back, Sam @88",
+        "section: Decision center @187",
+        "section: Your deals @522",
+        "section: Your screening record @1288"
+      ],
+      "smallTargets": [],
+      "gaps": []
+    },
+    "1440": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "overflow": false,
+      "listTop": 488,
+      "viewportHeight": 900,
+      "sections": [
+        "div: Welcome back, Sam @88",
+        "section: Decision center @187",
+        "section: Your deals @466",
+        "section: Your screening record @1232"
+      ],
+      "smallTargets": [],
+      "gaps": []
+    }
+  },
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Refused to execute script from 'http://127.0.0.1:3100/_vercel/insights/script.js' because its MIME type ('text/plain') is not executable, and strict MIME type checking is enabled.",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Refused to execute script from 'http://127.0.0.1:3100/_vercel/insights/script.js' because its MIME type ('text/plain') is not executable, and strict MIME type checking is enabled.",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Refused to execute script from 'http://127.0.0.1:3100/_vercel/insights/script.js' because its MIME type ('text/plain') is not executable, and strict MIME type checking is enabled.",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Refused to execute script from 'http://127.0.0.1:3100/_vercel/insights/script.js' because its MIME type ('text/plain') is not executable, and strict MIME type checking is enabled."
+  ]
+}
