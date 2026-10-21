@@ -220,6 +220,8 @@ import {
 import {
   ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE,
   ANONYMOUS_DECISION_INPUT_BOUND_NOTE,
+  ANONYMOUS_DECISION_USED_INTRO,
+  ANONYMOUS_DECISION_USED_STORAGE_KEY,
   anonymousDecisionUsedDescription,
 } from "@/lib/anonymous-decision-copy";
 import { announceTrialUsage } from "@/lib/pricing-evaluation";
@@ -712,6 +714,31 @@ function writeCalcDraftWithMaoTarget(
 }
 
 /** Safely remove the draft. */
+/** The input fingerprint of the last finished run (audit A19). */
+const COMPLETED_RUN_DRAFT_KEY = "truecap_calc_completed_run_v1";
+
+function readCompletedRunFingerprint(): string | null {
+  try {
+    return typeof window === "undefined"
+      ? null
+      : window.localStorage.getItem(COMPLETED_RUN_DRAFT_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/** A new navigation to the page: not a reload and not Back or Forward. */
+function isFreshNavigation(): boolean {
+  try {
+    const entry = performance.getEntriesByType("navigation")[0] as
+      | PerformanceNavigationTiming
+      | undefined;
+    return !entry || entry.type === "navigate";
+  } catch {
+    return false;
+  }
+}
+
 function clearCalcDraftRaw(): void {
   try {
     if (typeof window !== "undefined")
@@ -1520,6 +1547,18 @@ export function InvestCalcPage({
   // analysis"; it authorizes nothing.
   const [anonymousDecisionClaimSeen, setAnonymousDecisionClaimSeen] =
     useState(false);
+  // Presentation only: this browser's no-signup decision was claimed on an
+  // earlier visit or this one, so the intro stops promising it (audit A19).
+  const [anonymousDecisionUsed, setAnonymousDecisionUsed] = useState(false);
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(ANONYMOUS_DECISION_USED_STORAGE_KEY) === "1") {
+        setAnonymousDecisionUsed(true);
+      }
+    } catch {
+      /* storage blocked: the intro keeps its first-visit sentence */
+    }
+  }, []);
   const clearAnonymousDecisionPresentationGrant = useCallback(() => {
     anonymousDecisionGrantFormJsonRef.current = null;
     setAnonymousDecisionGrantAvailable(false);
@@ -5748,6 +5787,24 @@ export function InvestCalcPage({
             matchesSyntheticSampleDraft &&
             !resumesPendingSaveAfterAuth &&
             !resumesPendingShareAfterAuth;
+          // A draft that is exactly the last finished run, opened by a new
+          // navigation (not a reload or Back), is a finished deal, not work
+          // in progress: the visitor came for the next one (audit A19).
+          const isFinishedRunOnFreshVisit =
+            !resumesPendingSaveAfterAuth &&
+            !resumesPendingShareAfterAuth &&
+            isFreshNavigation() &&
+            readCompletedRunFingerprint() ===
+              maoTargetAnalysisFingerprint(normalized);
+          if (isFinishedRunOnFreshVisit) {
+            clearCalcDraftRaw();
+            clearPendingMaoTarget();
+            resetToNewAnalysis("single-family");
+            queueMicrotask(() => {
+              isProgrammaticResetRef.current = false;
+            });
+            return;
+          }
           if (isSyntheticSampleDraft) {
             // Clean up drafts created by older releases that did persist the
             // demo. A synthetic sample must never become the default starting
@@ -6500,6 +6557,12 @@ export function InvestCalcPage({
           setAnonymousDecisionGrantAvailable(boundFormSnapshot !== null);
           if (anonymousGrant.ok || anonymousGrant.code === "LIMIT_REACHED") {
             setAnonymousDecisionClaimSeen(true);
+            setAnonymousDecisionUsed(true);
+            try {
+              window.localStorage.setItem(ANONYMOUS_DECISION_USED_STORAGE_KEY, "1");
+            } catch {
+              /* presentation only */
+            }
           }
           if (!anonymousGrant.ok) {
             toast({
@@ -6647,6 +6710,18 @@ export function InvestCalcPage({
         verdict: getDealTier(result),
         has_ceiling: Boolean(canUseMaxOffer),
       });
+      // The finished run's inputs: a fresh visit to the analyzer does not
+      // reopen exactly this run (audit A19); a reload or Back still does.
+      try {
+        const fingerprint = maoTargetAnalysisFingerprint(
+          normalizeReleasedInvestmentFormDraft(values) ?? values,
+        );
+        if (fingerprint) {
+          window.localStorage.setItem(COMPLETED_RUN_DRAFT_KEY, fingerprint);
+        }
+      } catch {
+        /* best-effort, like the draft itself */
+      }
       try {
         const firstAnalysisKey = "truecap_first_analysis_completed_v1";
         if (window.localStorage.getItem(firstAnalysisKey) !== "1") {
@@ -9954,7 +10029,9 @@ export function InvestCalcPage({
               Confirm the property, price, income, and assumptions. TrueCap then
               shows whether the deal works and why.
               {!isAuthenticated
-                ? " Your first full decision is free, with no account."
+                ? anonymousDecisionUsed
+                  ? ANONYMOUS_DECISION_USED_INTRO
+                  : " Your first full decision is free, with no account."
                 : null}
             </p>
           </div>

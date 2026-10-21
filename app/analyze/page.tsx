@@ -68,7 +68,10 @@ export default function AnalyzePage() {
   return (
     <div className="relative overflow-x-clip">
       <JsonLd data={webPageLd} />
-      <Header initialUser={null} initialEntitlements={null} />
+      {/* Anonymous by construction (proxy.ts rewrites signed-in visitors to
+          /home-authed): the server HTML carries Analyze, the menu, Sign in
+          and Create account, with or before JavaScript (audit A18, A22). */}
+      <Header initialUser={null} initialEntitlements={null} anonymousByDefault />
       {/* Hidden unless the URL asks for the sample: then it is the first
           paint, and the analyzer's own result takes its place (audit A2). */}
       <SampleDecisionPrerender />

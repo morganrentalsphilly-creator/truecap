@@ -38,3 +38,14 @@ export function anonymousDecisionUsedDescription(): string {
  */
 export const ANONYMOUS_DECISION_HOURLY_LIMIT_MESSAGE =
   "This network has reached the hourly limit on new no-signup decisions. Create a free account to continue now, or try again in an hour.";
+
+/**
+ * The analyzer intro once this browser's no-signup decision is used (audit
+ * A19): it stops promising a free first decision and says what the next one
+ * shows, as LIMIT_REACHED serves it (a range at most until sign-up).
+ */
+export const ANONYMOUS_DECISION_USED_INTRO =
+  " This browser's free decision is used: the next deal shows the Offer Ceiling as a range until you create a free account.";
+
+/** Browser marker that the no-signup decision was claimed (presentation only; it authorizes nothing). */
+export const ANONYMOUS_DECISION_USED_STORAGE_KEY = "truecap_anonymous_decision_used_v1";
