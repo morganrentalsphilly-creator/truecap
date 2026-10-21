@@ -1,0 +1,237 @@
+{
+  "device": "iphone",
+  "net": "slow4g",
+  "frames": [
+    {
+      "i": 0,
+      "ms": 1,
+      "name": "timeline-iphone-slow4g-00",
+      "valuenow": "236000",
+      "heroTop": 811,
+      "heroH": 1458,
+      "bannerTop": null,
+      "readyState": "interactive"
+    },
+    {
+      "i": 1,
+      "ms": 2287,
+      "name": "timeline-iphone-slow4g-01",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "interactive"
+    },
+    {
+      "i": 2,
+      "ms": 2946,
+      "name": "timeline-iphone-slow4g-02",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "interactive"
+    },
+    {
+      "i": 3,
+      "ms": 4144,
+      "name": "timeline-iphone-slow4g-03",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 4,
+      "ms": 4991,
+      "name": "timeline-iphone-slow4g-04",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 5,
+      "ms": 6094,
+      "name": "timeline-iphone-slow4g-05",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 6,
+      "ms": 7564,
+      "name": "timeline-iphone-slow4g-06",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 7,
+      "ms": 7960,
+      "name": "timeline-iphone-slow4g-07",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 8,
+      "ms": 8348,
+      "name": "timeline-iphone-slow4g-08",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 9,
+      "ms": 8983,
+      "name": "timeline-iphone-slow4g-09",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "complete"
+    }
+  ],
+  "probe": {
+    "events": [
+      [
+        1373,
+        "dcl"
+      ],
+      [
+        3270,
+        "valuenow",
+        "236000"
+      ],
+      [
+        4554,
+        "load"
+      ]
+    ],
+    "longtasks": [
+      [
+        1370,
+        163
+      ],
+      [
+        1555,
+        301
+      ],
+      [
+        2145,
+        123
+      ],
+      [
+        2276,
+        114
+      ],
+      [
+        3022,
+        227
+      ],
+      [
+        3310,
+        68
+      ],
+      [
+        3379,
+        122
+      ],
+      [
+        3525,
+        135
+      ],
+      [
+        3705,
+        88
+      ],
+      [
+        3816,
+        73
+      ],
+      [
+        3924,
+        101
+      ],
+      [
+        4032,
+        121
+      ],
+      [
+        4176,
+        90
+      ],
+      [
+        4280,
+        89
+      ],
+      [
+        4377,
+        63
+      ],
+      [
+        4447,
+        106
+      ],
+      [
+        4637,
+        68
+      ],
+      [
+        4854,
+        461
+      ],
+      [
+        5315,
+        168
+      ],
+      [
+        5541,
+        150
+      ],
+      [
+        6061,
+        170
+      ],
+      [
+        6279,
+        196
+      ],
+      [
+        6489,
+        200
+      ],
+      [
+        6696,
+        141
+      ],
+      [
+        6837,
+        187
+      ],
+      [
+        7052,
+        174
+      ],
+      [
+        8261,
+        259
+      ]
+    ],
+    "lcp": {
+      "t": 1892,
+      "el": "H1 Stop forwarding listings. Start sending "
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "out": [
+    {
+      "label": "Rent $3,050/mo · HUD FMR",
+      "body": "HUD FMR HUD rent benchmark (ZIP-level when available, otherwise the HUD Fair Market Rent area; when an address has no county match, a statewide HUD figure, labeled as such). A placeholder rent, not the property's own. Replace with: the property's leases or local rent comps"
+    },
+    {
+      "label": "Rate 6.6% · FRED rate",
+      "body": "FRED rate FRED 30-year fixed mortgage series, with its date shown in the analyzer. Replace with: an investor lender quote"
+    },
+    {
+      "label": "Property tax · Your input",
+      "body": "Your input TrueCap does not auto-fill property tax from a state average or parcel source. A blank property-tax field uses a TrueCap default of 1.1% of purchase price — replace it with your local number. Replace with: the local annual bill or a reviewed effective rate"
+    },
+    {
+      "label": "Down payment 20% · TrueCap default",
+      "body": "TrueCap default The analyzer's starting down payment; the mortgage line is solved from it. Replace with: your lender's terms"
+    }
+  ],
+  "sheet": "Philadelphia rental example · Sample deal\nEvery input editable · drag the price\nRent in\n$3,050/mo\nHUD FMR · 3 bed · replace with comps\nMortgage out\nFRED rate 6.6% · 20% down\nTax, insurance, reserves\nProperty tax: your input\nCash flow after reserves\n at \nOffer Ceiling $236,000\nAsking $265,000\n$216,000\n$285,000\n\nAt  · the highest price that still meets the Buy Box. Drag the handle or use the arrow keys.\n\nOffer Ceiling\n$236,000\n\nAsking price is $29,000 above the ceiling. Binding target: cash flow ≥ $750/mo.\n\nThe sample deal at its asking price and at the price on the handle\nLine item\n\tAt asking\t\nAt\nAt \nCash flow after reserves\nTarget ≥ $750/mo\n\t$554/mo\t\nMeets\n\nDSCR\nTarget ≥ 1.25\n\t1.52\t\nMeets\n\nCash-on-cash\nYear 1\n\t10.9%\t\nMeets the Buy Box\tNo\tYes\nRent $3,050/mo · HUD FMR\nRate 6.6% · FRED rate\nProperty tax · Your input\nDown payment 20% · TrueCap default\n\nSee where every figure comes from"
+}

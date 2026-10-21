@@ -1,0 +1,53 @@
+{
+  "dragAtMs": 1955,
+  "diamond": {
+    "slider": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "hidden": "visible/none"
+    },
+    "static": {
+      "x": 129.84375,
+      "y": 260.79688262939453,
+      "cls": "absolute top-1/2 size-5 -translate-x-1/2 -translate-y-1/2 rotate-45 border-2 bor"
+    }
+  },
+  "valueRightAfterDrag": "236000",
+  "valuenowTimeline": [
+    [
+      2883,
+      "valuenow",
+      "236000"
+    ],
+    [
+      4221,
+      "load"
+    ],
+    [
+      6327,
+      "valuenow",
+      "266000"
+    ],
+    [
+      6604,
+      "valuenow",
+      "265000"
+    ],
+    [
+      6736,
+      "valuenow",
+      "241000"
+    ],
+    [
+      7388,
+      "valuenow",
+      "236000"
+    ]
+  ],
+  "shots": [
+    "shots/audit/flow-early-drag-0.jpg",
+    "shots/audit/flow-early-drag-10s.jpg"
+  ]
+}

@@ -1,0 +1,408 @@
+{
+  "slug": "clerk",
+  "url": "https://clerk.com/",
+  "when": "2026-10-21T13:43:08.510Z",
+  "widths": {
+    "390": {
+      "status": 200,
+      "title": "Clerk | Authentication and User Management",
+      "frames": [
+        {
+          "target": 500,
+          "actual": 501,
+          "path": "shots/bench/clerk/home-390-t0.5.jpg"
+        },
+        {
+          "target": 1000,
+          "actual": 1603,
+          "path": "shots/bench/clerk/home-390-t1.jpg"
+        },
+        {
+          "target": 2000,
+          "actual": 2123,
+          "path": "shots/bench/clerk/home-390-t2.jpg"
+        },
+        {
+          "target": 3000,
+          "actual": 2999,
+          "path": "shots/bench/clerk/home-390-t3.jpg"
+        },
+        {
+          "target": 5000,
+          "actual": 4999,
+          "path": "shots/bench/clerk/home-390-t5.jpg"
+        }
+      ],
+      "firstScreen": [
+        {
+          "tag": "a",
+          "role": null,
+          "text": "Skip to main content",
+          "top": -1,
+          "left": -1,
+          "w": 149,
+          "h": 30,
+          "header": false
+        },
+        {
+          "tag": "a",
+          "role": null,
+          "text": "Clerk Home Page",
+          "top": 60,
+          "left": 20,
+          "w": 62,
+          "h": 18,
+          "header": true
+        },
+        {
+          "tag": "button",
+          "role": null,
+          "text": "Sign in",
+          "top": 56,
+          "left": 199,
+          "w": 63,
+          "h": 26,
+          "header": true
+        },
+        {
+          "tag": "a",
+          "role": null,
+          "text": "Sign up",
+          "top": 56,
+          "left": 272,
+          "w": 68,
+          "h": 26,
+          "header": true
+        },
+        {
+          "tag": "button",
+          "role": null,
+          "text": "Open navigation",
+          "top": 48,
+          "left": 340,
+          "w": 42,
+          "h": 42,
+          "header": true
+        },
+        {
+          "tag": "a",
+          "role": null,
+          "text": "Clerk raises $50m Series C Learn more",
+          "top": 0,
+          "left": 0,
+          "w": 390,
+          "h": 40,
+          "header": false
+        },
+        {
+          "tag": "button",
+          "role": null,
+          "text": "Add Clerk auth to my app: clerk.com/SKILL.md Copy prompt",
+          "top": 330,
+          "left": 24,
+          "w": 239,
+          "h": 44,
+          "header": false
+        },
+        {
+          "tag": "button",
+          "role": null,
+          "text": "Support",
+          "top": 776,
+          "left": 322,
+          "w": 40,
+          "h": 40,
+          "header": false
+        }
+      ],
+      "cookie": null,
+      "scan": {
+        "height": 13359,
+        "sticky": [],
+        "timelines": 1,
+        "videos": [],
+        "canvases": [],
+        "lottie": 0,
+        "svgAnim": 0,
+        "anims": [
+          "CSSAnimation:ynmefG_tabs-fade-start",
+          "CSSAnimation:ynmefG_tabs-fade-end",
+          "CSSAnimation:spin",
+          "Animation:js",
+          "Animation:js",
+          "Animation:js"
+        ],
+        "customEls": [
+          "next-route-announcer"
+        ],
+        "fonts": [
+          "geistNumbers"
+        ],
+        "h1": "Everything you need for authentication",
+        "gsap": false,
+        "lenis": false,
+        "framer": false,
+        "tabular": 0
+      },
+      "full": "shots/bench/clerk/home-390-full.jpg",
+      "jsBytes": 2343286,
+      "jsCount": 85,
+      "allBytes": 3758721,
+      "reducedMotion": {
+        "anims": [
+          "ynmefG_tabs-fade-start",
+          "ynmefG_tabs-fade-end",
+          "spin",
+          "Animation"
+        ],
+        "runningCount": 4,
+        "videosPlaying": 0,
+        "path": "shots/bench/clerk/home-390-reduced-motion.jpg"
+      },
+      "noJs": {
+        "words": 1164,
+        "h1": "Everything you need\nfor authentication",
+        "height": 13359,
+        "hidden0": 35,
+        "path": "shots/bench/clerk/home-390-no-js.jpg"
+      }
+    },
+    "1440": {
+      "status": 200,
+      "title": "Clerk | Authentication and User Management",
+      "frames": [
+        {
+          "target": 500,
+          "actual": 500,
+          "path": "shots/bench/clerk/home-1440-t0.5.jpg"
+        },
+        {
+          "target": 1000,
+          "actual": 1792,
+          "path": "shots/bench/clerk/home-1440-t1.jpg"
+        },
+        {
+          "target": 2000,
+          "actual": 2001,
+          "path": "shots/bench/clerk/home-1440-t2.jpg"
+        },
+        {
+          "target": 3000,
+          "actual": 3000,
+          "path": "shots/bench/clerk/home-1440-t3.jpg"
+        },
+        {
+          "target": 5000,
+          "actual": 5001,
+          "path": "shots/bench/clerk/home-1440-t5.jpg"
+        }
+      ],
+      "firstScreen": [
+        {
+          "tag": "a",
+          "role": null,
+          "text": "Skip to main content",
+          "top": -1,
+          "left": -1,
+          "w": 149,
+          "h": 30,
+          "header": false
+        },
+        {
+          "tag": "a",
+          "role": null,
+          "text": "Clerk Home Page",
+          "top": 56,
+          "left": 118,
+          "w": 76,
+          "h": 26,
+          "header": true
+        },
+        {
+          "tag": "button",
+          "role": null,
+          "text": "Products",
+          "top": 59,
+          "left": 206,
+          "w": 79,
+          "h": 20,
+          "header": true
+        },
+        {
+          "tag": "button",
+          "role": null,
+          "text": "Docs",
+          "top": 59,
+          "left": 284,
+          "w": 64,
+          "h": 20,
+          "header": true
+        },
+        {
+          "tag": "button",
+          "role": null,
+          "text": "Changelog",
+          "top": 59,
+          "left": 348,
+          "w": 99,
+          "h": 20,
+          "header": true
+        },
+        {
+          "tag": "button",
+          "role": null,
+          "text": "Company",
+          "top": 59,
+          "left": 446,
+          "w": 90,
+          "h": 20,
+          "header": true
+        },
+        {
+          "tag": "button",
+          "role": null,
+          "text": "AI",
+          "top": 59,
+          "left": 537,
+          "w": 44,
+          "h": 20,
+          "header": true
+        },
+        {
+          "tag": "a",
+          "role": null,
+          "text": "Pricing",
+          "top": 59,
+          "left": 581,
+          "w": 58,
+          "h": 20,
+          "header": true
+        },
+        {
+          "tag": "button",
+          "role": null,
+          "text": "Sign in",
+          "top": 56,
+          "left": 1185,
+          "w": 63,
+          "h": 26,
+          "header": true
+        },
+        {
+          "tag": "a",
+          "role": null,
+          "text": "Sign up",
+          "top": 56,
+          "left": 1258,
+          "w": 68,
+          "h": 26,
+          "header": true
+        },
+        {
+          "tag": "a",
+          "role": null,
+          "text": "Clerk raises $50m Series C Learn more",
+          "top": 0,
+          "left": 0,
+          "w": 1440,
+          "h": 40,
+          "header": false
+        },
+        {
+          "tag": "button",
+          "role": null,
+          "text": "Add Clerk auth to my app: clerk.com/SKILL.md Copy prompt",
+          "top": 310,
+          "left": 1081,
+          "w": 239,
+          "h": 44,
+          "header": false
+        },
+        {
+          "tag": "canvas",
+          "role": null,
+          "text": "",
+          "top": 527,
+          "left": 520,
+          "w": 400,
+          "h": 566,
+          "header": false
+        },
+        {
+          "tag": "button",
+          "role": null,
+          "text": "Support",
+          "top": 832,
+          "left": 1372,
+          "w": 40,
+          "h": 40,
+          "header": false
+        }
+      ],
+      "cookie": null,
+      "scan": {
+        "height": 7187,
+        "sticky": [],
+        "timelines": 1,
+        "videos": [],
+        "canvases": [
+          {
+            "w": 400,
+            "h": 566,
+            "cls": "absolute inset-0 h-full w-full"
+          }
+        ],
+        "lottie": 0,
+        "svgAnim": 0,
+        "anims": [
+          "CSSTransition:opacity",
+          "CSSTransition:translate",
+          "CSSTransition:opacity",
+          "CSSTransition:translate",
+          "CSSAnimation:ynmefG_tabs-fade-start",
+          "CSSAnimation:ynmefG_tabs-fade-end",
+          "CSSAnimation:spin",
+          "Animation:js"
+        ],
+        "customEls": [
+          "number-flow-react",
+          "next-route-announcer"
+        ],
+        "fonts": [
+          "geistNumbers",
+          "ui-sans-serif"
+        ],
+        "h1": "Everything you need for authentication",
+        "gsap": false,
+        "lenis": false,
+        "framer": false,
+        "tabular": 0
+      },
+      "full": "shots/bench/clerk/home-1440-full.jpg",
+      "jsBytes": 1832356,
+      "jsCount": 61,
+      "allBytes": 2811180,
+      "reducedMotion": {
+        "anims": [
+          "ynmefG_tabs-fade-start",
+          "ynmefG_tabs-fade-end",
+          "spin",
+          "Animation",
+          "Animation",
+          "Animation",
+          "Animation"
+        ],
+        "runningCount": 7,
+        "videosPlaying": 0,
+        "path": "shots/bench/clerk/home-1440-reduced-motion.jpg"
+      },
+      "noJs": {
+        "words": 1369,
+        "h1": "Everything you need for authentication",
+        "height": 7187,
+        "hidden0": 30,
+        "path": "shots/bench/clerk/home-1440-no-js.jpg"
+      }
+    }
+  }
+}

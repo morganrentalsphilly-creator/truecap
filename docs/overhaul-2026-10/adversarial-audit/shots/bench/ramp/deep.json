@@ -1,0 +1,170 @@
+{
+  "slug": "ramp",
+  "when": "2026-10-21T13:48:17.527Z",
+  "picks": {
+    "primary": true,
+    "card": true,
+    "input": true,
+    "slider": false
+  },
+  "micro": [
+    {
+      "label": "primary",
+      "rest": {
+        "backgroundColor": "lab(92.1406 -20.4979 84.7726)",
+        "color": "lab(2.83994 0.367254 0.969091)",
+        "transform": "none",
+        "boxShadow": "none",
+        "outline": "lab(2.83994 0.367254 0.969091) none 0px",
+        "outlineOffset": "0px",
+        "borderColor": "lab(2.83994 0.367254 0.969091)",
+        "opacity": "1",
+        "scale": "none",
+        "translate": "none",
+        "filter": "none",
+        "transitionProperty": "color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events",
+        "transitionDuration": "0.3s",
+        "transitionTimingFunction": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "box": [
+          333,
+          360,
+          176,
+          52
+        ],
+        "text": "Get started for free",
+        "tag": "button"
+      },
+      "restShot": "shots/bench/ramp/micro-primary-rest.jpg",
+      "hover": {
+        "backgroundColor": "lab(97.2856 -16.4927 62.0693)"
+      },
+      "hoverShot": "shots/bench/ramp/micro-primary-hover.jpg",
+      "press": {
+        "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.92) 0px 0px 0px 0px, rgba(255, 255, 255, 0.184) 0px 0px 0px 3.6831px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+        "outline": "lab(2.83994 0.367254 0.969091) solid 0px"
+      },
+      "pressShot": "shots/bench/ramp/micro-primary-press.jpg",
+      "focus": {
+        "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgb(255, 255, 255) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+        "outline": "rgb(16, 16, 16) solid 0px"
+      },
+      "focusVisible": true,
+      "focusShot": "shots/bench/ramp/micro-primary-focus.jpg"
+    },
+    {
+      "label": "card",
+      "rest": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "lab(2.83994 0.367254 0.969091)",
+        "transform": "none",
+        "boxShadow": "none",
+        "outline": "lab(2.83994 0.367254 0.969091) none 0px",
+        "outlineOffset": "0px",
+        "borderColor": "lab(2.83994 0.367254 0.969091)",
+        "opacity": "1",
+        "scale": "none",
+        "translate": "none",
+        "filter": "none",
+        "transitionProperty": "all",
+        "transitionDuration": "0s",
+        "transitionTimingFunction": "ease",
+        "box": [
+          890,
+          209,
+          455,
+          256
+        ],
+        "text": "",
+        "tag": "a"
+      },
+      "restShot": "shots/bench/ramp/micro-card-rest.jpg",
+      "hover": {},
+      "hoverShot": "shots/bench/ramp/micro-card-hover.jpg",
+      "press": {},
+      "pressShot": "shots/bench/ramp/micro-card-press.jpg",
+      "focus": {
+        "outline": "rgb(16, 16, 16) solid 2px",
+        "outlineOffset": "2px"
+      },
+      "focusVisible": true,
+      "focusShot": "shots/bench/ramp/micro-card-focus.jpg"
+    },
+    {
+      "label": "input",
+      "rest": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "lab(2.83994 0.367254 0.969091)",
+        "transform": "none",
+        "boxShadow": "none",
+        "outline": "lab(2.83994 0.367254 0.969091) none 0px",
+        "outlineOffset": "0px",
+        "borderColor": "rgba(33, 33, 33, 0.1)",
+        "opacity": "1",
+        "scale": "none",
+        "translate": "none",
+        "filter": "none",
+        "transitionProperty": "color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to",
+        "transitionDuration": "0.15s",
+        "transitionTimingFunction": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "box": [
+          69,
+          360,
+          260,
+          52
+        ],
+        "text": "Enter your work email",
+        "tag": "input"
+      },
+      "restShot": "shots/bench/ramp/micro-input-rest.jpg",
+      "hover": {},
+      "hoverShot": "shots/bench/ramp/micro-input-hover.jpg",
+      "focus": {
+        "outline": "rgb(16, 16, 16) solid 0px",
+        "borderColor": "rgba(33, 33, 33, 0.2)"
+      },
+      "focusVisible": true,
+      "focusShot": "shots/bench/ramp/micro-input-focus.jpg"
+    }
+  ],
+  "notFound": {
+    "status": 404,
+    "path": "shots/bench/ramp/404-1440.jpg",
+    "h1": "Something doesn't feel right.",
+    "inputs": 1,
+    "links": 10
+  },
+  "pricing": {
+    "390": {
+      "status": 200,
+      "first": "shots/bench/ramp/pricing-390-first.jpg",
+      "before": [
+        "$0/mo/user",
+        "$15/mo/user"
+      ],
+      "toggle": null,
+      "tables": [
+        {
+          "rows": 110,
+          "top": 5137,
+          "stickyHeader": true,
+          "scrollX": true,
+          "collapsibles": 0,
+          "width": 540
+        }
+      ],
+      "tableShot": "shots/bench/ramp/pricing-390-table.jpg",
+      "full": "shots/bench/ramp/pricing-390-full.jpg"
+    },
+    "1440": {
+      "status": 200,
+      "first": "shots/bench/ramp/pricing-1440-first.jpg",
+      "before": [
+        "$0/mo/user",
+        "$15/mo/user"
+      ],
+      "toggle": null,
+      "tables": [],
+      "full": "shots/bench/ramp/pricing-1440-full.jpg"
+    }
+  }
+}

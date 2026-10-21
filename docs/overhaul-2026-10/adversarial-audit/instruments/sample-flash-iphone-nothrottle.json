@@ -1,0 +1,226 @@
+{
+  "device": "iphone",
+  "net": "",
+  "formFirstVisibleMs": 927,
+  "verdictVisibleMs": 4362,
+  "frames": [
+    {
+      "ms": 337,
+      "shot": "shots/audit/sample-iphone-nothrottle-00.jpg"
+    },
+    {
+      "ms": 927,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 928,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-nothrottle-02.jpg"
+    },
+    {
+      "ms": 1470,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 1503,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-nothrottle-04.jpg"
+    },
+    {
+      "ms": 1773,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 1784,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-nothrottle-06.jpg"
+    },
+    {
+      "ms": 2007,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 2019,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-nothrottle-08.jpg"
+    },
+    {
+      "ms": 2599,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 2601,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-nothrottle-10.jpg"
+    },
+    {
+      "ms": 2734,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 2738,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-nothrottle-12.jpg"
+    },
+    {
+      "ms": 3055,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 3103,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-nothrottle-14.jpg"
+    },
+    {
+      "ms": 3414,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3415,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-nothrottle-16.jpg"
+    },
+    {
+      "ms": 3551,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3552,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-nothrottle-18.jpg"
+    },
+    {
+      "ms": 3707,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3714,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-nothrottle-20.jpg"
+    },
+    {
+      "ms": 4042,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4078,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-nothrottle-22.jpg"
+    },
+    {
+      "ms": 4362,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4365,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-nothrottle-24.jpg"
+    },
+    {
+      "ms": 4592,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4594,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-nothrottle-26.jpg"
+    },
+    {
+      "ms": 4962,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4985,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-nothrottle-28.jpg"
+    },
+    {
+      "ms": 5324,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5326,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-nothrottle-30.jpg"
+    },
+    {
+      "ms": 5523,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5538,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-nothrottle-32.jpg"
+    },
+    {
+      "ms": 5867,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    }
+  ]
+}

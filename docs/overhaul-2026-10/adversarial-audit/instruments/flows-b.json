@@ -1,0 +1,199 @@
+{
+  "second-run": {
+    "error": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-inform-submit=\"true\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to <button type=\"button\" data-slot=\"button\" aria-hidden=\"true\" data-aria-hidden=\"true\" data-inform-submit=\"true\" class=\"inline-flex min-"
+  },
+  "back-forward-mid-run": {
+    "afterBack": "https://usetruecap.com/",
+    "url": "https://usetruecap.com/analyze",
+    "address": "4821 Larchwood Ave, Philadelphia, PA 19143",
+    "price": "250,000",
+    "verdict": null,
+    "shot": "shots/audit/flow-back-forward-1440.jpg"
+  },
+  "refresh-mid-run": {
+    "url": "https://usetruecap.com/analyze",
+    "address": "4821 Larchwood Ave, Philadelphia, PA 19143",
+    "price": "250,000",
+    "rent": "2,400",
+    "verdict": null,
+    "shot": "shots/audit/flow-refresh-1440.jpg"
+  },
+  "two-tabs": {
+    "tabA": "4821 Larchwood Ave, Philadelphia, PA 19143 Does not meet TrueCap starter criteria at asking Asking $250,000 Offer Ceiling: $223,500. Targets: break-even cash flow · DSCR ≥ 1.25. Offer Ceiling Ceiling $223,500 Gap $26,500 Asking $250,000 Asking $250,000 is $26,",
+    "tabB": "5919 Belmar Ter, Philadelphia, PA 19143 Does not meet TrueCap starter criteria at asking Asking $210,000 Offer Ceiling: $150,000–$225,000. Targets: break-even cash flow · DSCR ≥ 1.25. Offer Ceiling $150,000–$225,000 Targets: break-even cash flow · DSCR ≥ 1.25 On the return criteria shown, the highest price that still meets them falls in this range. See the exact Offer Ceiling for this deal. The pr",
+    "tabAAfterB": "4821 Larchwood Ave, Philadelphia, PA 19143 Does not meet TrueCap starter criteria at asking Asking $250,000 Offer Ceiling: $223,500. Targets: break-even cash flow · DSCR ≥ 1.25. Offer Ceiling Ceiling $223,500 Gap $26,500 Asking $250,000 Asking $250,000 is $26,500 above the Offer Ceiling $223,500. Ta",
+    "shots": [
+      "shots/audit/flow-two-tabs-a.jpg",
+      "shots/audit/flow-two-tabs-b.jpg"
+    ]
+  },
+  "zoom200-home": {
+    "sw": 720,
+    "iw": 720,
+    "headerH": 65,
+    "stickyBottom": [
+      65,
+      65,
+      65
+    ],
+    "shot": "shots/audit/flow-zoom200-home.jpg"
+  },
+  "w320-home": {
+    "sw": 320,
+    "iw": 320,
+    "over": [],
+    "shot": "shots/audit/flow-w320-home.jpg"
+  },
+  "zoom200-sample": {
+    "sw": 720,
+    "iw": 720,
+    "headerH": 65,
+    "stickyBottom": [
+      32,
+      61,
+      61,
+      61,
+      61,
+      61,
+      61,
+      61,
+      61,
+      61,
+      61,
+      61,
+      61,
+      61,
+      61,
+      33,
+      33,
+      37,
+      37,
+      37,
+      37,
+      37,
+      37,
+      37,
+      37,
+      37,
+      37
+    ],
+    "shot": "shots/audit/flow-zoom200-sample.jpg"
+  },
+  "w320-sample": {
+    "sw": 320,
+    "iw": 320,
+    "over": [],
+    "shot": "shots/audit/flow-w320-sample.jpg"
+  },
+  "zoom200-pricing": {
+    "sw": 720,
+    "iw": 720,
+    "headerH": 65,
+    "stickyBottom": [],
+    "shot": "shots/audit/flow-zoom200-pricing.jpg"
+  },
+  "w320-pricing": {
+    "sw": 320,
+    "iw": 320,
+    "over": [],
+    "shot": "shots/audit/flow-w320-pricing.jpg"
+  },
+  "reduced-motion": {
+    "home": {
+      "running": [],
+      "valuenows": [
+        "236000"
+      ]
+    },
+    "result": {
+      "revealAttr": "absent",
+      "steps": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "running": 0
+    },
+    "shots": [
+      "shots/audit/flow-reduced-home-390.jpg",
+      "shots/audit/flow-reduced-result-390.jpg"
+    ]
+  },
+  "no-js": {
+    "home": {
+      "h1": "Stop forwarding listings. Start sending deals that already p",
+      "words": 1332,
+      "forms": 3,
+      "formActions": [
+        "/analyze",
+        "(none)",
+        "/analyze"
+      ],
+      "noscript": [],
+      "verdict": null,
+      "shot": "shots/audit/flow-nojs-home-390.jpg"
+    },
+    "analyze": {
+      "h1": "Underwrite a buy & hold rental",
+      "words": 145,
+      "forms": 1,
+      "formActions": [
+        "(none)"
+      ],
+      "noscript": [],
+      "verdict": null,
+      "shot": "shots/audit/flow-nojs-analyze-390.jpg"
+    },
+    "sample": {
+      "h1": "Underwrite a buy & hold rental",
+      "words": 145,
+      "forms": 1,
+      "formActions": [
+        "(none)"
+      ],
+      "noscript": [],
+      "verdict": null,
+      "shot": "shots/audit/flow-nojs-sample-390.jpg"
+    },
+    "pricing": {
+      "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before ",
+      "words": 808,
+      "forms": 0,
+      "formActions": [],
+      "noscript": [],
+      "verdict": null,
+      "shot": "shots/audit/flow-nojs-pricing-390.jpg"
+    },
+    "memo": {
+      "h1": "Doesn't meet your targets at asking.",
+      "words": 408,
+      "forms": 0,
+      "formActions": [],
+      "noscript": [],
+      "verdict": null,
+      "shot": "shots/audit/flow-nojs-memo-390.jpg"
+    },
+    "heroSubmit": {
+      "url": "https://usetruecap.com/analyze?address=4821+Larchwood+Ave%2C+Philadelphia%2C+PA+19143",
+      "shot": "shots/audit/flow-nojs-hero-submit-390.jpg"
+    }
+  },
+  "blocked-third-party": {
+    "blockedHosts": [
+      "maps.googleapis.com"
+    ],
+    "homeLoadMs": 2401,
+    "ok": true,
+    "ms": 1576,
+    "verdict": "Does not meet TrueCap starter criteria at asking",
+    "errors": [],
+    "shot": "shots/audit/flow-blocked-3p-result-390.jpg"
+  },
+  "early-drag-slow4g": {
+    "error": "TypeError: Cannot read properties of null (reading 'x')"
+  }
+}

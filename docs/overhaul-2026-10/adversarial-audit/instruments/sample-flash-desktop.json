@@ -1,0 +1,3661 @@
+{
+  "device": "desktop",
+  "net": "",
+  "formFirstVisibleMs": 1072,
+  "verdictVisibleMs": 4333,
+  "frames": [
+    {
+      "ms": 248,
+      "shot": "shots/audit/sample-desktop-00.jpg"
+    },
+    {
+      "ms": 1072,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 1088,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-desktop-02.jpg"
+    },
+    {
+      "ms": 1188,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 1191,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-desktop-04.jpg"
+    },
+    {
+      "ms": 1402,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 1418,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-desktop-06.jpg"
+    },
+    {
+      "ms": 1526,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 1527,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-desktop-08.jpg"
+    },
+    {
+      "ms": 1574,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 1576,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-desktop-10.jpg"
+    },
+    {
+      "ms": 1712,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 1713,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-desktop-12.jpg"
+    },
+    {
+      "ms": 1797,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 1799,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-desktop-14.jpg"
+    },
+    {
+      "ms": 1875,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 1884,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-desktop-16.jpg"
+    },
+    {
+      "ms": 2132,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 2168,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-desktop-18.jpg"
+    },
+    {
+      "ms": 2299,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 2309,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-desktop-20.jpg"
+    },
+    {
+      "ms": 2588,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 2650,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-desktop-22.jpg"
+    },
+    {
+      "ms": 2927,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 2948,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-desktop-24.jpg"
+    },
+    {
+      "ms": 3158,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental"
+    },
+    {
+      "ms": 3168,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-desktop-26.jpg"
+    },
+    {
+      "ms": 3383,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3419,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-desktop-28.jpg"
+    },
+    {
+      "ms": 3487,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3489,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-desktop-30.jpg"
+    },
+    {
+      "ms": 3543,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3545,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-desktop-32.jpg"
+    },
+    {
+      "ms": 3591,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3592,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-desktop-34.jpg"
+    },
+    {
+      "ms": 3639,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3643,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-desktop-36.jpg"
+    },
+    {
+      "ms": 3688,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3689,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-desktop-38.jpg"
+    },
+    {
+      "ms": 3802,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3803,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3804,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3805,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3807,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3809,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3811,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3813,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3813,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3814,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3815,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3816,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3817,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3817,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3818,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3819,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3819,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3820,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3823,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3824,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3825,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3826,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3827,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3831,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3832,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3835,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3836,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3837,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3838,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3838,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3840,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3845,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3848,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3849,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3849,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3850,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3851,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3852,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3852,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3853,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3854,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3862,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3867,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3871,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3880,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3881,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3887,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3888,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3889,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3890,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3891,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3892,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3894,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3902,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3905,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3912,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3913,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3916,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3917,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3918,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3919,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3920,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3922,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3923,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3930,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3932,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3933,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3938,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3940,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3941,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3942,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3943,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3945,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3946,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3947,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3952,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3953,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3954,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3955,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3960,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3961,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3962,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3964,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3965,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3966,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3967,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3968,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3969,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3970,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3971,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3972,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3973,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3974,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3976,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3977,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3979,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3983,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3985,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3985,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3987,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3987,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3990,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 3998,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4005,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4020,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4025,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4027,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4032,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4034,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4035,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4036,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4036,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4037,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4038,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4039,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4039,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4040,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4042,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4042,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4047,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4048,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4048,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4049,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4050,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4051,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4052,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4053,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4054,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4055,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4056,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4057,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4057,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4058,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4059,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4060,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4064,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4065,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4066,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4066,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4067,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4068,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4069,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4069,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4071,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4072,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4073,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4074,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4075,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4075,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4076,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4083,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4088,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4089,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4090,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4091,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4092,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4100,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4101,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4102,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4103,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4105,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4105,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4109,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4114,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4185,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4210,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4232,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4243,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4250,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4257,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4271,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4333,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4353,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4354,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4356,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4357,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4359,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4360,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4362,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4363,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4364,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4365,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4366,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4368,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4369,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4377,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4378,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4379,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4382,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4383,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4384,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4385,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4386,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4387,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4388,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4389,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4390,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4391,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4391,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4392,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4399,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4400,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4401,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4402,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4403,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4404,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4406,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4407,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4408,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4408,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4409,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4411,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4412,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4413,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4414,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4414,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4415,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4416,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4417,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4427,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4450,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4454,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4472,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4473,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4474,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4475,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4476,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4477,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4478,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4479,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4480,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4481,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4482,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4483,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4484,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4485,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4486,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4488,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4489,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4490,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4491,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4492,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4494,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4495,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4496,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4497,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4498,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4499,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4500,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4501,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4502,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4503,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4504,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4505,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4508,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4511,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4512,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4513,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4514,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4516,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4517,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4518,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4520,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4524,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4525,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4528,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4529,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4530,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4531,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4532,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4533,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4535,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4536,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4537,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4542,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4544,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4545,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4546,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4547,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4548,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4549,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4550,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4552,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4553,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4554,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4555,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4556,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4557,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4559,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4560,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4561,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4563,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4564,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4565,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4566,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4568,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4575,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4598,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4599,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4600,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4601,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4602,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4603,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4604,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4605,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4606,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4607,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4608,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4608,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4609,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4610,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4611,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4612,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4613,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4614,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4615,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4618,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4619,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4620,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4621,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4622,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4623,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4624,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4625,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4626,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4632,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4633,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4634,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4634,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4635,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4636,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4637,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4639,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4644,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4645,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4646,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4647,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4648,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4650,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4651,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4656,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4657,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4658,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4659,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4660,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4661,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4662,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4665,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4715,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4735,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4737,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4738,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4739,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4740,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4741,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4742,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4743,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4744,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4745,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4746,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4747,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4748,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4749,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4752,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4753,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4754,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4756,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4758,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4759,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4761,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4764,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4765,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4766,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4766,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4767,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4768,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4769,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4770,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4771,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4772,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4773,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4774,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4774,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4775,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4776,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4778,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4780,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4781,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4782,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4788,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4789,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4790,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4791,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4792,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4793,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4794,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4795,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4796,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4798,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4798,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4799,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4800,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4801,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4802,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4803,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4804,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4805,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4806,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4807,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4807,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4809,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4810,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4815,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4816,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4816,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4817,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4818,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4819,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4820,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4821,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4822,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4822,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4824,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4825,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4826,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4827,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4828,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4828,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4829,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4830,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4831,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4832,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4833,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4834,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4835,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4837,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4838,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4839,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4840,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4841,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4841,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4842,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4844,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4848,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4849,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4850,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4850,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4851,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4853,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4854,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4855,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4856,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4857,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4857,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4858,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4859,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4861,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4864,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4866,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4875,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4886,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4909,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4915,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4916,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4918,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4918,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4919,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4921,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4921,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4922,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4923,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4925,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4936,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4937,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4938,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4940,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4942,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4943,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4946,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4947,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4948,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4949,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4950,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4951,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4952,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4953,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4954,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4955,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4956,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4957,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4958,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4959,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4959,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4965,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4966,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4968,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4969,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4970,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4971,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4972,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4973,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4974,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4975,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4976,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 4995,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5004,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5016,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5023,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5026,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5035,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5036,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5037,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5037,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5038,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5040,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5041,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5042,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5063,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5280,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5474,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5485,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5488,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5489,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5490,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5491,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5492,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5498,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5499,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5501,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5502,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5504,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5505,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5507,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5515,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5519,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5523,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5524,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5525,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5526,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5537,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5547,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5554,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5556,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5557,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5558,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5559,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5569,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5571,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5573,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5574,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5575,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5586,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5587,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5588,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5589,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5592,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5604,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5605,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5606,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5608,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5609,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5623,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5624,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5677,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5776,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5824,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    },
+    {
+      "ms": 5872,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting"
+    }
+  ]
+}

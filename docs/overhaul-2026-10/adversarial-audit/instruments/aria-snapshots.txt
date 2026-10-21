@@ -1,0 +1,91 @@
+# Hero sheet (390)
+- figure "Philadelphia rental example · Sample deal Every input editable · drag the price":
+  - text: Philadelphia rental example · Sample deal Every input editable · drag the price
+  - 'group "The sample deal as a flow: rent in, the mortgage and the operating costs out, and the cash flow after reserves at the bottom"': "Rent in $3,050/mo HUD FMR · 3 bed · replace with comps Mortgage out $ 1 , 2 0 6 /mo FRED rate 6.6% · 20% down Tax, insurance, reserves $ 1 , 0 9 4 /mo Property tax: your input Cash flow after reserves $ 7 5 0 /mo at $ 2 3 6 , 0 0 0"
+  - slider "Offer price"
+  - paragraph: At $ 2 3 6 , 0 0 0 · the highest price that still meets the Buy Box. Drag the handle or use the arrow keys.
+  - status
+  - text: Offer Ceiling $236,000
+  - paragraph: "Asking price is $29,000 above the ceiling. Binding target: cash flow ≥ $750/mo."
+  - table "The sample deal at its asking price and at the price on the handle":
+    - caption: The sample deal at its asking price and at the price on the handle
+    - rowgroup:
+      - row "Line item At asking At $ 2 3 6 , 0 0 0":
+        - columnheader "Line item"
+        - columnheader "At asking"
+        - columnheader "At $ 2 3 6 , 0 0 0"
+    - rowgroup:
+      - row "Cash flow after reserves Target ≥ $750/mo $554/mo $ 7 5 0 /mo Meets":
+        - rowheader "Cash flow after reserves Target ≥ $750/mo"
+        - cell "$554/mo"
+        - cell "$ 7 5 0 /mo Meets"
+      - row "DSCR Target ≥ 1.25 1.52 1 . 7 5 Meets":
+        - rowheader "DSCR Target ≥ 1.25"
+        - cell "1.52"
+        - cell "1 . 7 5 Meets"
+      - row "Cash-on-cash Year 1 10.9% 1 6 . 6 %":
+        - rowheader "Cash-on-cash Year 1"
+        - cell "10.9%"
+        - cell "1 6 . 6 %"
+      - row "Meets the Buy Box No Yes":
+        - rowheader "Meets the Buy Box"
+        - cell "No"
+        - cell "Yes"
+  - list "Where the starting values come from":
+    - listitem:
+      - button "Rent $3,050/mo · HUD FMR"
+    - listitem:
+      - button "Rate 6.6% · FRED rate"
+    - listitem:
+      - button "Property tax · Your input"
+    - listitem:
+      - button "Down payment 20% · TrueCap default"
+  - paragraph:
+    - link "See where every figure comes from":
+      - /url: "#how-it-works"
+
+# Decision card (390, sample)
+- region "Doesn't meet sample targets at asking":
+  - paragraph: Philadelphia rental example
+  - heading "Doesn't meet sample targets at asking" [level=2]
+  - paragraph: Asking $265,000
+  - status: "Offer Ceiling: $236,000. Targets: cash flow ≥ $750/mo · DSCR ≥ 1.25."
+  - paragraph: Offer Ceiling
+  - paragraph: $ 2 3 6 , 0 0 0
+  - slider "What-if offer price"
+  - paragraph: Asking $265,000 is $29,000 above the Offer Ceiling $236,000.
+  - status
+  - paragraph: "Targets: cash flow ≥ $750/mo · DSCR ≥ 1.25"
+  - paragraph: The highest price that still meets the criteria shown.
+  - group: How this ceiling was calculated
+  - group "First-year investment snapshot":
+    - paragraph:
+      - button "Monthly Cash Flow - what's this?": Cash flow after reserve
+    - paragraph: $ 5 5 4 /mo
+    - paragraph: Misses $750/mo target
+    - paragraph:
+      - button "DSCR (Debt Service Coverage Ratio) - what's this?": Model DSCR
+    - paragraph: 1 . 5 2
+    - paragraph: Meets 1.25 target
+  - group "Primary result actions":
+    - button "Tune targets"
+    - button "Edit assumptions"
+    - button "Save"
+    - button "Next deal · keep assumptions"
+  - paragraph: Best next step
+  - paragraph: "Review the binding rule: Cash flow ≥ $750/mo"
+  - paragraph: Cash flow ≥ $750/mo is what caps the price. The asking price is $29,000 above the Offer Ceiling under your targets. Record the investment decision yourself.
+  - paragraph: "Verify next: Confirm with recent rent comps. Current source: Your entered rent."
+  - paragraph: Fastest paths to meet your targets
+  - list:
+    - listitem: 1. Rent ≥ $3,302/mo
+    - listitem: 2. Price ≤ $236,000
+  - paragraph: Two assumptions most likely to move the decision
+  - list:
+    - listitem: 1. Rent ±5% moves cash flow about ±$118/mo
+    - listitem: 2. Purchase price ±5% moves cash flow about ±$89/mo
+  - group: Decision context and key numbers
+  - group: More actions
+
+# Focus after the sample run: {"id":"decision-summary-title","tag":"H2"}
+# Live regions after two ArrowLeft on the what-if: ["Enter a nightly rate and occupancy — we'll model the monthly revenue (ADR × occupancy).","Draft saved on this device · just now","Offer Ceiling: $236,000. Targets: cash flow ≥ $750/mo · DSCR ≥ 1.25.","$263,000","Preliminary screenSensitivity risk (unverified inputs)moderate11 required inputs still need confirmation before this analysis is Offer Ready.Important inputs may still be estimates.Scope: rental base-case inputs. ARV, refinance, hold-time, and flip assumptions are outside this score.","Strong"]

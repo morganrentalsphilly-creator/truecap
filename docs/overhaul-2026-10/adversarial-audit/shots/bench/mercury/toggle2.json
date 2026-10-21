@@ -1,0 +1,115 @@
+{
+  "url": "https://mercury.com/pricing",
+  "target": "Annual Pricing",
+  "before": [
+    "Banking services and essenti",
+    "$0 per month",
+    "$29.90 per month",
+    "Invoice with ACH debit ($1/t",
+    "$50 off eligible LegalZoom C",
+    "$299 per month",
+    "Invoice with ACH debit ($0/t",
+    "$50 off eligible LegalZoom C"
+  ],
+  "samples": [
+    {
+      "ms": 40,
+      "vals": [
+        "Banking services and essenti",
+        "$0 per month",
+        "$35 per month",
+        "Invoice with ACH debit ($1/t",
+        "$50 off eligible LegalZoom C",
+        "$350 per month",
+        "Invoice with ACH debit ($0/t",
+        "$50 off eligible LegalZoom C"
+      ],
+      "anims": [
+        "translate",
+        "width",
+        "opacity",
+        "transform",
+        "opacity",
+        "transform"
+      ]
+    },
+    {
+      "ms": 120,
+      "vals": [
+        "Banking services and essenti",
+        "$0 per month",
+        "$35 per month",
+        "Invoice with ACH debit ($1/t",
+        "$50 off eligible LegalZoom C",
+        "$350 per month",
+        "Invoice with ACH debit ($0/t",
+        "$50 off eligible LegalZoom C"
+      ],
+      "anims": [
+        "width",
+        "opacity",
+        "transform",
+        "opacity",
+        "transform",
+        "opacity"
+      ]
+    },
+    {
+      "ms": 250,
+      "vals": [
+        "Banking services and essenti",
+        "$0 per month",
+        "$35 per month",
+        "Invoice with ACH debit ($1/t",
+        "$50 off eligible LegalZoom C",
+        "$350 per month",
+        "Invoice with ACH debit ($0/t",
+        "$50 off eligible LegalZoom C"
+      ],
+      "anims": [
+        "width",
+        "opacity",
+        "transform",
+        "opacity",
+        "transform",
+        "opacity"
+      ]
+    },
+    {
+      "ms": 500,
+      "vals": [
+        "Banking services and essenti",
+        "$0 per month",
+        "$35 per month",
+        "Invoice with ACH debit ($1/t",
+        "$50 off eligible LegalZoom C",
+        "$350 per month",
+        "Invoice with ACH debit ($0/t",
+        "$50 off eligible LegalZoom C"
+      ],
+      "anims": [
+        "opacity",
+        "transform",
+        "opacity",
+        "transform",
+        "transform",
+        "transform"
+      ]
+    },
+    {
+      "ms": 900,
+      "vals": [
+        "Banking services and essenti",
+        "$0 per month",
+        "$35 per month",
+        "Invoice with ACH debit ($1/t",
+        "$50 off eligible LegalZoom C",
+        "$350 per month",
+        "Invoice with ACH debit ($0/t",
+        "$50 off eligible LegalZoom C"
+      ],
+      "anims": []
+    }
+  ],
+  "after": "shots/bench/mercury/pricing-1440-toggle2-after.jpg"
+}

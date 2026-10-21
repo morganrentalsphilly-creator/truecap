@@ -1,0 +1,208 @@
+{
+  "hero-zillow": {
+    "url": "https://usetruecap.com/analyze",
+    "sw": 390,
+    "iw": 390,
+    "h": 3390,
+    "h1": "Underwrite a buy & hold rental",
+    "address": "5919 Belmar Ter Philadelphia PA 19143",
+    "price": "",
+    "rent": "",
+    "beds": "",
+    "focused": "purchasePrice",
+    "notes": [
+      "Address extracted Still needed: asking price and bedrooms to estimate area rent, or monthly rent."
+    ],
+    "shot": "shots/audit/flow-hero-zillow-390.jpg"
+  },
+  "hero-redfin": {
+    "url": "https://usetruecap.com/analyze",
+    "sw": 390,
+    "iw": 390,
+    "h": 3390,
+    "h1": "Underwrite a buy & hold rental",
+    "address": "5919 Belmar Ter 19143 Philadelphia PA",
+    "price": "",
+    "rent": "",
+    "beds": "",
+    "focused": "purchasePrice",
+    "notes": [
+      "Address extracted Still needed: asking price and bedrooms to estimate area rent, or monthly rent."
+    ],
+    "shot": "shots/audit/flow-hero-redfin-390.jpg"
+  },
+  "hero-address": {
+    "url": "https://usetruecap.com/analyze",
+    "sw": 390,
+    "iw": 390,
+    "h": 3247,
+    "h1": "Underwrite a buy & hold rental",
+    "address": "5919 Belmar Ter, Philadelphia, PA 19143",
+    "price": "",
+    "rent": "",
+    "beds": "",
+    "focused": "purchasePrice",
+    "notes": [],
+    "shot": "shots/audit/flow-hero-address-390.jpg"
+  },
+  "result-390": {
+    "url": "https://usetruecap.com/analyze",
+    "sw": 390,
+    "iw": 390,
+    "h": 7107,
+    "h1": "Buy & Hold underwriting",
+    "cardTop": 174,
+    "cardH": 1188.75,
+    "before": "$265,000: cash flow $554 a month, misses the $750 target by $196",
+    "after": "$249,000: cash flow $662 a month, misses the $750 target by $88",
+    "backToAsking": 1,
+    "cardText": "Philadelphia rental example Doesn't meet sample targets at asking Asking $265,000 Offer Ceiling: $236,000. Targets: cash flow ≥ $750/mo · DSCR ≥ 1.25. Offer Ceiling Ceiling $236,000 Asking $265,000 What if you offered $249,000 Back to asking $249,000: cash flow $662 a month, misses the $750 target by $88 Targets: cash flow ≥ $750/mo · DSCR ≥ 1.25 The highest price that still meets the criteria shown. How this ceiling was calculated At $249,000 Cash flow after reserve Misses $750/mo target Model DSCR Meets 1.25 target Tune targets Edit assumptions Save Next deal · keep assumptions Best next step Review the binding rule: Cash flow ≥ $750/mo Cash flow ≥ $750/mo is what caps the price. The asking price is $29,000 above the Offer Ceiling under your targets. Record the investment decision yourself. Verify next: Confirm with recent rent comps. Current source: Your entered rent. Fastest paths to",
+    "shots": [
+      "shots/audit/flow-result-390-0.jpg",
+      "shots/audit/flow-result-390-1.jpg",
+      "shots/audit/flow-result-390-2.jpg",
+      "shots/audit/flow-result-390-3.jpg",
+      "shots/audit/flow-result-390-4.jpg",
+      "shots/audit/flow-result-390-5.jpg",
+      "shots/audit/flow-result-390-whatif.jpg"
+    ]
+  },
+  "memo-390": {
+    "status": 200,
+    "url": "https://usetruecap.com/sample-decision-memo",
+    "sw": 390,
+    "iw": 390,
+    "h": 4881,
+    "h1": "Doesn't meet your targets at asking.",
+    "first": "shots/audit/flow-memo-390.jpg",
+    "full": "shots/audit/flow-memo-390-full.jpg"
+  },
+  "pricing-390": {
+    "status": 200,
+    "url": "https://usetruecap.com/pricing",
+    "sw": 390,
+    "iw": 390,
+    "h": 12100,
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar",
+    "first": "shots/audit/flow-pricing-390.jpg",
+    "full": "shots/audit/flow-pricing-390-full.jpg",
+    "cadence": [
+      "monthly=false",
+      "annual=true"
+    ],
+    "monthly": "shots/audit/flow-pricing-390-monthly.jpg",
+    "ctas": [
+      "A:Analyze a property free:/analyze",
+      "A:See Pro plans:#pro",
+      "A:Pro:#pro",
+      "A:Agent Pro:#agent-pro",
+      "A:Analyze a property free:/analyze",
+      "A:Start Pro evaluation — no card:/auth/sign-up?plan=investor-pro&billing=monthly&next=%2Fdashboard%2Fnew",
+      "A:Create a free account — no card:/auth/sign-up?plan=agent-pro&billing=monthly&next=%2Fdashboard%2Fnew"
+    ],
+    "checkoutStart": {
+      "clicked": "/auth/sign-up?plan=investor-pro&billing=monthly&next=%2Fdashboard%2Fnew",
+      "landed": "https://usetruecap.com/auth/sign-up?plan=investor-pro&billing=monthly&next=%2Fdashboard%2Fnew",
+      "shot": "shots/audit/flow-pricing-390-start.jpg"
+    }
+  },
+  "signup-390": {
+    "status": 200,
+    "url": "https://usetruecap.com/auth/sign-up",
+    "sw": 390,
+    "iw": 390,
+    "h": 1340,
+    "h1": "You're one step away from your full deal decision.",
+    "first": "shots/audit/flow-signup-390.jpg",
+    "full": "shots/audit/flow-signup-390-full.jpg"
+  },
+  "404-390": {
+    "status": 404,
+    "url": "https://usetruecap.com/listings/zz-not-a-page",
+    "sw": 390,
+    "iw": 390,
+    "h": 1014,
+    "h1": "404 — page not found",
+    "first": "shots/audit/flow-404-390.jpg",
+    "full": "shots/audit/flow-404-390-full.jpg"
+  },
+  "for-agents-390": {
+    "status": 200,
+    "url": "https://usetruecap.com/for-agents",
+    "sw": 390,
+    "iw": 390,
+    "h": 13849,
+    "h1": "Send your investor clients deals that already pencil.",
+    "first": "shots/audit/flow-for-agents-390.jpg",
+    "full": "shots/audit/flow-for-agents-390-full.jpg"
+  },
+  "memo-1440": {
+    "status": 200,
+    "url": "https://usetruecap.com/sample-decision-memo",
+    "sw": 1440,
+    "iw": 1440,
+    "h": 2952,
+    "h1": "Doesn't meet your targets at asking.",
+    "first": "shots/audit/flow-memo-1440.jpg",
+    "full": "shots/audit/flow-memo-1440-full.jpg"
+  },
+  "pricing-1440": {
+    "status": 200,
+    "url": "https://usetruecap.com/pricing",
+    "sw": 1440,
+    "iw": 1440,
+    "h": 6730,
+    "h1": "Overpaying by 3% on a $250,000 rental costs $7,500 — before you collect a dollar",
+    "first": "shots/audit/flow-pricing-1440.jpg",
+    "full": "shots/audit/flow-pricing-1440-full.jpg",
+    "cadence": [
+      "monthly=false",
+      "annual=true"
+    ],
+    "monthly": "shots/audit/flow-pricing-1440-monthly.jpg",
+    "ctas": [
+      "A:Analyze a property free:/analyze",
+      "A:See Pro plans:#pro",
+      "A:Pro:#pro",
+      "A:Agent Pro:#agent-pro",
+      "A:Analyze a property free:/analyze",
+      "A:Start Pro evaluation — no card:/auth/sign-up?plan=investor-pro&billing=monthly&next=%2Fdashboard%2Fnew",
+      "A:Create a free account — no card:/auth/sign-up?plan=agent-pro&billing=monthly&next=%2Fdashboard%2Fnew"
+    ],
+    "checkoutStart": {
+      "clicked": "/auth/sign-up?plan=investor-pro&billing=monthly&next=%2Fdashboard%2Fnew",
+      "landed": "https://usetruecap.com/auth/sign-up?plan=investor-pro&billing=monthly&next=%2Fdashboard%2Fnew",
+      "shot": "shots/audit/flow-pricing-1440-start.jpg"
+    }
+  },
+  "signup-1440": {
+    "status": 200,
+    "url": "https://usetruecap.com/auth/sign-up",
+    "sw": 1440,
+    "iw": 1440,
+    "h": 1816,
+    "h1": "You're one step away from your full deal decision.",
+    "first": "shots/audit/flow-signup-1440.jpg",
+    "full": "shots/audit/flow-signup-1440-full.jpg"
+  },
+  "404-1440": {
+    "status": 404,
+    "url": "https://usetruecap.com/listings/zz-not-a-page",
+    "sw": 1440,
+    "iw": 1440,
+    "h": 900,
+    "h1": "404 — page not found",
+    "first": "shots/audit/flow-404-1440.jpg",
+    "full": "shots/audit/flow-404-1440-full.jpg"
+  },
+  "for-agents-1440": {
+    "status": 200,
+    "url": "https://usetruecap.com/for-agents",
+    "sw": 1440,
+    "iw": 1440,
+    "h": 9819,
+    "h1": "Send your investor clients deals that already pencil.",
+    "first": "shots/audit/flow-for-agents-1440.jpg",
+    "full": "shots/audit/flow-for-agents-1440-full.jpg"
+  }
+}

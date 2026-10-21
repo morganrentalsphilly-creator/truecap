@@ -1,0 +1,265 @@
+{
+  "device": "android",
+  "net": "fast4g",
+  "frames": [
+    {
+      "i": 0,
+      "ms": 0,
+      "name": "timeline-android-fast4g-00",
+      "valuenow": "236000",
+      "heroTop": 742,
+      "heroH": 1346,
+      "bannerTop": null,
+      "readyState": "interactive"
+    },
+    {
+      "i": 1,
+      "ms": 2459,
+      "name": "timeline-android-fast4g-01",
+      "valuenow": "236000",
+      "heroTop": 742,
+      "heroH": 1346,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 2,
+      "ms": 3614,
+      "name": "timeline-android-fast4g-02",
+      "valuenow": "236000",
+      "heroTop": 742,
+      "heroH": 1346,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 3,
+      "ms": 4859,
+      "name": "timeline-android-fast4g-03",
+      "valuenow": "236000",
+      "heroTop": 742,
+      "heroH": 1346,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 4,
+      "ms": 5746,
+      "name": "timeline-android-fast4g-04",
+      "valuenow": "236000",
+      "heroTop": 742,
+      "heroH": 1346,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 5,
+      "ms": 6154,
+      "name": "timeline-android-fast4g-05",
+      "valuenow": "236000",
+      "heroTop": 742,
+      "heroH": 1346,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 6,
+      "ms": 6735,
+      "name": "timeline-android-fast4g-06",
+      "valuenow": "236000",
+      "heroTop": 742,
+      "heroH": 1346,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 7,
+      "ms": 7108,
+      "name": "timeline-android-fast4g-07",
+      "valuenow": "236000",
+      "heroTop": 742,
+      "heroH": 1346,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 8,
+      "ms": 7555,
+      "name": "timeline-android-fast4g-08",
+      "valuenow": "236000",
+      "heroTop": 742,
+      "heroH": 1346,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 9,
+      "ms": 7958,
+      "name": "timeline-android-fast4g-09",
+      "valuenow": "236000",
+      "heroTop": 742,
+      "heroH": 1346,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 10,
+      "ms": 8395,
+      "name": "timeline-android-fast4g-10",
+      "valuenow": "236000",
+      "heroTop": 742,
+      "heroH": 1346,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 11,
+      "ms": 8785,
+      "name": "timeline-android-fast4g-11",
+      "valuenow": "236000",
+      "heroTop": 742,
+      "heroH": 1346,
+      "bannerTop": null,
+      "readyState": "complete"
+    }
+  ],
+  "probe": {
+    "events": [
+      [
+        791,
+        "dcl"
+      ],
+      [
+        1769,
+        "valuenow",
+        "236000"
+      ],
+      [
+        3140,
+        "load"
+      ]
+    ],
+    "longtasks": [
+      [
+        790,
+        142
+      ],
+      [
+        937,
+        282
+      ],
+      [
+        1310,
+        71
+      ],
+      [
+        1560,
+        193
+      ],
+      [
+        1788,
+        59
+      ],
+      [
+        1899,
+        132
+      ],
+      [
+        2049,
+        135
+      ],
+      [
+        2246,
+        56
+      ],
+      [
+        2302,
+        87
+      ],
+      [
+        2410,
+        126
+      ],
+      [
+        2585,
+        70
+      ],
+      [
+        2672,
+        64
+      ],
+      [
+        2748,
+        72
+      ],
+      [
+        2834,
+        59
+      ],
+      [
+        2900,
+        77
+      ],
+      [
+        2986,
+        67
+      ],
+      [
+        3060,
+        79
+      ],
+      [
+        3400,
+        330
+      ],
+      [
+        3730,
+        133
+      ],
+      [
+        4050,
+        204
+      ],
+      [
+        4328,
+        116
+      ],
+      [
+        4463,
+        139
+      ],
+      [
+        4605,
+        111
+      ],
+      [
+        4717,
+        131
+      ],
+      [
+        4879,
+        121
+      ],
+      [
+        5014,
+        125
+      ],
+      [
+        5140,
+        97
+      ],
+      [
+        5252,
+        118
+      ],
+      [
+        6253,
+        192
+      ]
+    ],
+    "lcp": {
+      "t": 1312,
+      "el": "H1 Stop forwarding listings. Start sending "
+    }
+  }
+}

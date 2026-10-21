@@ -1,0 +1,67 @@
+{
+  "url": "https://www.raycast.com/pricing",
+  "target": "Monthly",
+  "before": [
+    "$0",
+    "$8",
+    "$120",
+    "$12",
+    "$180"
+  ],
+  "samples": [
+    {
+      "ms": 40,
+      "vals": [
+        "$0",
+        "$10",
+        "$15"
+      ],
+      "anims": [
+        "color",
+        "color",
+        "transform"
+      ]
+    },
+    {
+      "ms": 120,
+      "vals": [
+        "$0",
+        "$10",
+        "$15"
+      ],
+      "anims": [
+        "color",
+        "color",
+        "transform"
+      ]
+    },
+    {
+      "ms": 250,
+      "vals": [
+        "$0",
+        "$10",
+        "$15"
+      ],
+      "anims": []
+    },
+    {
+      "ms": 500,
+      "vals": [
+        "$0",
+        "$10",
+        "$15"
+      ],
+      "anims": []
+    },
+    {
+      "ms": 900,
+      "vals": [
+        "$0",
+        "$10",
+        "$15"
+      ],
+      "anims": []
+    }
+  ],
+  "after": "shots/bench/raycast/pricing-1440-toggle2-after.jpg"
+}

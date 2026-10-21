@@ -1,0 +1,32 @@
+[
+  {
+    "run": 0,
+    "addressFieldVisibleMs": 1907,
+    "heroSheetVisibleMs": 1922,
+    "domContentLoaded": 1716,
+    "load": 3043,
+    "first-paint": 936,
+    "first-contentful-paint": 936,
+    "lcp": 936
+  },
+  {
+    "run": 1,
+    "addressFieldVisibleMs": 1345,
+    "heroSheetVisibleMs": 1362,
+    "domContentLoaded": 1243,
+    "load": 3098,
+    "first-paint": 1084,
+    "first-contentful-paint": 1084,
+    "lcp": 1084
+  },
+  {
+    "run": 2,
+    "addressFieldVisibleMs": 1442,
+    "heroSheetVisibleMs": 1454,
+    "domContentLoaded": 1343,
+    "load": 3050,
+    "first-paint": 1076,
+    "first-contentful-paint": 1076,
+    "lcp": 1076
+  }
+]

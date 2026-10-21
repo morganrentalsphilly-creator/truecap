@@ -1,0 +1,57 @@
+{
+  "iphone": {
+    "height": 12871,
+    "words": 1346,
+    "blocksBeforeInstrument": [
+      "H1:Stop forwarding listings. Start sending deals that",
+      "P:Paste the rental listing. See whether it clears yo",
+      "P:Sample deal. Meets the Buy Box: no at $265,000 ask",
+      "P:Buying for your own portfolio? Same analyzer, your",
+      "A:For investors",
+      "FORM:Analyze a deal free",
+      "P:A listing link fills in the address. You enter the",
+      "P:See the sample deal",
+      "A:See the sample deal",
+      "P:Free. No account. Your first full decision is incl"
+    ],
+    "frames": [
+      "shots/audit/home-390-scroll-00.jpg",
+      "shots/audit/home-390-scroll-01.jpg",
+      "shots/audit/home-390-scroll-02.jpg",
+      "shots/audit/home-390-scroll-03.jpg",
+      "shots/audit/home-390-scroll-04.jpg",
+      "shots/audit/home-390-scroll-05.jpg",
+      "shots/audit/home-390-scroll-06.jpg",
+      "shots/audit/home-390-scroll-07.jpg",
+      "shots/audit/home-390-scroll-08.jpg",
+      "shots/audit/home-390-scroll-09.jpg",
+      "shots/audit/home-390-scroll-10.jpg",
+      "shots/audit/home-390-scroll-11.jpg",
+      "shots/audit/home-390-scroll-12.jpg",
+      "shots/audit/home-390-scroll-13.jpg",
+      "shots/audit/home-390-scroll-14.jpg",
+      "shots/audit/home-390-scroll-15.jpg",
+      "shots/audit/home-390-scroll-16.jpg"
+    ]
+  },
+  "desktop": {
+    "height": 8179,
+    "words": 1352,
+    "blocksBeforeInstrument": [
+      "H1:Stop forwarding listings. Start sending deals that"
+    ],
+    "frames": [
+      "shots/audit/home-1440-scroll-00.jpg",
+      "shots/audit/home-1440-scroll-01.jpg",
+      "shots/audit/home-1440-scroll-02.jpg",
+      "shots/audit/home-1440-scroll-03.jpg",
+      "shots/audit/home-1440-scroll-04.jpg",
+      "shots/audit/home-1440-scroll-05.jpg",
+      "shots/audit/home-1440-scroll-06.jpg",
+      "shots/audit/home-1440-scroll-07.jpg",
+      "shots/audit/home-1440-scroll-08.jpg",
+      "shots/audit/home-1440-scroll-09.jpg",
+      "shots/audit/home-1440-scroll-10.jpg"
+    ]
+  }
+}

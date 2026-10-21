@@ -1,0 +1,54 @@
+{
+  "device": "android",
+  "net": "fast4g",
+  "formFirstVisibleMs": 1480,
+  "verdictVisibleMs": 5238,
+  "frames": [
+    {
+      "ms": 251,
+      "shot": "shots/audit/sample-android-fast4g-quiet-00.jpg"
+    },
+    {
+      "ms": 1480,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-android-fast4g-quiet-01.jpg"
+    },
+    {
+      "ms": 2088,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-android-fast4g-quiet-02.jpg"
+    },
+    {
+      "ms": 2588,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-android-fast4g-quiet-03.jpg"
+    },
+    {
+      "ms": 3501,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-android-fast4g-quiet-04.jpg"
+    },
+    {
+      "ms": 5238,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-android-fast4g-quiet-05.jpg"
+    },
+    {
+      "ms": 6815,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-android-fast4g-quiet-06.jpg"
+    }
+  ]
+}

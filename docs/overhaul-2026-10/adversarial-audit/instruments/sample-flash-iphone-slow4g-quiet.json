@@ -1,0 +1,159 @@
+{
+  "device": "iphone",
+  "net": "slow4g",
+  "formFirstVisibleMs": 1349,
+  "verdictVisibleMs": 9251,
+  "frames": [
+    {
+      "ms": 310,
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-00.jpg"
+    },
+    {
+      "ms": 1349,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-01.jpg"
+    },
+    {
+      "ms": 2761,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-02.jpg"
+    },
+    {
+      "ms": 2985,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-03.jpg"
+    },
+    {
+      "ms": 3448,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-04.jpg"
+    },
+    {
+      "ms": 3774,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-05.jpg"
+    },
+    {
+      "ms": 4008,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-06.jpg"
+    },
+    {
+      "ms": 4316,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-07.jpg"
+    },
+    {
+      "ms": 4791,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-08.jpg"
+    },
+    {
+      "ms": 4954,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-09.jpg"
+    },
+    {
+      "ms": 5101,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-10.jpg"
+    },
+    {
+      "ms": 5249,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-11.jpg"
+    },
+    {
+      "ms": 5926,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-12.jpg"
+    },
+    {
+      "ms": 6869,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-13.jpg"
+    },
+    {
+      "ms": 7501,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-14.jpg"
+    },
+    {
+      "ms": 7740,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-15.jpg"
+    },
+    {
+      "ms": 7927,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-16.jpg"
+    },
+    {
+      "ms": 8375,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-17.jpg"
+    },
+    {
+      "ms": 9251,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-18.jpg"
+    },
+    {
+      "ms": 10000,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-19.jpg"
+    },
+    {
+      "ms": 10692,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-20.jpg"
+    },
+    {
+      "ms": 11016,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-slow4g-quiet-21.jpg"
+    }
+  ]
+}

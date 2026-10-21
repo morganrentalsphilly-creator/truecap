@@ -1,0 +1,247 @@
+{
+  "device": "iphone",
+  "net": "slow4g",
+  "frames": [
+    {
+      "i": 0,
+      "ms": 0,
+      "name": "timeline-iphone-slow4g-quiet-00",
+      "valuenow": "236000",
+      "heroTop": 811,
+      "heroH": 1458,
+      "bannerTop": null,
+      "readyState": "interactive"
+    },
+    {
+      "i": 1,
+      "ms": 1951,
+      "name": "timeline-iphone-slow4g-quiet-01",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "interactive"
+    },
+    {
+      "i": 2,
+      "ms": 3376,
+      "name": "timeline-iphone-slow4g-quiet-02",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 3,
+      "ms": 4298,
+      "name": "timeline-iphone-slow4g-quiet-03",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 4,
+      "ms": 5496,
+      "name": "timeline-iphone-slow4g-quiet-04",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 5,
+      "ms": 6299,
+      "name": "timeline-iphone-slow4g-quiet-05",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 6,
+      "ms": 6998,
+      "name": "timeline-iphone-slow4g-quiet-06",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 7,
+      "ms": 7415,
+      "name": "timeline-iphone-slow4g-quiet-07",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 8,
+      "ms": 7823,
+      "name": "timeline-iphone-slow4g-quiet-08",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 9,
+      "ms": 8335,
+      "name": "timeline-iphone-slow4g-quiet-09",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "complete"
+    },
+    {
+      "i": 10,
+      "ms": 8745,
+      "name": "timeline-iphone-slow4g-quiet-10",
+      "valuenow": "236000",
+      "heroTop": 762,
+      "heroH": 1414,
+      "bannerTop": null,
+      "readyState": "complete"
+    }
+  ],
+  "probe": {
+    "events": [
+      [
+        1580,
+        "dcl"
+      ],
+      [
+        2603,
+        "valuenow",
+        "236000"
+      ],
+      [
+        3875,
+        "load"
+      ]
+    ],
+    "longtasks": [
+      [
+        919,
+        281
+      ],
+      [
+        1215,
+        238
+      ],
+      [
+        1470,
+        109
+      ],
+      [
+        2092,
+        147
+      ],
+      [
+        2246,
+        89
+      ],
+      [
+        2378,
+        215
+      ],
+      [
+        2682,
+        97
+      ],
+      [
+        2860,
+        97
+      ],
+      [
+        2993,
+        76
+      ],
+      [
+        3121,
+        94
+      ],
+      [
+        3222,
+        81
+      ],
+      [
+        3315,
+        108
+      ],
+      [
+        3436,
+        157
+      ],
+      [
+        3601,
+        101
+      ],
+      [
+        3716,
+        71
+      ],
+      [
+        3797,
+        77
+      ],
+      [
+        4056,
+        557
+      ],
+      [
+        4614,
+        232
+      ],
+      [
+        5000,
+        194
+      ],
+      [
+        5390,
+        138
+      ],
+      [
+        5642,
+        136
+      ],
+      [
+        5789,
+        138
+      ],
+      [
+        5936,
+        108
+      ],
+      [
+        6060,
+        185
+      ],
+      [
+        6246,
+        173
+      ],
+      [
+        6460,
+        126
+      ],
+      [
+        7604,
+        269
+      ]
+    ],
+    "lcp": {
+      "t": 1276,
+      "el": "H1 Stop forwarding listings. Start sending "
+    }
+  }
+}

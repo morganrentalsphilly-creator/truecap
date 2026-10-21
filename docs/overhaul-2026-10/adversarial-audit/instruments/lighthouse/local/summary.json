@@ -1,0 +1,41 @@
+[
+  {
+    "url": "http://127.0.0.1:3100/",
+    "runs": 3,
+    "perf": 0.76,
+    "a11y": 1,
+    "lcp_s": 3.53,
+    "tbt_ms": 574,
+    "cls": 0,
+    "scriptKB": 430,
+    "totalKB": 629,
+    "tbtRuns": "502/620/574",
+    "benchmarkIndex": 2131
+  },
+  {
+    "url": "http://127.0.0.1:3100/analyze",
+    "runs": 3,
+    "perf": 0.75,
+    "a11y": 1,
+    "lcp_s": 3.67,
+    "tbt_ms": 567,
+    "cls": 0,
+    "scriptKB": 631,
+    "totalKB": 805,
+    "tbtRuns": "528/567/693",
+    "benchmarkIndex": 2079
+  },
+  {
+    "url": "http://127.0.0.1:3100/pricing",
+    "runs": 3,
+    "perf": 0.89,
+    "a11y": 1,
+    "lcp_s": 2.53,
+    "tbt_ms": 244,
+    "cls": 0.002,
+    "scriptKB": 439,
+    "totalKB": 595,
+    "tbtRuns": "244/367/226",
+    "benchmarkIndex": 1928
+  }
+]

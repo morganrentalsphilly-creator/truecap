@@ -1,0 +1,41 @@
+[
+  {
+    "url": "https://usetruecap.com/",
+    "runs": 3,
+    "perf": 0.65,
+    "a11y": 1,
+    "lcp_s": 2.64,
+    "tbt_ms": 957,
+    "cls": 0.181,
+    "scriptKB": 389,
+    "totalKB": 598,
+    "tbtRuns": "957/1202/871",
+    "benchmarkIndex": 2329
+  },
+  {
+    "url": "https://usetruecap.com/analyze",
+    "runs": 3,
+    "perf": 0.75,
+    "a11y": 1,
+    "lcp_s": 2.58,
+    "tbt_ms": 836,
+    "cls": 0.093,
+    "scriptKB": 578,
+    "totalKB": 766,
+    "tbtRuns": "840/785/836",
+    "benchmarkIndex": 2114
+  },
+  {
+    "url": "https://usetruecap.com/pricing",
+    "runs": 3,
+    "perf": 0.73,
+    "a11y": 1,
+    "lcp_s": 1.52,
+    "tbt_ms": 603,
+    "cls": 0.23,
+    "scriptKB": 403,
+    "totalKB": 583,
+    "tbtRuns": "680/603/443",
+    "benchmarkIndex": 2340
+  }
+]
