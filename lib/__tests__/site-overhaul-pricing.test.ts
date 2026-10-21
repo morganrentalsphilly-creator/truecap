@@ -65,7 +65,11 @@ describe("Phase 9 — pricing page", () => {
     const pricing = read("components/marketing/cadence-pricing.ts");
     expect(toggle).toContain("PaidPlanPrice");
     expect(toggle).toContain("paidPriceNote");
-    expect(cadence).toContain("annualMonthlyEquivalent");
+    // Re-anchored 2026-10-21 (audit A13): the figure is paidPriceDisplay's,
+    // the annual charge over twelve months when that is whole dollars, else
+    // the annual charge itself (founder decision).
+    expect(cadence).toContain("paidPriceDisplay(prices, cadence)");
+    expect(pricing).toContain("const perMonth = prices.annual / 12;");
     expect(pricing).toContain("billed annually");
   });
 

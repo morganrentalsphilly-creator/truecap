@@ -27,14 +27,14 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
-  annualCostsLess,
+  annualSavingFloorPct,
   CadenceToggle,
   PaidPlanPrice,
   paidChargeToday,
+  paidPriceDisplay,
   paidPriceNote,
-  parsePriceLabel,
+  planPrices,
   type Cadence,
-  type PaidPlanPrices,
 } from "@/components/marketing/cadence-toggle";
 import { agentProPlanAnswers, freePlanAnswers, proPlanAnswers } from "@/components/marketing/plan-answers";
 import { PlanCard } from "@/components/marketing/plan-card";
@@ -49,7 +49,6 @@ import {
   PRODUCT_EVALUATION_DEAL_LIMIT,
 } from "@/lib/product-access";
 import {
-  formatPublicUsd,
   PUBLIC_AGENT_PRO_ANNUAL_USD,
   PUBLIC_AGENT_PRO_MONTHLY_USD,
   PUBLIC_PRO_ANNUAL_USD,
@@ -96,18 +95,6 @@ interface PricingTogglePlansProps {
  * contradicted /for-agents' annual price). Checkout stays gated on the
  * resolved price through checkoutReady below.
  */
-function planPrices(
-  monthly: ResolvedPrice,
-  annual: ResolvedPrice,
-  catalog: { monthly: number; annual: number },
-): PaidPlanPrices {
-  return {
-    monthly: parsePriceLabel(monthly?.amountLabel) ?? catalog.monthly,
-    annual: parsePriceLabel(annual?.amountLabel) ?? catalog.annual,
-    monthlyLabel: monthly?.amountLabel ?? formatPublicUsd(catalog.monthly),
-    annualLabel: annual?.amountLabel ?? formatPublicUsd(catalog.annual),
-  };
-}
 
 export function PricingTogglePlans({
   monthly,
@@ -145,6 +132,13 @@ export function PricingTogglePlans({
     trackEvent("pricing_viewed", properties);
   }, []);
 
+  // The hero's stage list (app/pricing/page.tsx) shows each paid price at
+  // this cadence, from the server-rendered pair (audit A13); it reads it here.
+  useEffect(() => {
+    document.documentElement.setAttribute("data-plan-cadence", period);
+    return () => document.documentElement.removeAttribute("data-plan-cadence");
+  }, [period]);
+
   // Agent Pro exists on the page only when it is configured (env + plan rows).
   const showAgentPro = agentProConfigured;
   const proPrices = planPrices(monthly, annual, {
@@ -175,7 +169,7 @@ export function PricingTogglePlans({
         aria-label="Billing period"
         value={period}
         onChange={setPeriod}
-        annualCostsLess={annualCostsLess(showAgentPro ? [proPrices, agentPrices] : [proPrices])}
+        annualSavingPct={annualSavingFloorPct(showAgentPro ? [proPrices, agentPrices] : [proPrices])}
       />
 
       {/* The homepage plan row: default stretch, so PlanCard's flexible list
@@ -236,7 +230,7 @@ export function PricingTogglePlans({
             </>
           }
           price={<PaidPlanPrice prices={proPrices} cadence={period} />}
-          period="/mo"
+          period={paidPriceDisplay(proPrices, period).period}
           priceNote={<span className="font-figure">{paidPriceNote(proPrices, period)}</span>}
           // A block span, so the caption's wrap is balanced ("Everything in
           // Free, plus / answers to four questions —") rather than leaving
@@ -291,7 +285,7 @@ export function PricingTogglePlans({
               </>
             }
             price={<PaidPlanPrice prices={agentPrices} cadence={period} />}
-            period="/mo"
+            period={paidPriceDisplay(agentPrices, period).period}
             priceNote={<span className="font-figure">{paidPriceNote(agentPrices, period)}</span>}
             answersCaption="What changes for your workflow"
             answers={agentProPlanAnswers()}

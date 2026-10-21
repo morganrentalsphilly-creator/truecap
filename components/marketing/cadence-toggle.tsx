@@ -3,9 +3,9 @@
 /**
  * The one billing-cadence control for a row of plan cards (the homepage's
  * plans and /pricing): a radiogroup of two 44px segments, the checked one in
- * graphite ink, "Monthly" and "Annual" with a figure-free note ("costs less")
- * while every paid plan on the page costs less paid annually, so the note is
- * true beside each card without naming a saving that belongs to one of them.
+ * graphite ink, "Monthly" and "Annual" with the saving every paid plan on the
+ * page meets ("save 16%+", annualSavingFloorPct: founder decision 2026-10-21),
+ * so the figure is true beside each card, not one plan's saving.
  *
  * With it, the one way a paid plan's price is set at a cadence: the per-month
  * figure rolling through AnimatedNumber (annual shows the annual charge
@@ -16,12 +16,19 @@
  */
 
 import { AnimatedNumber } from "@/components/motion/animated-number";
-import type { Cadence, PaidPlanPrices } from "@/components/marketing/cadence-pricing";
+import {
+  paidPriceDisplay,
+  type Cadence,
+  type PaidPlanPrices,
+} from "@/components/marketing/cadence-pricing";
 import { cn } from "@/lib/utils";
 
 export {
   annualCostsLess,
+  annualSavingFloorPct,
   annualSavingUsd,
+  paidPriceDisplay,
+  planPrices,
   paidChargeToday,
   paidPriceNote,
   parsePriceLabel,
@@ -31,8 +38,9 @@ export {
 
 /** The per-month figure at a cadence: the monthly price, or the annual charge over twelve months. */
 export function PaidPlanPrice({ prices, cadence }: { prices: PaidPlanPrices; cadence: Cadence }) {
-  const annualMonthlyEquivalent = prices.annual / 12;
-  const value = cadence === "annual" ? annualMonthlyEquivalent : prices.monthly;
+  // The card's period comes from the same call (paidPriceDisplay): "/mo", or
+  // "/yr" when the annual charge has no whole-dollar monthly equivalent.
+  const { value } = paidPriceDisplay(prices, cadence);
   // Two decimals only when the amount has cents ($25 from $300 a year, $29.99
   // month to month), as formatPublicUsd prints them.
   return <AnimatedNumber value={value} kind={Number.isInteger(value) ? "usd" : "usdCents"} />;
@@ -44,14 +52,14 @@ const SEGMENT =
 export function CadenceToggle({
   value,
   onChange,
-  annualCostsLess: costsLess,
+  annualSavingPct,
   "aria-label": ariaLabel = "Billing period",
   className,
 }: {
   value: Cadence;
   onChange: (cadence: Cadence) => void;
-  /** Show "costs less" beside Annual: true only while every paid card on the page saves annually. */
-  annualCostsLess: boolean;
+  /** The saving to name beside Annual ("save 16%+"): annualSavingFloorPct of the paid cards on the page, true beside each; null names none. */
+  annualSavingPct: number | null;
   "aria-label"?: string;
   className?: string;
 }) {
@@ -89,7 +97,9 @@ export function CadenceToggle({
           ) : (
             <>
               Annual{" "}
-              {costsLess ? <span className="text-sm font-semibold">costs less</span> : null}
+              {annualSavingPct ? (
+                <span className="font-figure text-sm font-semibold">save {annualSavingPct}%+</span>
+              ) : null}
             </>
           )}
         </button>

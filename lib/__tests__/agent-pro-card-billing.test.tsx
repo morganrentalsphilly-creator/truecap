@@ -72,8 +72,13 @@ describe("/pricing Agent Pro card", () => {
     // (components/marketing/cadence-toggle.tsx), whose segments are radios.
     expect(html).toMatch(/aria-checked="true"[^>]*>Annual/);
     const card = agentCard(html);
-    expect(card).toContain(formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD / 12));
-    expect(card).toContain(`billed annually (${formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD)})`);
+    // Re-anchored 2026-10-21 (audit A13, founder decision): $590 a year has
+    // no whole-dollar monthly equivalent, so the card shows the annual charge
+    // itself ("$590" over "/yr"), never "$49.17/mo".
+    expect(card).toContain(formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD));
+    expect(card).toContain("/yr");
+    expect(card).not.toContain(formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD / 12));
+    expect(card).toContain("billed annually");
     expect(card).not.toContain("billed monthly");
     expect(card).not.toContain(formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD));
     // Its sign-up carries the period the card shows, as /for-agents' does.
@@ -84,8 +89,11 @@ describe("/pricing Agent Pro card", () => {
     const card = agentCard(
       renderPlans({ agentAnnual: { amountLabel: "$590", period: "year" } }),
     );
-    expect(card).toContain("$49.17");
-    expect(card).toContain("billed annually ($590)");
+    // Re-anchored 2026-10-21 (audit A13): the annual charge, not $49.17/mo.
+    expect(card).toContain("$590");
+    expect(card).toContain("/yr");
+    expect(card).not.toContain("$49.17");
+    expect(card).toContain("billed annually");
   });
 
   // Row P2-13: the saving was printed on the Pro card only, rounded up to the
@@ -105,9 +113,9 @@ describe("/pricing Agent Pro card", () => {
     );
     expect(pro).not.toContain(agentSaving);
     const agent = agentCard(html);
-    expect(agent).toContain(
-      `billed annually (${formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD)}) · ${agentSaving}`,
-    );
+    // Re-anchored 2026-10-21: the figure above is the annual charge, so the
+    // note does not repeat it.
+    expect(agent).toContain(`billed annually · ${agentSaving}`);
     expect(agent).not.toContain(proSaving);
     // The same figures when Stripe's display prices resolved.
     const resolved = renderPlans({
@@ -120,13 +128,22 @@ describe("/pricing Agent Pro card", () => {
     expect(agentCard(resolved)).toContain(agentSaving);
   });
 
-  it("gives the billing toggle no figure, so it is true beside both paid cards", () => {
+  it("names the saving every paid card meets, so the toggle is true beside both", () => {
+    // Re-anchored 2026-10-21 (audit A13, founder decision: the toggle names
+    // the saving, benchmarks P10). The intent of the old figure-free toggle
+    // stays: no figure that holds for one plan only. The toggle names the
+    // whole percent both plans save at least, from their own catalog prices.
     const html = renderPlans();
-    // Re-anchored: the shared CadenceToggle is a radiogroup.
     const toggle = html.slice(html.indexOf('role="radiogroup"'), html.indexOf("<article"));
     const text = toggle.replace(/<[^>]+>/g, "|").replace(/^[^|]*\|/, "");
-    expect(text).toContain("Annual |costs less");
-    expect(text).not.toMatch(/\d|%/);
+    const pct = (monthly: number, annual: number) => (1 - annual / (monthly * 12)) * 100;
+    const pro = pct(PUBLIC_PRO_MONTHLY_USD, PUBLIC_PRO_ANNUAL_USD);
+    const agent = pct(PUBLIC_AGENT_PRO_MONTHLY_USD, PUBLIC_AGENT_PRO_ANNUAL_USD);
+    const floor = Math.floor(Math.min(pro, agent));
+    expect(floor).toBeGreaterThan(0);
+    expect(text).toContain(`Annual |save ${floor}%+`);
+    expect(pro).toBeGreaterThanOrEqual(floor);
+    expect(agent).toBeGreaterThanOrEqual(floor);
     const source = readFileSync(
       join(process.cwd(), "components/marketing/pricing-toggle-plans.tsx"),
       "utf8",

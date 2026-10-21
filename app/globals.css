@@ -1026,6 +1026,17 @@ html[data-sample]:has([data-sample-prerender]):not(:has([data-decision-settled])
   display: none;
 }
 
+/* /pricing's stage list follows the cards' cadence toggle (audit A13): each
+   paid row carries both prices; annual shows by default, as the cards open,
+   and PricingTogglePlans sets data-plan-cadence on <html> as it changes. */
+[data-stage-cadence="monthly"],
+html[data-plan-cadence="monthly"] [data-stage-cadence="annual"] {
+  display: none;
+}
+html[data-plan-cadence="monthly"] [data-stage-cadence="monthly"] {
+  display: flex;
+}
+
 /* The hero's one moment (components/home/price-scrubber.tsx, audit A3): the
    meets-range reaches out to the asking marker and draws back to the
    ceiling, once, when the track is first seen. Scale only, from and to the
