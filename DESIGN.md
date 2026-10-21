@@ -269,7 +269,11 @@ In addition to Impeccable's catalogue (impeccable.style/slop):
   letter-spacing −0.025em); 600 for labels, terms and figures in a row; 400
   for text. Loaded through `next/font/google` in `app/layout.tsx` with
   `display: swap`, `adjustFontFallback` and `preload`, so the swap moves no
-  line. No hand-written `@font-face`.
+  line. next/font's fallback is `local("Arial")`, which Android and most
+  Linux machines lack; four generated faces (Hanken Grotesk and Geist Mono
+  against Roboto and Liberation Sans, `scripts/font-fallback-metrics.mjs`,
+  next/font's own formula) follow it in the family stacks (trust pass,
+  2026-10-21). No other `@font-face`.
 - **The Figure rule.** A number that will be compared with another, or that
   can change, is set in the text face with tabular numerals (`font-figure`:
   `font-variant-numeric: tabular-nums`). Ledger cells, prices, metric values,
