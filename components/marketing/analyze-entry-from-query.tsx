@@ -72,8 +72,11 @@ export function AnalyzeEntryFromQuery() {
   useLayoutEffect(() => {
     if (new URLSearchParams(window.location.search).get("sample") !== "1") {
       if (!isSamplePrerenderShown()) return;
-    } else {
+    } else if (document.querySelector("[data-sample-prerender]")) {
+      // Only where the static card exists (/analyze, not /dashboard/new).
       setSamplePrerenderFlag();
+    } else if (!isSamplePrerenderShown()) {
+      return;
     }
     const id = window.setTimeout(() => {
       if (!document.querySelector("[data-decision-settled]")) clearSamplePrerenderFlag();
