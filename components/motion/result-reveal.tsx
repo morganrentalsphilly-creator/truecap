@@ -14,6 +14,7 @@
  */
 
 import { useEffect, useState, type ReactNode } from "react";
+import { isSamplePrerenderShown } from "@/lib/sample-prerender";
 
 export function ResultReveal({
   runKey,
@@ -32,6 +33,9 @@ export function ResultReveal({
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     )
       return;
+    // The sample's server-rendered decision is already on screen with these
+    // figures (audit A2): the live card takes its place without an entrance.
+    if (isSamplePrerenderShown()) return;
     setPlaying(runKey);
     // After the sequence, drop the attribute so later layout changes (a tab,
     // a disclosure) never replay the entrance.

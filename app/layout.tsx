@@ -13,6 +13,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
 import { oneTimePdfReturnBootstrapScript } from "@/lib/one-time-pdf-return";
 import { analyzerHandoffBootstrapScript } from "@/lib/analyzer-handoff";
+import { samplePrerenderBootstrapScript } from "@/lib/sample-prerender";
 import "./globals.css";
 import { JsonLd } from "@/components/seo/json-ld";
 
@@ -171,6 +172,12 @@ export default function RootLayout({
         <script
           id="private-analyzer-handoff-bootstrap"
           dangerouslySetInnerHTML={{ __html: analyzerHandoffBootstrapScript() }}
+        />
+        {/* /analyze?sample=1 shows the sample's server-rendered decision
+            before first paint, not an empty form (lib/sample-prerender.ts). */}
+        <script
+          id="sample-prerender-bootstrap"
+          dangerouslySetInnerHTML={{ __html: samplePrerenderBootstrapScript() }}
         />
         {process.env.NODE_ENV === "production" && (
           <>
