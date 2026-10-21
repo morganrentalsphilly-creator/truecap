@@ -220,7 +220,7 @@ export function SampleDecisionPrerender() {
                       <div className="border-t border-border pt-2">
                         <p className="text-xs font-medium text-muted-foreground">
                           <span className={GLOSSARY_LABEL}>
-                            Cash flow after reserve
+                            Cash flow after reserves
                             <CircleHelp aria-hidden className="h-3 w-3 text-foreground" />
                           </span>
                         </p>

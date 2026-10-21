@@ -282,8 +282,8 @@ function FirstYearSnapshot({
         <p className="text-xs font-medium text-muted-foreground">
           <GlossaryTip term="cashFlow" className="!no-underline">
             {isScenarioActive
-              ? "Base cash flow after reserve"
-              : "Cash flow after reserve"}
+              ? "Base cash flow after reserves"
+              : "Cash flow after reserves"}
           </GlossaryTip>
         </p>
         <p
