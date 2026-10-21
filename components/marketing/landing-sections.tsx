@@ -317,7 +317,7 @@ export function BuiltByInvestor() {
  */
 export function FinalCta() {
   return (
-    <section className="bg-navy-grid text-navy-foreground" aria-labelledby="final-cta-heading">
+    <section className="bg-navy-grid text-navy-foreground" aria-labelledby="final-cta-heading" data-sticky-suppress="">
       <div className={cn(PAGE_CONTAINER, "grid gap-x-12 gap-y-6 py-18 sm:py-24 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-end xl:gap-x-16")}>
         <div>
           <h2 id="final-cta-heading" className="font-display text-balance text-section-sm text-white sm:text-section">
@@ -949,7 +949,9 @@ export async function PdfProUpsell() {
   };
 
   return (
-    <Section aria-labelledby="plans-heading">
+    // data-sticky-suppress: the sticky conversion bar stands down while the
+    // plans are in view; they carry their own actions (audit A14).
+    <Section aria-labelledby="plans-heading" data-sticky-suppress="">
       <div className="max-w-3xl">
         <SectionHeading id="plans-heading">
           Free screens the deal.{" "}

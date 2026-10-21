@@ -68,10 +68,19 @@ describe("contrast on the states that carry the verdict", () => {
 describe("the cookie banner is escapable and does not strand focus", () => {
   const banner = read("components/marketing/cookie-consent-banner.tsx");
 
-  it("still deliberately takes focus on appear", () => {
-    // Guards the premise for the two tests below: because the banner grabs
-    // focus on every page, its exit path is load-bearing rather than cosmetic.
-    expect(banner).toContain("bannerRef.current?.focus({ preventScroll: true })");
+  it("is reachable right after the skip link, without taking focus", () => {
+    // Re-anchored 2026-10-21 (audit A17): the banner used to sit after the
+    // footer and grab focus on load, which put its controls ahead of "Skip to
+    // main content". The intent stays (the consent controls are reachable
+    // early, never last): the root layout renders it right after the skip
+    // link and before the page, and it no longer takes focus.
+    const layout = read("app/layout.tsx");
+    const skip = layout.indexOf("Skip to main content");
+    const bannerAt = layout.indexOf("<CookieConsentBanner />");
+    expect(skip).toBeGreaterThan(0);
+    expect(bannerAt).toBeGreaterThan(skip);
+    expect(bannerAt).toBeLessThan(layout.indexOf("{children}"));
+    expect(banner).not.toContain("bannerRef.current?.focus(");
   });
 
   it("Escape dismisses it", () => {
