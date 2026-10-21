@@ -96,7 +96,7 @@ export function ResultPriceScrubber({
         // overlaps its neighbours (negative margins) so the card keeps the
         // static track's height: the decision's actions have to end inside
         // the first phone screen (public-product.spec, 390×844).
-        className="relative -my-2.5 mt-[-4px] flex h-11 w-full touch-none items-center select-none"
+        className="relative mt-[-6px] mb-[-14px] flex h-11 w-full touch-none items-center select-none"
         min={low}
         max={high}
         step={1_000}
