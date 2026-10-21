@@ -75,7 +75,12 @@ export function ResultPriceScrubber({
         {ceiling <= asking ? (
           <>
             {ceilingLabel}
-            {gap > 0 && !moved ? <span className="text-muted-foreground">Gap {usd(gap)}</span> : null}
+            {gap > 0 && !moved ? (
+              // From 640px: three labels fit one row; on a phone the gap
+              // would wrap the row and push the card's actions under the fold
+              // (the sr-only sentence below states it for assistive tech).
+              <span className="hidden text-muted-foreground sm:inline">Gap {usd(gap)}</span>
+            ) : null}
             {askingLabel}
           </>
         ) : (

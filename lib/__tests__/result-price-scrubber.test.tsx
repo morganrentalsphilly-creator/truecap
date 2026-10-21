@@ -37,6 +37,9 @@ describe("ResultPriceScrubber", () => {
     expect(html).toContain('aria-valuemin="228000"');
     expect(html).toContain('aria-valuemax="273000"');
     expect(html).toContain("Gap $29,000");
+    // The sr-only sentence states the gap at every width; the label row's
+    // gap shows from 640px only (it would wrap the row on a phone).
+    expect(html).toContain("Asking $265,000 is $29,000 above the Offer Ceiling $236,000.");
     expect(html).not.toContain("Back to asking");
     expect(html).toContain('data-what-if="false"');
   });
