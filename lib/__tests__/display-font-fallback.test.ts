@@ -64,7 +64,7 @@ describe("the type faces and their fallback", () => {
     // Liberation Sans shares Arial's metrics, so its overrides must equal the
     // ones next/font generates against Arial (seen in the built CSS).
     const generated = fallbackFaceCss();
-    const liberation = generated.match(/"Hanken Grotesk Fallback Liberation Sans";[\s\S]*?\}/)?.[0] ?? "";
+    const liberation = generated.match(/"TrueCap Text Fallback Liberation Sans";[\s\S]*?\}/)?.[0] ?? "";
     expect(liberation).toContain("ascent-override: 99.07%;");
     expect(liberation).toContain("descent-override: 30.02%;");
     expect(liberation).toContain("size-adjust: 100.94%;");
