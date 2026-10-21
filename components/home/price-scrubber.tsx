@@ -157,7 +157,11 @@ export function PriceScrubber({
   );
 
   return (
-    <div ref={rootRef} className="min-w-0" data-price-scrubber="" data-glide="idle">
+    // Below 1024px the answer leads (audit A8): the price track and the Offer
+    // Ceiling, then the schematic, the readout and the chips (flex order; the
+    // DOM keeps the drawing first for the wide layout).
+    <div ref={rootRef} className="flex min-w-0 flex-col lg:block" data-price-scrubber="" data-glide="idle">
+      <div className="max-lg:order-1 max-lg:mt-6">
       <Schematic
         rent={inputs.rent}
         rate={inputs.rate}
@@ -174,10 +178,11 @@ export function PriceScrubber({
         }
         aboveCeiling={aboveCeiling}
       />
+      </div>
 
       {/* The price track: a dimension line with the meets-range highlighted. */}
       <div
-        className="relative mx-2 mt-5 pt-6 pb-5"
+        className="relative mx-2 mt-5 pt-6 pb-5 max-lg:mt-1"
         onPointerDownCapture={() => {
           interacted.current = true;
         }}
@@ -296,7 +301,7 @@ export function PriceScrubber({
       {/* The readout: the engine's figures at asking beside the figures at
           the handle's price, with each target's chip. A table, so the
           comparison reads in order without JavaScript and for a screen reader. */}
-      <table className="mt-5 w-full border-collapse border-t border-border text-base">
+      <table className="mt-5 w-full border-collapse border-t border-border text-base max-lg:order-2">
         <caption className="sr-only">The sample deal at its asking price and at the price on the handle</caption>
         <thead>
           <tr className="border-b border-border text-sm text-muted-foreground">
@@ -369,7 +374,7 @@ export function PriceScrubber({
       </table>
 
       {/* Where each starting value comes from: a chip opens its source. */}
-      <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-1 border-t border-rule-soft pt-3" aria-label="Where the starting values come from">
+      <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-1 border-t border-rule-soft pt-3 max-lg:order-3" aria-label="Where the starting values come from">
         {sources.map((s) => (
           <li key={s.label}>
             <SourcePopover source={s.source} basis={s.basis} replaceWith={s.replaceWith} className="min-h-10 rounded-none px-0 font-mono text-xs text-muted-foreground decoration-dotted hover:text-foreground">

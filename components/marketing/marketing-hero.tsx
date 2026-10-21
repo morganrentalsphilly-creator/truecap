@@ -8,8 +8,9 @@
  * and 1280px (--text-display) so the headline keeps to four lines and the
  * form stays in the first screen of a 1095x760 window. The investor cue sits
  * ABOVE the address form at every width (founder ruling, 2026-10-03), so the
- * cookie banner cannot cover it on a short phone. Phones: one column in
- * reading order, and the sheet starts under the risk line.
+ * cookie banner cannot cover it on a short phone. Below 1024px: one column,
+ * the sheet (its price track and Offer Ceiling first) directly under the form
+ * and the risk line, the listing helper line under the sheet (audit A8).
  *
  * SERVER COMPONENT. The sheet is set from the engine's own sample-deal output
  * at build time (lib/sample-deal-ledger.ts, lib/sample-deal-sweep.ts) and
@@ -19,11 +20,11 @@
 
 import Link from "next/link";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
+import { HERO_LISTING_EXPECTATION } from "@/lib/hero-copy";
 import { HeroSheet } from "@/components/home/hero-sheet";
-import { LedgerFigure, LedgerVerdict } from "@/components/ledger/ledger-parts";
 import { PAGE_CONTAINER } from "@/components/marketing/section";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
-import { buildSampleDealLedger, formatLedgerDollars } from "@/lib/sample-deal-ledger";
+import { buildSampleDealLedger } from "@/lib/sample-deal-ledger";
 import { buildSampleDealSweep } from "@/lib/sample-deal-sweep";
 import { cn } from "@/lib/utils";
 
@@ -42,10 +43,15 @@ export function MarketingHero() {
       <div
         className={cn(
           PAGE_CONTAINER,
-          "grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-10 pb-12 pt-4 sm:pb-16 sm:pt-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:pb-18 lg:pt-8 xl:gap-x-16 xl:pt-14",
+          "grid grid-cols-[minmax(0,1fr)] gap-x-12 pb-12 pt-4 sm:pb-16 sm:pt-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:gap-y-10 lg:pb-18 lg:pt-8 xl:gap-x-16 xl:pt-14",
         )}
       >
-        <div className="min-w-0">
+        {/* Below 1024px this column's children join the hero grid
+            (display: contents), so the sheet can follow the form and the
+            helper line can follow the sheet (audit A8, founder decision
+            2026-10-21): on a phone the price track and the Offer Ceiling sit
+            directly under the address form. */}
+        <div className="contents lg:block lg:min-w-0">
           {/* break-words + hyphens-auto: at zoom-sensitive widths (a 195px
               column) a ten-letter word like "forwarding" is wider than the
               line; the browser may then break or hyphenate it rather than
@@ -59,30 +65,6 @@ export function MarketingHero() {
               ? "Paste the rental listing. See whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded with Pro."
               : "Enter an address, the asking price and a bedroom count for a first-pass screen with labeled, editable assumptions. Pro adds the Offer Ceiling: the highest price that still meets your targets."}
           </p>
-          {/* Phones only: the sheet's verdict in one sentence, before the
-              form, so a phone's first screen shows the answer and not only the
-              claim (the sheet starts under the fold there). Set from the same
-              engine output as the sheet. */}
-          {ledger ? (
-            // Short phones (under 700px tall, e.g. 375x667) drop the line: there
-            // the primary CTA has to clear the cookie banner, and the line is
-            // the one optional block above the form (e2e: "at 375px the
-            // header is one row and the hero CTA is in the first viewport").
-            <p
-              data-hero-verdict-line=""
-              className="mt-3 text-base leading-snug sm:hidden [@media(max-height:699.98px)]:hidden"
-            >
-              Sample deal. Meets the Buy Box:{" "}
-              <LedgerVerdict pass={ledger.meetsTargets.asking}>
-                {ledger.meetsTargets.asking ? "yes" : "no"}
-              </LedgerVerdict>{" "}
-              at <LedgerFigure>{formatLedgerDollars(ledger.askingPrice)}</LedgerFigure> asking,{" "}
-              <LedgerVerdict pass={ledger.meetsTargets.ceiling}>
-                {ledger.meetsTargets.ceiling ? "yes" : "no"}
-              </LedgerVerdict>{" "}
-              at the <LedgerFigure>{formatLedgerDollars(ledger.offerCeiling)}</LedgerFigure> Offer Ceiling.
-            </p>
-          ) : null}
           {/* The math supports the decision; it is not the headline. */}
           {newHomepagePositioningEnabled ? (
             <p
@@ -116,18 +98,27 @@ export function MarketingHero() {
           {/* The one primary action; its secondary is the sample-deal link.
               mt-3 on phones (the form's own default is mt-5): the cue above
               it is the gap. From 640px the form keeps its sm:mt-7. */}
-          <HeroAddressForm className="mt-3" />
+          <HeroAddressForm className="mt-3" listingExpectation={false} />
 
           {/* The full risk reversal stays next to the primary action at every
               viewport: paid mobile traffic must not have to infer account or
               card requirements. */}
-          <p className="text-sm text-muted-foreground">
+          <p className="mt-3 text-sm text-muted-foreground">
             Free. No account. Your first full decision is included.
+          </p>
+
+          {/* Helper line: after the form at every width, so it never moves
+              the field or the button; below 1024px it follows the sheet. */}
+          <p
+            data-hero-listing-expectation=""
+            className="mt-2 max-w-[62ch] text-pretty text-sm text-muted-foreground max-lg:order-2 max-lg:mt-5"
+          >
+            {HERO_LISTING_EXPECTATION}
           </p>
         </div>
 
         {ledger && sweep ? (
-          <div className="min-w-0 lg:pt-1.5">
+          <div className="min-w-0 max-lg:order-1 max-lg:mt-6 lg:pt-1.5">
             <HeroSheet ledger={ledger} sweep={sweep} walkthroughHref={`#${HOMEPAGE_WALKTHROUGH_ID}`} />
           </div>
         ) : null}
