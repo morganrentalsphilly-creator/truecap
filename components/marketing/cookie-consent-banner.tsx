@@ -101,24 +101,16 @@ export function CookieConsentBanner() {
     setDecision(readStoredConsent() ?? "pending");
   }, []);
 
-  // Focus the banner the moment it becomes visible. It's a role="dialog"
-  // appended at the END of the DOM (it renders after the footer), so without
-  // this a keyboard/screen-reader user had to tab through the entire page —
-  // footer legal links and all — before ever reaching Reject/Accept: the
-  // consent control was the LAST stop in tab order. Focusing the container
-  // (tabIndex={-1}) makes it the first stop instead, so the next Tab lands on
-  // Reject. preventScroll keeps the fixed bar from yanking the viewport.
-  useEffect(() => {
-    if (decision === "pending") {
-      bannerRef.current?.focus({ preventScroll: true });
-    }
-  }, [decision]);
-
-  // The banner auto-focuses itself on load, so it is the FIRST thing every
-  // keyboard visitor lands in on every page. That is deliberate (see above) and
-  // it makes the exit path load-bearing: on dismiss the banner unmounts and
-  // focus fell to <body>, so the next Tab restarted at "Skip to main content"
-  // while the viewport sat mid-page. Move focus somewhere meaningful instead.
+  // Reachable without taking focus (audit A17): the root layout renders the
+  // banner right after the skip link, so a keyboard visitor's first Tab is
+  // "Skip to main content" and the next ones reach Reject and Accept before
+  // the page. It used to sit after the footer and grab focus on load, which
+  // put its four controls ahead of the skip link.
+  //
+  // The exit path stays load-bearing: on dismiss the banner unmounts, and
+  // focus inside it would fall to <body>, so the next Tab restarted at "Skip
+  // to main content" while the viewport sat mid-page. Move focus somewhere
+  // meaningful instead.
   const restoreFocusAfterDismiss = () => {
     requestAnimationFrame(() => {
       const main = document.getElementById("main");

@@ -258,6 +258,13 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
+        {/* Cookie consent banner — pairs with the Consent Mode v2
+            defaults declared in <head>. Shows once on first visit, then
+            persists the choice to localStorage. Fixed to the bottom edge
+            wherever it sits in the DOM; it sits right after the skip link,
+            so the tab order is the skip link, then the consent controls,
+            then the page (audit A17), without the banner taking focus. */}
+        <CookieConsentBanner />
         {/* PostHog provider — initializes posthog-js with cookie-consent
             respect, identifies authenticated Supabase users, and fires
             $pageview on App Router transitions. The wizard set up env
@@ -279,12 +286,6 @@ export default function RootLayout({
           <ActionConfirmProvider>{children}</ActionConfirmProvider>
         </AgentProConfigProvider>
         <Toaster />
-        {/* Cookie consent banner — pairs with the Consent Mode v2
-            defaults declared in <head>. Shows once on first visit, then
-            persists the choice to localStorage. Mounted at the bottom
-            of <body> so it overlays everything but doesn't intercept
-            React hydration ordering. */}
-        <CookieConsentBanner />
         {/* Vercel Analytics — handles production-only logic internally,
             so we don't gate on NODE_ENV. The earlier gate was preventing
             events from being sent on Vercel deploys where NODE_ENV

@@ -4,7 +4,9 @@
  * Sticky bottom CTA bar for cold visitors on the homepage. Fires after
  * the user has scrolled past the hero (~600px) — at that point they've
  * read enough to be evaluating. Mobile-prominent (it's the main funnel
- * for paid traffic), shrunk to a compact pill on desktop.
+ * for paid traffic); a compact float from 640px; docked full width on the
+ * bottom edge from 1024px. It stands down while the hero, the plans or the
+ * close (each with its own action) is on screen.
  *
  * Dismissible. Hides on the /auth and /pricing routes via the parent
  * not rendering it.
@@ -28,7 +30,27 @@ export function StickyConversionBar() {
   // an active user to "try it". InvestCalcPage dispatches the event.
   const [analyzerEngaged, setAnalyzerEngaged] = useState(false);
   const [calculatorInView, setCalculatorInView] = useState(false);
+  // The hero, the plans and the close each carry their own primary action:
+  // the bar stands down while any of them is on screen, so it never sits
+  // over a plan card (audit A14).
+  const [actionsInView, setActionsInView] = useState(false);
   const cookieBannerOpen = useCookieBannerOpen();
+
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return;
+    const targets = document.querySelectorAll("[data-page-hero], [data-sticky-suppress]");
+    if (targets.length === 0) return;
+    const inView = new Set<Element>();
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) inView.add(entry.target);
+        else inView.delete(entry.target);
+      }
+      setActionsInView(inView.size > 0);
+    });
+    targets.forEach((target) => observer.observe(target));
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const onEngaged = () => setAnalyzerEngaged(true);
@@ -76,7 +98,8 @@ export function StickyConversionBar() {
     visible &&
     !cookieBannerOpen &&
     !analyzerEngaged &&
-    !calculatorInView;
+    !calculatorInView &&
+    !actionsInView;
 
   if (!showing) return null;
 
@@ -92,7 +115,10 @@ export function StickyConversionBar() {
     <div
       data-conversion-bar-root=""
       data-sticky-bottom-bar=""
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-float-up sm:inset-x-4 sm:bottom-4 sm:mx-auto sm:max-w-3xl sm:rounded-lg sm:border sm:px-4 sm:py-3 sm:shadow-md"
+      // From 1024px it docks: full width on the bottom edge with the
+      // bottom-bar float shadow, not a card floating over the content
+      // (audit A14). Between 640 and 1023px it stays the compact float.
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-float-up sm:inset-x-4 sm:bottom-4 sm:mx-auto sm:max-w-3xl sm:rounded-lg sm:border sm:px-4 sm:py-3 sm:shadow-md lg:inset-x-0 lg:bottom-0 lg:mx-0 lg:max-w-none lg:rounded-none lg:border-x-0 lg:border-b-0 lg:px-12 lg:shadow-float-up"
     >
       <div className="mx-auto flex max-w-5xl items-center gap-3">
         <div className="min-w-0 flex-1">
