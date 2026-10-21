@@ -116,6 +116,8 @@ import {
   describeMaoTarget,
 } from "@/lib/mao-targets";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
+import { meetsMaoTarget } from "@/lib/mao-target-evaluation";
+import { isOfferCeilingUnbounded } from "@/lib/offer-ceiling-display";
 import {
   decisionBasisBuyBoxName,
   normalizeOfferCeilingDecisionBasis,
@@ -1498,7 +1500,16 @@ export function AnalysisDashboard({
       {result && values ? (
         <ResultSummaryBar
           anchor={decisionEl}
-          ceiling={exactOfferCeiling?.presentation?.ceiling ?? null}
+          ceiling={
+            // A ceiling past 2x asking is shown as "no price limit" (audit
+            // A7), so the bar prints no figure for it either.
+            isOfferCeilingUnbounded(
+              exactOfferCeiling?.presentation?.ceiling,
+              Number(values.purchasePrice),
+            )
+              ? null
+              : (exactOfferCeiling?.presentation?.ceiling ?? null)
+          }
           asking={Number(values.purchasePrice)}
         />
       ) : null}
@@ -1760,7 +1771,12 @@ export function AnalysisDashboard({
                 </p>
               </div>
               <p className="mt-1.5 text-2xs text-muted-foreground">
-                A heuristic summary of the modeled numbers, 0–100.
+                {/* Beside a miss, an 86/100 under "Doesn't meet" needs its
+                    scope (audit A12): it scores the base economics at
+                    asking, not the fit to the targets. */}
+                {adoptedMaoTarget && !meetsMaoTarget(result, adoptedMaoTarget, values)
+                  ? "Base economics at asking, 0–100."
+                  : "A heuristic summary of the modeled numbers, 0–100."}
               </p>
             </div>
           ) : null}

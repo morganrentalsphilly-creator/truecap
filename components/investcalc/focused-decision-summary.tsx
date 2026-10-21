@@ -48,6 +48,11 @@ import type { InputConfidenceResult } from "@/lib/input-confidence";
 import { trackEvent } from "@/lib/analytics";
 import { scrollBehavior } from "@/lib/utils";
 import {
+  isOfferCeilingUnbounded,
+  NO_PRICE_LIMIT_HEADLINE,
+  NO_PRICE_LIMIT_HINT,
+} from "@/lib/offer-ceiling-display";
+import {
   METRIC_TONE_TEXT_CLASS,
   NO_DEBT_SERVICE_DSCR_LABEL,
   cashFlowTone,
@@ -601,7 +606,22 @@ export function FocusedDecisionSummary({
         " at the estimated price",
       )
     : sourceAwareDecisionLabel;
-  const viabilityLabels = exactBreakpointLabels.slice(0, 2);
+  // The price track states the ceiling, the gap and asking once (audit A12):
+  // the next step does not repeat them, and a "Price ≤ …" path is the
+  // ceiling itself. Mirrors exactCeilingValue below, for the miss branch.
+  const ceilingShownOnTrack =
+    targetAdopted &&
+    canShowPriceCeiling &&
+    Boolean(offerCeiling) &&
+    !isOfferCeilingLoading &&
+    !offerCeilingError &&
+    targetResolutionState !== "loading" &&
+    targetResolutionState !== "error" &&
+    Number(values.purchasePrice) > 0 &&
+    !isOfferCeilingUnbounded(offerCeiling?.ceiling, Number(values.purchasePrice));
+  const viabilityLabels = exactBreakpointLabels
+    .filter((label) => !(ceilingShownOnTrack && /^Price ≤ /.test(label)))
+    .slice(0, 2);
   const sensitivityLabels = drivers
     .map(
       (driver) =>
@@ -651,7 +671,13 @@ export function FocusedDecisionSummary({
               : "Review the binding target rule",
             reason:
               offerCeiling.listPriceGap > 0
-                ? `${bindingCriterionLabel ? `${bindingCriterionLabel} is what caps the price. ` : ""}The asking price is ${money(offerCeiling.listPriceGap)} above the Offer Ceiling under your targets. Record the investment decision yourself.`
+                ? `${bindingCriterionLabel ? "This rule caps the price. " : ""}${
+                    // The track's dimension labels carry the gap when it is
+                    // drawn; only without it does the sentence say so.
+                    ceilingShownOnTrack
+                      ? ""
+                      : `The asking price is ${money(offerCeiling.listPriceGap)} above the Offer Ceiling under your targets. `
+                  }Record the investment decision yourself.`
                 : `${bindingCriterionLabel ? `${bindingCriterionLabel} is the rule being missed. ` : ""}The current price misses at least one of your targets. Record the investment decision yourself.`,
           }
         : // Mirror the headline's own logic. This branch used to test only
@@ -897,7 +923,9 @@ export function FocusedDecisionSummary({
                 ceilingSemanticStatus === "no-finite-ceiling-in-supported-range"
                 ? "No finite ceiling found"
                 : offerCeiling
-                  ? money(offerCeiling.ceiling)
+                  ? isOfferCeilingUnbounded(offerCeiling.ceiling, Number(values.purchasePrice))
+                    ? NO_PRICE_LIMIT_HEADLINE
+                    : money(offerCeiling.ceiling)
                   : "Not reachable"
               : rangePreview?.downsideFeasible && rangePreview.lower != null
                 ? `${money(rangePreview.lower)}–${money(rangePreview.upper)}`
@@ -943,10 +971,15 @@ export function FocusedDecisionSummary({
           >
             {decisionLabel}
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {priceIsEstimated ? "Est. price" : "Asking"}{" "}
-            {money(Number(values.purchasePrice))}
-          </p>
+          {/* Said once (audit A12): when the price track is drawn, its
+              dimension labels carry asking; an estimated price keeps its
+              line, which says it is an estimate. */}
+          {exactCeilingValue != null && !priceIsEstimated ? null : (
+            <p className="mt-1 text-sm text-muted-foreground">
+              {priceIsEstimated ? "Est. price" : "Asking"}{" "}
+              {money(Number(values.purchasePrice))}
+            </p>
+          )}
         </div>
 
         {!targetAdopted ? (
@@ -968,12 +1001,23 @@ export function FocusedDecisionSummary({
           >
             {offerCeilingAnnouncement}
           </span>
-          <p className="text-sm font-semibold text-foreground">
-            {!targetAdopted
-              ? "Optional decision criteria"
-              : isScenarioActive
-                ? "Base Offer Ceiling"
-                : "Offer Ceiling"}
+          <p className="flex items-baseline justify-between gap-3 text-sm font-semibold text-foreground">
+            <span>
+              {!targetAdopted
+                ? "Optional decision criteria"
+                : isScenarioActive
+                  ? "Base Offer Ceiling"
+                  : "Offer Ceiling"}
+            </span>
+            {/* Below 640px the track has room for two dimension labels, so
+                the gap moves up beside the label it measures from. */}
+            {exactCeilingValue != null &&
+            Number(values.purchasePrice) > exactCeilingValue &&
+            !whatIfActive ? (
+              <span className="font-mono text-xs font-normal text-muted-foreground sm:hidden">
+                Gap {money(Number(values.purchasePrice) - exactCeilingValue)}
+              </span>
+            ) : null}
           </p>
           {exactCeilingValue != null ? (
             <p className="mt-1 font-display text-3xl text-foreground [overflow-wrap:anywhere] sm:text-key-sm lg:text-key">
@@ -1048,7 +1092,9 @@ export function FocusedDecisionSummary({
                 : "TrueCap Pro calculates the highest price that still clears the targets you choose — like the examples above — plus the binding constraint and a screening range."
               : offerCeilingHeadlineIsRange
                 ? "On the return criteria shown, the highest price that still meets them falls in this range."
-                : "The highest price that still meets the criteria shown."}
+                : offerCeilingHeadline === NO_PRICE_LIMIT_HEADLINE
+                  ? NO_PRICE_LIMIT_HINT
+                  : "The highest price that still meets the criteria shown."}
           </p>
           {/* Anonymous range-preview reveal (2026-09 positioning pass).
               Presentation only: the server already decided this request gets
@@ -1425,55 +1471,42 @@ export function FocusedDecisionSummary({
         </div>
       ) : null}
 
+      {/* One block on the cobalt rule (audit A12): the next step, the
+          fastest paths and what to verify, said once each. */}
       <div
         className="mt-3 border-l-2 border-primary py-0.5 pl-3"
         data-result-next-action=""
         data-reveal-step="5"
       >
-        <p className="text-xs font-medium text-foreground/75">
-          Best next step
-        </p>
+        <p className="text-xs font-medium text-foreground/75">Best next step</p>
         <p className="mt-0.5 text-sm font-semibold text-foreground">
           {resolvedNextAction?.label ?? "Verify the material assumptions"}
         </p>
         {resolvedNextAction?.reason ? (
-          <p className="mt-1 text-xs leading-relaxed text-foreground/80">
-            {resolvedNextAction.reason}
+          <p className="mt-1 text-xs leading-relaxed text-foreground/80">{resolvedNextAction.reason}</p>
+        ) : null}
+        {viabilityLabels.length > 0 ? (
+          <p className="mt-2 text-xs leading-relaxed text-foreground">
+            <span className="text-foreground/75">Fastest path to meet your targets:</span>{" "}
+            <span className="font-figure font-semibold">{viabilityLabels.join(" · ")}</span>
+          </p>
+        ) : null}
+        {!advocacyContractEnabled &&
+        nextVerification &&
+        !nextActionCoversVerification ? (
+          <p
+            className="mt-2 text-xs leading-relaxed text-foreground"
+            data-result-next-verification=""
+          >
+            <span className="font-semibold">Verify next:</span>{" "}
+            {nextVerification.verifyAction ?? `Verify ${nextVerification.label}`}.
+            Current source: {nextVerification.sourceLabel}.
           </p>
         ) : null}
       </div>
 
-      {!advocacyContractEnabled &&
-      nextVerification &&
-      !nextActionCoversVerification ? (
-        <p
-          className="mt-3 rounded-lg border border-border bg-muted/25 px-3 py-2 text-xs leading-relaxed text-foreground"
-          data-result-next-verification=""
-        >
-          <span className="font-extrabold">Verify next:</span>{" "}
-          {nextVerification.verifyAction ?? `Verify ${nextVerification.label}`}.
-          Current source: {nextVerification.sourceLabel}.
-        </p>
-      ) : null}
-
-      {viabilityLabels.length > 0 ? (
-        <div className="mt-4 border-l-2 border-primary py-0.5 pl-3">
-          <p className="text-xs font-medium text-muted-foreground">
-            Fastest paths to meet your targets
-          </p>
-          <ol className="mt-2 grid gap-1 text-sm font-semibold text-foreground sm:grid-cols-2">
-            {viabilityLabels.map((label, index) => (
-              <li key={label}>
-                <span className="text-muted-foreground">{index + 1}.</span>{" "}
-                {label}
-              </li>
-            ))}
-          </ol>
-        </div>
-      ) : null}
-
       {!advocacyContractEnabled && sensitivityLabels.length > 0 ? (
-        <div className="mt-4 border-l-2 border-caution py-0.5 pl-3">
+        <div className="mt-4 border-t border-border pt-3">
           <p className="text-xs font-medium text-muted-foreground">
             {targetAdopted
               ? "Two assumptions most likely to move the decision"
