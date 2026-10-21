@@ -279,8 +279,10 @@ test("pricing page holds together at 375, 768, and 1440 with annual as the defau
     expect(overflow.documentWidth, `overflow at ${width}`).toBeLessThanOrEqual(overflow.viewportWidth + 1);
     await expect(page.getByText(/Overpaying by 3% on a \$250,000 rental costs \$7,500/)).toBeVisible();
     // Annual is the default and the effective monthly figure is shown.
-    const annualToggle = page.getByRole("button", { name: /annual/i }).first();
-    await expect(annualToggle).toHaveAttribute("aria-pressed", "true");
+    // Re-anchored: the billing toggle is the shared CadenceToggle radiogroup
+    // (components/marketing/cadence-toggle.tsx), so its segments are radios.
+    const annualToggle = page.getByRole("radio", { name: /annual/i }).first();
+    await expect(annualToggle).toHaveAttribute("aria-checked", "true");
     await expect(page.getByText(/billed annually/i).first()).toBeVisible();
     await expect(page.getByRole("link", { name: /how this compares to DealCheck|DealCheck/i }).first()).toHaveAttribute(
       "href",

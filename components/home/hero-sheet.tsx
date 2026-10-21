@@ -1,8 +1,10 @@
 /**
  * The hero's sheet (DESIGN.md "The homepage", Blueprint): the sample deal on
- * a drafting sheet. A caption row, the schematic and the price track with
- * their readout (the PriceScrubber island), then the Offer Ceiling on the
- * highlight stroke with the gap in dollars and the link into the walkthrough.
+ * a drafting sheet. A caption row, then the PriceScrubber island: the
+ * schematic, the price track, the Offer Ceiling on the highlight stroke with
+ * the gap in dollars (this file's key figure, handed into the island so the
+ * answer sits above the readout and inside the first screen), the readout
+ * and the source chips; then the link into the walkthrough.
  *
  * SERVER COMPONENT. Every figure comes from the engine through
  * lib/sample-deal-ledger.ts and lib/sample-deal-sweep.ts; the sheet is set
@@ -100,25 +102,30 @@ export function HeroSheet({
           }}
           inputs={{ rent, rate, downPaymentPct, bedrooms: values.bedrooms ?? 0 }}
           sources={sources}
+          keyFigure={
+            <>
+              {/* The one total: the Offer Ceiling on the highlight stroke,
+                  under the price track and above the readout. */}
+              <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t-2 border-foreground pt-3">
+                <span className="font-display text-xl sm:text-2xl">Offer Ceiling</span>
+                <LedgerTotal draw className="highlight-stroke text-key-sm lg:text-key">
+                  {formatLedgerDollars(ledger.offerCeiling)}
+                </LedgerTotal>
+              </div>
+              {/* docs/voice.md: state the gap in dollars, never a vague "misses". */}
+              <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+                {ledger.belowAsking > 0
+                  ? `Asking price is ${formatLedgerDollars(ledger.belowAsking)} above the ceiling.`
+                  : "Asking price clears the sample targets."}
+                {ledger.bindingTarget ? ` Binding target: ${inSentence(ledger.bindingTarget)}.` : null}
+              </p>
+            </>
+          }
         />
       </div>
 
-      {/* The one total: the Offer Ceiling on the highlight stroke. */}
-      <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t-2 border-foreground pt-3">
-        <span className="font-display text-xl sm:text-2xl">Offer Ceiling</span>
-        <LedgerTotal draw className="highlight-stroke text-key-sm lg:text-key">
-          {formatLedgerDollars(ledger.offerCeiling)}
-        </LedgerTotal>
-      </div>
-      {/* docs/voice.md: state the gap in dollars, never a vague "misses". */}
-      <p className="mt-2 text-sm text-muted-foreground sm:text-base">
-        {ledger.belowAsking > 0
-          ? `Asking price is ${formatLedgerDollars(ledger.belowAsking)} above the ceiling.`
-          : "Asking price clears the sample targets."}
-        {ledger.bindingTarget ? ` Binding target: ${inSentence(ledger.bindingTarget)}.` : null}
-      </p>
       {walkthroughHref ? (
-        <p className="text-base">
+        <p className="mt-2 text-base">
           <Link href={walkthroughHref} className="tc-link inline-flex min-h-11 items-center">
             See where every figure comes from
           </Link>

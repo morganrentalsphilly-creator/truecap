@@ -23,6 +23,9 @@ import {
   ladderCellsForFeature,
   type FeatureKey,
 } from "@/lib/entitlements-catalog";
+import { agentProPlanAnswers, freePlanAnswers, proPlanAnswers } from "@/components/marketing/plan-answers";
+import { parsePriceLabel } from "@/components/marketing/cadence-toggle";
+import { ruleFitLabel } from "@/lib/decision-contract";
 // Section and plan-card links sit below the fold: they prefetch on hover or
 // focus, not on scroll (see the component's doc comment).
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
@@ -30,7 +33,7 @@ import { Check } from "lucide-react";
 import { AnalyzeCtaLink } from "@/components/marketing/analyze-cta-link";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { HOMEPAGE_WALKTHROUGH_ID } from "@/components/marketing/marketing-hero";
-import { CoBrandPreview } from "@/components/home/cobrand-preview";
+import { CoBrandPreview, type CoBrandSample } from "@/components/home/cobrand-preview";
 import { PlansToggle } from "@/components/home/plans-toggle";
 import { ReceiptFlow } from "@/components/home/receipt-flow";
 import { StoryObserver } from "@/components/home/story-observer";
@@ -38,7 +41,6 @@ import { DisclosureMark, LedgerVerdict } from "@/components/ledger/ledger-parts"
 import { formatDscr } from "@/lib/financial-presentation";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import type { ReactNode } from "react";
-import type { PlanCardAnswer } from "@/components/marketing/plan-card";
 import { ClientPdfCover } from "@/components/marketing/client-pdf-cover";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { Note } from "@/components/marketing/page-parts";
@@ -118,78 +120,90 @@ function SheetRow({ label, value, chip, tone }: { label: string; value: ReactNod
   );
 }
 
-function StoryFrames({ ledger }: { ledger: SampleDealLedger }) {
+/**
+ * The story's three frames. The pinned panel renders all three (CSS shows
+ * the active one); each step's inline frame, below 1024px and without
+ * JavaScript, renders `only` its own, so a phone sees one frame per step.
+ */
+function StoryFrames({ ledger, only }: { ledger: SampleDealLedger; only?: 1 | 2 | 3 }) {
   const values = SAMPLE_DEAL_FIXTURE.values;
   const frameClass = "rounded-lg bg-card p-4 shadow-lg sm:p-5";
   const caption = "flex justify-between gap-3 border-b border-border pb-2 font-mono text-xs text-muted-foreground";
   const shortfall = ledger.cashFlowShortfall;
+  const show = (n: 1 | 2 | 3) => only == null || only === n;
   return (
     <>
-      <div data-story-frame="1" className={frameClass}>
-        <p className={caption}>
-          <span>Step 1 · the listing</span>
-          <span>{ledger.title}</span>
-        </p>
-        <div className="mt-2">
-          <SheetRow label="Asking price" value={formatLedgerDollars(ledger.askingPrice)} chip="Your input" />
-          <SheetRow label="Rent" value={`${formatLedgerDollars(values.monthlyRent ?? 0)}/mo`} chip="HUD FMR" />
-          <SheetRow label="Mortgage rate" value={`${values.interestRate}%`} chip="FRED rate" />
-          <SheetRow label="Property tax" value={`${values.propertyTaxPct}% of price`} chip="Your input" tone="flag" />
-          <SheetRow label="Down payment" value={`${values.downPaymentPct}%`} chip="TrueCap default" />
-        </div>
-      </div>
-      <div data-story-frame="2" className={frameClass}>
-        <p className={caption}>
-          <span>Step 2 · the Buy Box</span>
-          <span>at asking</span>
-        </p>
-        <div className="mt-2">
-          <div className="flex items-baseline justify-between gap-3 border-b border-rule-soft py-2 text-sm">
-            <span>
-              Cash flow after reserves
-              <span className="block text-xs text-muted-foreground">Target ≥ {formatLedgerDollars(ledger.target.monthlyCashFlow ?? 0)}/mo · binding</span>
-            </span>
-            <span className="text-right">
-              <span className="font-figure font-semibold">{formatLedgerDollars(ledger.cashFlowMonthly.asking)}/mo</span>
-              <span className="block text-xs font-semibold text-highlight-text">
-                {shortfall != null ? `Misses by ${formatLedgerDollars(shortfall)}` : "Meets"}
-              </span>
-            </span>
-          </div>
-          <div className="flex items-baseline justify-between gap-3 py-2 text-sm">
-            <span>
-              DSCR
-              <span className="block text-xs text-muted-foreground">Target ≥ {ledger.target.dscr}</span>
-            </span>
-            <span className="text-right">
-              <span className="font-figure font-semibold">{formatDscr(ledger.dscr.asking, true)}</span>
-              <span className="block text-xs font-semibold text-positive">Meets</span>
-            </span>
-          </div>
-          <p className="mt-2 border-t border-border pt-2 text-sm">
-            Meets the Buy Box at asking:{" "}
-            <LedgerVerdict pass={ledger.meetsTargets.asking}>{ledger.meetsTargets.asking ? "Yes" : "No"}</LedgerVerdict>
+      {show(1) ? (
+        <div data-story-frame="1" className={frameClass}>
+          <p className={caption}>
+            <span>Step 1 · the listing</span>
+            <span>{ledger.title}</span>
           </p>
+          <div className="mt-2">
+            <SheetRow label="Asking price" value={formatLedgerDollars(ledger.askingPrice)} chip="Your input" />
+            <SheetRow label="Rent" value={`${formatLedgerDollars(values.monthlyRent ?? 0)}/mo`} chip="HUD FMR" />
+            <SheetRow label="Mortgage rate" value={`${values.interestRate}%`} chip="FRED rate" />
+            <SheetRow label="Property tax" value={`${values.propertyTaxPct}% of price`} chip="Your input" tone="flag" />
+            <SheetRow label="Down payment" value={`${values.downPaymentPct}%`} chip="TrueCap default" />
+          </div>
         </div>
-      </div>
-      <div data-story-frame="3" className={frameClass}>
-        <p className={caption}>
-          <span>Step 3 · the Offer Ceiling</span>
-          <span>send to client</span>
-        </p>
-        <div className="mt-3 flex items-baseline justify-between gap-3">
-          <span className="font-display text-lg">Offer Ceiling</span>
-          <span className="highlight-stroke font-display font-figure text-key-sm">{formatLedgerDollars(ledger.offerCeiling)}</span>
+      ) : null}
+      {show(2) ? (
+        <div data-story-frame="2" className={frameClass}>
+          <p className={caption}>
+            <span>Step 2 · the Buy Box</span>
+            <span>at asking</span>
+          </p>
+          <div className="mt-2">
+            <div className="flex items-baseline justify-between gap-3 border-b border-rule-soft py-2 text-sm">
+              <span>
+                Cash flow after reserves
+                <span className="block text-xs text-muted-foreground">Target ≥ {formatLedgerDollars(ledger.target.monthlyCashFlow ?? 0)}/mo · binding</span>
+              </span>
+              <span className="text-right">
+                <span className="font-figure font-semibold">{formatLedgerDollars(ledger.cashFlowMonthly.asking)}/mo</span>
+                <span className="block text-xs font-semibold text-highlight-text">
+                  {shortfall != null ? `Misses by ${formatLedgerDollars(shortfall)}` : "Meets"}
+                </span>
+              </span>
+            </div>
+            <div className="flex items-baseline justify-between gap-3 py-2 text-sm">
+              <span>
+                DSCR
+                <span className="block text-xs text-muted-foreground">Target ≥ {ledger.target.dscr}</span>
+              </span>
+              <span className="text-right">
+                <span className="font-figure font-semibold">{formatDscr(ledger.dscr.asking, true)}</span>
+                <span className="block text-xs font-semibold text-positive">Meets</span>
+              </span>
+            </div>
+            <p className="mt-2 border-t border-border pt-2 text-sm">
+              Meets the Buy Box at asking:{" "}
+              <LedgerVerdict pass={ledger.meetsTargets.asking}>{ledger.meetsTargets.asking ? "Yes" : "No"}</LedgerVerdict>
+            </p>
+          </div>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {ledger.belowAsking > 0 ? `${formatLedgerDollars(ledger.belowAsking)} below asking.` : "Asking clears the targets."}{" "}
-          Meets the Buy Box: <LedgerVerdict pass={ledger.meetsTargets.ceiling}>{ledger.meetsTargets.ceiling ? "Yes" : "No"}</LedgerVerdict>.
-        </p>
-        <div className="mt-3 border-t border-border pt-3 text-sm">
-          <p className="font-semibold">Send to client</p>
-          <p className="text-muted-foreground">A share link that opens without an account, and the decision memo, co-branded with Pro.</p>
+      ) : null}
+      {show(3) ? (
+        <div data-story-frame="3" className={frameClass}>
+          <p className={caption}>
+            <span>Step 3 · the Offer Ceiling</span>
+            <span>send to client</span>
+          </p>
+          <div className="mt-3 flex items-baseline justify-between gap-3">
+            <span className="font-display text-lg">Offer Ceiling</span>
+            <span className="highlight-stroke font-display font-figure text-key-sm">{formatLedgerDollars(ledger.offerCeiling)}</span>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {ledger.belowAsking > 0 ? `${formatLedgerDollars(ledger.belowAsking)} below asking.` : "Asking clears the targets."}{" "}
+            Meets the Buy Box: <LedgerVerdict pass={ledger.meetsTargets.ceiling}>{ledger.meetsTargets.ceiling ? "Yes" : "No"}</LedgerVerdict>.
+          </p>
+          <div className="mt-3 border-t border-border pt-3 text-sm">
+            <p className="font-semibold">Send to client</p>
+            <p className="text-muted-foreground">A share link that opens without an account, and the decision memo, co-branded with Pro.</p>
+          </div>
         </div>
-      </div>
+      ) : null}
     </>
   );
 }
@@ -220,9 +234,10 @@ export function HowTrueCapWorks() {
                       <p className="mt-2 max-w-[56ch] text-pretty text-base leading-relaxed text-muted-foreground">{step.body}</p>
                     </div>
                   </div>
-                  {/* The step's own sheet, in flow below 1024px and without JavaScript. */}
+                  {/* The step's own sheet (this step's frame only), in flow
+                      below 1024px and without JavaScript. */}
                   <div className="lg:hidden" data-story-inline-frame={step.n}>
-                    <StoryFrames ledger={ledger} />
+                    <StoryFrames ledger={ledger} only={step.n} />
                   </div>
                 </li>
               ))}
@@ -765,12 +780,49 @@ export function DataSourcesSection() {
 /**
  * The co-branding preview (OVERHAUL.md §6.4): the visitor types a name and
  * picks a color, and a mock share page and PDF cover recolor live
- * (components/home/cobrand-preview.tsx). What the client receives, exactly
- * (lib/client-receives.ts) and page 1 of the real PDF report (ClientPdfCover,
- * shared with /for-agents) sit behind one disclosure: the facts stay on the
- * page and the section keeps its weight.
+ * (components/home/cobrand-preview.tsx), composed from the real parts with
+ * the sample deal's own figures (the ledger, lib/sample-deal-ledger.ts, and
+ * the product's verdict label, lib/decision-contract.ts). What the client
+ * receives, exactly (lib/client-receives.ts) and page 1 of the real PDF
+ * report (ClientPdfCover, shared with /for-agents) sit behind one
+ * disclosure: the facts stay on the page and the section keeps its weight.
  */
 export function ClientReceivesSection() {
+  const ledger = buildSampleDealLedger();
+  const dscrTarget = ledger?.target.dscr ?? null;
+  const sample: CoBrandSample | null = ledger
+    ? {
+        title: ledger.title,
+        verdict: ruleFitLabel(ledger.meetsTargets.asking ? "meets_selected_rules" : "does_not_meet_selected_rules"),
+        offerCeiling: formatLedgerDollars(ledger.offerCeiling),
+        gap:
+          ledger.belowAsking > 0
+            ? `Asking price is ${formatLedgerDollars(ledger.belowAsking)} above the ceiling.`
+            : "Asking price clears the targets.",
+        chips: [
+          ...(ledger.target.monthlyCashFlow != null
+            ? [
+                {
+                  label: `Cash flow ≥ ${formatLedgerDollars(ledger.target.monthlyCashFlow)}/mo`,
+                  state:
+                    ledger.cashFlowShortfall != null ? `Misses by ${formatLedgerDollars(ledger.cashFlowShortfall)}` : "Meets",
+                  pass: ledger.cashFlowShortfall == null,
+                },
+              ]
+            : []),
+          ...(dscrTarget != null
+            ? [
+                {
+                  label: `DSCR ≥ ${dscrTarget}`,
+                  state: ledger.dscr.asking >= dscrTarget ? "Meets" : "Misses",
+                  pass: ledger.dscr.asking >= dscrTarget,
+                },
+              ]
+            : []),
+        ],
+        coverMeta: SAMPLE_DEAL_FIXTURE.display.subtitle,
+      }
+    : null;
   return (
     <Section id="what-your-client-receives" aria-labelledby="client-receives-heading">
       <div className="max-w-3xl">
@@ -781,7 +833,7 @@ export function ClientReceivesSection() {
           once in Settings and applies to every link and report.
         </p>
       </div>
-      <CoBrandPreview className="mt-8" />
+      {sample ? <CoBrandPreview sample={sample} className="mt-8" /> : null}
       <details className="tc-accordion group mt-10 border-t border-border">
         <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 py-3 text-base font-semibold [&::-webkit-details-marker]:hidden">
           What your client receives, exactly
@@ -846,29 +898,14 @@ const LADDER_ROWS: { label: string; cells: (boolean | string)[] }[] = (
   return { label, cells: [fullCells[0], fullCells[2]] };
 });
 
-/** A tier's cell from the catalog: the free column is index 0, Pro index 2. */
-function freeCell(key: FeatureKey) {
-  return ladderCellsForFeature(key)[0];
-}
-function proCell(key: FeatureKey) {
-  return ladderCellsForFeature(key)[2];
-}
-
 /**
  * The plans (DESIGN.md "Homepage structure" 5): Free, Pro and, where the
  * deployment sells it, Agent Pro as the page's only cards, then the Free/Pro
  * ladder under them. Amounts come from the Stripe display price with the
  * public catalog as the documented fallback (the /for-agents pattern), and
- * what each tier includes comes from lib/entitlements-catalog.
+ * what each tier includes comes from lib/entitlements-catalog through
+ * components/marketing/plan-answers.ts, the rows /pricing's cards read too.
  */
-
-/** A Stripe display label ("$29.99") as a number, for the cadence toggle; null when it is not a plain amount. */
-function parseAmount(label: string | undefined): number | null {
-  if (!label) return null;
-  const n = Number(label.replace(/[^0-9.]/g, ""));
-  return Number.isFinite(n) && n > 0 ? n : null;
-}
-
 export async function PdfProUpsell() {
   const { proOfferName } = getMarketingOfferConfig();
   const ladderHeaders = ["Free", proOfferName] as const;
@@ -888,37 +925,6 @@ export async function PdfProUpsell() {
     agentAnnual: agentAnnual?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD),
   };
 
-  const freeSaves = freeCell("save_deal");
-  const proCompares = proCell("compare_deals");
-  const freeAnswers: PlanCardAnswer[] = [
-    {
-      term: "Your first decision",
-      detail:
-        "Complete: cash flow, cap rate, CoC, DSCR, Buy Box fit, the Offer Ceiling, downside checks, and next steps.",
-    },
-    ...(freeCell("cash_flow") === true && freeCell("deal_score") === true
-      ? [{ term: "Every deal after that", detail: "Cash flow, cap rate, CoC, DSCR, and the 0–100 Deal score." }]
-      : []),
-    ...(typeof freeSaves === "string" ? [{ term: "Saved deals", detail: `${freeSaves}.` }] : []),
-  ];
-  const proAnswers: PlanCardAnswer[] = [
-    ...(proCell("buy_box") === true
-      ? [{ term: "Does it meet my criteria?", detail: "Buy Box fit on every deal." }]
-      : []),
-    ...(proCell("mao") === true
-      ? [{ term: "What is my Offer Ceiling?", detail: "The highest price that still meets your targets, on every deal." }]
-      : []),
-    ...(proCell("sensitivity") === true
-      ? [{ term: "What could make it fail?", detail: "Downside sensitivity checks." }]
-      : []),
-    {
-      term: "Can I defend the analysis?",
-      detail:
-        typeof proCompares === "string"
-          ? `The decision memo, and deals side by side (${proCompares.toLowerCase()}).`
-          : "The decision memo.",
-    },
-  ];
   // One filled action in the row: the free analysis, the page's primary CTA.
   // The paid plans link out with the secondary button (DESIGN.md "Buttons").
   const cta = buttonVariants({ size: "cta", className: "w-full" });
@@ -929,14 +935,14 @@ export async function PdfProUpsell() {
   });
   const prices = {
     pro: {
-      monthly: parseAmount(proMonthly?.amountLabel) ?? PUBLIC_PRO_MONTHLY_USD,
-      annual: parseAmount(proAnnual?.amountLabel) ?? PUBLIC_PRO_ANNUAL_USD,
+      monthly: parsePriceLabel(proMonthly?.amountLabel) ?? PUBLIC_PRO_MONTHLY_USD,
+      annual: parsePriceLabel(proAnnual?.amountLabel) ?? PUBLIC_PRO_ANNUAL_USD,
       monthlyLabel: price.proMonthly,
       annualLabel: price.proAnnual,
     },
     agentPro: {
-      monthly: parseAmount(agentMonthly?.amountLabel) ?? PUBLIC_AGENT_PRO_MONTHLY_USD,
-      annual: parseAmount(agentAnnual?.amountLabel) ?? PUBLIC_AGENT_PRO_ANNUAL_USD,
+      monthly: parsePriceLabel(agentMonthly?.amountLabel) ?? PUBLIC_AGENT_PRO_MONTHLY_USD,
+      annual: parsePriceLabel(agentAnnual?.amountLabel) ?? PUBLIC_AGENT_PRO_ANNUAL_USD,
       monthlyLabel: price.agentMonthly,
       annualLabel: price.agentAnnual,
     },
@@ -950,11 +956,11 @@ export async function PdfProUpsell() {
           {proOfferName} tells you what
           to offer.
         </SectionHeading>
+        {/* The Pro card lists its four questions; the paragraph says only
+            how the tiers divide the work. */}
         <p className="mt-3 max-w-[62ch] text-lg leading-relaxed text-muted-foreground">
           Free shows the economics before you spend more time on a property.{" "}
-          {proOfferName} answers four questions on every deal: does it meet
-          my criteria, what is my Offer Ceiling, what could make it fail, and
-          can I defend the analysis?
+          {proOfferName} answers four questions on every deal.
           {agentProConfigured
             ? " Agent Pro answers them per client, with a roster."
             : ""}
@@ -967,7 +973,7 @@ export async function PdfProUpsell() {
         freeCard={{
           audience: "See the economics before you spend more time on a property.",
           priceNote: "No account or card required.",
-          answers: freeAnswers,
+          answers: freePlanAnswers(),
           action: (
             <AnalyzeCtaLink analyticsSource="plans_free" className={cta}>
               Analyze a deal free
@@ -977,7 +983,7 @@ export async function PdfProUpsell() {
         proCard={{
           name: proOfferName,
           audience: "Know what to offer on every deal.",
-          answers: proAnswers,
+          answers: proPlanAnswers(),
           prices: prices.pro,
           action: (
             <IntentPrefetchLink href="/pricing" className={ctaSecondary}>
@@ -1000,24 +1006,10 @@ export async function PdfProUpsell() {
                 rootProps: { "data-homepage-agent-pro": "" },
                 audience: "Win investor clients.",
                 prices: prices.agentPro,
-                // Only what Agent Pro adds, with the caps the code enforces: 100
-                // clients (app/actions/agent-clients.ts MAX_CLIENTS) and 12 Buy
-                // Boxes per account (app/actions/user-buy-boxes.ts MAX_BUY_BOXES).
+                // Only what Agent Pro adds, with the caps the code enforces
+                // (plan-answers.ts: 100 clients, 12 Buy Boxes per account).
                 // Co-branding is Pro too, so it is the note, not a row.
-                answers: [
-                  {
-                    term: "Client Buy Boxes",
-                    detail: "Up to 100 clients on your roster; up to 12 Buy Boxes per account.",
-                  },
-                  {
-                    term: "Deals screened to their targets",
-                    detail: "Assign a deal to a client and it is screened against their Buy Box, not yours.",
-                  },
-                  {
-                    term: "Client-report share links",
-                    detail: "Open without an account; the address stays hidden unless you include it.",
-                  },
-                ],
+                answers: agentProPlanAnswers(),
                 note: (
                   <>
                     Plus everything in {proOfferName}, including co-branded share

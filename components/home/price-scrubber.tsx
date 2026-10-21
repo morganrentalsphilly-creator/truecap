@@ -11,6 +11,17 @@
  * under reduced motion it simply rests at the ceiling. The slider announces
  * its value when a drag ends, never per tick.
  *
+ * Order on the sheet: the schematic (its two out-flows move with the price
+ * and their arrows weigh more above the ceiling), the price track with its
+ * help line, then the caller's key figure (the Offer Ceiling on the highlight
+ * stroke, so the answer sits inside the first screen), then the readout the
+ * drag animates, then the source chips.
+ *
+ * The handle is a 20px diamond (the thumb element itself, rotated), so the
+ * site's 3px focus ring draws as a diamond around it; the slider root is the
+ * 44px-tall pointer target, since Radix takes the pointer on the root. On
+ * press the diamond fills cobalt and grows; on release it settles back.
+ *
  * No engine code here: the sweep is a list of points the server computed
  * with calculateAnalysis() in $1,000 steps (lib/sample-deal-sweep.ts).
  */
@@ -42,6 +53,7 @@ export function PriceScrubber({
   atAsking,
   inputs,
   sources,
+  keyFigure,
 }: {
   points: CompactSweepPoint[];
   asking: number;
@@ -51,6 +63,8 @@ export function PriceScrubber({
   atAsking: { cashFlow: string; dscr: string; coc: string; meets: boolean };
   inputs: { rent: string; rate: string; downPaymentPct: string; bedrooms: number };
   sources: ScrubberSource[];
+  /** The sheet's one total, set between the price track and the readout (server-rendered by the caller). */
+  keyFigure?: ReactNode;
 }) {
   const id = useId();
   const low = points[0][0];
@@ -70,13 +84,14 @@ export function PriceScrubber({
     for (const p of points) if (Math.abs(p[0] - price) < Math.abs(best[0] - price)) best = p;
     return best;
   }, [points, price]);
-  const [, cashFlow, dscr, coc, meetsFlag] = point;
+  const [, cashFlow, dscr, coc, meetsFlag, mortgage, operating] = point;
   const meets = meetsFlag === 1;
   const cfTarget = target.monthlyCashFlow;
   const cfMeets = cfTarget == null || cashFlow >= cfTarget;
   const dscrMeets = target.dscr == null || dscr >= target.dscr;
   const isCeiling = point[0] === ceiling;
   const isAsking = point[0] === asking;
+  const aboveCeiling = point[0] > ceiling;
 
   const valueText = (p: CompactSweepPoint) => {
     const miss = cfTarget != null && p[1] < cfTarget ? `misses the ${usd(cfTarget)} target by ${usd(cfTarget - p[1])}` : `meets the ${cfTarget != null ? usd(cfTarget) + " " : ""}target`;
@@ -148,16 +163,21 @@ export function PriceScrubber({
         rate={inputs.rate}
         downPaymentPct={inputs.downPaymentPct}
         bedrooms={inputs.bedrooms}
+        // The out-flows are the sweep's own figures; an older payload without
+        // them shows the flow with no figure rather than a typed number.
+        mortgageLabel={mortgage != null ? <AnimatedNumber value={mortgage} kind="usdPerMonth" /> : null}
+        operatingLabel={operating != null ? <AnimatedNumber value={operating} kind="usdPerMonth" /> : null}
         cashFlowLabel={
           <>
             <AnimatedNumber value={cashFlow} kind="usdPerMonth" /> at <AnimatedNumber value={point[0]} kind="usd" />
           </>
         }
+        aboveCeiling={aboveCeiling}
       />
 
       {/* The price track: a dimension line with the meets-range highlighted. */}
       <div
-        className="relative mx-2 mt-5 pt-7 pb-6"
+        className="relative mx-2 mt-5 pt-6 pb-5"
         onPointerDownCapture={() => {
           interacted.current = true;
         }}
@@ -184,7 +204,9 @@ export function PriceScrubber({
           <span className="mx-auto mt-0.5 block h-2 w-px bg-current" />
         </span>
         <SliderPrimitive.Root
-          className="relative flex h-8 w-full touch-none items-center select-none"
+          // 44px tall: Radix takes the pointer on the root, so the whole band
+          // around the track is the drag target, whatever the thumb's size.
+          className="relative flex h-11 w-full touch-none items-center select-none"
           min={low}
           max={high}
           step={1000}
@@ -225,7 +247,13 @@ export function PriceScrubber({
             aria-valuenow={point[0]}
             aria-valuetext={valueText(point)}
             aria-describedby={`${id}-help`}
-            className="block size-11 cursor-grab rounded-full border-0 bg-transparent transition-transform duration-[var(--duration-fast)] before:absolute before:top-1/2 before:left-1/2 before:size-5 before:-translate-x-1/2 before:-translate-y-1/2 before:rotate-45 before:border-2 before:border-primary before:bg-card before:shadow-xs before:content-[''] hover:scale-110 active:cursor-grabbing motion-reduce:transition-none"
+            // The thumb IS the diamond: a 20px square turned 45°, so the
+            // site's focus ring (globals.css, 3px cobalt at 2px) follows its
+            // edges instead of circling it. Hover grows it a little; press
+            // fills it cobalt and grows it more; release eases it back at the
+            // fast duration (the settle). Touch has no hover, so after a tap
+            // it settles to rest.
+            className="block size-5 rotate-45 cursor-grab rounded-none border-2 border-primary bg-card shadow-xs transition-[scale,background-color] duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:scale-110 active:scale-125 active:cursor-grabbing active:bg-primary motion-reduce:transition-none"
           />
         </SliderPrimitive.Root>
         <span className="absolute bottom-0 left-0 font-mono text-xs text-muted-foreground" aria-hidden>
@@ -249,6 +277,11 @@ export function PriceScrubber({
       <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {announcement}
       </p>
+
+      {/* The sheet's one total, before the readout: the answer is in the
+          first screen (1440×900 and 1095×760), and the rows that the drag
+          animates sit fully visible under it. */}
+      {keyFigure}
 
       {/* The readout: the engine's figures at asking beside the figures at
           the handle's price, with each target's chip. A table, so the

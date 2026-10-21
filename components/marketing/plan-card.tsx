@@ -82,7 +82,11 @@ export function PlanCard({
       id={id}
       className={cn(
         PLAN_CARD_ROWS,
-        "grid min-w-0 grid-rows-subgrid gap-y-0 rounded-lg border border-border bg-card p-5 shadow-sm transition-[transform,box-shadow,border-color] duration-[var(--duration-base)] ease-[var(--ease-out)] hover:-translate-y-0.5 hover:border-primary hover:shadow-md motion-reduce:transform-none sm:p-[22px]",
+        // The lift is the `translate` property (Tailwind v4's -translate-y
+        // writes `translate`, not `transform`), so the transition names it;
+        // the shadow eases with it. No colored edge on hover (DESIGN.md
+        // "Elevation": lift and the float shadow, no halo).
+        "grid min-w-0 grid-rows-subgrid gap-y-0 rounded-lg border border-border bg-card p-5 shadow-sm transition-[translate,box-shadow] duration-[var(--duration-base)] ease-[var(--ease-out)] hover:-translate-y-0.5 hover:shadow-md motion-reduce:translate-none sm:p-[22px]",
         className,
       )}
       {...props}

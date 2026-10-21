@@ -180,19 +180,24 @@ export function CookieConsentBanner() {
         handleReject();
       }}
       data-cookie-consent-banner=""
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-float-up outline-none sm:inset-x-auto sm:left-4 sm:bottom-4 sm:max-w-xl sm:rounded-lg sm:border sm:px-4 sm:pt-3 sm:pb-3 sm:shadow-md"
+      // Compact at every width (DESIGN.md "Chrome": the banner never covers
+      // the hero's first screen). Phones: a full-width bar on the bottom
+      // edge. From 640px: one row, no wider than 32rem, at the bottom RIGHT,
+      // clear of the hero's left column where the primary action, its
+      // helper line and "See the sample deal" sit at 1095 and 1440; what it
+      // can overlap there is the foot of the sheet, never an action.
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-float-up outline-none sm:inset-x-auto sm:right-4 sm:bottom-4 sm:max-w-lg sm:rounded-lg sm:border sm:px-4 sm:pt-3 sm:pb-3 sm:shadow-md"
     >
-      {/* Compact single row on phones: text + buttons side by side, so the
-          bar never reaches the hero's primary action in a 375×667 first
-          viewport. Full copy from sm:. The bar's height is set by the 44px
-          buttons, not by the text: the Privacy link keeps its 44px hit area
-          (min-h-11) and gives the height back with -my-3.5, so the line it
-          sits on stays one text line tall. Before that the link's line was
-          44px, which made the bar 80px on a phone (99px at 360px) and 88px
-          wherever the desktop sentence wrapped. Measured with the link
-          fixed: 61px from 360px to 414px, 69px from 768px, and the desktop
-          sentence on one line from 1080px. */}
-      <div className="mx-auto flex max-w-6xl flex-row items-center gap-1.5 sm:flex-wrap sm:gap-3">
+      {/* One row at every width: text + buttons side by side, so the bar
+          never reaches the hero's primary action in a 375×667 first viewport
+          and stays one line tall from 640px. The bar's height is set by the
+          44px buttons, not by the text: the Privacy link keeps its 44px hit
+          area (min-h-11) and gives the height back with -my-3.5, so the line
+          it sits on stays one text line tall. Before that the link's line
+          was 44px, which made the bar 80px on a phone (99px at 360px) and
+          88px wherever the desktop sentence wrapped; the desktop sentence
+          itself is now one short clause, so the row no longer wraps. */}
+      <div className="mx-auto flex max-w-6xl flex-row items-center gap-1.5 sm:gap-3">
         <div className="flex min-w-0 flex-1 items-center">
           <p className="text-sm leading-snug text-foreground">
             <strong className="font-semibold">We use cookies</strong>
@@ -207,17 +212,14 @@ export function CookieConsentBanner() {
               </Link>
             </span>
             <span className="hidden sm:inline">
-              {
-                " for analytics + paid-ad measurement. Reject and only essential session cookies are set. See our "
-              }
+              {" for analytics and ad measurement. Reject keeps only essential cookies. "}
               <Link
                 href="/privacy"
                 data-cookie-privacy-link=""
                 className="tc-link -my-3.5 inline-flex min-h-11 min-w-11 items-center font-medium"
               >
-                privacy policy
+                Privacy policy
               </Link>
-              .
             </span>
           </p>
         </div>

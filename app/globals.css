@@ -939,22 +939,23 @@ summary:has([class*="rotate-"])::marker {
   }
 }
 
-/* A leader in the receipt flow draws itself in as the section scrolls into
-   view. Drawn by default; the animation needs scroll timelines (Chrome and
-   Safari 26+) and no reduced-motion preference. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .tc-leader {
-      stroke-dashoffset: 0;
-      animation: tc-draw-leader linear both;
-      animation-timeline: view();
-      animation-range: entry 20% entry 90%;
-    }
-    @keyframes tc-draw-leader {
-      from { stroke-dasharray: 1; stroke-dashoffset: 1; }
-      to { stroke-dasharray: 1; stroke-dashoffset: 0; }
-    }
-  }
+/* The receipt flow's leaders (components/home/receipt-leaders.tsx) are drawn
+   once on entry by Motion, on every engine; here only the open state: while
+   a source's popover is open (Radix marks its trigger data-state="open"),
+   that source's leader goes solid and the result figure it feeds brightens.
+   Drawn and dashed is the default, so nothing here hides content. */
+[data-receipt-flow]:has([data-receipt-node="rent"] [data-state="open"]) [data-receipt-leader="rent"],
+[data-receipt-flow]:has([data-receipt-node="rate"] [data-state="open"]) [data-receipt-leader="rate"],
+[data-receipt-flow]:has([data-receipt-node="tax"] [data-state="open"]) [data-receipt-leader="tax"] {
+  stroke-dasharray: none;
+}
+[data-receipt-figure] {
+  transition: color var(--duration-fast) var(--ease-out);
+}
+[data-receipt-flow]:has([data-receipt-node="rent"] [data-state="open"]) [data-receipt-figure="cash-flow"],
+[data-receipt-flow]:has([data-receipt-node="tax"] [data-state="open"]) [data-receipt-figure="cash-flow"],
+[data-receipt-flow]:has([data-receipt-node="rate"] [data-state="open"]) [data-receipt-figure="dscr"] {
+  color: var(--navy-foreground);
 }
 
 /* A details row's content eases in as it opens (transform and opacity,

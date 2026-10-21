@@ -15,13 +15,28 @@
  * Pro card's action is the row's one filled button and Free and Agent Pro
  * take the outline button.
  *
- * Receives Stripe prices already resolved on the server, plus the
+ * The toggle, the rolling per-month figure and the note under it are the
+ * shared parts in components/marketing/cadence-toggle.tsx, and the cards'
+ * answer rows come from components/marketing/plan-answers.ts: the same
+ * parts and rows the homepage's plans use, so the two pages set a plan one
+ * way. Receives Stripe prices already resolved on the server, plus the
  * user's auth + paid status. Stays a single client component so all
  * toggle logic + checkout wiring lives in one place.
  */
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import {
+  annualCostsLess,
+  CadenceToggle,
+  PaidPlanPrice,
+  paidChargeToday,
+  paidPriceNote,
+  parsePriceLabel,
+  type Cadence,
+  type PaidPlanPrices,
+} from "@/components/marketing/cadence-toggle";
+import { agentProPlanAnswers, freePlanAnswers, proPlanAnswers } from "@/components/marketing/plan-answers";
 import { PlanCard } from "@/components/marketing/plan-card";
 import { PricingPlanButtons } from "@/components/marketing/pricing-plan-buttons";
 import { buttonVariants } from "@/components/ui/button";
@@ -33,7 +48,6 @@ import {
   PRODUCT_EVALUATION_DAYS,
   PRODUCT_EVALUATION_DEAL_LIMIT,
 } from "@/lib/product-access";
-import { featuresForTier } from "@/lib/entitlements-catalog";
 import {
   formatPublicUsd,
   PUBLIC_AGENT_PRO_ANNUAL_USD,
@@ -72,118 +86,27 @@ interface PricingTogglePlansProps {
   proOfferName?: string;
 }
 
-// Plan cards summarize the outcome; the single comparison table below carries
-// the exhaustive inventory. Keeping one detailed feature list prevents users
-// from reconciling the same twenty claims in three different places.
-const FREE_FEATURES = [
-  "Unlimited cash-flow analyses",
-  "Cap rate, CoC, DSCR, cash flow, Deal score, and screening context",
-  "Auto-fill starting assumptions from the address",
-  "Shareable read-only deal links",
-  // Honest caveat: Free can create five saves, while editing a saved deal is
-  // currently Pro-gated.
-  "Save up to 5 deals (editing saved deals is Pro)",
-] as const;
-
 /**
- * Agent-only entitlements the card already spells out, row by row, in
- * AGENT_PRO_WORKFLOW below. Their one-line catalog label would repeat those
- * rows (the card read "Client rosters — …" and then "A client roster, up to
- * 100 clients"), so the workflow stands in for it.
+ * A paid plan's two prices for the cadence toggle: Stripe's display amount
+ * when it resolved (it is shown only when it equals the catalog amount,
+ * lib/stripe/display-prices.ts), else the catalog pair (lib/public-pricing.ts).
+ * The toggle alone picks the branch: a Stripe read that fails this request
+ * falls back to the catalog amounts, never to the other billing period
+ * (Annual pressed over a "billed monthly" card, with a monthly sign-up link,
+ * contradicted /for-agents' annual price). Checkout stays gated on the
+ * resolved price through checkoutReady below.
  */
-const AGENT_PRO_WORKFLOW_FEATURES = new Set<string>(["client_buy_box"]);
-
-/**
- * Derived from the entitlement catalog — the labels of exactly the features
- * only agent_pro includes, less the ones the workflow rows explain. Hand-typing
- * this list is how pricing surfaces historically drifted from the gates (see
- * lib/entitlements-catalog.ts); a newly shipped agent-only feature still
- * appears here without an edit.
- */
-const AGENT_PRO_FEATURES: string[] = [
-  ...featuresForTier("agent_pro")
-    .filter((f) => !f.tiers.includes("pro"))
-    // Don't advertise an entitlement that is not marketable yet. This covers
-    // implementation readiness as well as legal/operational approval; the
-    // runtime entitlement can remain forward-compatible without being sold.
-    .filter((f) => f.shipped !== false)
-    .filter((f) => !AGENT_PRO_WORKFLOW_FEATURES.has(f.key))
-    .map((f) => f.label),
-];
-
-/**
- * What the one agent-only entitlement (client_buy_box) does in practice, so
- * the card lists the workflow, not one catalog label. Each line is a runtime
- * fact: rosters cap at 100 (app/actions/agent-clients.ts), a Buy Box can be
- * scoped to a client and a saved deal assigned to one (lib/buy-box.ts,
- * app/actions/saved-analyses.ts), the client-report share mode hides the
- * address unless included (share-link-button.tsx), and a miss names the
- * criterion (buy-box-verdict-card.tsx). Nothing here is a portal or a
- * white-label embed — those stay unshipped.
- */
-const AGENT_PRO_WORKFLOW = [
-  "A client roster, up to 100 clients",
-  "A Buy Box assigned to each client (up to 12 Buy Boxes per account)",
-  "Assign a saved deal to a client; it is screened against that client's targets",
-  "Client-report share links: no account needed, address hidden unless you include it",
-  "A miss names the criterion and the gap, so “this one doesn't fit” comes with a reason",
-] as const;
-
-/**
- * Pro sold as OUTCOMES, not a pile of upgrades.
- *
- * This was eighteen flat bullets, which made Pro read as a feature dump and
- * left the buyer to work out what it was FOR. Grouping them into the four jobs
- * Pro actually does makes the upgrade logic legible at a glance:
- *   Free = screen deals · Pro = underwrite + make offers ·
- *   Agent Pro = do that for clients.
- *
- * Every item still names a real, shipped capability — the grouping changed,
- * not the claims.
- */
-const PRO_OUTCOMES: { outcome: string; detail: string }[] = [
-  {
-    outcome: "Does the deal meet my criteria?",
-    detail: "Check every deal against your Buy Box — cash flow, CoC, DSCR, cap rate, and price targets — and against market comps.",
-  },
-  {
-    outcome: "What is my Offer Ceiling?",
-    detail: "Your walk-away price based on your targets: the highest price that still meets them under the assumptions shown.",
-  },
-  {
-    outcome: "What could make the deal fail?",
-    detail: "Stress rent, vacancy, rate, and price against the assumptions that drive the decision.",
-  },
-  {
-    outcome: "Can I defend the analysis?",
-    detail: "Save unlimited deals, compare up to four, and send a lender-facing report or co-branded share page with the assumptions and risks intact.",
-  },
-];
-
-/** The billing-period segments: 44px controls, 2px radius inside the 4px group. */
-const PERIOD_BUTTON =
-  "inline-flex min-h-11 items-center gap-1.5 rounded-sm border px-4 text-base font-semibold transition-colors";
-const PERIOD_BUTTON_PRESSED = "border-foreground bg-band text-foreground";
-const PERIOD_BUTTON_IDLE = "border-transparent text-muted-foreground hover:text-foreground";
-
-/**
- * What a year on the annual price saves over twelve monthly charges, to the
- * cent, from the plan's own two catalog prices (lib/public-pricing.ts). A
- * Stripe display price is shown only when it equals the catalog amount
- * (lib/stripe/display-prices.ts), so the catalog pair is the pair on the card.
- */
-function annualSavingUsd(monthlyUsd: number, annualUsd: number): number {
-  return Math.max(0, Math.round((monthlyUsd * 12 - annualUsd) * 100) / 100);
-}
-
-function annualSavingLabel(savingUsd: number): string | null {
-  return savingUsd > 0 ? `Save ${formatPublicUsd(savingUsd)}/yr` : null;
-}
-
-function parsePriceAmount(p: ResolvedPrice): number | null {
-  if (!p) return null;
-  const match = p.amountLabel.match(/[\d.]+/);
-  return match ? Number(match[0]) : null;
+function planPrices(
+  monthly: ResolvedPrice,
+  annual: ResolvedPrice,
+  catalog: { monthly: number; annual: number },
+): PaidPlanPrices {
+  return {
+    monthly: parsePriceLabel(monthly?.amountLabel) ?? catalog.monthly,
+    annual: parsePriceLabel(annual?.amountLabel) ?? catalog.annual,
+    monthlyLabel: monthly?.amountLabel ?? formatPublicUsd(catalog.monthly),
+    annualLabel: annual?.amountLabel ?? formatPublicUsd(catalog.annual),
+  };
 }
 
 export function PricingTogglePlans({
@@ -204,7 +127,7 @@ export function PricingTogglePlans({
   // visitor sees the lower monthly number AND the real charge. A current
   // monthly subscriber opens on Monthly so their exact card is visibly marked
   // Current; the toggle remains under their control.
-  const [period, setPeriod] = useState<"monthly" | "annual">(
+  const [period, setPeriod] = useState<Cadence>(
     activePaidPlanSlug?.endsWith("_monthly") ? "monthly" : "annual"
   );
 
@@ -222,126 +145,38 @@ export function PricingTogglePlans({
     trackEvent("pricing_viewed", properties);
   }, []);
 
-  const annualAmount = parsePriceAmount(annual) ?? PUBLIC_PRO_ANNUAL_USD;
-
-  // Derived display values
-  const annualMonthlyEquivalent =
-    annualAmount != null ? annualAmount / 12 : null;
-  // Agent Pro exists on the page only when its price resolved (env configured).
+  // Agent Pro exists on the page only when it is configured (env + plan rows).
   const showAgentPro = agentProConfigured;
-  // Each paid plan's own annual saving, stated in its card's price note after
-  // the annual charge. The Pro figure used to be rounded to the dollar and
-  // printed on the Pro card only, and the toggle carried a percentage worked
-  // out from the Pro prices, which was not Agent Pro's.
-  const proAnnualSavingUsd = annualSavingUsd(PUBLIC_PRO_MONTHLY_USD, PUBLIC_PRO_ANNUAL_USD);
-  const agentAnnualSavingUsd = annualSavingUsd(
-    PUBLIC_AGENT_PRO_MONTHLY_USD,
-    PUBLIC_AGENT_PRO_ANNUAL_USD,
-  );
-  const proAnnualSavingLabel = period === "annual" ? annualSavingLabel(proAnnualSavingUsd) : null;
-  const agentAnnualSavingLabel =
-    period === "annual" ? annualSavingLabel(agentAnnualSavingUsd) : null;
-  // The toggle's note carries no figure, so it is true beside every paid card
-  // on the page; it shows only while each of them costs less paid annually.
-  const annualCostsLess =
-    proAnnualSavingUsd > 0 && (!showAgentPro || agentAnnualSavingUsd > 0);
-  const agentMonthlyAmount = parsePriceAmount(agentMonthly);
-  const agentAnnualAmount = parsePriceAmount(agentAnnual);
-  const agentAnnualMonthlyEquivalent = agentAnnualAmount != null ? agentAnnualAmount / 12 : null;
-  // The toggle alone picks the branch, as for the Pro card: a Stripe read
-  // that fails this request falls back to the catalog amounts, never to the
-  // other billing period (Annual pressed over a "billed monthly" card, with a
-  // monthly sign-up link, contradicted /for-agents' annual price). Checkout
-  // stays gated on the resolved price through checkoutReady below.
-  const agentCard =
-    period === "monthly"
-      ? {
-          priceTop: agentMonthly?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD),
-          priceSub: agentMonthly ? `/${agentMonthly.period}` : "/month",
-          subline: "billed monthly",
-          slot: "agent_pro_monthly" as const,
-        }
-      : {
-          priceTop:
-            agentAnnualMonthlyEquivalent != null
-              ? `$${agentAnnualMonthlyEquivalent.toFixed(agentAnnualMonthlyEquivalent % 1 === 0 ? 0 : 2)}`
-              : formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD / 12),
-          priceSub: "/month",
-          subline: `billed annually (${agentAnnual?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD)})`,
-          slot: "agent_pro_annual" as const,
-        };
-  void agentMonthlyAmount;
-
-  const proCard =
-    period === "monthly"
-      ? {
-          priceTop: monthly?.amountLabel ?? formatPublicUsd(PUBLIC_PRO_MONTHLY_USD),
-          priceSub: `/${monthly?.period ?? "month"}`,
-          subline: "billed monthly",
-          slot: "pro_monthly" as const,
-        }
-      : {
-          priceTop:
-            annualMonthlyEquivalent != null
-              ? `$${annualMonthlyEquivalent.toFixed(
-                  annualMonthlyEquivalent % 1 === 0 ? 0 : 2
-                )}`
-              : formatPublicUsd(PUBLIC_PRO_ANNUAL_USD / 12),
-          priceSub: "/month",
-          subline:
-            `billed annually (${annual?.amountLabel ?? formatPublicUsd(PUBLIC_PRO_ANNUAL_USD)})`,
-          slot: "pro_annual" as const,
-        };
-  const proCardDecision = decidePricingCardCta(activePaidPlanSlug, proCard.slot);
-  const agentCardDecision = decidePricingCardCta(activePaidPlanSlug, agentCard.slot);
-  const proChargeToday =
-    period === "monthly"
-      ? formatPublicUsd(PUBLIC_PRO_MONTHLY_USD)
-      : formatPublicUsd(PUBLIC_PRO_ANNUAL_USD);
-  const agentChargeToday =
-    period === "monthly"
-      ? formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD)
-      : formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD);
+  const proPrices = planPrices(monthly, annual, {
+    monthly: PUBLIC_PRO_MONTHLY_USD,
+    annual: PUBLIC_PRO_ANNUAL_USD,
+  });
+  const agentPrices = planPrices(agentMonthly, agentAnnual, {
+    monthly: PUBLIC_AGENT_PRO_MONTHLY_USD,
+    annual: PUBLIC_AGENT_PRO_ANNUAL_USD,
+  });
+  const proSlot = period === "monthly" ? ("pro_monthly" as const) : ("pro_annual" as const);
+  const agentSlot = period === "monthly" ? ("agent_pro_monthly" as const) : ("agent_pro_annual" as const);
+  const proCardDecision = decidePricingCardCta(activePaidPlanSlug, proSlot);
+  const agentCardDecision = decidePricingCardCta(activePaidPlanSlug, agentSlot);
+  const proChargeToday = paidChargeToday(proPrices, period);
+  const agentChargeToday = paidChargeToday(agentPrices, period);
 
   return (
     <>
       {/* Monthly ↔ Annual toggle, above the row: it sets both paid cards'
-          prices. A 4px control whose pressed segment takes the band and an
-          ink edge, so the state does not rest on color alone. The plans open
-          on it: which plan does which job is the hero's stage chooser
+          prices. The shared radiogroup (the homepage's), whose "costs less"
+          note carries no figure, so it is true beside every paid card on the
+          page and shows only while each of them costs less paid annually.
+          Which plan does which job is the hero's stage chooser
           (app/pricing/page.tsx), with each plan's price, and each card's
           bold lead repeats its job. */}
-      <div
-        role="group"
+      <CadenceToggle
         aria-label="Billing period"
-        className="flex w-fit gap-1 rounded-md border border-border p-1"
-      >
-        <button
-          type="button"
-          aria-pressed={period === "monthly"}
-          onClick={() => setPeriod("monthly")}
-          className={cn(
-            PERIOD_BUTTON,
-            period === "monthly" ? PERIOD_BUTTON_PRESSED : PERIOD_BUTTON_IDLE,
-          )}
-        >
-          Monthly
-        </button>
-        <button
-          type="button"
-          aria-pressed={period === "annual"}
-          onClick={() => setPeriod("annual")}
-          className={cn(
-            PERIOD_BUTTON,
-            period === "annual" ? PERIOD_BUTTON_PRESSED : PERIOD_BUTTON_IDLE,
-          )}
-        >
-          Annual{" "}
-          {annualCostsLess ? (
-            <span className="text-sm font-semibold">costs less</span>
-          ) : null}
-        </button>
-      </div>
+        value={period}
+        onChange={setPeriod}
+        annualCostsLess={annualCostsLess(showAgentPro ? [proPrices, agentPrices] : [proPrices])}
+      />
 
       {/* The homepage plan row: default stretch, so PlanCard's flexible list
           lines the actions up across the row. Pro comes first on phones. */}
@@ -368,7 +203,7 @@ export function PricingTogglePlans({
           }
           price="$0"
           period="forever"
-          answers={FREE_FEATURES.map((feature) => ({ term: feature }))}
+          answers={freePlanAnswers()}
           action={
             <PricingPlanButtons
               slot="free"
@@ -400,13 +235,9 @@ export function PricingTogglePlans({
               stress-test the assumptions, and document the decision.
             </>
           }
-          price={proCard.priceTop}
-          period={proCard.priceSub}
-          priceNote={
-            proAnnualSavingLabel
-              ? `${proCard.subline} · ${proAnnualSavingLabel}`
-              : proCard.subline
-          }
+          price={<PaidPlanPrice prices={proPrices} cadence={period} />}
+          period="/mo"
+          priceNote={<span className="font-figure">{paidPriceNote(proPrices, period)}</span>}
           // A block span, so the caption's wrap is balanced ("Everything in
           // Free, plus / answers to four questions —") rather than leaving
           // the last words alone on a second line in a narrow card.
@@ -415,10 +246,7 @@ export function PricingTogglePlans({
               Everything in Free, plus answers to four questions —
             </span>
           }
-          answers={PRO_OUTCOMES.map((group) => ({
-            term: group.outcome,
-            detail: group.detail,
-          }))}
+          answers={proPlanAnswers()}
           action={
             billingRecoveryRequired ? (
               <Link
@@ -429,7 +257,7 @@ export function PricingTogglePlans({
               </Link>
             ) : (
               <PricingPlanButtons
-                slot={proCard.slot}
+                slot={proSlot}
                 isAuthenticated={isAuthenticated}
                 activePaidPlanSlug={activePaidPlanSlug}
                 priceLabel={proChargeToday}
@@ -441,11 +269,11 @@ export function PricingTogglePlans({
         />
 
         {/* AGENT PRO — rendered only when its Stripe price is configured.
-            Feature list derives from lib/entitlements-catalog (the SSOT):
-            "Everything in Pro" + exactly the agent_pro-only feature labels,
-            so this card can never promise something the tier doesn't gate.
-            The hero's stage chooser jumps to #agent-pro: from 768px the card
-            sits in the row under the toggle, so it takes the Pro card's
+            Its rows derive from lib/entitlements-catalog through
+            plan-answers.ts (the SSOT): "Everything in Pro" + what Agent Pro
+            adds, so this card can never promise something the tier doesn't
+            gate. The hero's stage chooser jumps to #agent-pro: from 768px the
+            card sits in the row under the toggle, so it takes the Pro card's
             scroll margin and lands with the toggle that sets its price in
             view. On phones it is the third card down and lands at its top. */}
         {showAgentPro ? (
@@ -462,15 +290,11 @@ export function PricingTogglePlans({
                 send the decision memo, co-branded, under your name.
               </>
             }
-            price={agentCard.priceTop}
-            period={agentCard.priceSub}
-            priceNote={
-              agentAnnualSavingLabel
-                ? `${agentCard.subline} · ${agentAnnualSavingLabel}`
-                : agentCard.subline
-            }
+            price={<PaidPlanPrice prices={agentPrices} cadence={period} />}
+            period="/mo"
+            priceNote={<span className="font-figure">{paidPriceNote(agentPrices, period)}</span>}
             answersCaption="What changes for your workflow"
-            answers={[...AGENT_PRO_FEATURES, ...AGENT_PRO_WORKFLOW].map((f) => ({ term: f }))}
+            answers={agentProPlanAnswers()}
             note={
               <>
                 Plus everything in {proOfferName}, including co-branded share
@@ -487,7 +311,7 @@ export function PricingTogglePlans({
                 </Link>
               ) : (
                 <PricingPlanButtons
-                  slot={agentCard.slot}
+                  slot={agentSlot}
                   isAuthenticated={isAuthenticated}
                   activePaidPlanSlug={activePaidPlanSlug}
                   priceLabel={agentChargeToday}

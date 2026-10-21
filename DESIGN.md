@@ -401,15 +401,29 @@ Every fix lands in one of these, never as a page-local override.
   bands so prices and actions line up across a row.
 - **Sheet** (Phase 3): the instrument panel the hero sets the sample deal in:
   white on the grid, 12px, the panel shadow, a Geist Mono caption row, the
-  schematic, the price track, the readout and the key figure on the
-  highlight stroke.
+  schematic, the price track, the key figure on the highlight stroke, then
+  the readout and the source chips (the order since the 2026-10 polish: the
+  answer sits inside the first screen at 1440×900 and 1095×760, and the rows
+  the drag animates stay fully visible under it). The schematic is HTML on a
+  grid, not text in a scaled SVG: rent in on the left in green, the house and
+  the arrows as fixed-size SVG, the mortgage and the operating costs out on
+  the right in red, each a live figure from the sweep, the cash flow landing
+  under the house on a dashed leader; the out-arrows take a heavier stroke
+  while the price sits above the ceiling. No label falls below 12px at any
+  width; below 640px it stacks: the rent row, the house, the two cost rows,
+  the landing figure.
 - **Price track** (Phase 3): a Radix Slider in the sheet's grammar, the rail a
   1.5px graphite line with end ticks, the meets-range a highlight fill, the
   handle a cobalt-bordered diamond, markers for asking and the ceiling as
-  dimension labels in Geist Mono. `aria-valuetext` reads the price, the cash
-  flow and the target; it announces on release, not per tick. The thumb sets
-  its own `aria-valuenow`, since Radix's comes from a collection index the
-  server does not have (Phase 8).
+  dimension labels in Geist Mono. The thumb is the 20px diamond itself (a
+  square turned 45°), so the 3px focus ring follows its edges instead of
+  circling it; it grows a little on hover, fills cobalt and grows more on
+  press, and settles back on release at the fast duration; the slider's root
+  is the 44px-tall pointer target (Radix takes the pointer there).
+  `aria-valuetext` reads the price, the cash flow and the target; it
+  announces on release, not per tick. The thumb sets its own
+  `aria-valuenow`, since Radix's comes from a collection index the server
+  does not have (Phase 8).
 - **Target chip:** 4px, label weight; meets on the positive wash in green,
   misses on the highlight wash in the highlight text color, with the gap in
   dollars ("Misses by $196"). Every state exists in the DOM; the active one is
@@ -445,20 +459,36 @@ Phase 5 restyles their internals and the pages follow.
 
 1. **Hero:** left, the pinned copy (H1, subhead, the investor cue above the
    form, the address form, the listing-link line, the risk line); right, the
-   sheet: the schematic (rent in on the left in green, mortgage and taxes out
-   on the right in red, cash flow landing under the house on a dashed
-   leader), the price track, the three-figure readout with target chips, the
-   Offer Ceiling on the highlight stroke. The sheet is server-rendered at the
-   ceiling state from a precomputed sweep (`calculateAnalysis` in $1,000
-   steps); the island hydrates onto it. On phones the schematic gets its own
-   layout and the readout stacks.
+   sheet: the schematic (rent in on the left in green, the mortgage and the
+   operating costs out on the right in red, both live with the price, cash
+   flow landing under the house on a dashed leader), the price track with its
+   help line, the Offer Ceiling on the highlight stroke with the gap in
+   dollars, then the three-figure readout with target chips and the source
+   chips. The sheet is server-rendered at the ceiling state from a precomputed
+   sweep (`calculateAnalysis` in $1,000 steps, with the two out-flows per
+   point); the island hydrates onto it. On phones the schematic stacks and
+   the readout stacks.
 2. **From listing to offer:** a pinned sheet that changes as three steps
-   scroll past; the full line items behind "See every line". Without
-   scripting (`@media (scripting: none)`) the three frames sit in flow under
-   one another, so the page is complete without JavaScript (Phase 8).
-3. **Every number has a receipt:** the sources as a drawn flow into the result.
-4. **Make it yours:** the live co-branding preview.
-5. **Plans:** the toggle, cards with hover depth, the comparison table.
+   scroll past; the full line items behind "See every line". Below 1024px
+   each step carries its own frame only (one frame per step), and without
+   scripting (`@media (scripting: none)`) the pinned panel's three frames sit
+   in flow under one another, so the page is complete without JavaScript
+   (Phase 8).
+3. **Every number has a receipt:** the sources as a drawn flow into the
+   result. Motion draws the three leaders once as they enter, on every
+   engine, from a drawn default (no-JavaScript and reduced motion see them
+   complete); while a source's popover is open its leader goes solid and the
+   result figure it feeds brightens.
+4. **Make it yours:** the live co-branding preview, composed from the memo's
+   real parts with the sample deal's figures (the "Shared by" band, the
+   verdict, the Offer Ceiling on the stroke with its label as a brand-colored
+   tag, the target chips; the cover's bar, first lines and "Prepared by").
+5. **Plans:** the one cadence toggle (`CadenceToggle`, shared with /pricing:
+   a radiogroup in graphite ink, "Annual costs less" with no figure), cards
+   with hover depth (the lift and the float shadow, no colored edge), their
+   rows from one catalog-derived source (`plan-answers.ts`, shared with
+   /pricing), the per-month price rolling through `AnimatedNumber`, the
+   comparison table.
 6. **Built by a rental investor, the eight questions, the close on a navy band
    with the address form.**
 
@@ -567,6 +597,25 @@ so marketing and app are one product.
   grammar, the brand colour's text picked by contrast (`textOnBrand`), the
   chrome hidden in print (`data-print-hide`).
 
+
+**Polish pass (2026-10-20, after the final checkpoint).** The result's
+price track is an instrument: the hero's diamond handle on the same 2px line,
+a what-if that previews the deal at $X through the engine (the card's cash
+flow and DSCR roll, the target chips flip) without writing the form; asking
+and the Offer Ceiling stay fixed as the dimension labels, "Back to asking"
+returns the handle, and the slider announces on release. The results region
+takes programmatic focus after a run but draws no ring (the verdict heading
+receives the focus when it is on the page); the reveal plays once per
+explicit run (`revealKey`), never on a live recompute or a what-if; the
+action row arrives with the next step, after the verdict and the ceiling.
+Below the decision card the report is on the system: radius by role, rows on
+lines instead of cards in cards, every figure in the figure face, sentence
+case, no arrows or sparkle icons, the expense bar in graphite steps with the
+net in green; the confidence block is one figure on a rule and the inputs as
+rows with a source tag and a "Mark verified" control; the Deal score is a
+figure on a rule; the sign-up prompt sits below the numbers it asks the
+visitor to trust; the two disclosures carry a hint of their contents.
+
 ## Token strategy
 
 - One stylesheet, `app/globals.css`: `:root` holds the palette, the radius
@@ -664,6 +713,26 @@ so marketing and app are one product.
   `docs/overhaul-2026-10/tools/static-shot.mjs` screenshots it). The
   `rehab-estimator-card` default rendering stays byte-pinned; the agent
   branding form's default colour is the brand's data, not a token.
+
+- 2026-10-20, polish pass (founder: "everything, result then homepage"): the
+  critique found the signature only in the demo, a cobalt ring around every
+  report, nine story cards on phones, and the old product under the decision
+  card. Decisions: the result's track drags as a what-if and never writes the
+  form (asking stays asking); the focus ring on the handle is the diamond
+  itself, since the site's 3px ring is `!important` in `@layer base` and no
+  utility moves it to a pseudo-element, so the thumb is the 20px diamond and
+  the 44px slider root is the pointer target; the plans' "2 months free" was
+  retired for the figure-free "Annual costs less" (the saving was not exactly
+  two months and "months free" is banned on /pricing); one `CadenceToggle`
+  and one catalog-backed answers source serve `/` and `/pricing`; the hero's
+  key figure moves above the readout so the answer is in the first screen;
+  the schematic is an HTML grid with live out-flows; the co-branding mock is
+  built from the real memo parts; the cookie banner is one row and sits
+  bottom-right from 640px; the sticky conversion bar stays suppressed while
+  the banner is pending (by design). Not done: the accumulating story sheet
+  (needs layout animations on server-rendered frames), the form flash before
+  hydration on `/analyze?sample=1` (a static page cannot know the query), the
+  app home's tiles (out of this pass by the founder's choice).
 
 ## Do and don't
 

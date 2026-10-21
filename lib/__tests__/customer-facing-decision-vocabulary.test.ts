@@ -74,6 +74,10 @@ describe("customer-facing decision vocabulary", () => {
     // 2026-10-03: the sign-up side panel no longer says "walk-away price"
     // (its headline now reads the same for an agent and an investor), so
     // that page left the list.
+    // 2026-10-20 (polish): the plan cards' rows are one catalog-derived
+    // source for /pricing and the homepage (plan-answers.ts), which explains
+    // the Offer Ceiling without "walk-away price", so that mention left the
+    // pricing cards; the Pro card's "Know what to offer" lead stays.
     expect(violations).toEqual([
       "app/about/page.tsx: walk-away price",
       "app/home-authed/page.tsx: Max Offer",
@@ -82,7 +86,6 @@ describe("customer-facing decision vocabulary", () => {
       "app/pricing/page.tsx: walk-away price",
       "components/marketing/landing-sections.tsx: what to offer",
       "components/marketing/pricing-toggle-plans.tsx: what to offer",
-      "components/marketing/pricing-toggle-plans.tsx: walk-away price",
     ]);
   });
 

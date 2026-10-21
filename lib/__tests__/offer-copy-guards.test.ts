@@ -96,12 +96,17 @@ describe("offer trust language", () => {
     expect(read("app/actions/user-buy-boxes.ts")).toContain("const MAX_BUY_BOXES = 12");
 
     const home = read("components/marketing/landing-sections.tsx");
-    // The homepage Agent Pro PlanCard: its data attribute to its action.
+    // The homepage Agent Pro PlanCard: its data attribute to its action, and
+    // its rows from the one source both plan rows read.
+    // Re-anchored: the rows live in components/marketing/plan-answers.ts
+    // (shared with /pricing's Agent Pro card), so the cap is checked there.
     const agentCardAt = home.indexOf("data-homepage-agent-pro");
     const agentActionAt = home.indexOf("See TrueCap for agents", agentCardAt);
     expect(agentCardAt).toBeGreaterThan(-1);
     expect(agentActionAt).toBeGreaterThan(agentCardAt);
-    const agentCard = home.slice(agentCardAt, agentActionAt);
+    expect(home.slice(agentCardAt, agentActionAt)).toContain("agentProPlanAnswers()");
+    const answers = read("components/marketing/plan-answers.ts");
+    const agentCard = answers.slice(answers.indexOf("export function agentProPlanAnswers"));
     expect(agentCard).toContain("up to 12 Buy Boxes per account");
     expect(agentCard).not.toContain("A Buy Box per client");
     // Every row sells something only Agent Pro has: co-branding is in Pro too.
