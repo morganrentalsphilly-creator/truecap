@@ -1,0 +1,207 @@
+
+> my-project@0.1.0 perf:homepage
+> node scripts/performance/homepage-transfer.mjs --base http://127.0.0.1:3100 --json
+
+{
+  "url": "http://127.0.0.1:3100/",
+  "measuredAt": "2026-10-21T01:56:30.562Z",
+  "rawHtmlBytes": 282435,
+  "firstPartyJavaScript": {
+    "requestCount": 40,
+    "transferBytes": 438620,
+    "resources": [
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1123-f55ab395859d7135.js",
+        "transferBytes": 15208
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1139-1abe0434c4676f84.js",
+        "transferBytes": 4316
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1652.bce336aaaf7df3c1.js",
+        "transferBytes": 4975
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1766-f0686d1bb3313edf.js",
+        "transferBytes": 5359
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1820-6bbab6abb2e86315.js",
+        "transferBytes": 4418
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/2128-b20e90fd7cbc118e.js",
+        "transferBytes": 6706
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/2429-010b1bfb30db5168.js",
+        "transferBytes": 6920
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/250-09fc63947542f33d.js",
+        "transferBytes": 6370
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/2503-0809c2e051532795.js",
+        "transferBytes": 4432
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/3035-556235e334f536dc.js",
+        "transferBytes": 13125
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/3794-4bc5594f4938d67d.js",
+        "transferBytes": 70079
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/4291-6d4debc6e5fdeb3b.js",
+        "transferBytes": 13387
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/4440-7aad41bd3cae503b.js",
+        "transferBytes": 8501
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/4527-49424ed3d9921153.js",
+        "transferBytes": 6170
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/4831-8d8d8c9f639934fb.js",
+        "transferBytes": 2889
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/4bd1b696-8a4ab4fdf0ae305a.js",
+        "transferBytes": 65065
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/5048.b96f4051dc1092ea.js",
+        "transferBytes": 72134
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/5371-58f073f98a5fdbd7.js",
+        "transferBytes": 6024
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/5d015edf.7c0ac124fa9565a7.js",
+        "transferBytes": 1945
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/6183-79893f817ca57da6.js",
+        "transferBytes": 5559
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/6320-12f83f856f77e9f6.js",
+        "transferBytes": 7486
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/6415-acef2bc1d09a83d3.js",
+        "transferBytes": 4806
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/740-4456253cdfe43c03.js",
+        "transferBytes": 7438
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/7979-994cff81f054c7bf.js",
+        "transferBytes": 8031
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/8409-29c10ce4e9f7dc38.js",
+        "transferBytes": 10517
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/8437-3cc78015a4392d59.js",
+        "transferBytes": 7226
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/8480-2e33a0e9a7b677fd.js",
+        "transferBytes": 8937
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/8500-01a63dafd809e317.js",
+        "transferBytes": 5285
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/9019-1c0cc85e56407b10.js",
+        "transferBytes": 8067
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/9662-d5c571f52c441665.js",
+        "transferBytes": 4651
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/error-588ae22692b62bc0.js",
+        "transferBytes": 3567
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/for-investors/page-067bfe0aad59c345.js",
+        "transferBytes": 6055
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/global-error-62e912623bfea8ef.js",
+        "transferBytes": 2888
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/layout-2c7c6db916d12cec.js",
+        "transferBytes": 9083
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/not-found-ac1f0032d588e417.js",
+        "transferBytes": 2472
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/page-ae5d32fbd8a1df67.js",
+        "transferBytes": 7295
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/privacy/page-0dfd34dc8597a9b6.js",
+        "transferBytes": 2417
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/main-app-6a4a29fb74eaaabe.js",
+        "transferBytes": 4564
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/webpack-8fd433014137d292.js",
+        "transferBytes": 4253
+      },
+      {
+        "url": "http://127.0.0.1:3100/_vercel/insights/script.js",
+        "transferBytes": 0
+      }
+    ]
+  },
+  "hydration": {
+    "analyzerReadyMs": 15290,
+    "waitAfterDomContentLoadedMs": 15005,
+    "mainThreadTaskDurationMs": 470,
+    "scriptDurationMs": 153,
+    "longTasks": {
+      "count": 0,
+      "totalDurationMs": 0
+    }
+  },
+  "coreWebVitals": {
+    "firstContentfulPaintMs": 164,
+    "lcpMs": 164,
+    "cls": 0.00007
+  },
+  "mobileRendering": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "horizontalOverflowPx": 0,
+    "heroAddressEntryVisible": true,
+    "heroAddressEntryAboveFold": true,
+    "heroAddressEntryAcceptsText": true
+  },
+  "accessibility": {
+    "seriousOrCriticalViolationCount": 0,
+    "violations": []
+  },
+  "calculatorReady": false,
+  "blockedExternalOrigins": [],
+  "budgetFailures": []
+}

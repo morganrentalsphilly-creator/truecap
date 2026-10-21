@@ -475,10 +475,10 @@ Phase 5 restyles their internals and the pages follow.
    in flow under one another, so the page is complete without JavaScript
    (Phase 8).
 3. **Every number has a receipt:** the sources as a drawn flow into the
-   result. Motion draws the three leaders once as they enter, on every
-   engine, from a drawn default (no-JavaScript and reduced motion see them
-   complete); while a source's popover is open its leader goes solid and the
-   result figure it feeds brightens.
+   result. A keyframe on each mask's stroke draws the three leaders once as
+   they enter, on every engine, from a drawn default (no-JavaScript and
+   reduced motion see them complete); while a source's popover is open its
+   leader goes solid and the result figure it feeds brightens.
 4. **Make it yours:** the live co-branding preview, composed from the memo's
    real parts with the sample deal's figures (the "Shared by" band, the
    verdict, the Offer Ceiling on the stroke with its label as a brand-colored
