@@ -66,9 +66,16 @@ import {
   formatPublicUsd,
   formatUsdWhole,
   PRICING_OUTCOME_EXAMPLE,
+  PUBLIC_AGENT_PRO_ANNUAL_USD,
   PUBLIC_AGENT_PRO_MONTHLY_USD,
+  PUBLIC_PRO_ANNUAL_USD,
   PUBLIC_PRO_MONTHLY_USD,
 } from "@/lib/public-pricing";
+import {
+  paidPriceDisplay,
+  planPrices,
+  type PaidPlanPrices,
+} from "@/components/marketing/cadence-pricing";
 import {
   formatPricingEvaluationAllowance,
   summarizePricingEvaluation,
@@ -351,8 +358,8 @@ async function PricingSignedOutAgentLine({ children }: { children: ReactNode }) 
 }
 
 /**
- * Which plan answers which job, with its monthly price: the hero's aside.
- * Each paid price is the same expression its card shows on Monthly (the
+ * Which plan answers which job, with its price: the hero's aside. Each paid
+ * price is the same expression its card shows at the toggle's cadence (the
  * Stripe display price, else the catalog fallback), so the two never
  * disagree; nothing here is typed by hand. The stages run in the cards'
  * order, Free · Pro · Agent Pro, so the list and the row under it read the
@@ -367,32 +374,54 @@ async function PricingSignedOutAgentLine({ children }: { children: ReactNode }) 
  */
 function PricingStages({
   monthly,
+  annual,
   agentMonthly,
+  agentAnnual,
   agentProConfigured,
   proOfferName,
 }: {
   monthly: StripeDisplayPrice;
+  annual: StripeDisplayPrice;
   agentMonthly: StripeDisplayPrice;
+  agentAnnual: StripeDisplayPrice;
   agentProConfigured: boolean;
   proOfferName: string;
 }) {
+  // Each paid row carries its price at both cadences, the cards' own
+  // expression (planPrices, paidPriceDisplay), and shows the one the cards'
+  // toggle is on (audit A13): annual by default, as the cards open
+  // (app/globals.css, data-plan-cadence).
+  const proPrices = planPrices(monthly, annual, {
+    monthly: PUBLIC_PRO_MONTHLY_USD,
+    annual: PUBLIC_PRO_ANNUAL_USD,
+  });
+  const agentPrices = planPrices(agentMonthly, agentAnnual, {
+    monthly: PUBLIC_AGENT_PRO_MONTHLY_USD,
+    annual: PUBLIC_AGENT_PRO_ANNUAL_USD,
+  });
+  const atCadence = (prices: PaidPlanPrices) =>
+    (["annual", "monthly"] as const).map((cadence) => {
+      const { value, period } = paidPriceDisplay(prices, cadence);
+      return {
+        cadence,
+        // Monthly keeps Stripe's own label, as the card's monthly figure does.
+        price: cadence === "monthly" ? prices.monthlyLabel : formatPublicUsd(value),
+        period,
+      };
+    });
   const stages = [
     {
       job: "Screen the deal",
       product: "Free",
       href: "#plans",
-      price: "$0",
-      period: "forever",
+      prices: [{ cadence: null, price: "$0", period: "forever" }],
       answer: "Understand the economics before spending more time on the property.",
     },
     {
       job: "Know what to offer",
       product: proOfferName,
       href: "#pro",
-      price: monthly?.amountLabel ?? formatPublicUsd(PUBLIC_PRO_MONTHLY_USD),
-      // The cards say "/mo" (the shared price presentation); the stage list
-      // says the same, whatever Stripe calls the interval.
-      period: "/mo",
+      prices: atCadence(proPrices),
       answer: "Find your Offer Ceiling and what could break the deal before you make the offer.",
     },
     ...(agentProConfigured
@@ -401,8 +430,7 @@ function PricingStages({
             job: "Win investor clients",
             product: "Agent Pro",
             href: "#agent-pro",
-            price: agentMonthly?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD),
-            period: "/mo",
+            prices: atCadence(agentPrices),
             answer: "Screen each listing against the client's own Buy Box and send the decision memo under your name.",
           },
         ]
@@ -441,10 +469,18 @@ function PricingStages({
                 {stage.product}
               </a>
             </p>
-            <p className="mt-0.5 flex items-baseline justify-end gap-x-1 whitespace-nowrap">
-              <LedgerFigure className="text-xl font-medium">{stage.price}</LedgerFigure>
-              <span className="text-sm text-muted-foreground">{stage.period}</span>
-            </p>
+            <div className="mt-0.5 text-right">
+              {stage.prices.map((row) => (
+                <p
+                  key={row.cadence ?? "free"}
+                  data-stage-cadence={row.cadence ?? undefined}
+                  className="flex items-baseline justify-end gap-x-1 whitespace-nowrap"
+                >
+                  <LedgerFigure className="text-xl font-medium">{row.price}</LedgerFigure>
+                  <span className="text-sm text-muted-foreground">{row.period}</span>
+                </p>
+              ))}
+            </div>
             <p className="col-span-2 mt-1 max-w-[64ch] text-pretty text-base leading-relaxed text-muted-foreground">
               {stage.answer}
             </p>
@@ -462,11 +498,13 @@ async function PricingStagesWithPrices({
   agentProConfigured: boolean;
   proOfferName: string;
 }) {
-  const { monthly, agentMonthly } = await loadPricingPrices();
+  const { monthly, annual, agentMonthly, agentAnnual } = await loadPricingPrices();
   return (
     <PricingStages
       monthly={monthly}
+      annual={annual}
       agentMonthly={agentMonthly}
+      agentAnnual={agentAnnual}
       agentProConfigured={agentProConfigured}
       proOfferName={proOfferName}
     />
@@ -655,7 +693,9 @@ export default function PricingPage() {
               fallback={
                 <PricingStages
                   monthly={null}
+                  annual={null}
                   agentMonthly={null}
+                  agentAnnual={null}
                   agentProConfigured={agentProConfigured}
                   proOfferName={proOfferName}
                 />

@@ -68,6 +68,7 @@ import {
   PUBLIC_AGENT_PRO_ANNUAL_USD,
   PUBLIC_AGENT_PRO_MONTHLY_USD,
 } from "@/lib/public-pricing";
+import { paidPriceDisplay, planPrices } from "@/components/marketing/cadence-pricing";
 import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
@@ -183,14 +184,21 @@ export default async function ForAgentsPage() {
     loadStripeDisplayPrice("agent_pro_monthly"),
     loadStripeDisplayPrice("agent_pro_annual"),
   ]);
-  // Mirror /pricing: the annual card shows the effective monthly figure with
-  // the real annual charge under it. Amounts come from the Stripe display
-  // price, with the public catalog as the documented fallback.
-  const annualAmount =
-    Number(agentAnnual?.amountLabel.replace(/[^\d.]/g, "")) || PUBLIC_AGENT_PRO_ANNUAL_USD;
-  const annualPerMonth = `$${(annualAmount / 12).toFixed(2)}`;
-  const annualLabel = agentAnnual?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD);
-  const monthlyLabel = agentMonthly?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD);
+  // Mirror /pricing's cards (paidPriceDisplay): on annual, the per-month
+  // equivalent only when it is whole dollars, else the annual charge itself
+  // ($590/year, never $49.17/month: founder decision 2026-10-21, audit A13).
+  // Amounts come from the Stripe display price, with the public catalog as
+  // the documented fallback.
+  const agentPrices = planPrices(agentMonthly, agentAnnual, {
+    monthly: PUBLIC_AGENT_PRO_MONTHLY_USD,
+    annual: PUBLIC_AGENT_PRO_ANNUAL_USD,
+  });
+  const annualDisplay = paidPriceDisplay(agentPrices, "annual");
+  const annualFigure =
+    annualDisplay.period === "/yr" ? agentPrices.annualLabel : formatPublicUsd(annualDisplay.value);
+  const annualPeriod = annualDisplay.period === "/yr" ? "/year" : "/month";
+  const annualLabel = agentPrices.annualLabel;
+  const monthlyLabel = agentPrices.monthlyLabel;
 
   // The waitlist branch is unreachable behind the redirect above; it stays so
   // a deployment that removes the redirect can never sell an unconfigured tier.
@@ -292,7 +300,8 @@ export default async function ForAgentsPage() {
               <dd>
                 {agentProConfigured ? (
                   <>
-                    <LedgerFigure className="font-medium">{annualPerMonth}</LedgerFigure>/month{" "}
+                    <LedgerFigure className="font-medium">{annualFigure}</LedgerFigure>
+                    {annualPeriod}{" "}
                     <span className="whitespace-nowrap">billed annually</span>
                   </>
                 ) : (
@@ -580,10 +589,12 @@ export default async function ForAgentsPage() {
                     <div className="border-b border-rule-soft py-3">
                       <dt className="text-base font-semibold">Billed annually</dt>
                       <dd className="mt-1">
-                        <LedgerFigure className={CLOSE_PRICE_FIGURE}>{annualPerMonth}</LedgerFigure>
-                        <span className="text-base text-muted-foreground">/month</span>
+                        <LedgerFigure className={CLOSE_PRICE_FIGURE}>{annualFigure}</LedgerFigure>
+                        <span className="text-base text-muted-foreground">{annualPeriod}</span>
                       </dd>
-                      <dd className="mt-1 text-sm text-muted-foreground">{annualLabel} charged once a year</dd>
+                      <dd className="mt-1 text-sm text-muted-foreground">
+                        {annualPeriod === "/year" ? "Charged once a year" : `${annualLabel} charged once a year`}
+                      </dd>
                     </div>
                     <div className="border-b border-rule-soft py-3">
                       <dt className="text-base font-semibold">Month to month</dt>

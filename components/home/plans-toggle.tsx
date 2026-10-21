@@ -13,7 +13,8 @@
 
 import { useState, type ReactNode } from "react";
 import {
-  annualCostsLess,
+  annualSavingFloorPct,
+  paidPriceDisplay,
   CadenceToggle,
   PaidPlanPrice,
   paidPriceNote,
@@ -40,7 +41,7 @@ export function PlansToggle({ freeCard, proCard, agentProCard }: PlansToggleProp
         className="mt-8"
         value={cadence}
         onChange={setCadence}
-        annualCostsLess={annualCostsLess(paidPlans)}
+        annualSavingPct={annualSavingFloorPct(paidPlans)}
       />
       <div className={cn("mt-6 grid gap-4 sm:gap-5", agentProCard ? "md:grid-cols-3" : "md:grid-cols-2 lg:max-w-4xl")}>
         <PlanCard
@@ -55,7 +56,7 @@ export function PlansToggle({ freeCard, proCard, agentProCard }: PlansToggleProp
           name={proCard.name}
           audience={proCard.audience}
           price={<PaidPlanPrice prices={proCard.prices} cadence={cadence} />}
-          period="/mo"
+          period={paidPriceDisplay(proCard.prices, cadence).period}
           priceNote={<span className="font-figure">{paidPriceNote(proCard.prices, cadence)}</span>}
           answers={proCard.answers}
           action={proCard.action}
@@ -67,7 +68,7 @@ export function PlansToggle({ freeCard, proCard, agentProCard }: PlansToggleProp
             name="Agent Pro"
             audience={agentProCard.audience}
             price={<PaidPlanPrice prices={agentProCard.prices} cadence={cadence} />}
-            period="/mo"
+            period={paidPriceDisplay(agentProCard.prices, cadence).period}
             priceNote={<span className="font-figure">{paidPriceNote(agentProCard.prices, cadence)}</span>}
             answers={agentProCard.answers}
             note={agentProCard.note}
