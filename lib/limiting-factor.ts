@@ -54,20 +54,31 @@ export function getLimitingFactor(
 
   // Mixed: name the first failing Solid gate, in classifyDeal's order.
   if (cf < 100) {
-    return `Cash flow $${Math.round(cf).toLocaleString()}/mo — below the $100/mo Solid bar.`;
+    return `Cash flow $${Math.round(cf).toLocaleString()}/mo — under $100/mo, a thin margin.`;
   }
   if (!isCashPurchase && dscr < 1.15) {
     return `DSCR ${dscr.toFixed(2)} — below the 1.25 lenders want.`;
   }
   if (isCashPurchase && cap < 5) {
-    return `Cap rate ${cap.toFixed(1)}% — below the 5% Solid bar.`;
+    return `Cap rate ${cap.toFixed(1)}% — under 5%, a thin return.`;
   }
   const cocBar = isCashPurchase ? 5 : 6;
   if (coc < cocBar) {
-    return `Cash-on-cash ${coc.toFixed(1)}% — below the ${cocBar}% Solid bar.`;
+    return `Cash-on-cash ${coc.toFixed(1)}% — under ${cocBar}%, a thin return.`;
   }
 
   // Shouldn't happen when the tier came from the same metrics, but the
   // contract is nullable — render nothing rather than a wrong reason.
   return null;
+}
+
+/**
+ * The preview's line naming the targets the full run will test (audit A15).
+ * The limiting factor above describes the deal's strength in the screen's
+ * own terms; this says which targets decide the run, in the run's words
+ * (describeMaoTarget: "break-even cash flow · DSCR ≥ 1.25"), so the preview
+ * never seems to apply a bar of its own.
+ */
+export function runTargetsLine(targetLabel: string): string {
+  return `The full run tests your targets: ${targetLabel}.`;
 }

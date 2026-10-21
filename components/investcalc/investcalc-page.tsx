@@ -10558,6 +10558,7 @@ export function InvestCalcPage({
                       showGenericLivePreview ? livePreviewMsg : ""
                     }
                     assumptionBasis={livePreviewAssumptionBasis}
+                    runTargets={visibleDecisionTarget ? decisionTargetLabel : null}
                     inputChange={
                       lookupRateChange
                         ? {

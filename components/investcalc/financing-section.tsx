@@ -120,7 +120,7 @@ export function FinancingSection({
               step="0.01"
               min={0}
               max={100}
-              placeholder="20"
+              placeholder="e.g. 20"
               aria-invalid={!!errors.downPaymentPct}
               aria-describedby={
                 errors.downPaymentPct ? "downPaymentPct-error" : undefined
@@ -166,7 +166,7 @@ export function FinancingSection({
               step="0.01"
               min={0}
               max={30}
-              placeholder="6.75"
+              placeholder="e.g. 6.75"
               aria-invalid={!!errors.interestRate}
               aria-describedby={
                 errors.interestRate ? "interestRate-error" : undefined
@@ -204,7 +204,7 @@ export function FinancingSection({
             step={1}
             min={1}
             max={50}
-            placeholder="30"
+            placeholder="e.g. 30"
             aria-invalid={!!errors.loanTermYears}
             aria-describedby={
               errors.loanTermYears ? "loanTermYears-error" : undefined
@@ -285,7 +285,7 @@ export function FinancingSection({
                       min={0}
                       max={100_000_000}
                       step={100}
-                      placeholder="9,000"
+                      placeholder="e.g. 9,000"
                       aria-invalid={!!errors.closingCostsFixed}
                       aria-describedby={
                         errors.closingCostsFixed
@@ -312,7 +312,7 @@ export function FinancingSection({
                   step="0.01"
                   min={0}
                   max={100}
-                  placeholder="3"
+                  placeholder="e.g. 3"
                   aria-invalid={!!errors.closingCostsPct}
                   aria-describedby={
                     errors.closingCostsPct
@@ -369,7 +369,7 @@ export function FinancingSection({
                   step={100}
                   min={0}
                   max={1_000_000}
-                  placeholder="0"
+                  placeholder="e.g. 0"
                   aria-invalid={!!errors.rehabBudget}
                   aria-describedby={
                     errors.rehabBudget ? "rehabBudget-error" : undefined
@@ -422,7 +422,7 @@ export function FinancingSection({
                   step="0.05"
                   min={0}
                   max={5}
-                  placeholder={usesOwnerOccupantPmiDefault ? "0.8" : "0"}
+                  placeholder={usesOwnerOccupantPmiDefault ? "e.g. 0.8" : "e.g. 0"}
                   aria-invalid={!!errors.pmiAnnualRatePct}
                   aria-describedby={
                     errors.pmiAnnualRatePct

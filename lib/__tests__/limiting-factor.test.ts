@@ -48,10 +48,10 @@ describe("getLimitingFactor", () => {
   it("names thin cash flow first (classifyDeal's weighting order)", () => {
     // Cash flow AND DSCR both below their Solid gates → cash flow wins.
     expect(getLimitingFactor("Mixed", financed({ netCashFlow: 62, dscr: 1.08 }))).toBe(
-      "Cash flow $62/mo — below the $100/mo Solid bar."
+      "Cash flow $62/mo — under $100/mo, a thin margin."
     );
     expect(getLimitingFactor("Mixed", cash({ netCashFlow: 40 }))).toBe(
-      "Cash flow $40/mo — below the $100/mo Solid bar."
+      "Cash flow $40/mo — under $100/mo, a thin margin."
     );
   });
 
@@ -63,16 +63,16 @@ describe("getLimitingFactor", () => {
 
   it("names low cash-on-cash with the tier-correct bar (6% financed, 5% cash)", () => {
     expect(getLimitingFactor("Mixed", financed({ cocReturn: 4.1 }))).toBe(
-      "Cash-on-cash 4.1% — below the 6% Solid bar."
+      "Cash-on-cash 4.1% — under 6%, a thin return."
     );
     expect(getLimitingFactor("Mixed", cash({ cocReturn: 4.1 }))).toBe(
-      "Cash-on-cash 4.1% — below the 5% Solid bar."
+      "Cash-on-cash 4.1% — under 5%, a thin return."
     );
   });
 
   it("names a low cap rate on cash purchases (no DSCR gate)", () => {
     expect(getLimitingFactor("Mixed", cash({ capRate: 4.2 }))).toBe(
-      "Cap rate 4.2% — below the 5% Solid bar."
+      "Cap rate 4.2% — under 5%, a thin return."
     );
   });
 

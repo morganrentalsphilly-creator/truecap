@@ -172,7 +172,8 @@ interface AddressAutocompleteProps {
 export function AddressAutocomplete({
   form,
   hasError,
-  placeholder = "123 Main Street, Austin, TX 78701",
+  // A format hint, not an address that reads as an answer (audit A10).
+  placeholder = "Street, city, state and ZIP",
   inputClassName,
   inputId,
   ariaLabel,
