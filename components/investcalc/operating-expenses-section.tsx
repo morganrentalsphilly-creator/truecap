@@ -328,12 +328,12 @@ export function OperatingExpensesSection({
           {showAdvanced ? (
             <>
               <ChevronUp className="mr-1.5 size-3.5" />
-              Hide Advanced Options
+              Hide advanced options
             </>
           ) : (
             <>
               <ChevronDown className="mr-1.5 size-3.5" />
-              Show Advanced Options
+              Show advanced options
             </>
           )}
         </Button>
@@ -426,7 +426,7 @@ export function OperatingExpensesSection({
             </span>
           </div>
           <p className="text-xs text-muted-foreground">
-            Click &quot;Show Advanced Options&quot; to review any value. Type 0
+            Click &quot;Show advanced options&quot; to review any value. Type 0
             explicitly when you intend to exclude a material expense.
           </p>
         </div>
@@ -1067,7 +1067,7 @@ export function OperatingExpensesSection({
           )}
         >
           <p className="mb-3 text-xs font-medium text-muted-foreground">
-            Advanced Options (Optional)
+            Advanced options (optional)
           </p>
           <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2 xl:grid-cols-4">
             {TAX_STRATEGY_RELEASED ? (

@@ -210,6 +210,6 @@ export function canChoosePropertyTypeForStrategy(
 export function getUnderwritingHeading(key: string | null | undefined): string {
   const strategy = getStrategyByKey(key);
   return strategy
-    ? `${strategy.label} Underwriting`
-    : "Underwrite a Buy & Hold Rental";
+    ? `${strategy.label} underwriting`
+    : "Underwrite a buy & hold rental";
 }

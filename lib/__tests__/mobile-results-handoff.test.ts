@@ -58,13 +58,14 @@ describe("completed-result focus handoff", () => {
     expect(resultRegion).toContain('role="region"');
     expect(resultRegion).toContain("tabIndex={-1}");
     expect(resultRegion).toContain('aria-label="Analysis results"');
-    expect(calculator).toContain(
-      "scroll-mt-20 focus-visible:outline-none focus-visible:ring-[3px]",
-    );
+    // The region takes programmatic focus but draws no ring (polish pass,
+    // 2026-10-20: the 3px frame around the whole report was the first thing
+    // a visitor saw); the verdict heading receives the focus when present.
+    expect(calculator).toContain("scroll-mt-20 outline-none");
     expect(calculator).toContain("sm:scroll-mt-24");
     expect(handoff).toContain("requestAnimationFrame");
     expect(handoff).toContain("resultsSection.scrollIntoView");
-    expect(handoff).toContain("resultsSection.focus({ preventScroll: true })");
+    expect(handoff).toContain("focusAnalysisResults();");
   });
 
   it("consumes the pending handoff before scheduling focus", () => {

@@ -20,13 +20,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShareLinkButton } from "@/components/investcalc/share-link-button";
 import { GlossaryTip } from "@/components/investcalc/glossary-tip";
-import { PriceTrack } from "@/components/investcalc/price-track";
+import { ResultPriceScrubber } from "@/components/investcalc/result-price-scrubber";
 import { AnimatedNumber } from "@/components/motion/animated-number";
 import {
   isTrueCapSyntheticSampleAddress,
   SAMPLE_DEAL_DISPLAY,
 } from "@/lib/sample-deal";
-import type { AnalysisResult } from "@/lib/calc-analysis";
+import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
 import { computeAssumptionImpact } from "@/lib/assumption-impact";
 import type { MaoTarget } from "@/lib/max-allowable-offer";
 import { meetsMaoTarget } from "@/lib/mao-target-evaluation";
@@ -241,11 +241,14 @@ function FirstYearSnapshot({
   result,
   isScenarioActive,
   target,
+  whatIfPrice = null,
 }: {
   result: AnalysisResult;
   isScenarioActive: boolean;
   /** Adopted targets, when any. Absent on the no-criteria path. */
   target?: MaoTarget;
+  /** The price the track's handle previews; the figures below are at it. */
+  whatIfPrice?: number | null;
 }) {
   const cashFlowTarget = target?.monthlyCashFlow;
   const dscrTarget = target?.dscr;
@@ -265,6 +268,11 @@ function FirstYearSnapshot({
       role="group"
       aria-label="First-year investment snapshot"
     >
+      {whatIfPrice != null ? (
+        <p className="col-span-full text-xs font-medium text-highlight-text" data-what-if-caption="">
+          At {money(whatIfPrice)}, what if
+        </p>
+      ) : null}
       <div className="border-t border-border pt-2" data-reveal-step="4">
         <p className="text-xs font-medium text-muted-foreground">
           <GlossaryTip term="cashFlow" className="!no-underline">
@@ -391,6 +399,35 @@ export function FocusedDecisionSummary({
   const targetEditorId = useId();
   const targetEditorRef = useRef<HTMLDivElement | null>(null);
   const [tuneOpen, setTuneOpen] = useState(false);
+
+  // The track's what-if: the handle previews the deal at $X through the
+  // engine (pure client math, the function the run used) without changing
+  // the price being analyzed. Keyed to the result it was made for, so a new
+  // run or an edit retires it without an effect.
+  const [whatIf, setWhatIf] = useState<{ forResult: AnalysisResult; price: number } | null>(null);
+  const whatIfActive = whatIf != null && whatIf.forResult === result;
+  const whatIfPrice = whatIfActive ? whatIf.price : null;
+  const previewResult = useMemo<AnalysisResult>(() => {
+    if (whatIfPrice == null) return result;
+    try {
+      return calculateAnalysis({ ...values, purchasePrice: whatIfPrice });
+    } catch {
+      return result;
+    }
+  }, [whatIfPrice, values, result]);
+  const whatIfValueText = (p: number) => {
+    const r = p === whatIfPrice ? previewResult : p === Number(values.purchasePrice) ? result : null;
+    const cf = r ? Math.round(r.netCashFlow) : null;
+    if (cf == null) return money(p);
+    const t = target?.monthlyCashFlow;
+    const fit =
+      typeof t === "number"
+        ? cf >= t
+          ? `, meets the ${money(t)} target`
+          : `, misses the ${money(t)} target by ${money(t - cf)}`
+        : "";
+    return `${money(p)}: cash flow ${money(cf)} a month${fit}`;
+  };
   const [targetInputs, setTargetInputs] = useState<TargetInputs>(() =>
     inputsFromTarget(target),
   );
@@ -961,9 +998,14 @@ export function FocusedDecisionSummary({
           )}
           {exactCeilingValue != null && Number(values.purchasePrice) > 0 ? (
             <div className="mt-2" data-reveal-step="3">
-              <PriceTrack
+              <ResultPriceScrubber
                 asking={Number(values.purchasePrice)}
                 ceiling={exactCeilingValue}
+                price={whatIfActive ? whatIfPrice! : Number(values.purchasePrice)}
+                onPriceChange={(p) =>
+                  setWhatIf(p === Number(values.purchasePrice) ? null : { forResult: result, price: p })
+                }
+                valueText={whatIfValueText}
                 compact
               />
             </div>
@@ -1148,14 +1190,18 @@ export function FocusedDecisionSummary({
 
         {targetAdopted ? (
           <FirstYearSnapshot
-            result={result}
+            result={previewResult}
             isScenarioActive={isScenarioActive}
             target={target}
+            whatIfPrice={whatIfActive ? whatIfPrice : null}
           />
         ) : null}
       </div>
 
       <div
+        // The actions arrive with the next step, after the verdict and the
+        // ceiling: chrome never precedes the answer (polish critique).
+        data-reveal-step="5"
         className="mt-4 grid grid-cols-1 gap-2 border-t border-border pt-4 min-[320px]:grid-cols-2 sm:flex sm:flex-wrap"
         role="group"
         aria-label="Primary result actions"
@@ -1235,8 +1281,8 @@ export function FocusedDecisionSummary({
           )}
           {isSaving ? "Saving…" : isSaved ? "Saved" : "Save"}
           {isSaveLocked ? (
-            <span className="ml-0.5 rounded-sm bg-[var(--brand-orange)] px-1.5 py-0.5 font-mono text-2xs font-semibold text-white">
-              PRO
+            <span className="ml-1 rounded-sm border border-border px-1.5 py-0.5 font-mono text-2xs text-muted-foreground">
+              Pro
             </span>
           ) : null}
         </Button>
@@ -1446,7 +1492,10 @@ export function FocusedDecisionSummary({
 
       <details className="group tc-accordion mt-2 border-t border-border py-1">
         <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
-          Decision context and key numbers
+          <span>Decision context and key numbers</span>
+          <span className="ml-auto hidden text-right text-2xs font-normal text-muted-foreground sm:inline">
+            Cap rate, cash-on-cash, the inputs used
+          </span>
           <ChevronDown
             className="size-4 transition-transform group-open:rotate-180"
             aria-hidden
@@ -1521,11 +1570,11 @@ export function FocusedDecisionSummary({
               {advocacyContractEnabled ? (
                 <>
                   {targetAdopted ? (
-                    <p className="mt-1 break-all text-3xs text-muted-foreground">
+                    <p className="mt-1 break-all text-2xs text-muted-foreground">
                       {targetVersionLabel}
                     </p>
                   ) : null}
-                  <p className="mt-1 break-all text-3xs text-muted-foreground">
+                  <p className="mt-1 break-all text-2xs text-muted-foreground">
                     Exact targets are shown with the Offer Ceiling.
                   </p>
                 </>
@@ -1540,7 +1589,7 @@ export function FocusedDecisionSummary({
                   {readinessLabel}
                 </p>
                 {nextVerification ? (
-                  <p className="mt-1 text-3xs text-muted-foreground">
+                  <p className="mt-1 text-2xs text-muted-foreground">
                     Weakest material input: {nextVerification.label}
                   </p>
                 ) : null}
@@ -1554,7 +1603,7 @@ export function FocusedDecisionSummary({
                 <p className="mt-1 text-sm font-extrabold text-foreground">
                   {userDecisionLabel(userDecision)}
                 </p>
-                <p className="mt-1 text-3xs text-muted-foreground">
+                <p className="mt-1 text-2xs text-muted-foreground">
                   Recorded by you, never inferred
                 </p>
               </div>
@@ -1590,7 +1639,10 @@ export function FocusedDecisionSummary({
 
       <details className="group tc-accordion mt-2 border-t border-border py-1">
         <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
-          More actions
+          <span>More actions</span>
+          <span className="ml-auto hidden text-right text-2xs font-normal text-muted-foreground sm:inline">
+            Export PDF, share, compare, new analysis
+          </span>
           <ChevronDown
             className="size-4 transition-transform group-open:rotate-180"
             aria-hidden
