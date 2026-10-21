@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { fallbackFaceCss, fallbackStack } from "../../scripts/font-fallback-metrics.mjs";
 
 const ROOT = process.cwd();
 const read = (p: string) => readFileSync(join(ROOT, p), "utf8");
@@ -37,11 +38,36 @@ describe("the type faces and their fallback", () => {
     expect(layout).toContain("${hankenGrotesk.variable} ${geistMono.variable} font-sans");
   });
 
-  it("needs no hand-written @font-face: the fallback is next/font's own", () => {
-    expect(css.match(/@font-face\s*\{/g) ?? []).toHaveLength(0);
+  it("adds only the generated fallback faces, after next/font's own, in every family declaration", () => {
+    // Re-anchored 2026-10-21 (audit A4): next/font's fallback is local("Arial"),
+    // which Android and most Linux machines lack, so the live swap shifted
+    // (CLS 0.181 on /). The intent stays (no line moves at the swap); the
+    // anchor moves to the faces scripts/font-fallback-metrics.mjs computes
+    // with next/font's own formula, for Roboto and Liberation Sans.
+    const generated = fallbackFaceCss();
+    expect(css).toContain(generated);
+    expect(css.match(/@font-face\s*\{/g) ?? []).toHaveLength(generated.match(/@font-face\s*\{/g)?.length ?? -1);
     expect(css).not.toMatch(/Archivo|DM Mono/);
-    expect(css).toContain('--font-sans: var(--font-sans-variable), "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;');
-    expect(css).toContain('--font-mono: var(--font-mono-variable), "Geist Mono", ui-monospace, monospace;');
+    expect(css).toContain(
+      `--font-sans: var(--font-sans-variable), ${fallbackStack("Hanken Grotesk")}, "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;`,
+    );
+    expect(css).toContain(
+      `--font-mono: var(--font-mono-variable), ${fallbackStack("Geist Mono")}, "Geist Mono", ui-monospace, monospace;`,
+    );
+    // The two dashboard scopes re-declare the family; both carry the stack.
+    expect(
+      css.split(`font-family: var(--font-sans-variable), ${fallbackStack("Hanken Grotesk")}, "Hanken Grotesk"`).length - 1,
+    ).toBe(2);
+  });
+
+  it("matches next/font's own numbers for the Arial-compatible face", () => {
+    // Liberation Sans shares Arial's metrics, so its overrides must equal the
+    // ones next/font generates against Arial (seen in the built CSS).
+    const generated = fallbackFaceCss();
+    const liberation = generated.match(/"Hanken Grotesk Fallback Liberation Sans";[\s\S]*?\}/)?.[0] ?? "";
+    expect(liberation).toContain("ascent-override: 99.07%;");
+    expect(liberation).toContain("descent-override: 30.02%;");
+    expect(liberation).toContain("size-adjust: 100.94%;");
   });
 
   it("sets the display voice at 750 and tight, in the text face, with no width axis", () => {

@@ -7,6 +7,46 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Fallback faces for systems without Arial (audit A4). next/font's own
+   fallback is `local("Arial")`, which Android and most Linux machines do not
+   have, so the swap to Hanken Grotesk moved every line there (live CLS 0.181
+   on /, 0.230 on /pricing). These faces are next/font's calculation against
+   Roboto and Liberation Sans, written by scripts/font-fallback-metrics.mjs:
+   change them only by rerunning it. They are listed after next/font's
+   fallback in the three family declarations below. */
+@font-face {
+  font-family: "Hanken Grotesk Fallback Roboto";
+  src: local("Roboto"), local("Roboto Regular"), local("Roboto-Regular");
+  ascent-override: 98.85%;
+  descent-override: 29.95%;
+  line-gap-override: 0.00%;
+  size-adjust: 101.16%;
+}
+@font-face {
+  font-family: "Hanken Grotesk Fallback Liberation Sans";
+  src: local("Liberation Sans"), local("LiberationSans"), local("LiberationSans-Regular");
+  ascent-override: 99.07%;
+  descent-override: 30.02%;
+  line-gap-override: 0.00%;
+  size-adjust: 100.94%;
+}
+@font-face {
+  font-family: "Geist Mono Fallback Roboto";
+  src: local("Roboto"), local("Roboto Regular"), local("Roboto-Regular");
+  ascent-override: 74.51%;
+  descent-override: 21.87%;
+  line-gap-override: 0.00%;
+  size-adjust: 134.88%;
+}
+@font-face {
+  font-family: "Geist Mono Fallback Liberation Sans";
+  src: local("Liberation Sans"), local("LiberationSans"), local("LiberationSans-Regular");
+  ascent-override: 74.67%;
+  descent-override: 21.92%;
+  line-gap-override: 0.00%;
+  size-adjust: 134.59%;
+}
+
 :root {
   /* Blueprint (DESIGN.md, decided 2026-10-20): a drafting sheet, graphite
      ink, one cobalt for actions, one warm highlight for the Offer Ceiling.
@@ -143,8 +183,8 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-sans-variable), "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-mono-variable), "Geist Mono", ui-monospace, monospace;
+  --font-sans: var(--font-sans-variable), "Hanken Grotesk Fallback Roboto", "Hanken Grotesk Fallback Liberation Sans", "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-variable), "Geist Mono Fallback Roboto", "Geist Mono Fallback Liberation Sans", "Geist Mono", ui-monospace, monospace;
   /* The two dense product-UI steps below text-xs (DESIGN.md "Label-xs" /
      "Label-2xs"). Defined as font-size only so they behave exactly like the
      arbitrary text-[11px] / text-[10px] values they replace (line-height
@@ -780,7 +820,7 @@ textarea,
   --gradient-sidebar: var(--navy);
   --shadow-glow: var(--shadow-md);
   --shadow-gold-glow: var(--shadow-md);
-  font-family: var(--font-sans-variable), "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans-variable), "Hanken Grotesk Fallback Roboto", "Hanken Grotesk Fallback Liberation Sans", "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* The mobile nav sheet is portaled OUTSIDE .dashboard-shell and can't
@@ -791,7 +831,7 @@ textarea,
   --sidebar-accent-foreground: oklch(0.995 0 0);
   --sidebar-border: var(--navy-line);
   --gradient-sidebar: var(--navy);
-  font-family: var(--font-sans-variable), "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans-variable), "Hanken Grotesk Fallback Roboto", "Hanken Grotesk Fallback Liberation Sans", "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* The dashboard is intentionally ALWAYS LIGHT. It shares the marketing /
