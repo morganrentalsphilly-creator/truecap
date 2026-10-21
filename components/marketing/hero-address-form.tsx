@@ -60,8 +60,8 @@ export const HERO_LISTING_ERROR = `Paste a supported ${SUPPORTED_LISTING_SITES_T
  * (app/actions/property-comps.ts, `proOnly`), which is what the analyzer's
  * own listing-link help says (components/investcalc/listing-link-input.tsx).
  */
-export const HERO_LISTING_EXPECTATION =
-  "A listing link fills in the address. You enter the asking price and bedrooms; a paid Pro or Agent Pro plan can fill them.";
+import { HERO_LISTING_EXPECTATION } from "@/lib/hero-copy";
+export { HERO_LISTING_EXPECTATION };
 
 /**
  * Carries a listing link rather than a street address. The link may sit
@@ -123,12 +123,16 @@ export function HeroAddressForm({
   placement = "hero",
   tone = "light",
   className,
+  listingExpectation = true,
 }: {
   /** "hero": the first screen. "close": the same form at the page's end. */
   placement?: "hero" | "close";
   /** "dark": the form sits on the navy band (the close), so the button is white on cobalt text. */
   tone?: "light" | "dark";
   className?: string;
+  /** The listing-paste helper line under the form. The homepage hero sets it
+   * itself (false here), so on phones it can follow the sheet (audit A8). */
+  listingExpectation?: boolean;
 } = {}) {
   const isHero = placement === "hero";
   const errorId = isHero ? "hero-address-error" : "close-address-error";
@@ -333,7 +337,7 @@ export function HeroAddressForm({
       {/* Sits AFTER the form, so it cannot move the field or the button: at
           375x629 the button ends a few pixels above the cookie bar. Hero
           only; the closing form is reached after the page has explained it. */}
-      {isHero ? (
+      {isHero && listingExpectation ? (
         <p
           data-hero-listing-expectation=""
           className="mt-2 max-w-[62ch] text-pretty text-sm text-muted-foreground"
@@ -342,27 +346,27 @@ export function HeroAddressForm({
         </p>
       ) : null}
 
-      {/* The one secondary action: a real link, so it works before hydration
-          and for crawlers. /analyze?sample=1 runs the sample deal in the
-          analyzer (the memo page stays linked from the footer). */}
+      {/* The one secondary action, as the secondary button under the
+          primary (audit A8, benchmarks P3: the sample weighs the same as the
+          primary). A real link, so it works before hydration and for
+          crawlers; /analyze?sample=1 opens with the sample's decision
+          already painted (components/investcalc/sample-decision-prerender.tsx). */}
       {isHero ? (
-        <p className="mt-1 text-base">
-          <Link
-            href="/analyze?sample=1"
-            prefetch={false}
-            data-hero-sample-link=""
-            onClick={() => {
-              // sample_viewed is sent once, by /analyze?sample=1 when it
-              // mounts (analyze-entry-from-query.tsx). Sending it here too
-              // counted every hero click twice.
-              trackEvent("hero_sample_clicked");
-              trackEvent("hero_sample_opened");
-            }}
-            className="tc-link inline-flex min-h-11 items-center font-medium"
-          >
-            See the sample deal
-          </Link>
-        </p>
+        <Link
+          href="/analyze?sample=1"
+          prefetch={false}
+          data-hero-sample-link=""
+          onClick={() => {
+            // sample_viewed is sent once, by /analyze?sample=1 when it
+            // mounts (analyze-entry-from-query.tsx). Sending it here too
+            // counted every hero click twice.
+            trackEvent("hero_sample_clicked");
+            trackEvent("hero_sample_opened");
+          }}
+          className="mt-2.5 inline-flex h-12 min-h-11 w-full items-center justify-center rounded-md border border-muted-foreground bg-transparent px-5 text-base font-semibold text-foreground transition-colors duration-[var(--duration-fast)] hover:bg-band sm:w-auto"
+        >
+          See the sample deal
+        </Link>
       ) : null}
     </div>
   );

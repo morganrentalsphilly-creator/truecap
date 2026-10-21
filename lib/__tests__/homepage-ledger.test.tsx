@@ -112,13 +112,20 @@ describe("the homepage hero", () => {
     expect(source).not.toMatch(/\$\d{2,3},\d{3}/);
   });
 
-  it("gives phones the verdict in one line, read from the same ledger", () => {
-    // Below 640px the ledger starts under the fold, so the hero states its
-    // verdict before the form; every value comes from the engine's ledger.
-    expect(source).toContain('data-hero-verdict-line=""');
-    expect(source).toContain("ledger.meetsTargets.asking");
-    expect(source).toContain("formatLedgerDollars(ledger.offerCeiling)");
-    expect(source).toMatch(/data-hero-verdict-line=""[^>]*sm:hidden/);
+  it("gives phones the sheet's answer directly under the form, read from the same ledger", () => {
+    // Re-anchored 2026-10-21 (audit A8, founder decision): the phone-only
+    // verdict sentence before the form is gone; below 1024px the column
+    // joins the hero grid and the sheet (its price track and Offer Ceiling
+    // first) follows the form. Every value still comes from the engine's ledger.
+    expect(source).not.toContain("data-hero-verdict-line");
+    expect(source).toContain('className="contents lg:block lg:min-w-0"');
+    expect(source).toMatch(/max-lg:order-1[^"]*"[^>]*>\s*<HeroSheet/);
+    const sheet = read("components/home/hero-sheet.tsx");
+    expect(sheet).toContain("ledger.meetsTargets.asking");
+    expect(sheet).toContain("formatLedgerDollars(ledger.offerCeiling)");
+    const scrubber = read("components/home/price-scrubber.tsx");
+    expect(scrubber).toContain('className="flex min-w-0 flex-col lg:block"');
+    expect(scrubber).toContain('<div className="max-lg:order-1 max-lg:mt-6">');
   });
 
   it("keeps the ledger's figures on the shared sample fixture", () => {
