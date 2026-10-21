@@ -30,7 +30,6 @@ import {
   MoreHorizontal,
   Search,
   SlidersHorizontal,
-  Sparkles,
   Tag,
   Target,
   Trash2,
@@ -4645,7 +4644,6 @@ export function SavedAnalysesPage({
               asChild
             >
               <Link href="/dashboard/new?fresh=1">
-                <Sparkles className="w-4 h-4 mr-1.5" />
                 New Analysis
               </Link>
             </Button>

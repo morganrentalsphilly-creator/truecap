@@ -12,7 +12,6 @@ import {
   LockKeyhole,
   Save,
   SlidersHorizontal,
-  Sparkles,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -1813,7 +1812,6 @@ export function FocusedDecisionSummary({
             title={resultActionsBlockedReason}
             className="min-h-11 gap-2 rounded-md max-[250px]:w-full max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight"
           >
-            <Sparkles className="size-4" aria-hidden />
             New analysis
           </Button>
         </div>

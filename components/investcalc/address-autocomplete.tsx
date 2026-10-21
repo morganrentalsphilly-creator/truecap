@@ -14,13 +14,14 @@
  * Falls back to a plain Input when the key is missing or Maps fails to load.
  */
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { UseFormReturn } from "react-hook-form";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { UseFormReturn, useWatch } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { deriveStateFromAddress } from "@/lib/buy-box";
 import { withTypedUnit } from "@/components/investcalc/address-shape";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
+import { isTrueCapSyntheticSampleAddress, SAMPLE_DEAL_DISPLAY } from "@/lib/sample-deal";
 
 type FormattableText = { toString: () => string };
 type PlacePrediction = {
@@ -587,6 +588,20 @@ export function AddressAutocomplete({
 
   const autocompleteWarningId = `${fieldId}-autocomplete-warning`;
   const noMatchesId = `${fieldId}-no-matches`;
+  // The sample's address is an internal sentinel ("TrueCap Synthetic
+  // Sample, …"), kept as the field's value because the sample's identity
+  // keys on it. The field shows the sample's display label over it instead
+  // (audit A9, display only); the first keystroke replaces the whole value
+  // (it is selected on focus) and leaves the sample, and the text shows again.
+  const watchedAddress = useWatch({ control: form.control, name: "address" });
+  const showsSampleLabel = isTrueCapSyntheticSampleAddress(watchedAddress);
+  const [sampleLabelInset, setSampleLabelInset] = useState("0.75rem");
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+    if (!showsSampleLabel || !input) return;
+    const style = window.getComputedStyle(input);
+    setSampleLabelInset(`calc(${style.paddingLeft} + ${style.borderLeftWidth})`);
+  }, [showsSampleLabel]);
   const describedBy = [hasError && errorId ? errorId : null, autocompleteWarning ? autocompleteWarningId : null, noMatches ? noMatchesId : null]
     .filter(Boolean)
     .join(" ") || undefined;
@@ -621,17 +636,29 @@ export function AddressAutocomplete({
           // so reaching here means the user left the field with typed text.
           commitTypedAddress();
         }}
-        onFocus={() => {
+        onFocus={(e) => {
           loadScript();
           if (predictions.length > 0) setOpen(true);
+          if (showsSampleLabel) e.currentTarget.select();
         }}
         onKeyDown={handleKeyDown}
         className={cn(
           "border-input bg-background",
           hasError && "border-destructive focus-visible:ring-destructive",
-          inputClassName
+          inputClassName,
+          showsSampleLabel && "text-transparent selection:bg-transparent"
         )}
       />
+      {showsSampleLabel ? (
+        <span
+          aria-hidden
+          data-sample-address-label=""
+          className="pointer-events-none absolute inset-y-0 left-0 right-3 flex items-center truncate text-base text-foreground"
+          style={{ paddingLeft: sampleLabelInset }}
+        >
+          {SAMPLE_DEAL_DISPLAY.shortAddress}
+        </span>
+      ) : null}
       {/* Visually-hidden live count so screen readers hear that suggestions
           appeared and how many - the visual dropdown is otherwise silent. */}
       <span className="sr-only" role="status" aria-live="polite">

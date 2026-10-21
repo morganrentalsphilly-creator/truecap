@@ -23,7 +23,6 @@ import {
   MapPin,
   PencilLine,
   SlidersHorizontal,
-  Sparkles,
 } from "lucide-react";
 import {
   screenBatchAction,
@@ -507,11 +506,7 @@ export function BatchTriageClient({
               disabled={extracting || pending || text.trim() === ""}
               className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-md border border-border bg-background px-4 text-sm font-semibold text-foreground outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-60"
             >
-              {extracting ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Sparkles className="size-4 text-primary" />
-              )}
+              {extracting ? <Loader2 className="size-4 animate-spin" /> : null}
               Auto-extract from text
             </button>
           ) : null}

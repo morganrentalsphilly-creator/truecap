@@ -289,7 +289,9 @@ export function AssumptionsStrip({
         }
         aria-expanded={opensAdvanced ? isExpanded : undefined}
         className={cn(
-          "inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-sm border border-border bg-background px-2.5 py-2 font-mono text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+          // The text face with tabular figures; Geist Mono only for the
+          // source tag (audit A11, DESIGN.md "Metadata").
+          "inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-2 font-figure text-sm font-medium text-foreground transition-colors duration-[var(--duration-fast)] hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
           pulsing[chip.id] && "animate-pulse border-primary bg-primary/10",
         )}
       >
@@ -305,7 +307,7 @@ export function AssumptionsStrip({
         {chip.badge ? (
           <span
             className={cn(
-              "rounded-sm px-1 py-0.5 text-3xs font-semibold leading-none",
+              "rounded-sm px-1 py-0.5 font-mono text-xs font-medium leading-none",
               chip.badge.kind === "yours" || chip.badge.kind === "default"
                 ? "bg-muted text-muted-foreground"
                 : "bg-primary/10 text-primary",
@@ -322,7 +324,7 @@ export function AssumptionsStrip({
   const extrasChip = chips.find((c) => c.id === "extras");
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
+    <div className="rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
         <div className="min-w-0">
           {/* tabIndex={-1}: focus landing zone for the "Hide details"

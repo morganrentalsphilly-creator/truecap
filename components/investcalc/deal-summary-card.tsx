@@ -14,7 +14,7 @@
  */
 
 import { useState } from "react";
-import { Loader2, Sparkles, WandSparkles } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { generateDealSummaryAction } from "@/app/actions/deal-summary";
 import { trackEvent } from "@/lib/analytics";
@@ -68,9 +68,6 @@ export function DealSummaryCard({
     <div className="rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex items-center justify-between gap-2">
         <p className="flex items-center gap-2 text-sm font-bold text-foreground">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <WandSparkles className="size-4" />
-          </span>
           AI summary
           <span className="rounded-full bg-muted px-1.5 py-0.5 text-xs font-semibold text-muted-foreground">
             Beta
@@ -102,7 +99,6 @@ export function DealSummaryCard({
             href="/pricing"
             className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-primary hover:underline"
           >
-            <Sparkles className="size-3.5" />
             See Pro
           </Link>
         </div>
@@ -120,7 +116,6 @@ export function DealSummaryCard({
             </>
           ) : (
             <>
-              <WandSparkles className="size-4" />
               Summarize this deal
             </>
           )}
