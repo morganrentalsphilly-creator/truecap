@@ -483,7 +483,7 @@ export function InputConfidenceCard({
                         {isVerified ? "Verified" : item.sourceDisplay}
                       </span>
                     </div>
-                    <p className="mt-1 text-2xs leading-relaxed text-muted-foreground">
+                    <p className="mt-1 max-w-[68ch] text-2xs leading-relaxed text-muted-foreground">
                       {item.reason}
                       {item.verifyAction ? ` ${item.verifyAction}.` : ""}
                     </p>

@@ -1502,10 +1502,11 @@ export function FocusedDecisionSummary({
           {resolvedNextAction?.label ?? "Verify the material assumptions"}
         </p>
         {resolvedNextAction?.reason ? (
-          <p className="mt-1 text-xs leading-relaxed text-foreground/80">{resolvedNextAction.reason}</p>
+          // The running-text measure (DESIGN.md, 60 to 68ch) at the text's own size.
+          <p className="mt-1 max-w-[68ch] text-xs leading-relaxed text-foreground/80">{resolvedNextAction.reason}</p>
         ) : null}
         {viabilityLabels.length > 0 ? (
-          <p className="mt-2 text-xs leading-relaxed text-foreground">
+          <p className="mt-2 max-w-[68ch] text-xs leading-relaxed text-foreground">
             <span className="text-foreground/75">Fastest path to meet your targets:</span>{" "}
             <span className="font-figure font-semibold">{viabilityLabels.join(" · ")}</span>
           </p>
@@ -1514,7 +1515,7 @@ export function FocusedDecisionSummary({
         nextVerification &&
         !nextActionCoversVerification ? (
           <p
-            className="mt-2 text-xs leading-relaxed text-foreground"
+            className="mt-2 max-w-[68ch] text-xs leading-relaxed text-foreground"
             data-result-next-verification=""
           >
             <span className="font-semibold">Verify next:</span>{" "}
@@ -1524,29 +1525,12 @@ export function FocusedDecisionSummary({
         ) : null}
       </div>
 
-      {!advocacyContractEnabled && sensitivityLabels.length > 0 ? (
-        <div className="mt-4 border-t border-border pt-3">
-          <p className="text-xs font-medium text-muted-foreground">
-            {targetAdopted
-              ? "Two assumptions most likely to move the decision"
-              : "What can move the result"}
-          </p>
-          <ol className="mt-2 grid gap-1 text-sm font-semibold text-foreground sm:grid-cols-2">
-            {sensitivityLabels.map((label, index) => (
-              <li key={label}>
-                <span className="text-muted-foreground">{index + 1}.</span>{" "}
-                {label}
-              </li>
-            ))}
-          </ol>
-        </div>
-      ) : null}
 
       <details className="group tc-accordion mt-2 border-t border-border py-1">
         <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
           <span>Decision context and key numbers</span>
           <span className="ml-auto hidden text-right text-2xs font-normal text-muted-foreground sm:inline">
-            Cap rate, cash-on-cash, the inputs used
+            What moves it, cap rate, cash-on-cash, the inputs used
           </span>
           <ChevronDown
             className="size-4 transition-transform group-open:rotate-180"
@@ -1554,6 +1538,26 @@ export function FocusedDecisionSummary({
           />
         </summary>
         <div className="space-y-3 border-t border-border px-2 py-3">
+          {/* The assumptions most likely to move the decision: context for
+              the decision, one tap away, so the card's first screen carries
+              one callout (audit A12). */}
+          {!advocacyContractEnabled && sensitivityLabels.length > 0 ? (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground">
+                {targetAdopted
+                  ? "Two assumptions most likely to move the decision"
+                  : "What can move the result"}
+              </p>
+              <ol className="mt-2 grid gap-1 text-sm font-semibold text-foreground sm:grid-cols-2">
+                {sensitivityLabels.map((label, index) => (
+                  <li key={label}>
+                    <span className="text-muted-foreground">{index + 1}.</span>{" "}
+                    {label}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : null}
           <div
             className="grid grid-cols-1 gap-3 min-[280px]:grid-cols-2 lg:grid-cols-4"
             role="group"
