@@ -1,0 +1,149 @@
+[
+  {
+    "name": "hero scrubber: ArrowRight steps the price",
+    "ok": true,
+    "before": 236000,
+    "after": 238000,
+    "valuetext": "$238,000: cash flow $736 a month, misses the $750 target by $14",
+    "focus": {
+      "tag": "SPAN",
+      "text": "",
+      "outlineStyle": "solid",
+      "outlineWidth": "3px",
+      "boxShadow": "shadow",
+      "focusVisible": true
+    }
+  },
+  {
+    "name": "hero scrubber: Home jumps to the low end",
+    "ok": true,
+    "focus": {
+      "tag": "SPAN",
+      "text": "",
+      "outlineStyle": "solid",
+      "outlineWidth": "3px",
+      "boxShadow": "shadow",
+      "focusVisible": true
+    }
+  },
+  {
+    "name": "source receipt: Enter opens the popover",
+    "ok": true,
+    "focus": {
+      "tag": "DIV",
+      "text": "HUD FMRHUD rent benchmark (ZIP-level whe",
+      "outlineStyle": "none",
+      "outlineWidth": "1px",
+      "boxShadow": "shadow",
+      "focusVisible": true
+    }
+  },
+  {
+    "name": "source receipt: Escape closes it",
+    "ok": true,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Rent $3,050/mo · HUD FMR",
+      "outlineStyle": "solid",
+      "outlineWidth": "3px",
+      "boxShadow": "none",
+      "focusVisible": true
+    }
+  },
+  {
+    "name": "receipt flow: Space opens a source",
+    "ok": true,
+    "focus": {
+      "tag": "DIV",
+      "text": "HUD FMRHUD rent benchmark (ZIP-level whe",
+      "outlineStyle": "none",
+      "outlineWidth": "1px",
+      "boxShadow": "shadow",
+      "focusVisible": true
+    }
+  },
+  {
+    "name": "plans toggle: Space selects",
+    "ok": true,
+    "focus": {
+      "tag": "BUTTON",
+      "text": "Annual costs less",
+      "outlineStyle": "solid",
+      "outlineWidth": "3px",
+      "boxShadow": "none",
+      "focusVisible": true
+    }
+  },
+  {
+    "name": "FAQ row: Enter opens",
+    "ok": true,
+    "focus": {
+      "tag": "SUMMARY",
+      "text": "See every line",
+      "outlineStyle": "solid",
+      "outlineWidth": "3px",
+      "boxShadow": "none",
+      "focusVisible": true
+    }
+  },
+  {
+    "name": "co-branding: typing a name updates the preview",
+    "ok": true,
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "outlineStyle": "solid",
+      "outlineWidth": "3px",
+      "boxShadow": "none",
+      "focusVisible": true
+    }
+  },
+  {
+    "name": "close form: the field takes focus",
+    "ok": true,
+    "focus": {
+      "tag": "INPUT",
+      "text": "",
+      "outlineStyle": "solid",
+      "outlineWidth": "3px",
+      "boxShadow": "none",
+      "focusVisible": true
+    }
+  },
+  {
+    "name": "result: the ceiling disclosure opens with Enter",
+    "ok": true,
+    "focus": {
+      "tag": "SUMMARY",
+      "text": "How this ceiling was calculated",
+      "outlineStyle": "solid",
+      "outlineWidth": "3px",
+      "boxShadow": "shadow",
+      "focusVisible": true
+    }
+  },
+  {
+    "name": "result: the summary bar's Decision button is reachable and returns focus to the heading",
+    "ok": true,
+    "focus": {
+      "tag": "H2",
+      "text": "Doesn't meet sample targets at asking",
+      "outlineStyle": "none",
+      "outlineWidth": "1px",
+      "boxShadow": "none",
+      "focusVisible": true
+    }
+  },
+  {
+    "name": "auth sheet: ArrowLeft steps the price",
+    "ok": true,
+    "focus": {
+      "tag": "SPAN",
+      "text": "",
+      "outlineStyle": "solid",
+      "outlineWidth": "3px",
+      "boxShadow": "shadow",
+      "focusVisible": true
+    }
+  }
+]
