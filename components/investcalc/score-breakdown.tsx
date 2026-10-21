@@ -85,12 +85,12 @@ export function ScoreBreakdown({
             <li key={r.key}>
               <div className="flex items-center justify-between gap-3">
                 <span className="text-foreground">{r.label}</span>
-                <span className="tabular-nums text-muted-foreground">
+                <span className="font-figure text-muted-foreground">
                   {r.notApplicable ? "N/A" : `${Math.round(v)} / ${r.max}`}
                 </span>
               </div>
-              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
-                <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+              <div className="mt-1 h-1.5 overflow-hidden rounded-sm bg-band">
+                <div className="h-full rounded-sm bg-foreground/70" style={{ width: `${pct}%` }} />
               </div>
             </li>
           );
@@ -98,7 +98,7 @@ export function ScoreBreakdown({
         {breakdown.riskPenalty !== 0 ? (
           <li className="flex items-center justify-between gap-3 pt-0.5">
             <span className="text-foreground">Risk adjustments</span>
-            <span className="tabular-nums font-semibold text-destructive">
+            <span className="font-figure font-semibold text-negative">
               {Math.round(breakdown.riskPenalty)}
             </span>
           </li>
@@ -106,7 +106,7 @@ export function ScoreBreakdown({
         {applicabilityAdjustment != null ? (
           <li className="flex items-center justify-between gap-3 pt-0.5">
             <span className="text-foreground">Applicable-factor normalization</span>
-            <span className="tabular-nums font-semibold text-foreground">
+            <span className="font-figure font-semibold text-foreground">
               {applicabilityAdjustment >= 0 ? "+" : ""}{Math.round(applicabilityAdjustment)}
             </span>
           </li>
@@ -114,15 +114,15 @@ export function ScoreBreakdown({
         {floorApplied ? (
           <li className="flex items-center justify-between gap-3 pt-0.5">
             <span className="text-foreground">Appreciation-play floor</span>
-            <span className="tabular-nums font-semibold text-foreground">
+            <span className="font-figure font-semibold text-foreground">
               held at {Math.round(score)}
             </span>
           </li>
         ) : null}
       </ul>
-      <div className="mt-3 flex items-center justify-between border-t border-border pt-2 font-bold">
+      <div className="mt-3 flex items-center justify-between border-t-2 border-foreground pt-2 font-semibold">
         <span>Deal score</span>
-        <span className="tabular-nums">{Math.round(score)} / 100</span>
+        <span className="font-figure">{Math.round(score)} / 100</span>
       </div>
       <p className="mt-2 text-2xs leading-snug text-muted-foreground">
         {floorApplied ? (

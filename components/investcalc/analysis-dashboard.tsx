@@ -21,20 +21,18 @@ import {
   CopyPlus,
   FileDown,
   FileText,
-  Info,
   ListTodo,
   Loader2,
   MoreHorizontal,
   NotebookPen,
+  Plus,
   Save,
   Search,
-  SlidersHorizontal,
-  Sparkles,
   TrendingUp,
   X,
   type LucideIcon,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/hooks/use-toast";
@@ -337,6 +335,10 @@ interface AnalysisDashboardProps {
   dataConfidence?: DataConfidence | null;
   /** Deterministic 15-field data-readiness assessment. Separate from Deal Fit. */
   inputConfidence?: InputConfidenceResult | null;
+  /** Changes on each explicit run (Analyze, the sample launcher, a saved
+   *  deal opening); the result reveal plays only then, never on a live
+   *  recompute or a what-if. */
+  revealKey?: number;
   onToggleInputVerified?: (
     key: InputConfidenceFieldKey,
     verified: boolean,
@@ -402,34 +404,35 @@ const TABS: {
   icon: LucideIcon;
   isPro: boolean;
 }[] = [
-  { id: "cash-flow", label: "Cash Flow", icon: TrendingUp, isPro: false },
+  // Sentence case throughout (DESIGN.md chrome rules); acronyms stay.
+  { id: "cash-flow", label: "Cash flow", icon: TrendingUp, isPro: false },
   {
     id: "projections",
-    label: "10-Year Projections",
+    label: "10-year projections",
     icon: ArrowUpRight,
     isPro: true,
   },
   {
     id: "tax-strategy",
-    label: "Illustrative Tax Impact",
+    label: "Illustrative tax impact",
     icon: FileText,
     isPro: true,
   },
   {
     id: "exit-scenarios",
-    label: "Exit Scenarios",
+    label: "Exit scenarios",
     icon: Building2,
     isPro: true,
   },
   // Renamed from "Strategies" (Jun 2026 UX pass) - vague label for the
   // not-Excel-power-user audience; the row IS the BRRRR + fix-and-flip
   // + rehab analyzers, so say that.
-  { id: "strategies", label: "BRRRR & Flip", icon: Target, isPro: true },
+  { id: "strategies", label: "BRRRR & flip", icon: Target, isPro: true },
   // Stress Test consolidates Offer Ceiling + Sensitivity Grid —
   // both Pro features that previously rendered as always-visible cards
   // between the metrics row and the tab bar. Keeping them in one row
   // keeps the headline scroll calmer without losing the features.
-  { id: "stress-test", label: "Stress Test", icon: Activity, isPro: true },
+  { id: "stress-test", label: "Stress test", icon: Activity, isPro: true },
 ];
 
 const RELEASED_TABS = TABS.filter((tab) => {
@@ -538,6 +541,7 @@ export function AnalysisDashboard({
   savedDealLimit = null,
   dataConfidence = null,
   inputConfidence = null,
+  revealKey,
   onToggleInputVerified,
   activeTab: activeTabProp,
   activeTabNonce = 0,
@@ -1399,9 +1403,9 @@ export function AnalysisDashboard({
       : null;
 
   const labelMap: Record<string, string> = {
-    "single-family": "Single Family",
-    "multi-family": "Multi-Family",
-    "owner-occupant": "Owner Occupant",
+    "single-family": "Single family",
+    "multi-family": "Multi-family",
+    "owner-occupant": "Owner occupant",
   };
 
   // Metric tiles are built once and shared between the fixed first-year row
@@ -1468,7 +1472,7 @@ export function AnalysisDashboard({
           deferredWhatIfState.ratePp,
           deferredWhatIfState.vacancyPp,
         )}: ${fmtSignedMonthly(deferredWhatIfState.result.netCashFlow)}`
-      : "Stress it — see what happens when assumptions get worse",
+      : "What happens when assumptions get worse",
     comps:
       compsQaData == null && compsPausedUntil !== undefined
         ? compsPausedUntil
@@ -1498,40 +1502,44 @@ export function AnalysisDashboard({
           asking={Number(values.purchasePrice)}
         />
       ) : null}
-      {/* Sample-deal Pro preview banner - slimmed to a one-line dismissible
-          strip (Phase 2) so it no longer pushes the answer below the fold on
-          the 375px first paint. Still explains why every Pro tab is open on
-          the demo and converts the "wow" into a pricing visit; gradient +
-          border language still matches ProInlineGate. */}
+      {/* Sample-deal Pro preview banner - one dismissible line on a 1px
+          rule (no tinted card, no sparkle), so it never pushes the answer
+          below the fold on the 375px first paint. It explains why every Pro
+          row is open on the demo and converts the "wow" into a pricing
+          visit. "Get Pro" is a real link because it navigates: /pricing for
+          a visitor, the billing deep link for an account (the same routing
+          as goToBilling — /profile is auth-gated and bounces anonymous
+          users to /auth/login with NO ?next, so anon must not go there). */}
       {isSampleProPreview && !sampleBannerDismissed && (
-        <div className="flex items-center gap-2 rounded-md border border-border bg-card py-1 pl-3 pr-1">
-          <Sparkles className="size-3.5 shrink-0 text-primary" aria-hidden />
+        <div className="flex items-center gap-3 border-b border-border py-2">
           {/* Wraps instead of truncating: at 390px the sentence was cut off
               mid-word ("the full Pro repor…"). */}
-          <p className="min-w-0 flex-1 text-xs font-semibold leading-snug text-foreground">
+          <p className="min-w-0 flex-1 text-sm font-semibold leading-snug text-foreground">
             Sample deal: the full Pro report is unlocked.
           </p>
-          <Button
-            size="sm"
-            className="h-7 shrink-0 gap-1 rounded-full bg-primary px-3 text-2xs font-bold text-primary-foreground"
-            onClick={goToBilling}
+          <Link
+            href={isAuthenticated ? "/profile#billing" : "/pricing"}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "min-h-11 shrink-0 rounded-md px-3 text-sm",
+            )}
           >
             Get Pro
-          </Button>
+          </Link>
           <button
             type="button"
             aria-label="Dismiss the sample deal banner"
             onClick={() => setSampleBannerDismissed(true)}
-            className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-band hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
-            <X className="size-3.5" aria-hidden />
+            <X className="size-4" aria-hidden />
           </button>
         </div>
       )}
       {deferredWhatIfState?.isAdjusted ? (
         <div
           role="status"
-          className="sticky top-16 z-20 rounded-xl border border-caution/40 bg-caution-light px-4 py-3 text-sm text-caution-text shadow-sm"
+          className="sticky top-16 z-20 rounded-lg border border-caution/40 bg-caution-light px-4 py-3 text-sm text-caution-text shadow-md"
         >
           <strong>Scenario only.</strong> These numbers are temporary. Your
           saved base assumptions have not changed. Scenario values below are
@@ -1542,7 +1550,7 @@ export function AnalysisDashboard({
       {scenarioResetNotice ? (
         <div
           role="status"
-          className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-foreground"
+          className="rounded-lg border border-border bg-band px-4 py-3 text-sm text-foreground"
         >
           Scenario reset because the base assumptions changed.
         </div>
@@ -1552,10 +1560,10 @@ export function AnalysisDashboard({
         <div
           role={buyBoxTargetResolutionState === "error" ? "alert" : "status"}
           className={cn(
-            "flex flex-col gap-2 rounded-xl border px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between",
+            "flex flex-col gap-2 rounded-lg border px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between",
             buyBoxTargetResolutionState === "error"
               ? "border-caution/30 bg-caution-light text-caution-text"
-              : "border-primary/20 bg-[var(--brand-blue-light)] text-foreground",
+              : "border-border bg-card text-foreground",
           )}
         >
           <span>{targetActionsBlockedReason}</span>
@@ -1563,7 +1571,7 @@ export function AnalysisDashboard({
             <button
               type="button"
               onClick={retryBuyBoxResolution}
-              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-caution/40 bg-background px-3 font-semibold text-caution-text focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-md border border-caution/40 bg-card px-3 font-semibold text-caution-text focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               Retry Buy Box
             </button>
@@ -1582,36 +1590,34 @@ export function AnalysisDashboard({
       values ? (
         <section
           aria-label="Base underwriting while decision rules load"
-          className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6"
+          className="rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6"
         >
           <p className="text-sm font-semibold leading-snug text-muted-foreground [overflow-wrap:anywhere]">
             {values.address}
           </p>
-          <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground">
+          <h2 className="mt-1 font-display text-2xl text-foreground">
             Base underwriting is ready
           </h2>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-xl border border-border bg-muted/20 p-3">
-              <p className="text-xs font-medium text-muted-foreground">
+          <dl className="mt-4 divide-y divide-border border-t border-foreground">
+            <div className="flex items-baseline justify-between gap-4 py-2">
+              <dt className="text-sm text-muted-foreground">
                 Cash flow after reserve
-              </p>
-              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
+              </dt>
+              <dd className="font-figure text-lg font-semibold text-foreground">
                 {result.netCashFlow < 0 ? "-" : ""}$
                 {Math.round(Math.abs(result.netCashFlow)).toLocaleString(
                   "en-US",
                 )}
                 /mo
-              </p>
+              </dd>
             </div>
-            <div className="rounded-xl border border-border bg-muted/20 p-3">
-              <p className="text-xs font-medium text-muted-foreground">
-                Model DSCR
-              </p>
-              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-foreground">
+            <div className="flex items-baseline justify-between gap-4 py-2">
+              <dt className="text-sm text-muted-foreground">Model DSCR</dt>
+              <dd className="font-figure text-lg font-semibold text-foreground">
                 {formatDscr(result.dscr, result.monthlyPayment > 0)}
-              </p>
+              </dd>
             </div>
-          </div>
+          </dl>
           <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
             Checking the saved Buy Box rules for this strategy before showing
             a fit or Offer Ceiling.
@@ -1628,7 +1634,11 @@ export function AnalysisDashboard({
           ref={setDecisionEl}
         >
           <ResultReveal
-            runKey={`${values.purchasePrice}|${result.netCashFlow}|${result.dscr}`}
+            runKey={
+              revealKey != null
+                ? `run-${revealKey}`
+                : `${values.purchasePrice}|${result.netCashFlow}|${result.dscr}`
+            }
           >
           <FocusedDecisionSummary
             values={values}
@@ -1733,17 +1743,23 @@ export function AnalysisDashboard({
               claim (advocacy-accessibility-guards pins that), and a
               secondary heuristic belongs in a secondary strip. */}
           {dealScoreResult?.ok && dealScoreResult.tier === "pro" ? (
-            <div
-              id="screening-index"
-              className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-xl border border-border bg-muted/20 px-4 py-2.5"
-            >
-              <p className="text-xs font-medium text-muted-foreground">
-                Deal score
-              </p>
-              <p className="font-mono text-sm font-extrabold tabular-nums text-foreground">
-                {Math.round(dealScoreResult.data.score)}/100
-              </p>
-              <p className="text-2xs text-muted-foreground">
+            // A figure on a rule in the flow, not a mono strip: the label
+            // row sits on the 2px graphite rule a result keeps for its key
+            // figure, the score is the display face with tabular numerals,
+            // and the one-line explanation sits under it.
+            <div id="screening-index" className="mt-3 px-1">
+              <div className="flex items-baseline justify-between gap-4 border-b-2 border-foreground pb-1.5">
+                <p className="text-sm font-semibold text-foreground">
+                  Deal score
+                </p>
+                <p className="font-display font-figure text-2xl leading-none text-foreground">
+                  {Math.round(dealScoreResult.data.score)}
+                  <span className="text-sm font-normal text-muted-foreground">
+                    /100
+                  </span>
+                </p>
+              </div>
+              <p className="mt-1.5 text-2xs text-muted-foreground">
                 A heuristic summary of the modeled numbers, 0–100.
               </p>
             </div>
@@ -1896,7 +1912,7 @@ export function AnalysisDashboard({
             </span>
             <span
               className={cn(
-                "rounded-sm border px-1.5 py-0.5 font-mono text-xs",
+                "rounded-sm border px-1.5 py-0.5 font-mono text-2xs",
                 isSaved
                   ? "border-positive/30 bg-positive-light text-positive"
                   : isExistingSavedDeal
@@ -1927,10 +1943,9 @@ export function AnalysisDashboard({
             {isExistingSavedDeal && savedDealId ? (
               <Link
                 href={`/dashboard/saved-analyses/${savedDealId}`}
-                className="ml-auto inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                className="tc-link ml-auto inline-flex min-h-11 shrink-0 items-center text-xs font-semibold"
               >
                 Deal workspace
-                <ArrowUpRight className="size-3.5" />
               </Link>
             ) : null}
           </div>
@@ -1955,7 +1970,7 @@ export function AnalysisDashboard({
                   ? targetActionsBlockedReason
                   : saveLockedHint
               }
-              className="h-11 gap-1 rounded-xl px-2 text-2xs sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-3xs"
+              className="h-11 gap-1 rounded-md px-2 text-2xs sm:h-10 sm:gap-0 sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:px-1 max-[380px]:text-2xs"
             >
               {isSaving ? (
                 <Loader2 className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 animate-spin max-[380px]:h-3 max-[380px]:w-3" />
@@ -1964,8 +1979,8 @@ export function AnalysisDashboard({
               )}
               <span>Save</span>
               {isSaveLockedByPlan && (
-                <span className="ml-0.5 sm:ml-1 rounded-sm bg-[var(--brand-orange)] px-1 sm:px-1 py-0.5 font-mono text-2xs font-semibold text-white sm:ml-1.5 sm:px-1.5">
-                  PRO
+                <span className="ml-0.5 sm:ml-1 rounded-sm border border-border px-1 sm:px-1 py-0.5 font-mono text-2xs text-muted-foreground sm:ml-1.5 sm:px-1.5">
+                  Pro
                 </span>
               )}
             </Button>
@@ -1973,7 +1988,7 @@ export function AnalysisDashboard({
             <Button
               variant="outline"
               size="sm"
-              className="hidden h-11 gap-1 rounded-xl px-2 text-2xs sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-3xs"
+              className="hidden h-11 gap-1 rounded-md px-2 text-2xs sm:inline-flex sm:h-10 sm:gap-0 sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:px-1 max-[380px]:text-2xs"
               onClick={() => void onCompareDeals()}
               disabled={!isSaved || !canCompareDeals || isComparing}
               title={
@@ -1990,12 +2005,12 @@ export function AnalysisDashboard({
               ) : (
                 <ListTodo className="w-3.5 h-3.5 shrink-0 sm:mr-1.5 max-[380px]:h-3 max-[380px]:w-3" />
               )}
-              <span className="hidden sm:inline">Compare Deals</span>
+              <span className="hidden sm:inline">Compare deals</span>
               <span className="sm:hidden">Compare</span>
             </Button>
             <Button
               size="sm"
-              className="h-11 gap-1 rounded-xl bg-primary px-2 text-2xs font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:rounded-lg max-[380px]:px-1 max-[380px]:text-3xs"
+              className="h-11 gap-1 rounded-md bg-primary px-2 text-2xs font-semibold text-primary-foreground sm:h-10 sm:gap-0 sm:px-4 sm:text-sm max-[380px]:gap-0.5 max-[380px]:px-1 max-[380px]:text-2xs"
               onClick={() => handleExportPdf()}
               // Clickable for users WITHOUT the entitlement on purpose:
               // the click opens the Pro report upgrade dialog. Existing
@@ -2036,7 +2051,7 @@ export function AnalysisDashboard({
                   <Button
                     size="sm"
                     variant="outline"
-                    className="hidden h-11 rounded-xl px-2 sm:inline-flex sm:h-10"
+                    className="hidden h-11 rounded-md px-2 sm:inline-flex sm:h-10"
                     disabled={isExporting || targetActionsBlocked}
                     aria-label="Choose a report style"
                     title="Choose a report style (lender / partner / personal)"
@@ -2045,7 +2060,7 @@ export function AnalysisDashboard({
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent align="end" className="w-64 p-1.5">
-                  <p className="px-2 py-1 font-mono text-xs text-muted-foreground">
+                  <p className="px-2 py-1 text-2xs text-muted-foreground">
                     Export as…
                   </p>
                   {REPORT_MODES.map((m) => (
@@ -2078,26 +2093,26 @@ export function AnalysisDashboard({
               // col-span-2: the label is the feature ("same assumptions" in
               // the user's own words) and Button is whitespace-nowrap — one
               // minmax(0,1fr) column would clip it.
-              className="hidden h-11 gap-1 rounded-xl px-2 text-2xs sm:col-span-2 sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm"
+              className="hidden h-11 gap-1 rounded-md px-2 text-2xs sm:col-span-2 sm:inline-flex sm:h-10 sm:gap-0 sm:px-4 sm:text-sm"
               onClick={onAnalyzeAnotherLikeThis}
               title="Keeps your assumptions — just enter the next property"
             >
               <CopyPlus className="w-3.5 h-3.5 shrink-0 sm:mr-1.5" />
               <span>Analyze another like this</span>
             </Button>
-            {/* Hidden below sm — New Analysis lives in "More" there.
+            {/* Hidden below sm — New analysis lives in "More" there.
                   Share keeps the 3-up slot instead: the read-only share
                   link is the growth loop, and burying it a tap deep on
                   the mobile-majority audience risks the one action that
                   markets TrueCap for free. */}
             <Button
               size="sm"
-              className="hidden h-11 gap-1 rounded-xl bg-primary px-2 text-2xs font-semibold text-primary-foreground sm:inline-flex sm:h-10 sm:gap-0 sm:rounded-xl sm:px-4 sm:text-sm"
+              className="hidden h-11 gap-1 rounded-md bg-primary px-2 text-2xs font-semibold text-primary-foreground sm:inline-flex sm:h-10 sm:gap-0 sm:px-4 sm:text-sm"
               onClick={() => void onNewAnalysis()}
               title="Create a new analysis"
             >
-              <Sparkles className="w-3.5 h-3.5 shrink-0 sm:mr-1.5" />
-              <span className="hidden sm:inline">New Analysis</span>
+              <Plus className="w-3.5 h-3.5 shrink-0 sm:mr-1.5" />
+              <span className="hidden sm:inline">New analysis</span>
               <span className="sm:hidden">New</span>
             </Button>
             {/* Share is FREE for everyone - the read-only /d/[encoded]
@@ -2126,7 +2141,7 @@ export function AnalysisDashboard({
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-11 rounded-xl px-2 sm:hidden max-[380px]:rounded-lg max-[380px]:px-1"
+                  className="h-11 rounded-md px-2 sm:hidden max-[380px]:px-1"
                   aria-label="More actions"
                   title="More actions (Compare, Share, report style)"
                 >
@@ -2152,7 +2167,7 @@ export function AnalysisDashboard({
                   className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-semibold text-foreground hover:bg-muted focus-visible:bg-muted focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <ListTodo className="size-4 shrink-0 text-muted-foreground" />
-                  Compare Deals
+                  Compare deals
                 </button>
                 {/* Phase D "copy a row" — same-assumptions fork, listed
                       above New Analysis so the repeat-screening path is
@@ -2185,12 +2200,12 @@ export function AnalysisDashboard({
                   title="Create a new analysis"
                   className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-semibold text-foreground hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
                 >
-                  <Sparkles className="size-4 shrink-0 text-muted-foreground" />
-                  New Analysis
+                  <Plus className="size-4 shrink-0 text-muted-foreground" />
+                  New analysis
                 </button>
                 {canExportPdf && isSaved ? (
                   <>
-                    <p className="px-2 pt-2 pb-1 font-mono text-xs text-muted-foreground">
+                    <p className="px-2 pt-2 pb-1 text-2xs text-muted-foreground">
                       Export as…
                     </p>
                     {REPORT_MODES.map((m) => (
@@ -2240,10 +2255,9 @@ export function AnalysisDashboard({
                 —{" "}
                 <Link
                   href="/dashboard/saved-analyses"
-                  className="inline-flex items-center gap-0.5 font-semibold text-primary hover:underline"
+                  className="tc-link font-semibold"
                 >
                   delete one to free a slot
-                  <ArrowUpRight aria-hidden className="size-3" />
                 </Link>
               </p>
             ) : null}
@@ -2252,10 +2266,9 @@ export function AnalysisDashboard({
                 Screening several listings?{" "}
                 <Link
                   href="/dashboard/triage"
-                  className="inline-flex items-center gap-0.5 font-semibold text-primary hover:underline"
+                  className="tc-link font-semibold"
                 >
                   Screen a shortlist
-                  <ArrowUpRight aria-hidden className="size-3" />
                 </Link>
               </p>
             ) : null}
@@ -2339,26 +2352,27 @@ export function AnalysisDashboard({
       !decisionFirst ? (
         <section
           aria-labelledby="max-offer-summary-title"
-          className="rounded-2xl border-2 border-primary/30 bg-[var(--brand-blue-light)] p-5 sm:p-6"
+          className="rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6"
         >
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <div className="flex items-center gap-2 text-primary">
-                <Target className="size-4" aria-hidden />
+              <div className="flex flex-wrap items-center gap-2 border-b-2 border-foreground pb-1.5">
                 <h2
                   id="max-offer-summary-title"
-                  className="text-xs font-semibold"
+                  className="text-sm font-semibold text-foreground"
                 >
                   Offer Ceiling
                 </h2>
                 {maoQaContext.fromBuyBox ? (
-                  <span className="rounded-full border border-primary/25 bg-card px-2 py-0.5 text-3xs font-semibold">
+                  <span className="rounded-sm border border-border px-1.5 py-0.5 font-mono text-2xs text-muted-foreground">
                     From your Buy Box
                   </span>
                 ) : null}
               </div>
-              <p className="mt-2 font-mono text-4xl font-extrabold tabular-nums tracking-tight text-primary sm:text-5xl">
-                ${Math.round(maoQaContext.maxOffer).toLocaleString("en-US")}
+              <p className="mt-2 font-display font-figure text-key-sm text-foreground">
+                <span className="highlight-stroke">
+                  ${Math.round(maoQaContext.maxOffer).toLocaleString("en-US")}
+                </span>
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 The highest price that still meets {maoQaContext.basis}{" "}
@@ -2375,11 +2389,11 @@ export function AnalysisDashboard({
                   below the current price
                 </p>
               ) : (
-                <p className="font-bold text-[var(--brand-green)]">
+                <p className="font-bold text-positive">
                   Current price meets these modeled targets
                 </p>
               )}
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="mt-1 font-figure text-xs text-muted-foreground">
                 At the ceiling: $
                 {Math.round(maoQaContext.achieved.netCashFlow).toLocaleString(
                   "en-US",
@@ -2404,10 +2418,9 @@ export function AnalysisDashboard({
                     block: "start",
                   });
                 }}
-                className="mt-3 inline-flex min-h-11 items-center gap-1 rounded-md font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="tc-link mt-3 inline-flex min-h-11 items-center rounded-md font-semibold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
-                Review and tune targets{" "}
-                <ArrowUpRight className="size-4" aria-hidden />
+                Review and tune targets
               </button>
             </div>
           </div>
@@ -2439,7 +2452,7 @@ export function AnalysisDashboard({
           >
             <h2
               id="numbers-section-title"
-              className="font-display text-lg text-foreground"
+              className="border-b border-border pb-2 font-display text-lg text-foreground"
             >
               {deferredWhatIfState?.isAdjusted ? "Scenario numbers" : "Numbers"}
             </h2>
@@ -2510,18 +2523,14 @@ export function AnalysisDashboard({
                             <button
                               type="button"
                               aria-label={`${c.label}: ${c.value}. Show definition`}
-                              className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border bg-muted/40 px-3 text-xs transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
+                              className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-input bg-card px-3 text-xs transition-colors duration-150 hover:bg-band focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                             >
-                              <span className="text-muted-foreground">
+                              <span className="text-muted-foreground underline decoration-dotted decoration-muted-foreground/50 underline-offset-2">
                                 {c.label}
                               </span>
-                              <span className="font-bold tabular-nums text-foreground">
+                              <span className="font-figure font-semibold text-foreground">
                                 {c.value}
                               </span>
-                              <Info
-                                className="size-3 text-muted-foreground"
-                                aria-hidden="true"
-                              />
                             </button>
                           </PopoverTrigger>
                           <PopoverContent
@@ -2548,19 +2557,16 @@ export function AnalysisDashboard({
             exit-scenario engine as the Screening Index, so it never contradicts
             them. Does NOT alter the year-1 facts above - it explains them. */}
             {appreciationPlay && result && !deferredWhatIfState?.isAdjusted ? (
-              <div className="flex items-start gap-3 rounded-2xl border border-[var(--brand-green)]/25 bg-[var(--brand-green-light)] p-4">
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-card text-[var(--brand-green)]">
-                  <TrendingUp className="size-4" />
-                </span>
+              <div className="border-t border-border pt-3">
                 <div className="space-y-1">
-                  <p className="text-sm font-bold text-[var(--brand-green)]">
+                  <p className="text-sm font-semibold text-positive">
                     Long-term projection differs from the year-1 operating
                     result
                   </p>
-                  <p className="text-xs leading-relaxed text-foreground/70">
+                  <p className="text-xs leading-relaxed text-muted-foreground">
                     Year-1 cash flow is negative because of the high leverage.
                     The projected pre-tax 10-year total return is{" "}
-                    <strong className="text-foreground">
+                    <strong className="font-figure text-foreground">
                       ~{Math.round(annualizedReturnPct ?? 0)}%/yr
                     </strong>{" "}
                     (modeled operating cash flow, appreciation, loan paydown,
@@ -2597,7 +2603,7 @@ export function AnalysisDashboard({
           >
             <h2
               id="risks-section-title"
-              className="font-display text-lg text-foreground"
+              className="border-b border-border pb-2 font-display text-lg text-foreground"
             >
               {deferredWhatIfState?.isAdjusted
                 ? advocacyDecisionContract
@@ -2646,22 +2652,19 @@ export function AnalysisDashboard({
                   if (!open) setWhatIfState(null);
                 }}
               >
-                <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-2xl border border-primary/20 bg-[var(--brand-blue-light)] px-4 py-3 transition-colors hover:border-primary/40">
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-card text-primary">
-                    <SlidersHorizontal className="size-4" />
-                  </span>
+                <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 border-y border-border py-3 transition-colors duration-150 hover:bg-band focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-bold text-foreground">
+                    <span className="block text-sm font-semibold text-foreground">
                       Play with the numbers
                     </span>
-                    <span className="block text-xs text-muted-foreground">
-                      Drag the levers - or tap Worst case - and watch the
+                    <span className="block text-sm text-muted-foreground">
+                      Drag the levers, or tap Worst case, and watch the
                       screening result move, live.
                     </span>
                   </span>
                   <ChevronRight
                     aria-hidden
-                    className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
+                    className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 group-open:rotate-90"
                   />
                 </summary>
                 <div className="mt-2 space-y-3">
@@ -2735,25 +2738,8 @@ export function AnalysisDashboard({
           unchanged: keepMounted so its saved-comps mount fetch and
           on-demand pull-on-click economics are identical. */}
 
-      {/* Free-tier prompt - shows ONE card, not two stacked.
-          Decision tree:
-            - Anonymous user → SignupPromptCard (cheap "save this" ask).
-              Signing up is the lower-friction win; we don't double-up
-              with a Pro pitch on top of it.
-            - Signed-in free users already saw the deal-specific Offer Ceiling
-              upgrade moment directly after the answer above.
-            - Pro user → nothing renders here.
-          Previously both rendered for anonymous users, which buried
-          the Pro pitch under the signup ask. */}
-      {result && !isLoading && !isAuthenticated && (
-        <SignupPromptCard
-          address={values?.address}
-          isAuthenticated={isAuthenticated}
-          onPrepareSaveIntent={() =>
-            onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource)
-          }
-        />
-      )}
+      {/* The free-tier sign-up prompt (SignupPromptCard) mounts AFTER the
+          ledger, below every number; see the end of this component. */}
       {/* Retention: when a signed-in user has a saved deal on screen, offer
           the rate-alert opt-in right where the intent is, instead of burying
           it in /settings. Self-hides if already enabled or the schema
@@ -2794,7 +2780,7 @@ export function AnalysisDashboard({
         >
           <h2
             id="long-term-section-title"
-            className="font-display text-lg text-foreground"
+            className="border-b border-border pb-2 font-display text-lg text-foreground"
           >
             {deferredWhatIfState?.isAdjusted
               ? "Base long-term analysis"
@@ -3004,6 +2990,24 @@ export function AnalysisDashboard({
           </DrillLedger>
         </section>
       </ResultsRegionOrFragment>
+
+      {/* Free-tier prompt — ONE card, after the numbers, never between the
+          decision and the ledger (2026-10 polish). Decision tree:
+            - Anonymous user → SignupPromptCard (cheap "save this" ask).
+              Signing up is the lower-friction win; we don't double-up
+              with a Pro pitch on top of it.
+            - Signed-in free users already saw the deal-specific Offer Ceiling
+              upgrade moment directly after the answer above.
+            - Pro user → nothing renders here. */}
+      {result && !isLoading && !isAuthenticated && (
+        <SignupPromptCard
+          address={values?.address}
+          isAuthenticated={isAuthenticated}
+          onPrepareSaveIntent={() =>
+            onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource)
+          }
+        />
+      )}
     </div>
   );
 }
@@ -3013,30 +3017,30 @@ const proPreviewCopy: Record<
   { title: string; description: string; metrics: string[] }
 > = {
   projections: {
-    title: "10-Year Projections",
+    title: "10-year projections",
     description:
       "Unlock long-term pre-tax cash flow, equity, and income trends.",
     metrics: [
-      "Year 10 Cumulative CF",
-      "Best Annual Cash Flow",
-      "10-Year Operating Cash Flow",
+      "Year 10 cumulative CF",
+      "Best annual cash flow",
+      "10-year operating cash flow",
     ],
   },
   "tax-strategy": {
-    title: "Illustrative Tax Impact",
+    title: "Illustrative tax impact",
     description:
       "Unlock modeled taxable rental income, depreciation, mortgage interest, and tax impact at the entered marginal rate.",
     metrics: [
-      "Year 1 Taxable Rental Income",
-      "Year 1 Modeled Tax Impact",
-      "10-Year Modeled Tax Impact",
+      "Year 1 taxable rental income",
+      "Year 1 modeled tax impact",
+      "10-year modeled tax impact",
     ],
   },
   "exit-scenarios": {
-    title: "Exit Scenarios",
+    title: "Exit scenarios",
     description:
       "Unlock equity growth, sale timing, profit breakdowns, and ROI scenarios.",
-    metrics: ["Highest Modeled Profit", "Year 5 Profit", "Total ROI"],
+    metrics: ["Highest modeled profit", "Year 5 profit", "Total ROI"],
   },
   strategies: {
     title: "Strategies",
@@ -3088,7 +3092,7 @@ function ProFeaturePreview({
   const previewValues = buildProPreviewValues(kind, result, values);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl">
+    <div className="relative overflow-hidden rounded-lg">
       {/* The blurred layer is decoration for sighted visitors. It carries the
           deal's real figures, which a screen reader used to read out before
           the unlock heading: aria-hidden and inert keep it out of the
@@ -3099,7 +3103,7 @@ function ProFeaturePreview({
         data-pro-preview-blur=""
         className="pointer-events-none select-none space-y-5 blur-[3px] opacity-70"
       >
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-px overflow-hidden rounded-lg border border-border bg-border md:grid-cols-3">
           {copy.metrics.map((metric, index) => {
             const tileValue = previewValues
               ? previewValues[index]!
@@ -3107,20 +3111,15 @@ function ProFeaturePreview({
                 ? "Year 10"
                 : "$48,260";
             return (
-              <div
-                key={metric}
-                className="rounded-2xl border border-border bg-card p-4"
-              >
+              <div key={metric} className="bg-card p-4">
                 <p className="text-xs font-medium text-muted-foreground">
                   {metric}
                 </p>
                 {/* Real numbers can be negative — don't tint a loss green. */}
                 <p
                   className={cn(
-                    "mt-2 text-2xl font-extrabold",
-                    tileValue.startsWith("-")
-                      ? "text-[var(--metric-negative)]"
-                      : "text-[var(--metric-positive)]",
+                    "mt-2 font-display font-figure text-2xl",
+                    tileValue.startsWith("-") ? "text-negative" : "text-positive",
                   )}
                 >
                   {tileValue}
@@ -3130,28 +3129,23 @@ function ProFeaturePreview({
           })}
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-4">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-primary" />
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                {copy.title}
-              </p>
-              <p className="text-xs text-muted-foreground">Preview snapshot</p>
-            </div>
-          </div>
+        <div className="border-t border-border pt-3">
+          <p className="text-sm font-semibold text-foreground">{copy.title}</p>
+          <p className="font-mono text-2xs text-muted-foreground">
+            Preview snapshot
+          </p>
         </div>
 
         <div className="grid gap-4 xl:grid-cols-2">
-          <div className="rounded-2xl border border-border bg-card p-4">
+          <div className="border-t border-border pt-3">
             <p className="mb-4 text-sm font-semibold text-foreground">
               {kind === "tax-strategy"
-                ? "Annual Tax Savings"
+                ? "Annual tax savings"
                 : kind === "exit-scenarios"
-                  ? "Equity Growth"
-                  : "Annual Cash Flow"}
+                  ? "Equity growth"
+                  : "Annual cash flow"}
             </p>
-            <div className="flex h-56 items-end gap-3 border-t border-border/60 pt-4">
+            <div className="flex h-56 items-end gap-3 border-t border-rule-soft pt-4">
               {bars.map((height, index) => (
                 <div
                   key={index}
@@ -3159,12 +3153,12 @@ function ProFeaturePreview({
                 >
                   <div
                     className={cn(
-                      "w-full rounded-t-lg",
+                      "w-full rounded-t-sm",
                       kind === "tax-strategy" ? "bg-positive" : "bg-primary",
                     )}
                     style={{ height }}
                   />
-                  <span className="text-3xs text-muted-foreground">
+                  <span className="font-figure text-2xs text-muted-foreground">
                     {index + 1}
                   </span>
                 </div>
@@ -3172,15 +3166,15 @@ function ProFeaturePreview({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-4">
+          <div className="border-t border-border pt-3">
             <p className="mb-4 text-sm font-semibold text-foreground">
               {kind === "tax-strategy"
-                ? "Taxable Rental Income Trend"
+                ? "Taxable rental income trend"
                 : kind === "exit-scenarios"
-                  ? "Property Value vs Loan Balance"
-                  : "Income vs Expenses"}
+                  ? "Property value vs loan balance"
+                  : "Income vs expenses"}
             </p>
-            <div className="relative h-56 border-t border-border/60">
+            <div className="relative h-56 border-t border-rule-soft">
               <svg viewBox="0 0 420 220" className="h-full w-full">
                 <path
                   d="M20 165 C110 155 190 145 400 105"
@@ -3191,12 +3185,12 @@ function ProFeaturePreview({
                 <path
                   d="M20 185 C120 180 240 176 400 162"
                   fill="none"
-                  stroke="rgb(219 39 119)"
+                  stroke="var(--metric-negative)"
                   strokeWidth="4"
                 />
                 <path
                   d="M20 55 H400 M20 110 H400 M20 165 H400"
-                  stroke="hsl(var(--border))"
+                  stroke="var(--border)"
                   strokeWidth="1"
                 />
               </svg>
@@ -3206,11 +3200,8 @@ function ProFeaturePreview({
       </div>
 
       <div className="absolute inset-0 flex items-center justify-center bg-background/55 p-4 backdrop-blur-[1px]">
-        <div className="max-w-sm rounded-2xl border border-primary/20 bg-card p-5 text-center shadow-lg">
-          <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <Sparkles className="size-6" />
-          </div>
-          <h3 className="text-lg font-extrabold text-foreground">
+        <div className="max-w-sm rounded-lg border border-border bg-card p-5 text-center shadow-md">
+          <h3 className="font-display text-lg text-foreground">
             {kind === "projections"
               ? "See what this deal could produce over 10 years"
               : kind === "tax-strategy"
@@ -3222,10 +3213,7 @@ function ProFeaturePreview({
           <p className="mt-2 text-sm text-muted-foreground">
             {copy.description}
           </p>
-          <Button
-            className="mt-4 rounded-full font-semibold"
-            onClick={onUpgrade}
-          >
+          <Button className="mt-4 font-semibold" onClick={onUpgrade}>
             Unlock this decision view
           </Button>
         </div>
@@ -3310,20 +3298,22 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
     // 344px phone and below) the three stack. Anything longer wraps inside
     // its card instead of crossing the border. Written as max-width
     // container rules so they can never apply next to the sm: sizes.
+    // Three figures in three columns on one rule, not three tiles in a card
+    // (2026-10 polish): the section is the object, the columns are rows.
     <section
       aria-label="Cash flow over time"
-      className="@container rounded-2xl border border-border bg-card p-4 sm:p-5"
+      className="@container rounded-lg border border-border bg-card p-4 sm:p-5"
     >
-      <div className="mb-3 flex items-center justify-between">
-        <p className="text-xs font-medium text-muted-foreground">
+      <div className="mb-3 flex items-baseline justify-between gap-3 border-b border-border pb-2">
+        <p className="text-sm font-semibold text-foreground">
           Cash flow over time
         </p>
-        <p className="text-3xs font-medium text-muted-foreground hidden sm:block">
+        <p className="hidden font-mono text-2xs text-muted-foreground sm:block">
           monthly · 10-yr horizon
         </p>
       </div>
       <div className="grid grid-cols-3 items-stretch gap-2 @max-[21rem]:gap-1.5 @max-[14.5rem]:grid-cols-1 sm:gap-4">
-        {points.map((point, index) => {
+        {points.map((point) => {
           const tone =
             point.monthly > 25
               ? "positive"
@@ -3332,32 +3322,27 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
                 : "neutral";
           const valueColor =
             tone === "positive"
-              ? "text-[var(--metric-positive,#16a34a)]"
+              ? "text-positive"
               : tone === "negative"
-                ? "text-[var(--metric-negative,#dc2626)]"
+                ? "text-negative"
                 : "text-foreground";
           return (
             <div
               key={point.label}
-              className={cn(
-                "relative min-w-0 rounded-xl border border-border bg-background px-3 py-3 @max-[21rem]:px-1.5 sm:px-4 sm:py-4",
-                index === 0 ? "border-primary/30 bg-primary/[0.03]" : null,
-              )}
+              className="relative min-w-0 px-3 py-2 @max-[21rem]:px-1.5 sm:px-4 sm:py-3"
             >
               <p className="text-xs font-medium text-muted-foreground">
                 {point.label}
               </p>
               <p
                 className={cn(
-                  "mt-1 text-lg font-extrabold tabular-nums [overflow-wrap:anywhere] @max-[21rem]:text-sm sm:text-2xl",
+                  "mt-1 font-figure text-lg font-semibold [overflow-wrap:anywhere] @max-[21rem]:text-sm sm:text-2xl",
                   valueColor,
                 )}
               >
                 {formatMonthly(point.monthly)}
               </p>
-              <p className="mt-0.5 text-3xs text-muted-foreground sm:text-2xs">
-                /mo
-              </p>
+              <p className="mt-0.5 text-2xs text-muted-foreground">/mo</p>
             </div>
           );
         })}
@@ -3444,14 +3429,14 @@ function CashFlowTab({
           type="button"
           onClick={() => setShowBreakdown((prev) => !prev)}
           aria-expanded={showBreakdown}
-          className="group flex w-full items-center justify-between gap-2 rounded-xl px-1 py-1.5 text-left hover:bg-muted/50"
+          className="group flex w-full items-center justify-between gap-2 rounded-md px-1 py-1.5 text-left transition-colors duration-150 hover:bg-band focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
-          <span className="text-xs font-medium text-muted-foreground">
+          <span className="text-sm font-semibold text-foreground">
             Full breakdown
           </span>
           <ChevronDown
             className={cn(
-              "h-4 w-4 text-muted-foreground transition-transform",
+              "h-4 w-4 text-muted-foreground transition-transform duration-150",
               showBreakdown ? "rotate-180" : "rotate-0",
             )}
             aria-hidden
@@ -3459,25 +3444,26 @@ function CashFlowTab({
         </button>
       </div>
       {showBreakdown && (
+        // Three ruled columns (2026-10 polish): a column heading on a 1px
+        // line, rows under it, every figure in the figure face, the two
+        // key figures (loan amount, cash to close) on the 2px rule. No blue
+        // wash, no filled box, no icons.
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
           {/* Monthly income */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="w-4 h-4 text-[var(--metric-positive)]" />
-              <span className="text-xs font-semibold text-foreground">
-                Monthly Income
-              </span>
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Rental Income</span>
-                <span className="font-medium text-foreground">
+            <p className="mb-3 border-b border-foreground pb-2 text-sm font-semibold text-foreground">
+              Monthly income
+            </p>
+            <div className="divide-y divide-rule-soft">
+              <div className="flex justify-between py-1.5 text-sm">
+                <span className="text-muted-foreground">Rental income</span>
+                <span className="font-figure text-foreground">
                   ${Math.round(result.monthlyRentalIncome).toLocaleString()}
                 </span>
               </div>
-              <div className="flex justify-between text-sm border-t border-border pt-2">
+              <div className="flex justify-between py-1.5 text-sm">
                 <span className="font-semibold text-foreground">Total</span>
-                <span className="font-bold text-[var(--metric-positive)]">
+                <span className="font-figure font-semibold text-positive">
                   ${Math.round(result.monthlyRentalIncome).toLocaleString()}
                 </span>
               </div>
@@ -3486,49 +3472,12 @@ function CashFlowTab({
 
           {/* Operating expenses */}
           <div>
-            <div className="mb-4">
-              <span className="text-xs font-semibold text-foreground">
-                Operating Expenses
-              </span>
-
-              {!isLoading &&
-                result &&
-                (result.maintenanceAgeAdjusted || result.capexAgeAdjusted) && (
-                  <div className="rounded-2xl border border-[var(--brand-orange)]/25 bg-[var(--brand-orange-light)] py-2 px-3 ">
-                    <p className="text-xs font-semibold text-[var(--brand-orange)]">
-                      Age Impact on Expenses
-                    </p>
-                    <div className="mt-2 space-y-1 text-xs">
-                      {result.maintenanceAgeAdjusted && (
-                        <p className="text-foreground">
-                          Maintenance: {fmtPct(result.maintenancePctInput)}{" "}
-                          &rarr;{" "}
-                          <span className="text-foreground font-bold">
-                            {" "}
-                            {fmtPct(result.maintenancePctEffective)}
-                          </span>
-                        </p>
-                      )}
-                      {result.capexAgeAdjusted && (
-                        <p className="text-foreground">
-                          CapEx: {fmtPct(result.capexPctInput)} &rarr;{" "}
-                          <span className="text-foreground font-bold">
-                            {" "}
-                            {fmtPct(result.capexPctEffective)}
-                          </span>
-                        </p>
-                      )}
-                    </div>
-                    <p className="mt-2 text-xs text-muted-foreground inline-flex items-center gap-1.5">
-                      <Info className="w-3.5 h-3.5 text-[var(--brand-orange)]" />
-                      Adjusted based on property age ({result.propertyAge} y)
-                    </p>
-                  </div>
-                )}
-            </div>
-            <div className="space-y-2">
+            <p className="mb-3 border-b border-foreground pb-2 text-sm font-semibold text-foreground">
+              Operating expenses
+            </p>
+            <div className="divide-y divide-rule-soft">
               {[
-                { label: "Property Tax", value: result.propertyTax },
+                { label: "Property tax", value: result.propertyTax },
                 { label: "Insurance", value: result.insurance },
                 { label: "HOA", value: result.hoa },
                 { label: "Utilities", value: result.utilities },
@@ -3537,43 +3486,72 @@ function CashFlowTab({
                 { label: "Management", value: result.management },
                 { label: "CapEx", value: result.capex },
               ].map(({ label, value }) => (
-                <div key={label} className="flex justify-between text-sm">
+                <div key={label} className="flex justify-between py-1.5 text-sm">
                   <span className="text-muted-foreground">{label}</span>
-                  <span className="font-medium text-foreground">
+                  <span className="font-figure text-foreground">
                     ${Math.round(value).toLocaleString()}
                   </span>
                 </div>
               ))}
-              <div className="flex justify-between text-sm border-t border-border pt-2">
+              <div className="flex justify-between py-1.5 text-sm">
                 <span className="font-semibold text-foreground">Total</span>
-                <span className="font-bold text-[var(--metric-negative)]">
+                <span className="font-figure font-semibold text-negative">
                   ${Math.round(result.totalOperatingExpenses).toLocaleString()}
                 </span>
               </div>
             </div>
+            {!isLoading &&
+              result &&
+              (result.maintenanceAgeAdjusted || result.capexAgeAdjusted) && (
+                <div className="mt-3 border-t border-border pt-2">
+                  <p className="text-xs font-semibold text-caution-text">
+                    Age impact on expenses
+                  </p>
+                  <div className="mt-1 space-y-1 text-xs">
+                    {/* The arrow is data: the input rate becoming the
+                        effective rate. */}
+                    {result.maintenanceAgeAdjusted && (
+                      <p className="font-figure text-foreground">
+                        Maintenance: {fmtPct(result.maintenancePctInput)}{" "}
+                        &rarr;{" "}
+                        <span className="font-semibold">
+                          {fmtPct(result.maintenancePctEffective)}
+                        </span>
+                      </p>
+                    )}
+                    {result.capexAgeAdjusted && (
+                      <p className="font-figure text-foreground">
+                        CapEx: {fmtPct(result.capexPctInput)} &rarr;{" "}
+                        <span className="font-semibold">
+                          {fmtPct(result.capexPctEffective)}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Adjusted based on property age ({result.propertyAge} y)
+                  </p>
+                </div>
+              )}
           </div>
 
           {/* Debt service */}
           <div>
-            <div className="mb-4">
-              <span className="text-xs font-semibold text-foreground">
-                Debt Service
-              </span>
-            </div>
-            <div className="space-y-4">
-              <div className="bg-[var(--brand-blue-light)] rounded-xl p-4">
-                <p className="text-xs text-muted-foreground mb-1">
-                  Loan Amount
-                </p>
-                <p className="text-xl font-bold text-foreground">
+            <p className="mb-3 border-b border-foreground pb-2 text-sm font-semibold text-foreground">
+              Debt service
+            </p>
+            <div className="space-y-3">
+              <div className="flex items-baseline justify-between gap-4 border-b-2 border-foreground pb-1.5">
+                <p className="text-sm text-muted-foreground">Loan amount</p>
+                <p className="font-figure text-lg font-semibold text-foreground">
                   ${Math.round(result.loanAmount).toLocaleString()}
                 </p>
               </div>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between py-1.5 text-sm">
                 <span className="text-muted-foreground">
-                  Loan Payment (P&amp;I)
+                  Loan payment (P&amp;I)
                 </span>
-                <span className="font-medium text-foreground">
+                <span className="font-figure text-foreground">
                   ${Math.round(result.monthlyPayment).toLocaleString()}
                 </span>
               </div>
@@ -3598,59 +3576,59 @@ function CashFlowTab({
               analyzer against their deal list had to guess they were one
               number. "Cash to close" is the canonical label (the deal list
               + dashboard already used it). */}
-            <div className="mt-6 pt-5 border-t border-border">
-              <p className="text-xs font-medium text-muted-foreground mb-3">
-                Cash to Close
+            <div className="mt-6">
+              <p className="mb-3 border-b border-foreground pb-2 text-sm font-semibold text-foreground">
+                Cash to close
               </p>
-              <div className="flex justify-between text-sm mb-1">
-                <div>
-                  <p className="text-muted-foreground">Down Payment</p>
-                  <p className="text-xs text-muted-foreground">
-                    {fmtPct(result.downPaymentPct)}
-                  </p>
-                </div>
-                <span className="font-semibold text-foreground">
-                  ${Math.round(result.downPayment).toLocaleString()}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm mb-1">
-                <div>
-                  <p className="text-muted-foreground">Closing Costs</p>
-                  <p className="text-xs text-muted-foreground">
-                    {fmtPct(result.closingCostsPct)}
-                  </p>
-                </div>
-                <span className="font-semibold text-foreground">
-                  ${Math.round(result.closingCosts).toLocaleString()}
-                </span>
-              </div>
-              {/* Up-front rehab + STR furnishing are in totalCashRequired too, so
-              itemize the residual or the lines won't sum to Total Investment. */}
-              {(() => {
-                const upfrontExtra = Math.max(
-                  0,
-                  Math.round(
-                    result.totalCashRequired -
-                      result.downPayment -
-                      result.closingCosts,
-                  ),
-                );
-                return upfrontExtra > 0 ? (
-                  <div className="flex justify-between text-sm mb-3">
-                    <p className="text-muted-foreground">Rehab / Furnishing</p>
-                    <span className="font-semibold text-foreground">
-                      ${Math.round(upfrontExtra).toLocaleString()}
-                    </span>
+              <div className="divide-y divide-rule-soft">
+                <div className="flex justify-between py-1.5 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Down payment</p>
+                    <p className="font-figure text-xs text-muted-foreground">
+                      {fmtPct(result.downPaymentPct)}
+                    </p>
                   </div>
-                ) : (
-                  <div className="mb-2" />
-                );
-              })()}
-              <div className="bg-primary rounded-xl p-4 flex justify-between items-center">
-                <p className="text-sm font-semibold text-primary-foreground">
+                  <span className="font-figure text-foreground">
+                    ${Math.round(result.downPayment).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between py-1.5 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Closing costs</p>
+                    <p className="font-figure text-xs text-muted-foreground">
+                      {fmtPct(result.closingCostsPct)}
+                    </p>
+                  </div>
+                  <span className="font-figure text-foreground">
+                    ${Math.round(result.closingCosts).toLocaleString()}
+                  </span>
+                </div>
+                {/* Up-front rehab + STR furnishing are in totalCashRequired too, so
+                itemize the residual or the lines won't sum to Total Investment. */}
+                {(() => {
+                  const upfrontExtra = Math.max(
+                    0,
+                    Math.round(
+                      result.totalCashRequired -
+                        result.downPayment -
+                        result.closingCosts,
+                    ),
+                  );
+                  return upfrontExtra > 0 ? (
+                    <div className="flex justify-between py-1.5 text-sm">
+                      <p className="text-muted-foreground">Rehab / furnishing</p>
+                      <span className="font-figure text-foreground">
+                        ${Math.round(upfrontExtra).toLocaleString()}
+                      </span>
+                    </div>
+                  ) : null;
+                })()}
+              </div>
+              <div className="mt-2 flex items-baseline justify-between gap-4 border-t-2 border-foreground pt-2">
+                <p className="text-sm font-semibold text-foreground">
                   Total cash to close
                 </p>
-                <p className="text-xl font-extrabold text-primary-foreground">
+                <p className="font-display font-figure text-xl text-foreground">
                   ${Math.round(result.totalCashRequired).toLocaleString()}
                 </p>
               </div>

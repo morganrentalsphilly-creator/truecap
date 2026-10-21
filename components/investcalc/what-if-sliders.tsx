@@ -46,7 +46,7 @@
  */
 
 import { useMemo, useState, useCallback, useEffect } from "react";
-import { CloudRain, RotateCcw, Sparkles } from "lucide-react";
+import { CloudRain, RotateCcw } from "lucide-react";
 import { calculateAnalysis, type AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { getDealTier, type DealTier } from "@/lib/verdict";
@@ -188,28 +188,27 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
   const tierToneClass = TIER_TONE[tier];
 
   return (
-    <div className="rounded-2xl border border-border bg-card/60 p-3 sm:p-4">
+    // Rows on lines under the "Play with the numbers" disclosure, not a
+    // translucent card: the ledger row's card already frames this.
+    <div className="border-t border-border pt-3">
       {/* SR-only running commentary of the adjusted metrics (see liveMsg). */}
       <span className="sr-only" aria-live="polite" aria-atomic="true">
         {liveMsg}
       </span>
-      {/* Header row - kicker + tier pill + (optional) reset button. */}
+      {/* Header row - label + tier tag + (optional) reset button. */}
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-1.5">
-          <Sparkles className="size-3.5 text-primary" />
-          <span className="text-xs font-medium text-muted-foreground">
-            What-if
-          </span>
-        </div>
+        <span className="text-xs font-medium text-muted-foreground">
+          What-if
+        </span>
         <span
-          className={`rounded-full px-2 py-0.5 text-xs font-semibold ${tierToneClass}`}
+          className={`rounded-sm border px-2 py-0.5 text-xs font-semibold ${tierToneClass}`}
           aria-live="polite"
           aria-atomic="true"
         >
           {tier}
         </span>
         {isAdjusted ? (
-          <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-3xs font-semibold text-primary">
+          <span className="ml-1 inline-flex items-center rounded-sm border border-border px-1.5 py-0.5 font-mono text-2xs text-muted-foreground">
             {formatAdjustmentLabel(rentPct, pricePct, ratePp, vacancyPp)}
           </span>
         ) : null}
@@ -218,10 +217,10 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
           <button
             type="button"
             onClick={reset}
-            className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-2xs font-semibold text-foreground/80 hover:bg-muted"
+            className="inline-flex min-h-11 items-center gap-1 rounded-md border border-input bg-transparent px-3 text-2xs font-semibold text-foreground transition-colors duration-150 hover:bg-band focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             aria-label="Reset what-if sliders to actuals"
           >
-            <RotateCcw className="size-3" />
+            <RotateCcw className="size-3" aria-hidden />
             Reset
           </button>
         ) : null}
@@ -234,15 +233,15 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
           type="button"
           onClick={applyWorstCase}
           aria-pressed={isWorstCase}
-          className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 py-1 text-2xs font-semibold transition-colors ${
+          className={`inline-flex min-h-11 items-center gap-1.5 rounded-md border px-3 py-1 text-2xs font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
             isWorstCase
               ? "border-primary bg-primary/10 text-primary"
-              : "border-border bg-background text-foreground/80 hover:bg-muted"
+              : "border-input bg-transparent text-foreground hover:bg-band"
           }`}
         >
           <CloudRain className="size-3.5" aria-hidden />
           Worst case
-          <span className="font-normal text-muted-foreground">
+          <span className="font-figure font-normal text-muted-foreground">
             {isCashPurchase ? "rent −10% · vacancy +5pp" : "rent −10% · vacancy +5pp · rate +1pp"}
           </span>
         </button>
@@ -251,17 +250,17 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
           onClick={reset}
           aria-pressed={!isAdjusted}
           disabled={!isAdjusted}
-          className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 py-1 text-2xs font-semibold transition-colors ${
+          className={`inline-flex min-h-11 items-center gap-1.5 rounded-md border px-3 py-1 text-2xs font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-100 ${
             !isAdjusted
               ? "border-primary bg-primary/10 text-primary"
-              : "border-border bg-background text-foreground/80 hover:bg-muted"
+              : "border-input bg-transparent text-foreground hover:bg-band"
           }`}
         >
           Base case
         </button>
         {isCashPurchase ? (
-          <span className="text-3xs text-muted-foreground">
-            Cash purchase — no loan, so rate stress is skipped.
+          <span className="text-2xs text-muted-foreground">
+            Cash purchase: no loan, so rate stress is skipped.
           </span>
         ) : null}
       </div>
@@ -339,12 +338,16 @@ export function WhatIfSliders({ values, baseResult, onStateChange }: Props) {
  * Strong and Negative already cleared AA and keep their solid fills so the two
  * decisive ends stay visually strongest.
  */
+// Status tags follow the Sign rule and the app's chip grammar (DESIGN.md
+// "Status chips"): a pass on the positive wash in green, a caution on the
+// highlight wash in its text colour, a miss on the negative wash in red;
+// nothing is white on green or white on red.
 const TIER_TONE: Record<DealTier, string> = {
-  Strong: "bg-[var(--brand-green)] text-white",
-  Solid: "bg-positive-light text-positive",
-  Mixed: "bg-caution-light text-caution-text",
-  Marginal: "bg-caution-light text-caution-text",
-  Negative: "bg-negative text-white",
+  Strong: "border-positive/30 bg-positive-light text-positive",
+  Solid: "border-positive/30 bg-positive-light text-positive",
+  Mixed: "border-caution/30 bg-caution-light text-caution-text",
+  Marginal: "border-caution/30 bg-caution-light text-caution-text",
+  Negative: "border-negative/30 bg-negative/10 text-destructive-text",
 };
 
 /** "rent −10% · vacancy +5pp · rate +1pp" style summary of the current
@@ -395,8 +398,8 @@ function SliderRow({
       <div className="flex items-center justify-between text-xs">
         <span className="font-semibold text-foreground">{label}</span>
         <span
-          className={`font-mono tabular-nums font-bold ${
-            isZero ? "text-muted-foreground" : "text-primary"
+          className={`font-figure font-semibold ${
+            isZero ? "text-muted-foreground" : "text-foreground"
           }`}
         >
           {!isZero && showSign && value > 0 ? "+" : ""}
@@ -420,7 +423,7 @@ function SliderRow({
           className="whatif-range h-2 w-full cursor-pointer appearance-none rounded-full bg-muted"
         />
       </div>
-      <div className="flex justify-between text-3xs text-muted-foreground">
+      <div className="flex justify-between font-figure text-2xs text-muted-foreground">
         <span>
           {min > 0 ? "+" : ""}
           {min}

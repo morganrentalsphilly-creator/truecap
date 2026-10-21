@@ -60,7 +60,7 @@ export function SummaryCardGrid({
     // Dashboard-hardening: one surface with hairline-separated cells
     // (gap-px over a border-colored background) instead of a row of
     // boxed cards. Robust for any column count, including wrapping.
-    <div className={cn("grid gap-px overflow-hidden rounded-2xl border border-border bg-border", columnsClassName)}>
+    <div className={cn("grid gap-px overflow-hidden rounded-lg border border-border bg-border", columnsClassName)}>
       {items.map((item) => (
         <div key={item.label} className="bg-card p-4 sm:p-5">
           {item.labelTooltip ? (
@@ -68,11 +68,13 @@ export function SummaryCardGrid({
           ) : (
             <p className="text-xs font-medium text-muted-foreground">{item.label}</p>
           )}
+          {/* The figure face at the display weight (the Figure rule), never
+              Geist Mono. */}
           <p
             className={cn(
-              "mt-2 font-mono text-2xl font-extrabold tabular-nums tracking-tight",
-              item.tone === "positive" && "text-[var(--metric-positive)]",
-              item.tone === "negative" && "text-[var(--metric-negative)]",
+              "mt-2 font-display font-figure text-2xl",
+              item.tone === "positive" && "text-positive",
+              item.tone === "negative" && "text-negative",
               (!item.tone || item.tone === "neutral") && "text-foreground"
             )}
           >

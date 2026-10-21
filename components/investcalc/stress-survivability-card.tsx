@@ -15,7 +15,6 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import { ShieldAlert, ShieldCheck } from "lucide-react";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 import { buildStressSurvivability } from "@/lib/stress-survivability";
 
@@ -42,22 +41,11 @@ export function StressSurvivabilityCard({ base, stressed, adjustmentLabel }: Pro
   const good = s.survives;
 
   return (
-    <div
-      className={`flex items-start gap-3 rounded-2xl border p-3 sm:p-4 ${
-        good
-          ? "border-[var(--brand-green)]/25 bg-[var(--brand-green-light)]"
-          : "border-negative/30 bg-negative/10"
-      }`}
-    >
+    // A ruled row under the sliders, not a tinted card with an icon tile:
+    // the headline carries the Sign rule's green or red, nothing else does.
+    <div className="border-t border-border pt-3">
       <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {announced}
-      </span>
-      <span
-        className={`flex size-8 shrink-0 items-center justify-center rounded-lg bg-card ${
-          good ? "text-[var(--brand-green)]" : "text-destructive-text"
-        }`}
-      >
-        {good ? <ShieldCheck className="size-4" aria-hidden /> : <ShieldAlert className="size-4" aria-hidden />}
       </span>
       <div className="min-w-0 space-y-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
@@ -65,20 +53,20 @@ export function StressSurvivabilityCard({ base, stressed, adjustmentLabel }: Pro
             Survivability
           </span>
           {adjustmentLabel ? (
-            <span className="text-3xs font-semibold text-muted-foreground">
+            <span className="font-figure text-2xs text-muted-foreground">
               under {adjustmentLabel}
             </span>
           ) : null}
         </div>
         <p
-          className={`text-sm font-bold ${
-            good ? "text-[var(--brand-green)]" : "text-destructive-text"
+          className={`text-sm font-semibold ${
+            good ? "text-positive" : "text-destructive-text"
           }`}
         >
           {s.headline}
         </p>
         {s.breakEven.sentence ? (
-          <p className="text-xs leading-relaxed text-foreground/70">
+          <p className="text-xs leading-relaxed text-muted-foreground">
             {s.breakEven.sentence}
           </p>
         ) : null}

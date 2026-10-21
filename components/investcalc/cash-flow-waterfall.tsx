@@ -14,10 +14,13 @@
  * exist; no new business logic. Self-hides when monthlyRentalIncome
  * is ≤ 0 so we never render a 0-width chart.
  *
- * Mobile: bar collapses to a vertical legend layout because a 12-row
- * horizontal stack at 320px is unreadable. The legend always shows
- * the dollar + percent for each segment, which is the actual signal
- * - the bar visualization is the cherry on top.
+ * Blueprint (2026-10): the outflow segments are graphite steps (the
+ * foreground at decreasing opacity, in waterfall order), and only the net
+ * carries a colour, green by the Sign rule. The legend is a ruled list, not
+ * a two-column grid of swatches.
+ *
+ * Mobile: the legend always shows the dollar + percent for each segment,
+ * which is the actual signal - the bar visualization is the cherry on top.
  */
 import type { AnalysisResult } from "@/lib/calc-analysis";
 
@@ -25,8 +28,6 @@ type Segment = {
   key: string;
   label: string;
   value: number; // monthly dollars
-  /** CSS color (uses brand-system vars). */
-  color: string;
 };
 
 function fmtUsd(n: number): string {
@@ -43,6 +44,16 @@ function fmtPct(num: number, denom: number): string {
   return `${pct.toFixed(0)}%`;
 }
 
+/**
+ * The graphite step for the n-th outflow segment: the foreground ink at
+ * 92% for the first, stepping down 7 points per segment and never below
+ * 29% (ten segments), so adjacent segments stay distinguishable on the
+ * white card and the whole bar reads as one drawing.
+ */
+function graphiteStep(index: number): number {
+  return Math.max(0.29, 0.92 - index * 0.07);
+}
+
 export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
   const gross = result.monthlyRentalIncome;
   if (!Number.isFinite(gross) || gross <= 0) return null;
@@ -51,16 +62,16 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
   // pre-collection loss, not an out-of-pocket cost), then OpEx in
   // priority order, then debt service. NCF is the residual.
   const segments: Segment[] = [
-    { key: "vacancy",     label: "Vacancy",        value: Math.max(0, result.vacancy),     color: "rgb(148, 163, 184)" }, // slate-400
-    { key: "tax",         label: "Property tax",   value: Math.max(0, result.propertyTax), color: "rgb(245, 158, 11)" }, // amber-500
-    { key: "insurance",   label: "Insurance",      value: Math.max(0, result.insurance),   color: "rgb(59, 130, 246)" }, // blue-500 - moved off the warm tones so Insurance doesn't blend into the adjacent amber Property-tax segment in the bar + legend
-    { key: "mgmt",        label: "Management",     value: Math.max(0, result.management),  color: "rgb(249, 115, 22)" }, // orange-500 (moved off purple to stay on-brand)
-    { key: "maintenance", label: "Maintenance",    value: Math.max(0, result.maintenance), color: "rgb(13, 148, 136)" }, // teal-600 - spread away from the purple/pink neighbours so adjacent segments stay distinguishable
-    { key: "capex",       label: "CapEx reserve",  value: Math.max(0, result.capex),       color: "rgb(236, 72, 153)" }, // pink-500
-    { key: "hoa",         label: "HOA",            value: Math.max(0, result.hoa),         color: "rgb(132, 204, 22)" }, // lime-500 (moved off indigo to stay on-brand)
-    { key: "utilities",   label: "Utilities",      value: Math.max(0, result.utilities),   color: "rgb(56, 189, 248)" }, // sky-400
-    { key: "debt",        label: "Mortgage (P&I)", value: Math.max(0, result.loanPrincipalAndInterest), color: "rgb(220, 38, 38)" }, // red-600
-    { key: "pmi",         label: "PMI",            value: Math.max(0, result.pmiMonthly),  color: "rgb(157, 23, 77)" }, // pink-800 — financing-adjacent, distinct from debt + capex
+    { key: "vacancy", label: "Vacancy", value: Math.max(0, result.vacancy) },
+    { key: "tax", label: "Property tax", value: Math.max(0, result.propertyTax) },
+    { key: "insurance", label: "Insurance", value: Math.max(0, result.insurance) },
+    { key: "mgmt", label: "Management", value: Math.max(0, result.management) },
+    { key: "maintenance", label: "Maintenance", value: Math.max(0, result.maintenance) },
+    { key: "capex", label: "CapEx reserve", value: Math.max(0, result.capex) },
+    { key: "hoa", label: "HOA", value: Math.max(0, result.hoa) },
+    { key: "utilities", label: "Utilities", value: Math.max(0, result.utilities) },
+    { key: "debt", label: "Mortgage (P&I)", value: Math.max(0, result.loanPrincipalAndInterest) },
+    { key: "pmi", label: "PMI", value: Math.max(0, result.pmiMonthly) },
   ].filter((s) => s.value > 0);
 
   const totalOutflow = segments.reduce((sum, s) => sum + s.value, 0);
@@ -73,7 +84,6 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
     key: "ncf",
     label: ncfPositive ? "Net cash flow" : "Shortfall",
     value: Math.abs(ncf),
-    color: ncfPositive ? "rgb(22, 163, 74)" : "rgb(220, 38, 38)", // emerald-600 / red-600
   };
   const allSegments = ncfPositive ? [...segments, ncfSegment] : [...segments]; // shortfall handled separately below
 
@@ -85,19 +95,19 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
   return (
     <section
       aria-label="Cash flow waterfall"
-      className="rounded-2xl border border-border bg-card p-4 sm:p-5"
+      className="rounded-lg border border-border bg-card p-4 sm:p-5"
     >
       {/* Header - title left, the two headline numbers (Gross rent IN,
           Net cash flow OUT) prominently displayed on the right so the
           punchline conclusion is the FIRST thing the eye lands on, not
           buried at the bottom of the legend. */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-medium text-foreground">
+          <p className="text-sm font-semibold text-foreground">
             Where the rent goes
           </p>
-          <p className="mt-0.5 text-2xs text-muted-foreground">
-            Monthly - every dollar in, every dollar out. Percentages are
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Monthly: every dollar in, every dollar out. Percentages are
             each cost&apos;s share of gross rent.
           </p>
         </div>
@@ -106,21 +116,21 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
             <p className="text-xs font-medium text-muted-foreground">
               Gross rent
             </p>
-            <p className="text-lg font-extrabold tabular-nums text-foreground sm:text-xl">
+            <p className="font-figure text-lg font-semibold text-foreground sm:text-xl">
               {fmtUsd(gross)}
             </p>
           </div>
           <div className="text-left sm:text-right">
             <p
               className={`text-xs font-medium ${
-                ncfPositive ? "text-[var(--metric-positive,#16a34a)]" : "text-[var(--metric-negative,#dc2626)]"
+                ncfPositive ? "text-positive" : "text-negative"
               }`}
             >
               {ncfPositive ? "Net cash flow" : "Monthly shortfall"}
             </p>
             <p
-              className={`text-xl font-extrabold tabular-nums sm:text-2xl ${
-                ncfPositive ? "text-[var(--metric-positive,#16a34a)]" : "text-[var(--metric-negative,#dc2626)]"
+              className={`font-figure text-xl font-semibold sm:text-2xl ${
+                ncfPositive ? "text-positive" : "text-negative"
               }`}
             >
               {ncfPositive ? "+" : "-"}
@@ -134,7 +144,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
           bar still renders - 9 thin segments are still informative as
           a visual anchor - but the legend below is the real readout. */}
       <div
-        className="mt-4 flex h-8 w-full overflow-hidden rounded-lg ring-1 ring-border"
+        className="mt-4 flex h-8 w-full overflow-hidden rounded-sm ring-1 ring-border"
         role="img"
         aria-label={[
           ncfPositive
@@ -146,36 +156,45 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
             : `Monthly shortfall ${fmtUsd(Math.abs(ncf))} per month.`,
         ].join(" ")}
       >
-        {allSegments.map((seg) => {
+        {allSegments.map((seg, index) => {
           const widthPct = (seg.value / scaleBase) * 100;
           if (widthPct < 0.5) return null; // tiny segments would render invisibly anyway
+          const isNet = seg.key === "ncf";
           return (
             <div
               key={seg.key}
               title={`${seg.label}: ${fmtUsd(seg.value)}`}
-              style={{ width: `${widthPct}%`, backgroundColor: seg.color }}
+              style={{
+                width: `${widthPct}%`,
+                backgroundColor: isNet
+                  ? "var(--metric-positive)"
+                  : "var(--foreground)",
+                opacity: isNet ? 1 : graphiteStep(index),
+              }}
               className="h-full"
             />
           );
         })}
       </div>
 
-      {/* Legend - the per-segment readout. NCF is no longer duplicated
-          here because it's already the headline in the card header
-          (top-right). Keeping the legend focused on the outflow lines
-          makes the waterfall less noisy. */}
-      <ul className="mt-4 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-        {segments.map((seg) => (
-          <li key={seg.key} className="flex items-center justify-between gap-3 text-sm">
-            <span className="flex min-w-0 items-center gap-2 text-foreground/80">
+      {/* Legend - the per-segment readout, as rows on soft lines. NCF is
+          not duplicated here because it's already the headline in the
+          header (top-right). */}
+      <ul className="mt-4 divide-y divide-rule-soft border-t border-border">
+        {segments.map((seg, index) => (
+          <li key={seg.key} className="flex items-center justify-between gap-3 py-1.5 text-sm">
+            <span className="flex min-w-0 items-center gap-2 text-foreground">
               <span
                 aria-hidden
                 className="inline-block size-2.5 shrink-0 rounded-sm"
-                style={{ backgroundColor: seg.color }}
+                style={{
+                  backgroundColor: "var(--foreground)",
+                  opacity: graphiteStep(index),
+                }}
               />
               <span className="truncate">{seg.label}</span>
             </span>
-            <span className="shrink-0 tabular-nums text-muted-foreground">
+            <span className="shrink-0 font-figure text-muted-foreground">
               <span className="font-semibold text-foreground">{fmtUsd(seg.value)}</span>
               <span className="ml-1.5 text-2xs">({fmtPct(seg.value, gross)})</span>
             </span>

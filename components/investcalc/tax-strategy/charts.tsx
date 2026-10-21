@@ -24,13 +24,14 @@ import {
 } from "@/components/investcalc/analysis-panels/shared/formatters";
 import type { TaxStrategyYear } from "@/lib/tax-strategy";
 
+// Sentence case (DESIGN.md chrome rules).
 const chartConfig = {
-  taxSavingsAnnual: { label: "Modeled Tax Savings", color: "var(--color-chart-2)" },
-  taxLiabilityAnnual: { label: "Modeled Tax Liability", color: "var(--color-chart-5)" },
-  taxableRentalIncomeAnnual: { label: "Taxable Rental Income", color: "var(--color-chart-1)" },
-  mortgageInterestDeductionAnnual: { label: "Interest Deduction", color: "var(--color-chart-4)" },
+  taxSavingsAnnual: { label: "Modeled tax savings", color: "var(--color-chart-2)" },
+  taxLiabilityAnnual: { label: "Modeled tax liability", color: "var(--color-chart-5)" },
+  taxableRentalIncomeAnnual: { label: "Taxable rental income", color: "var(--color-chart-1)" },
+  mortgageInterestDeductionAnnual: { label: "Interest deduction", color: "var(--color-chart-4)" },
   depreciationDeductionAnnual: { label: "Depreciation", color: "var(--color-chart-3)" },
-  operatingExpensesAnnual: { label: "Operating Expenses", color: "var(--color-chart-5)" },
+  operatingExpensesAnnual: { label: "Operating expenses", color: "var(--color-chart-5)" },
 } as const;
 
 export function TaxStrategyCharts({
@@ -43,7 +44,7 @@ export function TaxStrategyCharts({
   const animate = useChartDrawAnimation();
   return (
     <div className="grid min-w-0 gap-3 sm:gap-4 xl:grid-cols-2">
-      <ChartCard title="Modeled Annual Tax Savings">
+      <ChartCard title="Modeled annual tax savings">
         <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <BarChart data={years}>
             <CartesianGrid vertical={false} />
@@ -55,7 +56,7 @@ export function TaxStrategyCharts({
         </ChartContainer>
       </ChartCard>
 
-      <ChartCard title="Taxable Rental Income Trend">
+      <ChartCard title="Taxable rental income trend">
         <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <LineChart data={years}>
             <CartesianGrid vertical={false} />
@@ -74,7 +75,7 @@ export function TaxStrategyCharts({
         </ChartContainer>
       </ChartCard>
 
-      <ChartCard title="Interest vs Depreciation Deduction">
+      <ChartCard title="Interest vs depreciation deduction">
         <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[280px]">
           <LineChart data={years}>
             <CartesianGrid vertical={false} />
@@ -102,7 +103,7 @@ export function TaxStrategyCharts({
         </ChartContainer>
       </ChartCard>
 
-      <ChartCard title="Deductions Breakdown">
+      <ChartCard title="Deductions breakdown">
         <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[280px]">
           <BarChart data={years}>
             <CartesianGrid vertical={false} />

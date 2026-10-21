@@ -99,17 +99,20 @@ export function LoanAmortizationView({
   const hasBalloon = rows.some((row) => row.balloon > 0);
 
   return (
-    <details className="group rounded-xl border border-border bg-card p-3 sm:p-4">
-      <summary className="min-h-11 flex cursor-pointer items-center gap-2.5 select-none list-none">
+    // A ruled disclosure inside the cash-flow row, not a card in the card
+    // (2026-10 polish): one line above, the chevron, the title and its
+    // metadata line.
+    <details className="group border-t border-border pt-3">
+      <summary className="min-h-11 flex cursor-pointer items-center gap-2.5 select-none list-none rounded-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
         <ChevronRight
           aria-hidden
-          className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
+          className="size-4 shrink-0 text-muted-foreground transition-transform duration-150 group-open:rotate-90"
         />
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-semibold text-foreground">
             Loan amortization
           </span>
-          <span className="mt-0.5 block text-2xs leading-snug text-muted-foreground">
+          <span className="mt-0.5 block font-figure text-2xs leading-snug text-muted-foreground">
             Year-by-year interest, scheduled principal and balance ·{" "}
             {values.loanTermYears}-year maturity ·{" "}
             {result.amortizationTermYears ??
@@ -173,22 +176,22 @@ export function LoanAmortizationView({
             {previewRows.map((row) => (
               <tr
                 key={row.year}
-                className="border-b border-border/50 last:border-b-0"
+                className="border-b border-rule-soft last:border-b-0"
               >
-                <td className="py-2 pr-3 text-xs font-bold text-foreground">
+                <td className="py-2 pr-3 font-figure text-xs font-semibold text-foreground">
                   {row.year}
                 </td>
-                <td className="py-2 px-3 text-right tabular-nums text-muted-foreground">
+                <td className="py-2 px-3 text-right font-figure text-muted-foreground">
                   {fmtUsd(row.interest)}
                 </td>
-                <td className="py-2 px-3 text-right tabular-nums font-semibold text-foreground">
+                <td className="py-2 px-3 text-right font-figure font-semibold text-foreground">
                   {fmtUsd(row.principal)}
                 </td>
-                <td className="py-2 pl-3 text-right tabular-nums text-foreground">
+                <td className="py-2 pl-3 text-right font-figure text-foreground">
                   {fmtUsd(row.endingBalance)}
                 </td>
                 {hasBalloon ? (
-                  <td className="py-2 pl-3 text-right tabular-nums font-semibold text-[var(--metric-negative)]">
+                  <td className="py-2 pl-3 text-right font-figure font-semibold text-negative">
                     {row.balloon > 0 ? fmtUsd(row.balloon) : "—"}
                   </td>
                 ) : null}

@@ -13,7 +13,6 @@
  * until there's a result with a measurable top driver.
  */
 import { useMemo } from "react";
-import { Crosshair } from "lucide-react";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 import { computeAssumptionImpact } from "@/lib/assumption-impact";
@@ -121,15 +120,12 @@ export function DealDriverInsight({
   return (
     // Neutral chrome (not the blue tint): the blue treatment is reserved
     // for the interactive what-if affordance so exactly one element pops.
-    <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-4 sm:p-5">
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-card text-primary">
-        <Crosshair className="size-4" />
-      </span>
+    <div className="border-t border-border pt-3">
       <div className="min-w-0 space-y-1">
-        <p className="text-xs font-medium text-primary">
+        <p className="text-xs font-medium text-muted-foreground">
           What decides this deal
         </p>
-        <p className="text-sm font-bold text-foreground">
+        <p className="text-sm font-semibold text-foreground">
           {top.label} is the swing factor — a {top.deltaLabel} move changes your monthly cash flow by{" "}
           <span className="text-primary">±${swing.toLocaleString()}</span>.
         </p>

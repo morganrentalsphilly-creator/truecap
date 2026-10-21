@@ -20,44 +20,37 @@ export function TenYearProjectionTable({
   const hasBalloon = projectionYears.some(
     (year) => (year.balloonPaymentAnnual ?? 0) > 0,
   );
+  // Sentence case, acronyms kept (DESIGN.md chrome rules, table heads
+  // included).
   const columns = [
     "Year",
-    "Rental Income",
-    "Operating Expenses",
-    "Annual Debt Service (P&I + Mortgage Insurance)",
-    ...(hasBalloon ? ["Balloon Due"] : []),
-    "Net Cash Flow",
-    ...(showTaxMetrics ? ["Tax Effect", "After-Tax Cash Flow"] : []),
-    "Cumulative Cash Flow",
+    "Rental income",
+    "Operating expenses",
+    "Annual debt service (P&I + mortgage insurance)",
+    ...(hasBalloon ? ["Balloon due"] : []),
+    "Net cash flow",
+    ...(showTaxMetrics ? ["Tax effect", "After-tax cash flow"] : []),
+    "Cumulative cash flow",
   ];
 
   return (
     <>
-      <div className="space-y-2 sm:hidden">
+      {/* Phones: one ruled row per year, not a stack of cards. */}
+      <div className="divide-y divide-border border-y border-border sm:hidden">
         {projectionYears.map((year) => {
           const isOpen = openYear === year.year;
           return (
-            <div
-              key={year.year}
-              className="rounded-xl border border-border bg-card shadow-sm"
-            >
+            <div key={year.year}>
               <button
                 type="button"
+                aria-expanded={isOpen}
                 onClick={() => setOpenYear(isOpen ? null : year.year)}
-                className={cn(
-                  "flex w-full items-center justify-between gap-3 px-3.5 py-3 text-left",
-                  isOpen && "border-b border-border",
-                )}
+                className="flex min-h-11 w-full items-center justify-between gap-3 py-3 text-left focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
-                <span
-                  className={cn(
-                    "text-sm font-bold",
-                    isOpen ? "text-primary" : "text-foreground",
-                  )}
-                >
+                <span className="text-sm font-semibold text-foreground">
                   Year {year.year}
                 </span>
-                <span className="ml-auto min-w-0 truncate text-right text-xs font-medium text-muted-foreground">
+                <span className="ml-auto min-w-0 truncate text-right font-figure text-xs text-muted-foreground">
                   {formatCurrency(year.rentalIncomeAnnual)} /{" "}
                   {formatCurrency(year.operatingExpensesAnnual)}
                 </span>
@@ -69,19 +62,19 @@ export function TenYearProjectionTable({
               </button>
 
               {isOpen && (
-                <div className="px-3.5 py-2">
+                <div className="pb-2">
                   {(
                     [
                       [
-                        "Rental Income",
+                        "Rental income",
                         formatCurrency(year.rentalIncomeAnnual),
                       ],
                       [
-                        "Operating Expenses",
+                        "Operating expenses",
                         formatCurrency(year.operatingExpensesAnnual),
                       ],
                       [
-                        "Annual Debt Service (P&I + Mortgage Insurance)",
+                        "Annual debt service (P&I + mortgage insurance)",
                         formatCurrency(year.debtServiceAnnual),
                       ],
                       ...((year.balloonPaymentAnnual ?? 0) > 0
@@ -102,26 +95,26 @@ export function TenYearProjectionTable({
                           ]
                         : []),
                       [
-                        "Net Cash Flow",
+                        "Net cash flow",
                         formatCurrency(year.netCashFlowAnnual),
                         year.netCashFlowAnnual,
                       ],
                       ...(showTaxMetrics
                         ? [
                             [
-                              "Tax Effect",
+                              "Tax effect",
                               formatCurrency(year.taxSavingsAnnual),
                               year.taxSavingsAnnual,
                             ],
                             [
-                              "After-Tax Cash Flow",
+                              "After-tax cash flow",
                               formatCurrency(year.afterTaxCashFlowAnnual),
                               year.afterTaxCashFlowAnnual,
                             ],
                           ]
                         : []),
                       [
-                        "Cumulative Cash Flow",
+                        "Cumulative cash flow",
                         formatCurrency(year.cumulativeCashFlowAnnual),
                         year.cumulativeCashFlowAnnual,
                       ],
@@ -129,18 +122,18 @@ export function TenYearProjectionTable({
                   ).map(([label, value, numericValue]) => (
                     <div
                       key={String(label)}
-                      className="flex items-center justify-between gap-3 border-b border-border/70 py-2 last:border-b-0"
+                      className="flex items-center justify-between gap-3 border-b border-rule-soft py-2 last:border-b-0"
                     >
                       <span className="text-xs font-medium text-muted-foreground">
                         {label}
                       </span>
                       <span
                         className={cn(
-                          "text-right text-sm font-semibold text-foreground",
+                          "text-right font-figure text-sm font-semibold text-foreground",
                           typeof numericValue === "number" &&
                             (numericValue >= 0
-                              ? "text-[var(--metric-positive)]"
-                              : "text-[var(--metric-negative)]"),
+                              ? "text-positive"
+                              : "text-negative"),
                         )}
                       >
                         {value}
@@ -161,11 +154,14 @@ export function TenYearProjectionTable({
           card, and the head is the solid band so the pinned Year head
           matches its row. */}
       <div className="hidden sm:block">
+        {/* The table sits on lines inside the ledger row's card: a 1px line
+            above, the head on the band, rows on soft lines; no card of its
+            own. */}
         <ScrollX
           label="Table"
           cue
           stickyFirstColumn
-          className="overflow-x-auto rounded-2xl border border-border bg-card"
+          className="overflow-x-auto border-t border-border"
         >
           <table className="w-full min-w-[980px] text-sm">
             <thead className="bg-muted">
@@ -173,7 +169,7 @@ export function TenYearProjectionTable({
                 {columns.map((label) => (
                   <th
                     key={label}
-                    className="px-4 text-left text-xs font-medium text-muted-foreground"
+                    className="px-4 text-left text-xs font-semibold text-muted-foreground"
                   >
                     {label}
                   </th>
@@ -184,26 +180,26 @@ export function TenYearProjectionTable({
               {projectionYears.map((year) => (
                 <tr
                   key={year.year}
-                  className="border-b border-border/70 last:border-b-0"
+                  className="border-b border-rule-soft last:border-b-0"
                 >
-                  <td className="px-4 py-3 font-semibold text-foreground">
+                  <td className="px-4 py-3 font-figure font-semibold text-foreground">
                     {year.year}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 font-figure">
                     {formatCurrency(year.rentalIncomeAnnual)}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 font-figure">
                     {formatCurrency(year.operatingExpensesAnnual)}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 font-figure">
                     {formatCurrency(year.debtServiceAnnual)}
                   </td>
                   {hasBalloon ? (
                     <td
                       className={cn(
-                        "px-4 py-3 font-semibold",
+                        "px-4 py-3 font-figure font-semibold",
                         (year.balloonPaymentAnnual ?? 0) > 0
-                          ? "text-[var(--metric-negative)]"
+                          ? "text-negative"
                           : "text-muted-foreground",
                       )}
                     >
@@ -214,10 +210,10 @@ export function TenYearProjectionTable({
                   ) : null}
                   <td
                     className={cn(
-                      "px-4 py-3 font-semibold",
+                      "px-4 py-3 font-figure font-semibold",
                       year.netCashFlowAnnual >= 0
-                        ? "text-[var(--metric-positive)]"
-                        : "text-[var(--metric-negative)]",
+                        ? "text-positive"
+                        : "text-negative",
                     )}
                   >
                     {formatCurrency(year.netCashFlowAnnual)}
@@ -226,20 +222,20 @@ export function TenYearProjectionTable({
                     <>
                       <td
                         className={cn(
-                          "px-4 py-3 font-medium",
+                          "px-4 py-3 font-figure",
                           year.taxSavingsAnnual >= 0
-                            ? "text-[var(--metric-positive)]"
-                            : "text-[var(--metric-negative)]",
+                            ? "text-positive"
+                            : "text-negative",
                         )}
                       >
                         {formatCurrency(year.taxSavingsAnnual)}
                       </td>
                       <td
                         className={cn(
-                          "px-4 py-3 font-semibold",
+                          "px-4 py-3 font-figure font-semibold",
                           year.afterTaxCashFlowAnnual >= 0
-                            ? "text-[var(--metric-positive)]"
-                            : "text-[var(--metric-negative)]",
+                            ? "text-positive"
+                            : "text-negative",
                         )}
                       >
                         {formatCurrency(year.afterTaxCashFlowAnnual)}
@@ -248,10 +244,10 @@ export function TenYearProjectionTable({
                   ) : null}
                   <td
                     className={cn(
-                      "px-4 py-3 font-semibold",
+                      "px-4 py-3 font-figure font-semibold",
                       year.cumulativeCashFlowAnnual >= 0
-                        ? "text-[var(--metric-positive)]"
-                        : "text-[var(--metric-negative)]",
+                        ? "text-positive"
+                        : "text-negative",
                     )}
                   >
                     {formatCurrency(year.cumulativeCashFlowAnnual)}

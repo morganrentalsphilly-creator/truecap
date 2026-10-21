@@ -11,7 +11,7 @@
  */
 
 import { useEffect, useId, useMemo, useState } from "react";
-import { Repeat, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -196,10 +196,9 @@ export function BrrrrCard({
   ]);
 
   return (
-    <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6">
+    <div className="rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6">
       <div className="flex items-center justify-between mb-1.5 gap-2">
         <div className="flex items-center gap-2">
-          <Repeat className="w-4 h-4 text-primary" />
           <span className="font-semibold text-sm text-foreground">
             BRRRR analyzer
           </span>
@@ -245,7 +244,7 @@ export function BrrrrCard({
               htmlFor={rehabId}
               className="text-xs font-medium text-muted-foreground mb-1.5 block"
             >
-              Rehab Budget
+              Rehab budget
             </Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
@@ -275,7 +274,7 @@ export function BrrrrCard({
               message={strategyInputErrors?.rehabBudget}
             />
             {defaultRehab && defaultRehab > 0 && inputs.rehabBudget == null && (
-              <p className="text-3xs text-muted-foreground mt-1">
+              <p className="text-2xs text-muted-foreground mt-1">
                 Using estimator total
               </p>
             )}
@@ -314,7 +313,7 @@ export function BrrrrCard({
               id={`${arvId}-error`}
               message={strategyInputErrors?.strategyArv}
             />
-            <p className="mt-1 text-3xs leading-relaxed text-muted-foreground">
+            <p className="mt-1 text-2xs leading-relaxed text-muted-foreground">
               Your estimate · verify with relevant sold comps or an appraisal.
             </p>
           </div>
@@ -360,7 +359,7 @@ export function BrrrrCard({
               htmlFor={refiRateId}
               className="text-xs font-medium text-muted-foreground mb-1.5 block"
             >
-              Refi Rate
+              Refi rate
             </Label>
             <div className="relative">
               <Input
@@ -397,7 +396,7 @@ export function BrrrrCard({
               htmlFor={refiTermId}
               className="text-xs font-medium text-muted-foreground mb-1.5 block"
             >
-              Refi Term
+              Refi term
             </Label>
             <div className="relative">
               <Input
@@ -434,7 +433,7 @@ export function BrrrrCard({
               htmlFor={holdId}
               className="text-xs font-medium text-muted-foreground mb-1.5 block"
             >
-              Hold (rehab → refi)
+              Hold (rehab to refi)
             </Label>
             <div className="relative">
               <Input
@@ -471,7 +470,7 @@ export function BrrrrCard({
               htmlFor={refiCloseId}
               className="text-xs font-medium text-muted-foreground mb-1.5 block"
             >
-              Refi Closing
+              Refi closing
             </Label>
             <div className="relative">
               <Input
@@ -507,13 +506,13 @@ export function BrrrrCard({
       )}
 
       {!analysis ? (
-        <div className="text-xs text-muted-foreground rounded-xl border border-border bg-[var(--background)] px-4 py-3">
+        <div className="border-t border-border pt-3 text-xs text-muted-foreground">
           {hasInvalidStrategyInput
             ? "Correct the out-of-range strategy assumptions above before relying on the BRRRR result."
             : "Enter purchase price, rehab budget, and ARV to run the BRRRR math."}
         </div>
       ) : (
-        <div className="rounded-xl border border-border bg-[var(--background)] p-4 sm:p-5 space-y-4">
+        <div className="space-y-4 border-t border-border pt-4">
           {/* Headline */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             <Metric
@@ -553,7 +552,7 @@ export function BrrrrCard({
               + refi costs, so the investor brings cash TO the refi table.
               Already counted in "Cash left in deal" — this names it. */}
           {analysis.cashNeededAtRefi > 0 && (
-            <p className="text-xs font-semibold text-[var(--metric-negative)]">
+            <p className="text-xs font-semibold text-negative">
               Refi shortfall: the new loan doesn&apos;t cover the original loan
               payoff plus refi closing costs — you&apos;d bring{" "}
               {fmt(analysis.cashNeededAtRefi)} to the refi table (included in
@@ -646,9 +645,9 @@ function Metric({
       </div>
       <div
         className={cn(
-          "text-base sm:text-lg font-extrabold mt-0.5 tabular-nums",
-          positive && "text-[var(--metric-positive)]",
-          negative && "text-[var(--metric-negative)]",
+          "mt-0.5 font-figure text-base font-semibold sm:text-lg",
+          positive && "text-positive",
+          negative && "text-negative",
           !positive && !negative && "text-foreground",
         )}
       >
@@ -672,8 +671,8 @@ function Row({
       <span className="text-muted-foreground">{label}</span>
       <span
         className={cn(
-          "tabular-nums",
-          bold ? "font-bold text-foreground" : "text-foreground",
+          "font-figure",
+          bold ? "font-semibold text-foreground" : "text-foreground",
         )}
       >
         {value}

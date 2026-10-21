@@ -83,15 +83,19 @@ describe("calculation trust copy and applicability guards", () => {
     );
     const pdf = read("lib/pdf-generator.ts");
 
+    // Re-anchored: ten-year-projections/table.tsx and charts.tsx — the
+    // column head and the series label are sentence case (DESIGN.md chrome
+    // rules); the fact they state (P&I plus mortgage insurance, the balloon
+    // separate) is unchanged.
     expect(projectionTable).toContain(
-      "Annual Debt Service (P&I + Mortgage Insurance)"
+      "Annual debt service (P&I + mortgage insurance)"
     );
-    expect(projectionTable).not.toContain(
-      "Annual Debt Service (Principal & Interest)"
+    expect(projectionTable).not.toMatch(
+      /Annual debt service \(principal & interest\)/i
     );
     expect(projectionTable).toContain("Balloon due at maturity");
     expect(projectionTable).toContain("Total financing outflow");
-    expect(projectionCharts).toContain("Financing Outflow (P&I + MI)");
+    expect(projectionCharts).toContain("Financing outflow (P&I + MI)");
     expect(pdf).toContain('label: "P&I + MI"');
     expect(normalizeSource(pdf)).toContain(
       normalizeSource(

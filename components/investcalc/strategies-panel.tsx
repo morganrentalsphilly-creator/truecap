@@ -104,7 +104,7 @@ export function StrategiesPanel({
               <button
                 type="button"
                 onClick={() => onApplyRehab(rehabTotal)}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--brand-green)] px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-[background-color] duration-150 hover:bg-primary-deep focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 Apply ${Math.round(rehabTotal).toLocaleString()} to this deal
               </button>

@@ -1,13 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import {
-  Check,
-  ChevronDown,
-  CircleAlert,
-  Database,
-  ShieldCheck,
-} from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,11 +14,6 @@ import { computeAssumptionImpact } from "@/lib/assumption-impact";
 import { formatAssumptionLedgerValue } from "@/lib/assumption-ledger-value";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import type { AnalyzerStrategyKey } from "@/lib/analyzer-strategy-persistence";
-import {
-  buildAssumptionLedger,
-  type AssumptionConfirmationType,
-  type AssumptionSourceClass,
-} from "@/lib/decision-contract";
 import { cn } from "@/lib/utils";
 import { ScrollX } from "@/components/ui/scroll-x";
 
@@ -42,27 +31,14 @@ type Props = {
   actionsBlockedReason?: string;
 };
 
+// The Sign rule: the risk level is a pass or a miss against the verified
+// inputs, so it may carry green, the highlight text or red; nothing else on
+// the card does.
 const RISK_STYLE = {
   low: "border-positive/30 bg-positive-light text-positive",
   moderate: "border-caution/30 bg-caution-light text-caution-text",
   high: "border-negative/30 bg-negative/10 text-destructive-text",
 } as const;
-
-const SOURCE_CLASS_LABEL: Record<AssumptionSourceClass, string> = {
-  "direct-property-evidence": "Direct property evidence",
-  "third-party-property-estimate": "Third-party property estimate",
-  "geographic-benchmark": "Geographic benchmark",
-  "scenario-assumption": "Scenario assumption",
-  interpretation: "Interpretation",
-  unknown: "Unknown",
-};
-
-const CONFIRMATION_LABEL: Record<AssumptionConfirmationType, string> = {
-  unreviewed: "Unreviewed",
-  "user-confirmed": "User confirmed",
-  "evidence-attached-cited": "Evidence attached/cited",
-  "third-party-verified": "Third-party verified",
-};
 
 const IMPACT_FIELD_KEY: Readonly<Record<string, InputConfidenceFieldKey>> = {
   rent: "rent",
@@ -110,6 +86,18 @@ const CHECK_INSTRUCTION: Record<InputConfidenceFieldKey, string> = {
   hoa: "Confirm the current HOA amount.",
   rehabBudget: "Confirm the scope and contractor budget.",
 };
+
+const SOURCE_TAG_CLASS =
+  "inline-flex max-w-full items-center rounded-sm border border-border px-1.5 py-0.5 font-mono text-2xs leading-tight text-muted-foreground [overflow-wrap:anywhere]";
+
+const VERIFY_TOGGLE_CLASS =
+  "inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-md border px-3 text-sm font-semibold transition-[color,background-color,border-color] duration-150 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50";
+
+function verifyToggleTone(verified: boolean): string {
+  return verified
+    ? "border-positive/30 bg-positive-light text-positive"
+    : "border-input bg-card text-foreground hover:bg-band";
+}
 
 function offerCheckLabel(
   field: InputConfidenceField,
@@ -177,6 +165,12 @@ function offerCheckActionLabel(
  * because the current product has no owner-scoped evidence ingestion path; it
  * must not imply that browser edits can complete evidence review. The legacy
  * Input Confidence score remains available only outside that cohort.
+ *
+ * Blueprint (2026-10): one heading in the display face, the score as a figure
+ * on the 2px rule, the inputs to verify as rows on 1px lines (name, the
+ * source as a Geist Mono tag, the state, one control), the scope line, and
+ * the full ledger behind one disclosure. No stepper, no tiles, no cards in
+ * the card.
  */
 export function InputConfidenceCard({
   confidence,
@@ -193,7 +187,8 @@ export function InputConfidenceCard({
   const cardRef = useRef<HTMLElement>(null);
   const pendingQueueFocusIndex = useRef<number | null>(null);
   const remaining = confidence.offerReadyRemaining.length;
-  const ledger = buildAssumptionLedger(confidence);
+  // The three readiness stages. The current one's detail is the one line
+  // under the status; the ladder itself no longer renders as three boxes.
   const readinessSteps = [
     {
       label: "Preliminary screen",
@@ -214,25 +209,11 @@ export function InputConfidenceCard({
       : confidence.stage === "verified"
         ? 1
         : 0;
-  const visibleQueue = advocacyContractEnabled
-    ? ledger.items
-        .filter((item) => item.material && !item.evidenceVerified)
-        .sort(
-          (a, b) =>
-            (b.materialityScore ?? -1) - (a.materialityScore ?? -1) ||
-            b.weight - a.weight,
-        )
-        .slice(0, 3)
-        .map((item) => ({
-          ...item,
-          sourceDisplay: SOURCE_CLASS_LABEL[item.sourceClass],
-        }))
-    : confidence.verificationQueue.slice(0, 3).map((item) => ({
-        ...item,
-        sourceDisplay: inputSourceClassLabel(item.sourceClass),
-      }));
+  const visibleQueue = confidence.verificationQueue.slice(0, 3).map((item) => ({
+    ...item,
+    sourceDisplay: inputSourceClassLabel(item.sourceClass),
+  }));
   const verified = new Set(confidence.verifiedFields);
-  const ledgerByKey = new Map(ledger.items.map((item) => [item.key, item]));
   const offerChecks = useMemo(() => {
     if (!advocacyContractEnabled) return [];
     const impactKeys = computeAssumptionImpact(values)
@@ -257,17 +238,21 @@ export function InputConfidenceCard({
       )
       .slice(0, 2);
   }, [advocacyContractEnabled, confidence.fields, values]);
-  const statusHeadline = advocacyContractEnabled
-    ? ledger.readinessLabel
-    : showOfferReadyStatus
-      ? confidence.stage === "offer-ready"
-        ? "Offer-ready"
-        : remaining <= 3 && remaining > 0
-          ? "Almost offer-ready"
-          : confidence.stage === "verified"
-            ? "Assumptions reviewed"
-            : "Preliminary screen"
-      : "Input verification";
+  const statusHeadline = showOfferReadyStatus
+    ? confidence.stage === "offer-ready"
+      ? "Offer-ready"
+      : remaining <= 3 && remaining > 0
+        ? "Almost offer-ready"
+        : confidence.stage === "verified"
+          ? "Assumptions reviewed"
+          : "Preliminary screen"
+    : "Input verification";
+  const currentStageDetail = readinessSteps[readinessStep].detail;
+  const summarySentence = showOfferReadyStatus
+    ? confidence.stage === "offer-ready"
+      ? "The required inputs have been explicitly confirmed for this underwrite. Re-check anything that changes before recording a decision."
+      : `${remaining} required ${remaining === 1 ? "input" : "inputs"} still need confirmation before this analysis is Offer Ready.`
+    : `${remaining} high-priority ${remaining === 1 ? "input" : "inputs"} still need confirmation before relying on this underwrite.`;
 
   useEffect(() => {
     const requestedIndex = pendingQueueFocusIndex.current;
@@ -289,12 +274,12 @@ export function InputConfidenceCard({
         tabIndex={-1}
         aria-labelledby="input-confidence-title"
         data-verification-plan=""
-        className="rounded-2xl border border-border bg-card focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        className="rounded-lg border border-border bg-card shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         <div className="px-4 pb-3 pt-4 sm:px-5 sm:pt-5">
           <h2
             id="input-confidence-title"
-            className="text-xs font-semibold text-primary"
+            className="font-display text-xl text-foreground"
           >
             Before you offer
           </h2>
@@ -307,7 +292,7 @@ export function InputConfidenceCard({
         {actionsBlocked && actionsBlockedReason ? (
           <p
             role="status"
-            className="mx-4 mb-3 rounded-lg border border-caution/40 bg-caution-light px-3 py-2 text-xs font-medium leading-relaxed text-caution-text sm:mx-5"
+            className="mx-4 mb-3 rounded-md border border-caution/40 bg-caution-light px-3 py-2 text-xs font-medium leading-relaxed text-caution-text sm:mx-5"
           >
             {actionsBlockedReason}
           </p>
@@ -332,8 +317,11 @@ export function InputConfidenceCard({
                   className="grid gap-3 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-5"
                 >
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-foreground">
-                      {label} · {formatAssumptionLedgerValue(field.key, values)}
+                    <p className="text-sm font-semibold text-foreground">
+                      {label} ·{" "}
+                      <span className="font-figure">
+                        {formatAssumptionLedgerValue(field.key, values)}
+                      </span>
                     </p>
                     <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
                       {offerCheckSource(
@@ -360,7 +348,7 @@ export function InputConfidenceCard({
                     }
                     disabled={actionsBlocked}
                     title={actionsBlocked ? actionsBlockedReason : undefined}
-                    className="min-h-11 w-full rounded-xl sm:w-auto"
+                    className="min-h-11 w-full rounded-md sm:w-auto"
                   >
                     {actionLabel}
                   </Button>
@@ -381,7 +369,7 @@ export function InputConfidenceCard({
                 onClick={onEditAssumptions}
                 disabled={actionsBlocked}
                 title={actionsBlocked ? actionsBlockedReason : undefined}
-                className="min-h-11 rounded-xl"
+                className="min-h-11 rounded-md"
               >
                 Edit assumptions
               </Button>
@@ -397,179 +385,70 @@ export function InputConfidenceCard({
       ref={cardRef}
       tabIndex={-1}
       aria-labelledby="input-confidence-title"
-      className="rounded-2xl border border-border bg-card p-4 shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:p-6"
+      className="rounded-lg border border-border bg-card p-4 shadow-sm focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:p-6"
     >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <Database aria-hidden className="size-4 text-primary" />
-            <h2
-              id="input-confidence-title"
-              className="text-xs font-semibold text-primary"
-            >
-              {advocacyContractEnabled
-                ? "Evidence readiness"
-                : "Decision confidence"}
-            </h2>
-          </div>
-          <div aria-live="polite" aria-atomic="true">
-            <p className="mt-2 text-lg font-extrabold text-foreground">
-              {statusHeadline}
-            </p>
-            <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted-foreground">
-              {advocacyContractEnabled
-                ? `${ledger.evidenceVerifiedCount} of ${ledger.materialInputCount} material inputs are evidence-verified. ${ledger.userConfirmedCount} are user-confirmed; self-confirmation does not count as evidence.`
-                : showOfferReadyStatus
-                  ? confidence.stage === "offer-ready"
-                    ? "The required inputs have been explicitly confirmed for this underwrite. Re-check anything that changes before recording a decision."
-                    : `${remaining} required ${remaining === 1 ? "input" : "inputs"} still need confirmation before this analysis is Offer Ready.`
-                  : `${remaining} high-priority ${remaining === 1 ? "input" : "inputs"} still need confirmation before relying on this underwrite.`}
-            </p>
-            <p className="mt-2 max-w-xl text-xs leading-relaxed text-muted-foreground">
-              Scope: rental base-case inputs. ARV, refinance, hold-time, and
-              flip assumptions are outside this score.
-            </p>
-          </div>
-        </div>
+      <h2
+        id="input-confidence-title"
+        className="font-display text-xl text-foreground"
+      >
+        Decision confidence
+      </h2>
 
-        <div
-          role="group"
-          // 2 columns in the default branch now that Deal Fit is gone (it
-          // duplicated the Screening Index bar). The advocacy branch above
-          // still renders three tiles, so the column count follows the branch.
-          className={cn(
-            "grid shrink-0 grid-cols-1 gap-2",
-            advocacyContractEnabled ? "min-[360px]:grid-cols-3" : "min-[360px]:grid-cols-2",
-          )}
-          aria-label={
-            advocacyContractEnabled
-              ? "Evidence readiness summary"
-              : "Decision confidence summary"
-          }
-        >
-          {advocacyContractEnabled ? (
-            <>
-              <SummaryMetric
-                label="Evidence verified"
-                value={`${ledger.evidenceVerifiedCount}`}
-                suffix={`/${ledger.materialInputCount}`}
-                help="Material inputs"
-              />
-              <SummaryMetric
-                label="User confirmed"
-                value={`${ledger.userConfirmedCount}`}
-                help="Not evidence"
-              />
-            </>
-          ) : (
-            <>
-              {/* No "Deal Fit" tile. It rendered Math.round of the SAME
-                  dealScore the full-width SCREENING INDEX bar shows ~89px
-                  above, from the same payload behind the same gate — they
-                  could never diverge and never appeared apart. Two names for
-                  one number invites the reader to look for the difference and
-                  find none. "Screening Index" is the canonical customer-facing
-                  name (it is what /pricing sells), so the bar keeps the score
-                  with its methodology caveat and this row keeps the two
-                  measures that are genuinely distinct. */}
-              <SummaryMetric
-                label="Input Confidence"
-                value={`${confidence.score}%`}
-                help="Input readiness"
-              />
-            </>
-          )}
-          {advocacyContractEnabled ? (
-            <SummaryMetric
-              label="Readiness state"
-              value={ledger.readinessLabel}
-              help="Based on verified inputs"
-            />
-          ) : (
-            <div className="min-w-0 rounded-xl border border-border bg-background p-3 text-center">
-              <p className="text-xs font-medium text-muted-foreground sm:text-xs">
-                Sensitivity risk
-              </p>
-              <span
-                className={cn(
-                  "mt-2 inline-flex rounded-full border px-2 py-0.5 text-xs font-bold capitalize",
-                  RISK_STYLE[confidence.sensitivityRisk],
-                )}
-              >
-                {confidence.sensitivityRisk}
-              </span>
-              <p className="mt-1 text-3xs text-muted-foreground">
-                Unverified-input risk
-              </p>
-            </div>
-          )}
-        </div>
+      {/* The one figure, on the 2px rule a result card keeps for its key
+          figure's label row. */}
+      <div className="mt-4 flex items-baseline justify-between gap-4 border-b-2 border-foreground pb-2">
+        <p className="text-sm font-semibold text-foreground">
+          Input confidence
+          <span className="ml-2 text-2xs font-normal text-muted-foreground">
+            Input readiness
+          </span>
+        </p>
+        <p className="font-display font-figure text-2xl leading-none text-foreground sm:text-3xl">
+          {confidence.score}%
+        </p>
       </div>
 
-      {showOfferReadyStatus ? (
-        <ol
-          aria-label="Underwriting readiness"
-          className="mt-5 grid gap-2 sm:grid-cols-3"
-        >
-          {readinessSteps.map((step, index) => {
-            const completed = index < readinessStep;
-            const current = index === readinessStep;
-            return (
-              <li
-                key={step.label}
-                aria-current={current ? "step" : undefined}
-                className={cn(
-                  "rounded-xl border p-3",
-                  current
-                    ? "border-primary/40 bg-primary/[0.06]"
-                    : completed
-                      ? "border-positive/30 bg-positive-light"
-                      : "border-border bg-muted/20",
-                )}
-              >
-                <div className="flex items-center gap-2">
-                  <span
-                    aria-hidden
-                    className={cn(
-                      "flex size-6 shrink-0 items-center justify-center rounded-full border text-2xs font-extrabold",
-                      completed
-                        ? "border-positive bg-positive text-white"
-                        : current
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border bg-background text-muted-foreground",
-                    )}
-                  >
-                    {completed ? <Check className="size-3.5" /> : index + 1}
-                  </span>
-                  <span className="text-xs font-extrabold text-foreground">
-                    {step.label}
-                  </span>
-                </div>
-                <p className="mt-1.5 text-3xs leading-relaxed text-muted-foreground">
-                  {step.detail}
-                </p>
-                <span className="sr-only">
-                  {completed ? "Completed" : current ? "Current state" : "Not reached"}
-                </span>
-              </li>
-            );
-          })}
-        </ol>
-      ) : null}
+      <div aria-live="polite" aria-atomic="true" className="mt-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+          <p className="text-base font-semibold text-foreground">
+            {statusHeadline}
+          </p>
+          <span className="inline-flex items-center gap-1.5 text-2xs text-muted-foreground">
+            Sensitivity risk (unverified inputs)
+            <span
+              className={cn(
+                "inline-flex rounded-sm border px-1.5 py-0.5 text-2xs font-semibold capitalize",
+                RISK_STYLE[confidence.sensitivityRisk],
+              )}
+            >
+              {confidence.sensitivityRisk}
+            </span>
+          </span>
+        </div>
+        <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted-foreground">
+          {summarySentence}
+        </p>
+        {showOfferReadyStatus ? (
+          <p className="mt-1 text-2xs text-muted-foreground">
+            {currentStageDetail}.
+          </p>
+        ) : null}
+        <p className="mt-2 max-w-xl text-2xs leading-relaxed text-muted-foreground">
+          Scope: rental base-case inputs. ARV, refinance, hold-time, and{" "}
+          flip assumptions are outside this score.
+        </p>
+      </div>
 
       {visibleQueue.length > 0 ? (
-        <div className="mt-5 border-t border-border pt-4">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <p className="inline-flex items-center gap-1.5 text-xs font-bold text-foreground">
-              <CircleAlert aria-hidden className="size-3.5 text-caution-text" />
-              {advocacyContractEnabled ? "Resolve next" : "Verify next"}
-            </p>
+        <div className="mt-5">
+          <div className="flex items-center justify-between gap-3 border-b border-foreground pb-2">
+            <p className="text-sm font-semibold text-foreground">Verify next</p>
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={onEditAssumptions}
-              className="min-h-11 text-xs"
+              className="min-h-11 rounded-md text-xs"
             >
               {/* Deliberately NOT "Edit assumptions". The decision summary's
                   primary control already carries that name, and this row can
@@ -579,296 +458,192 @@ export function InputConfidenceCard({
               Edit inputs
             </Button>
           </div>
-          <ul className="grid gap-2 lg:grid-cols-3">
-            {visibleQueue.map((item, index) => (
-              <li
-                key={item.key}
-                className="rounded-xl border border-border bg-muted/20 p-3"
-              >
-                <div className="flex items-start justify-between gap-2">
+          <ul className="divide-y divide-border">
+            {visibleQueue.map((item, index) => {
+              const isVerified = verified.has(item.key);
+              return (
+                <li
+                  key={item.key}
+                  className="grid gap-x-4 gap-y-2 py-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start"
+                >
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-foreground">
-                      {item.label}
-                    </p>
-                    <p className="mt-0.5 text-xs font-semibold text-muted-foreground">
-                      {item.sourceDisplay}
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <p className="text-sm font-semibold text-foreground">
+                        {item.label}
+                      </p>
+                      <span className={SOURCE_TAG_CLASS}>
+                        {item.sourceLabel}
+                      </span>
+                      <span
+                        className={cn(
+                          "text-2xs font-medium",
+                          isVerified ? "text-positive" : "text-muted-foreground",
+                        )}
+                      >
+                        {isVerified ? "Verified" : item.sourceDisplay}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-2xs leading-relaxed text-muted-foreground">
+                      {item.reason}
+                      {item.verifyAction ? ` ${item.verifyAction}.` : ""}
                     </p>
                   </div>
                   <button
                     type="button"
                     data-input-confidence-queue-action
                     onClick={() => {
-                      if (!verified.has(item.key))
-                        pendingQueueFocusIndex.current = index;
-                      onToggleVerified(item.key, !verified.has(item.key));
+                      if (!isVerified) pendingQueueFocusIndex.current = index;
+                      onToggleVerified(item.key, !isVerified);
                     }}
-                    aria-pressed={verified.has(item.key)}
+                    aria-pressed={isVerified}
                     aria-label={
-                      verified.has(item.key)
-                        ? advocacyContractEnabled
-                          ? `Remove user confirmation for ${item.label}`
-                          : `Mark ${item.label} as unverified`
-                        : advocacyContractEnabled
-                          ? `Mark ${item.label} as reviewed and user-confirmed`
-                          : `Confirm ${item.label} as verified`
+                      isVerified
+                        ? `Mark ${item.label} as unverified`
+                        : `Confirm ${item.label} as verified`
                     }
-                    className={cn(
-                      "inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg border px-3 text-3xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-                      verified.has(item.key)
-                        ? "border-positive/30 bg-positive-light text-positive"
-                        : "border-border bg-background text-foreground hover:border-primary/40",
-                    )}
+                    className={cn(VERIFY_TOGGLE_CLASS, verifyToggleTone(isVerified))}
                   >
-                    <Check aria-hidden className="size-3" />
-                    {advocacyContractEnabled
-                      ? verified.has(item.key)
-                        ? "User confirmed"
-                        : "I reviewed this"
-                      : verified.has(item.key)
-                        ? "Verified"
-                        : "I verified it"}
+                    <Check aria-hidden className="size-3.5" />
+                    {isVerified ? "Verified" : "Mark verified"}
                   </button>
-                </div>
-                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                  {item.reason}
-                </p>
-                {item.verifyAction ? (
-                  <button
-                    type="button"
-                    onClick={onEditAssumptions}
-                    className="mt-1 inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-2 hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                  >
-                    {item.verifyAction} →
-                  </button>
-                ) : null}
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         </div>
       ) : (
-        <div className="mt-5 flex items-start gap-2 rounded-xl border border-positive/30 bg-positive-light p-3 text-positive">
-          <ShieldCheck aria-hidden className="mt-0.5 size-4 shrink-0" />
-          <p className="text-sm">
-            {advocacyContractEnabled
-              ? "Every material input satisfies the disclosed evidence policy. Evidence complete is not an investment recommendation."
-              : showOfferReadyStatus
-                ? "Required inputs confirmed. Offer Ready is a data-readiness status, not a recommendation or guarantee."
-                : "Priority inputs confirmed for this underwrite. Re-check anything that changes before relying on it."}
-          </p>
-        </div>
+        <p className="mt-5 border-t border-border pt-3 text-sm text-positive">
+          {showOfferReadyStatus
+            ? "Required inputs confirmed. Offer Ready is a data-readiness status, not a recommendation or guarantee."
+            : "Priority inputs confirmed for this underwrite. Re-check anything that changes before relying on it."}
+        </p>
       )}
 
       <details className="group mt-4 border-t border-border pt-3">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-md text-xs font-semibold text-muted-foreground marker:content-none focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
-          {advocacyContractEnabled
-            ? "Open the Assumption Ledger"
-            : "See all input sources and scoring rules"}
+          See all input sources and scoring rules
           <ChevronDown
             aria-hidden
-            className="size-4 transition-transform group-open:rotate-180"
+            className="size-4 transition-transform duration-150 group-open:rotate-180"
           />
         </summary>
         <div
           role="region"
-          aria-label={
-            advocacyContractEnabled
-              ? "Assumption sources, confirmation types, and evidence flags"
-              : "All input sources and confidence scoring"
-          }
+          aria-label="All input sources and confidence scoring"
           tabIndex={0}
-          className="mt-3 rounded-xl border border-border focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className="mt-3 border-t border-border focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
-          {advocacyContractEnabled ? (
-            <>
-              <ul className="divide-y divide-border sm:hidden">
-                {confidence.fields.map((item) => {
-                  const ledgerItem = ledgerByKey.get(item.key)!;
-                  return (
-                    <li key={item.key} className="space-y-2 p-3 text-xs">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="font-bold text-foreground">
-                            {item.label}
-                          </p>
-                          <p
-                            className="mt-0.5 break-words font-mono text-sm font-bold tabular-nums text-foreground"
-                            data-assumption-ledger-value={item.key}
-                          >
-                            <span className="sr-only">Value: </span>
-                            {formatAssumptionLedgerValue(item.key, values)}
-                          </p>
-                          <p className="mt-0.5 text-muted-foreground">
-                            {SOURCE_CLASS_LABEL[ledgerItem.sourceClass]}
-                          </p>
-                        </div>
-                        {item.sourceClass === "not-applicable" ? (
-                          <span className="text-muted-foreground">N/A</span>
-                        ) : (
-                          <button
-                            type="button"
-                            aria-pressed={verified.has(item.key)}
-                            aria-label={
-                              verified.has(item.key)
-                                ? `Remove user confirmation for ${item.label}`
-                                : `Mark ${item.label} as reviewed and user-confirmed`
-                            }
-                            onClick={() =>
-                              onToggleVerified(
-                                item.key,
-                                !verified.has(item.key),
-                              )
-                            }
-                            className={cn(
-                              "inline-flex min-h-11 shrink-0 items-center gap-1 rounded-md border px-3 text-3xs font-bold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-                              verified.has(item.key)
-                                ? "border-positive/30 bg-positive-light text-positive"
-                                : "border-border bg-background text-muted-foreground hover:text-foreground",
-                            )}
-                          >
-                            <Check aria-hidden className="size-3" />
-                            {verified.has(item.key)
-                              ? "User confirmed"
-                              : "I reviewed this"}
-                          </button>
-                        )}
-                      </div>
-                      <p className="text-muted-foreground">
-                        Source: {item.sourceLabel}
-                      </p>
-                      <p className="text-muted-foreground">
-                        Confirmation:{" "}
-                        {CONFIRMATION_LABEL[ledgerItem.confirmationType]}
-                      </p>
-                      {ledgerItem.hardFlags.length > 0 ? (
-                        <p className="font-semibold text-caution-text">
-                          Flags:{" "}
-                          {ledgerItem.hardFlags.join(", ").replaceAll("-", " ")}
-                        </p>
-                      ) : null}
-                    </li>
-                  );
-                })}
-              </ul>
-              {/* cue + stickyFirstColumn: between 640 and about 860px the
-                  table is wider than the card and its last column (the
-                  review buttons) was off-screen with nothing to say so. The
-                  head is the solid band so the pinned first head matches its
-                  row; the wrapper pads the cue to the cells' px-3. */}
-              <div className="[&>p]:px-3 [&>p]:pb-2">
-              <ScrollX label="Input confidence table" cue stickyFirstColumn className="hidden overflow-x-auto sm:block">
-                <table className="w-full min-w-[720px] text-left text-xs">
-                  <caption className="sr-only">
-                    Assumption values, sources, confirmation types, evidence
-                    flags, and review controls
-                  </caption>
-                  <thead className="bg-muted text-xs text-muted-foreground">
-                    <tr>
-                      <th className="px-3 py-2 font-bold">Input</th>
-                      <th className="px-3 py-2 font-bold">Value</th>
-                      <th className="px-3 py-2 font-bold">Source class</th>
-                      <th className="px-3 py-2 font-bold">Source</th>
-                      <th className="px-3 py-2 font-bold">Confirmation</th>
-                      <th className="px-3 py-2 text-right font-bold">Review</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {confidence.fields.map((item) => {
-                      const ledgerItem = ledgerByKey.get(item.key)!;
-                      return (
-                        <tr key={item.key}>
-                          <td className="px-3 py-2 font-semibold text-foreground">
-                            {item.label}
-                          </td>
-                          <td
-                            className="whitespace-nowrap px-3 py-2 font-mono font-semibold tabular-nums text-foreground"
-                            data-assumption-ledger-value={item.key}
-                          >
-                            {formatAssumptionLedgerValue(item.key, values)}
-                          </td>
-                          <td className="px-3 py-2 text-muted-foreground">
-                            {SOURCE_CLASS_LABEL[ledgerItem.sourceClass]}
-                          </td>
-                          <td className="px-3 py-2 text-muted-foreground">
-                            {item.sourceLabel}
-                          </td>
-                          <td className="px-3 py-2 text-muted-foreground">
-                            {CONFIRMATION_LABEL[ledgerItem.confirmationType]}
-                            {ledgerItem.hardFlags.length > 0
-                              ? ` · ${ledgerItem.hardFlags.join(", ").replaceAll("-", " ")}`
-                              : ""}
-                          </td>
-                          <td className="px-3 py-2 text-right">
-                            {item.sourceClass === "not-applicable" ? (
-                              <span className="text-muted-foreground">—</span>
-                            ) : (
-                              <button
-                                type="button"
-                                aria-pressed={verified.has(item.key)}
-                                aria-label={
-                                  verified.has(item.key)
-                                    ? `Remove user confirmation for ${item.label}`
-                                    : `Mark ${item.label} as reviewed and user-confirmed`
-                                }
-                                onClick={() =>
-                                  onToggleVerified(
-                                    item.key,
-                                    !verified.has(item.key),
-                                  )
-                                }
-                                className={cn(
-                                  "inline-flex min-h-11 items-center gap-1 rounded-md border px-3 text-3xs font-bold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-                                  verified.has(item.key)
-                                    ? "border-positive/30 bg-positive-light text-positive"
-                                    : "border-border bg-background text-muted-foreground hover:text-foreground",
-                                )}
-                              >
-                                <Check aria-hidden className="size-3" />
-                                {verified.has(item.key)
-                                  ? "User confirmed"
-                                  : "I reviewed this"}
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </ScrollX>
-              </div>
-            </>
-          ) : (
-            <>
-              <ul className="divide-y divide-border sm:hidden">
+          <ul className="divide-y divide-border sm:hidden">
+            {confidence.fields.map((item) => (
+              <li key={item.key} className="space-y-2 py-3 text-xs">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-foreground">
+                      {item.label}
+                    </p>
+                    <p
+                      className="mt-0.5 break-words font-figure text-sm font-semibold text-foreground"
+                      data-assumption-ledger-value={item.key}
+                    >
+                      <span className="sr-only">Value: </span>
+                      {formatAssumptionLedgerValue(item.key, values)}
+                    </p>
+                    <p className="mt-1 text-muted-foreground">
+                      {inputSourceClassLabel(item.sourceClass)} ·{" "}
+                      {item.sourceLabel}
+                    </p>
+                    <p className="mt-1 text-muted-foreground">
+                      Confidence points:{" "}
+                      <span className="font-figure">
+                        {item.maxPoints === 0
+                          ? "not applicable"
+                          : `${item.earnedPoints.toFixed(1)} of ${item.maxPoints}`}
+                      </span>
+                    </p>
+                  </div>
+                  {item.sourceClass === "not-applicable" ? (
+                    <span className="shrink-0 text-muted-foreground">
+                      N/A
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      aria-pressed={verified.has(item.key)}
+                      aria-label={
+                        verified.has(item.key)
+                          ? `Mark ${item.label} as unverified`
+                          : `Confirm ${item.label} as verified`
+                      }
+                      onClick={() =>
+                        onToggleVerified(item.key, !verified.has(item.key))
+                      }
+                      className={cn(
+                        VERIFY_TOGGLE_CLASS,
+                        "text-xs",
+                        verifyToggleTone(verified.has(item.key)),
+                      )}
+                    >
+                      <Check aria-hidden className="size-3" />
+                      {verified.has(item.key) ? "Confirmed" : "Confirm"}
+                    </button>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+          {/* No tabIndex or aria-label here: ScrollX names the region
+              and makes it a tab stop only while it overflows. Passing
+              them unconditionally left a role-less div with an aria-label
+              (which assistive tech drops) and a tab stop on wide screens.
+              cue + stickyFirstColumn: between 640 and about 860px the
+              Confirmation column was off-screen with nothing to say so.
+              The head is the solid band so the pinned first head matches
+              its row; the wrapper pads the cue to the cells' px-3. */}
+          <div className="[&>p]:px-3 [&>p]:pb-2">
+          <ScrollX label="Input confidence table" cue stickyFirstColumn className="hidden overflow-x-auto sm:block">
+            <table className="w-full min-w-[760px] text-left text-xs">
+              <caption className="sr-only">
+                Input value, source, scoring points, and confirmation status
+                for every underwriting input
+              </caption>
+              <thead className="bg-muted text-xs text-muted-foreground">
+                <tr>
+                  <th className="px-3 py-2 font-semibold">Input</th>
+                  <th className="px-3 py-2 font-semibold">Value</th>
+                  <th className="px-3 py-2 font-semibold">Source class</th>
+                  <th className="px-3 py-2 font-semibold">Source</th>
+                  <th className="px-3 py-2 text-right font-semibold">Points</th>
+                  <th className="px-3 py-2 text-right font-semibold">
+                    Confirmation
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
                 {confidence.fields.map((item) => (
-                  <li key={item.key} className="space-y-2 p-3 text-xs">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="font-bold text-foreground">
-                          {item.label}
-                        </p>
-                        <p
-                          className="mt-0.5 break-words font-mono text-sm font-bold tabular-nums text-foreground"
-                          data-assumption-ledger-value={item.key}
-                        >
-                          <span className="sr-only">Value: </span>
-                          {formatAssumptionLedgerValue(item.key, values)}
-                        </p>
-                        <p className="mt-1 text-muted-foreground">
-                          {inputSourceClassLabel(item.sourceClass)} ·{" "}
-                          {item.sourceLabel}
-                        </p>
-                        <p className="mt-1 text-muted-foreground">
-                          Confidence points:{" "}
-                          {item.maxPoints === 0
-                            ? "not applicable"
-                            : `${item.earnedPoints.toFixed(1)} of ${item.maxPoints}`}
-                        </p>
-                      </div>
+                  <tr key={item.key}>
+                    <td className="px-3 py-2 font-semibold text-foreground">
+                      {item.label}
+                    </td>
+                    <td
+                      className="whitespace-nowrap px-3 py-2 font-figure font-semibold text-foreground"
+                      data-assumption-ledger-value={item.key}
+                    >
+                      {formatAssumptionLedgerValue(item.key, values)}
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {inputSourceClassLabel(item.sourceClass)}
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      {item.sourceLabel}
+                    </td>
+                    <td className="px-3 py-2 text-right font-figure text-foreground">
+                      {item.maxPoints === 0
+                        ? "—"
+                        : `${item.earnedPoints.toFixed(1)} / ${item.maxPoints}`}
+                    </td>
+                    <td className="px-3 py-2 text-right">
                       {item.sourceClass === "not-applicable" ? (
-                        <span className="shrink-0 text-muted-foreground">
-                          N/A
-                        </span>
+                        <span className="text-muted-foreground">—</span>
                       ) : (
                         <button
                           type="button"
@@ -879,145 +654,33 @@ export function InputConfidenceCard({
                               : `Confirm ${item.label} as verified`
                           }
                           onClick={() =>
-                            onToggleVerified(item.key, !verified.has(item.key))
+                            onToggleVerified(
+                              item.key,
+                              !verified.has(item.key),
+                            )
                           }
                           className={cn(
-                            "inline-flex min-h-11 shrink-0 items-center gap-1 rounded-md border px-3 text-3xs font-bold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-                            verified.has(item.key)
-                              ? "border-positive/30 bg-positive-light text-positive"
-                              : "border-border bg-background text-muted-foreground hover:text-foreground",
+                            VERIFY_TOGGLE_CLASS,
+                            "text-xs",
+                            verifyToggleTone(verified.has(item.key)),
                           )}
                         >
                           <Check aria-hidden className="size-3" />
                           {verified.has(item.key) ? "Confirmed" : "Confirm"}
                         </button>
                       )}
-                    </div>
-                  </li>
+                    </td>
+                  </tr>
                 ))}
-              </ul>
-              {/* No tabIndex or aria-label here: ScrollX names the region
-                  and makes it a tab stop only while it overflows. Passing
-                  them unconditionally left a role-less div with an aria-label
-                  (which assistive tech drops) and a tab stop on wide screens.
-                  cue + stickyFirstColumn: between 640 and about 860px the
-                  Confirmation column was off-screen with nothing to say so.
-                  The head is the solid band so the pinned first head matches
-                  its row; the wrapper pads the cue to the cells' px-3. */}
-              <div className="[&>p]:px-3 [&>p]:pb-2">
-              <ScrollX label="Input confidence table" cue stickyFirstColumn className="hidden overflow-x-auto sm:block">
-                <table className="w-full min-w-[760px] text-left text-xs">
-                  <caption className="sr-only">
-                    Input value, source, scoring points, and confirmation status
-                    for every underwriting input
-                  </caption>
-                  <thead className="bg-muted text-xs text-muted-foreground">
-                    <tr>
-                      <th className="px-3 py-2 font-bold">Input</th>
-                      <th className="px-3 py-2 font-bold">Value</th>
-                      <th className="px-3 py-2 font-bold">Source class</th>
-                      <th className="px-3 py-2 font-bold">Source</th>
-                      <th className="px-3 py-2 text-right font-bold">Points</th>
-                      <th className="px-3 py-2 text-right font-bold">
-                        Confirmation
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {confidence.fields.map((item) => (
-                      <tr key={item.key}>
-                        <td className="px-3 py-2 font-semibold text-foreground">
-                          {item.label}
-                        </td>
-                        <td
-                          className="whitespace-nowrap px-3 py-2 font-mono font-semibold tabular-nums text-foreground"
-                          data-assumption-ledger-value={item.key}
-                        >
-                          {formatAssumptionLedgerValue(item.key, values)}
-                        </td>
-                        <td className="px-3 py-2 text-muted-foreground">
-                          {inputSourceClassLabel(item.sourceClass)}
-                        </td>
-                        <td className="px-3 py-2 text-muted-foreground">
-                          {item.sourceLabel}
-                        </td>
-                        <td className="px-3 py-2 text-right font-mono tabular-nums text-foreground">
-                          {item.maxPoints === 0
-                            ? "—"
-                            : `${item.earnedPoints.toFixed(1)} / ${item.maxPoints}`}
-                        </td>
-                        <td className="px-3 py-2 text-right">
-                          {item.sourceClass === "not-applicable" ? (
-                            <span className="text-muted-foreground">—</span>
-                          ) : (
-                            <button
-                              type="button"
-                              aria-pressed={verified.has(item.key)}
-                              aria-label={
-                                verified.has(item.key)
-                                  ? `Mark ${item.label} as unverified`
-                                  : `Confirm ${item.label} as verified`
-                              }
-                              onClick={() =>
-                                onToggleVerified(
-                                  item.key,
-                                  !verified.has(item.key),
-                                )
-                              }
-                              className={cn(
-                                "inline-flex min-h-11 items-center gap-1 rounded-md border px-3 text-3xs font-bold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-                                verified.has(item.key)
-                                  ? "border-positive/30 bg-positive-light text-positive"
-                                  : "border-border bg-background text-muted-foreground hover:text-foreground",
-                              )}
-                            >
-                              <Check aria-hidden className="size-3" />
-                              {verified.has(item.key) ? "Confirmed" : "Confirm"}
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </ScrollX>
-              </div>
-            </>
-          )}
-          <p className="border-t border-border bg-muted/20 px-3 py-2 text-3xs leading-relaxed text-muted-foreground">
-            {advocacyContractEnabled
-              ? `Legacy Input Confidence v${confidence.methodVersion} remains stored for compatibility, but its percentage and Offer Ready stages do not control this view. Browser self-confirmation remains “User confirmed”; only server-resolved, owner-scoped evidence may count as evidence-verified.`
-              : `Deterministic Input Confidence v${confidence.methodVersion}: verified 100%, property-specific 80%, local estimate 65%, user estimate 50%, market benchmark 45%, generic default 20%, missing 0%. Field weights reflect decision impact. The score is not statistical certainty. ARV, refinance, hold-time, and flip assumptions are outside this base score.`}
+              </tbody>
+            </table>
+          </ScrollX>
+          </div>
+          <p className="border-t border-border px-3 py-2 text-2xs leading-relaxed text-muted-foreground">
+            {`Deterministic Input Confidence v${confidence.methodVersion}: verified 100%, property-specific 80%, local estimate 65%, user estimate 50%, market benchmark 45%, generic default 20%, missing 0%. Field weights reflect decision impact. The score is not statistical certainty. ARV, refinance, hold-time, and flip assumptions are outside this base score.`}
           </p>
         </div>
       </details>
     </section>
-  );
-}
-
-function SummaryMetric({
-  label,
-  value,
-  suffix,
-  help,
-}: {
-  label: string;
-  value: string;
-  suffix?: string;
-  help: string;
-}) {
-  return (
-    <div className="min-w-0 rounded-xl border border-border bg-background p-3 text-center">
-      <p className="text-xs font-medium text-muted-foreground sm:text-xs">
-        {label}
-      </p>
-      <p className="mt-1 break-words font-mono text-lg font-extrabold tabular-nums text-foreground sm:text-xl">
-        {value}
-        {suffix ? (
-          <span className="text-xs text-muted-foreground">{suffix}</span>
-        ) : null}
-      </p>
-      <p className="mt-0.5 text-3xs text-muted-foreground">{help}</p>
-    </div>
   );
 }

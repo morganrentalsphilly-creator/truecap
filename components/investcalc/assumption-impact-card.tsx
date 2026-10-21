@@ -5,9 +5,12 @@
  * swing monthly cash flow (and DSCR). Helps a user focus diligence on the
  * inputs that actually matter for THIS deal. Self-contained; reuses
  * computeAssumptionImpact (calc-analysis under the hood).
+ *
+ * Blueprint (2026-10): a heading on a 1px line and six rows on soft lines,
+ * each with its swing in the figure face and a graphite bar, inside the
+ * "Risks" section rather than a card of its own.
  */
 import { useMemo } from "react";
-import { Activity } from "lucide-react";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { computeAssumptionImpact } from "@/lib/assumption-impact";
 
@@ -22,39 +25,39 @@ export function AssumptionImpactCard({ values }: { values: InvestmentFormValues 
   const top = drivers.slice(0, 6);
 
   return (
-    <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6">
-      <div className="flex items-center gap-2 mb-1.5">
-        <Activity className="w-4 h-4 text-primary" />
-        <span className="font-semibold text-sm text-foreground">What moves this deal</span>
+    <div>
+      <div className="border-b border-border pb-2">
+        <p className="text-sm font-semibold text-foreground">What moves this deal</p>
+        <p className="mt-0.5 text-sm text-muted-foreground">
+          How monthly cash flow changes when each assumption moves. Use the
+          largest swings for stress testing.
+        </p>
       </div>
-      <p className="text-xs text-muted-foreground mb-3">
-        How monthly cash flow changes when each assumption moves. Use the
-        largest swings for stress testing.
-      </p>
 
-      <div className="space-y-2.5">
+      <ul className="divide-y divide-rule-soft">
         {top.map((d) => {
           const widthPct = Math.max(4, Math.round((d.cashFlowSwing / max) * 100));
           return (
-            <div key={d.key}>
-              <div className="mb-1 flex items-center justify-between text-xs">
+            <li key={d.key} className="py-2">
+              <div className="mb-1 flex items-center justify-between gap-3 text-xs">
                 <span className="font-medium text-foreground">
-                  {d.label} <span className="font-normal text-muted-foreground">{d.deltaLabel}</span>
+                  {d.label}{" "}
+                  <span className="font-figure font-normal text-muted-foreground">{d.deltaLabel}</span>
                 </span>
-                <span className="font-semibold text-foreground">
+                <span className="font-figure font-semibold text-foreground">
                   ±{money(d.cashFlowSwing / 2)}/mo
                   {d.dscrSwing >= 0.01 ? (
                     <span className="font-normal text-muted-foreground"> · ±{(d.dscrSwing / 2).toFixed(2)} DSCR</span>
                   ) : null}
                 </span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-muted">
-                <div className="h-full rounded-full bg-primary" style={{ width: `${widthPct}%` }} />
+              <div className="h-1.5 overflow-hidden rounded-sm bg-band">
+                <div className="h-full rounded-sm bg-foreground/70" style={{ width: `${widthPct}%` }} />
               </div>
-            </div>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </div>
   );
 }

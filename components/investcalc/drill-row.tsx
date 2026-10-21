@@ -73,7 +73,7 @@ export function DrillRow({
   return (
     <section
       data-drill-row={id}
-      className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
+      className="overflow-hidden rounded-lg border border-border bg-card shadow-sm"
     >
       <h3 className="m-0">
         <button
@@ -88,22 +88,25 @@ export function DrillRow({
           // scroll-mt clears the sticky site header when metric-tap /
           // jump wiring smooth-scrolls this row into view (same offsets
           // the tab buttons carried).
-          className="scroll-mt-24 sm:scroll-mt-28 flex min-h-14 w-full cursor-pointer items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset sm:px-4"
+          className="scroll-mt-24 sm:scroll-mt-28 flex min-h-14 w-full cursor-pointer items-center gap-3 px-3 py-3 text-left transition-colors duration-150 hover:bg-band focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset sm:px-4"
         >
+          {/* A plain glyph, not an icon tile (DESIGN.md: no icon tiles). */}
           {icon ? (
             <span
               aria-hidden
-              className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-blue-light)] text-primary"
+              className="flex size-5 shrink-0 items-center justify-center text-muted-foreground"
             >
               {icon}
             </span>
           ) : null}
           <span className="min-w-0 flex-1">
             <span className="flex items-center gap-2">
-              <span className="text-sm font-bold text-foreground">{title}</span>
+              <span className="text-sm font-semibold text-foreground">{title}</span>
               {locked ? (
-                <span className="inline-flex shrink-0 rounded-full bg-[var(--brand-orange)] px-1.5 py-0.5 text-xs font-medium text-white sm:text-xs">
-                  PRO
+                // The "Pro" tag: 4px, Geist Mono, on a line (the app's tag
+                // grammar), never an orange pill.
+                <span className="inline-flex shrink-0 rounded-sm border border-border px-1.5 py-0.5 font-mono text-2xs leading-tight text-muted-foreground">
+                  Pro
                 </span>
               ) : null}
             </span>
@@ -118,7 +121,7 @@ export function DrillRow({
           <ChevronDown
             aria-hidden
             className={cn(
-              "size-4 shrink-0 text-muted-foreground transition-transform",
+              "size-4 shrink-0 text-muted-foreground transition-transform duration-150",
               open && "rotate-180"
             )}
           />
