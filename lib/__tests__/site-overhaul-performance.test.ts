@@ -71,7 +71,7 @@ describe("performance contract", () => {
     expect(config).toContain("bundleSizeOptimizations");
     expect(config).toContain("excludeReplayShadowDom: true");
     expect(config).toContain("withBundleAnalyzer(nextConfig)");
-    // The SDK is loaded lazily (interaction / idle / 4 s), with an early
+    // The SDK is loaded lazily (first input, or idle once an error waits), with an early
     // error buffer, from lib/sentry/client-init.ts — which keeps the full
     // previous configuration.
     const entry = read("instrumentation-client.ts");
