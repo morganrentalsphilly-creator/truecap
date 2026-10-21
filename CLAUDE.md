@@ -811,6 +811,15 @@ fallbacks that mask a missing secret.
   build-executed file and why. If you did NOT make the change, do not
   update the manifest.
 
+- **Signed-in pages without Docker** — the authenticated Playwright projects
+  need CI's disposable Supabase stack, so they run in CI only
+  (`browser-regressions`). To look at a signed-in page locally at the §9
+  widths, `docs/overhaul-2026-10/tools/signed-in-loopback/` serves fixture
+  deals from a read-only loopback stand-in for Supabase and captures any
+  signed-in route of a local production build; its README has the five
+  commands. It does not replace the CI run: writes are dropped, so save and
+  delete flows go untested there.
+
 - **Unit tests** live in `lib/__tests__/`. Run them when you touch
   `calc-analysis.ts`, `analysis-template-schema.ts`,
   `dashboard-deal-mapping.ts`, `dashboard-risk-return.ts`, or anything
