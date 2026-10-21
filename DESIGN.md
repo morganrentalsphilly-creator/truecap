@@ -34,87 +34,87 @@ colors:
   grid-line-major: "oklch(0.48 0.19 262 / 0.16)"
 typography:
   display:
-    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Hanken Grotesk, TrueCap Text Fallback Roboto, TrueCap Text Fallback Liberation Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "clamp(2.375rem, -0.14rem + 4.474vw, 3.5rem)"
     fontWeight: 750
     lineHeight: 1.02
     letterSpacing: "-0.025em"
   display-sm:
-    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Hanken Grotesk, TrueCap Text Fallback Roboto, TrueCap Text Fallback Liberation Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "2.375rem"
     fontWeight: 750
     lineHeight: 1.02
     letterSpacing: "-0.025em"
   section:
-    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Hanken Grotesk, TrueCap Text Fallback Roboto, TrueCap Text Fallback Liberation Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "2.125rem"
     fontWeight: 750
     lineHeight: 1.08
     letterSpacing: "-0.025em"
   section-sm:
-    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Hanken Grotesk, TrueCap Text Fallback Roboto, TrueCap Text Fallback Liberation Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.75rem"
     fontWeight: 750
     lineHeight: 1.1
     letterSpacing: "-0.025em"
   h3:
-    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Hanken Grotesk, TrueCap Text Fallback Roboto, TrueCap Text Fallback Liberation Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.5rem"
     fontWeight: 750
     lineHeight: 1.333
     letterSpacing: "-0.025em"
   h3-sm:
-    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Hanken Grotesk, TrueCap Text Fallback Roboto, TrueCap Text Fallback Liberation Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.3125rem"
     fontWeight: 750
     lineHeight: 1.2
     letterSpacing: "-0.025em"
   h4:
-    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Hanken Grotesk, TrueCap Text Fallback Roboto, TrueCap Text Fallback Liberation Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.25rem"
     fontWeight: 600
     lineHeight: 1.4
   key-figure:
-    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Hanken Grotesk, TrueCap Text Fallback Roboto, TrueCap Text Fallback Liberation Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "3.375rem"
     fontWeight: 750
     lineHeight: 1
     letterSpacing: "-0.025em"
     fontVariation: "tabular-nums"
   key-figure-sm:
-    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Hanken Grotesk, TrueCap Text Fallback Roboto, TrueCap Text Fallback Liberation Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "2.375rem"
     fontWeight: 750
     lineHeight: 1
     letterSpacing: "-0.025em"
     fontVariation: "tabular-nums"
   figure:
-    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Hanken Grotesk, TrueCap Text Fallback Roboto, TrueCap Text Fallback Liberation Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1rem"
     fontWeight: 600
     fontVariation: "tabular-nums"
   text:
-    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Hanken Grotesk, TrueCap Text Fallback Roboto, TrueCap Text Fallback Liberation Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.125rem"
     fontWeight: 400
     lineHeight: 1.55
   ui:
-    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Hanken Grotesk, TrueCap Text Fallback Roboto, TrueCap Text Fallback Liberation Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.5
   label:
-    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Hanken Grotesk, TrueCap Text Fallback Roboto, TrueCap Text Fallback Liberation Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 600
     lineHeight: 1.35
   small:
-    fontFamily: "Hanken Grotesk, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Hanken Grotesk, TrueCap Text Fallback Roboto, TrueCap Text Fallback Liberation Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: 1.45
   meta:
-    fontFamily: "Geist Mono, ui-monospace, monospace"
+    fontFamily: "Geist Mono, TrueCap Mono Fallback Roboto, TrueCap Mono Fallback Liberation Sans, ui-monospace, monospace"
     fontSize: "0.75rem"
     fontWeight: 500
     lineHeight: 1.4
@@ -360,8 +360,8 @@ and takes the float shadow; reduced motion keeps it still.
   out to the asking marker and draws back to the ceiling (scale only); the
   handle never moves by itself, and the moment is skipped when hydration
   lands more than a second after first paint or a pointer touched the sheet
-  first; the scroll story's frame
-  changes as three steps pass; the sources draw their leaders into the
+  first; the scroll story's one sheet
+  accumulates a step's rows as the step is reached; the sources draw their leaders into the
   result; the co-branding preview recolors as you type.
 
 ## Chrome
@@ -476,12 +476,15 @@ Phase 5 restyles their internals and the pages follow.
    sweep (`calculateAnalysis` in $1,000 steps, with the two out-flows per
    point); the island hydrates onto it. On phones the schematic stacks and
    the readout stacks.
-2. **From listing to offer:** a pinned sheet that changes as three steps
-   scroll past; the full line items behind "See every line". Below 1024px
-   each step carries its own frame only (one frame per step), and without
-   scripting (`@media (scripting: none)`) the pinned panel's three frames sit
-   in flow under one another, so the page is complete without JavaScript
-   (Phase 8).
+2. **From listing to offer:** from 1024px ONE pinned sheet that accumulates
+   as three steps scroll past (trust pass, audit A16): the listing's inputs
+   with their sources, then the Buy Box rows with the binding target, then
+   the Offer Ceiling and the send card; a step's rows enter once (opacity and
+   translate at the base duration) when the step is reached, only if the
+   story was below the fold at hydration and never under reduced motion, and
+   the sheet rests complete. Below 1024px each step carries its own frame
+   only; without JavaScript the sheet is complete. The full line items stay
+   behind "See every line".
 3. **Every number has a receipt:** the sources as a drawn flow into the
    result. A keyframe on each mask's stroke draws the three leaders once as
    they enter, on every engine, from a drawn default (no-JavaScript and
@@ -492,11 +495,14 @@ Phase 5 restyles their internals and the pages follow.
    verdict, the Offer Ceiling on the stroke with its label as a brand-colored
    tag, the target chips; the cover's bar, first lines and "Prepared by").
 5. **Plans:** the one cadence toggle (`CadenceToggle`, shared with /pricing:
-   a radiogroup in graphite ink, "Annual costs less" with no figure), cards
+   a radiogroup in graphite ink, "Annual save 16%+": the whole percent every
+   paid plan meets, from the catalog, founder decision 2026-10-21), cards
    with hover depth (the lift and the float shadow, no colored edge), their
    rows from one catalog-derived source (`plan-answers.ts`, shared with
-   /pricing), the per-month price rolling through `AnimatedNumber`, the
-   comparison table.
+   /pricing), the price rolling through `AnimatedNumber` (per month, or the
+   annual charge when its monthly equivalent has cents: Agent Pro reads
+   "$590/yr", never "$49.17/mo"; `paidPriceDisplay`), the comparison table.
+   /pricing's stage list in the hero shows each price at the toggle's cadence.
 6. **Built by a rental investor, the eight questions, the close on a navy band
    with the address form.**
 
@@ -741,6 +747,20 @@ visitor to trust; the two disclosures carry a hint of their contents.
   (needs layout animations on server-rendered frames), the form flash before
   hydration on `/analyze?sample=1` (a static page cannot know the query), the
   app home's tiles (out of this pass by the founder's choice).
+
+- 2026-10-21, trust pass (the adversarial audit, `docs/overhaul-2026-10/
+  adversarial-audit/`; the founder answered its six questions with the
+  recommended options): the sample carries one provenance record on every
+  surface; `/analyze?sample=1` paints the sample's decision from the HTML and
+  swaps to the live card in one paint; the hero's handle never moves by
+  itself (the moment is the meets-range draw); fallback faces for Roboto and
+  Liberation Sans; on phones the price track and the Offer Ceiling sit under
+  the form and "See the sample deal" is the secondary button; past 2x asking
+  the result says "No price limit under these targets"; the cadence toggle
+  names the saving every plan meets ("save 16%+") and an annual price with
+  cents shows as the annual charge ("$590/yr"); the stage list follows the
+  toggle; Sentry's browser SDK starts after the first input. The record is
+  `docs/overhaul-2026-10/trust-pass/README.md`.
 
 ## Do and don't
 
