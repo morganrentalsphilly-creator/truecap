@@ -428,7 +428,8 @@ export function Header({
     <header className="border-b border-border bg-background">
       <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-3 px-4 sm:h-16 sm:px-6 lg:px-12">
         <div className="flex items-center justify-start gap-0 sm:gap-3 min-w-0">
-          <AppLogo priority subtitleClassName="hidden sm:block" />
+          {/* No tagline under the wordmark: a template tell (polish critique). */}
+          <AppLogo priority subtitle="" />
           {/* Primary nav — anon visitors only. Signed-in users navigate via the
               dashboard sidebar, so marketing chrome would just crowd the app. */}
           {!user ? <MarketingNav /> : null}

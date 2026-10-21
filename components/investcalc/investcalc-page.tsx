@@ -16,7 +16,6 @@ import {
   Calculator,
   ArrowUpRight,
   Loader2,
-  Sparkles,
   Home,
   CopyPlus,
   ChevronDown,
@@ -949,6 +948,25 @@ function buildProvenanceInput(
   return out;
 }
 
+
+/**
+ * After a run, focus goes to the verdict heading (`#decision-summary-title`,
+ * tabIndex -1) so assistive tech lands on the decision, and to the results
+ * region when no decision card rendered. Neither draws a focus ring: the
+ * region is a landmark, and the heading hides its outline (it is a target
+ * for the summary bar's button as well).
+ */
+function focusAnalysisResults() {
+  const heading = document.getElementById("decision-summary-title");
+  if (heading instanceof HTMLElement) {
+    heading.focus({ preventScroll: true });
+    if (document.activeElement === heading) return;
+  }
+  document
+    .querySelector<HTMLElement>("[data-analysis-results='true']")
+    ?.focus({ preventScroll: true });
+}
+
 export function InvestCalcPage({
   canSaveDeals = false,
   canCompareDeals = false,
@@ -1630,6 +1648,8 @@ export function InvestCalcPage({
     });
   }, []);
 
+  const [resultRunId, setResultRunId] = useState(0);
+
   const handleBackToResult = useCallback(() => {
     // Editing is non-destructive: flush the final valid change in case the
     // investor closes the editor inside the watcher's 100 ms debounce.
@@ -1640,10 +1660,8 @@ export function InvestCalcPage({
     requestAnimationFrame(() => {
       scrollToAnalysisResults();
       // "Done editing" unmounts with the edit banner. Hand focus to the
-      // results region, the same target a fresh run focuses.
-      document
-        .querySelector<HTMLElement>("[data-analysis-results='true']")
-        ?.focus({ preventScroll: true });
+      // verdict, the same target a fresh run focuses.
+      focusAnalysisResults();
     });
   }, [scrollToAnalysisResults]);
 
@@ -5321,6 +5339,7 @@ export function InvestCalcPage({
               }
             : null;
           setAnalysisResult(result);
+          setResultRunId((n) => n + 1);
           setStaleResultsWarning(false);
           setAnalysisValues(hydratedValues);
           setProjectionSource(builtProjectionSource);
@@ -5979,7 +5998,7 @@ export function InvestCalcPage({
         behavior: scrollBehavior(),
         block: "start",
       });
-      resultsSection.focus({ preventScroll: true });
+      focusAnalysisResults();
     });
     return () => cancelAnimationFrame(frame);
   }, [hasResultsForFocusHandoff, isCalculating]);
@@ -6515,6 +6534,7 @@ export function InvestCalcPage({
       setRecordedOfferCeiling(null);
       setRecordedSpecialistAnalysis(null);
       setAnalysisResult(result);
+      setResultRunId((n) => n + 1);
       // A full Run just validated + computed from the live form — the
       // results are current by definition.
       setStaleResultsWarning(false);
@@ -7096,6 +7116,7 @@ export function InvestCalcPage({
             ? buildTaxStrategySource(result.id, values, savedResult)
             : null;
           setAnalysisResult(savedResult);
+          setResultRunId((n) => n + 1);
           setAnalysisValues(values);
           setProjectionSource(builtProjectionSource);
           setTaxStrategySource(builtTaxStrategySource);
@@ -9860,7 +9881,6 @@ export function InvestCalcPage({
               className="group inline-flex min-h-11 shrink-0 flex-col items-start gap-0.5 self-start rounded-xl bg-primary px-5 py-3 text-left shadow-[0_10px_24px_rgba(0,_112,_196,0.28)] transition-transform hover:-translate-y-0.5 sm:self-end"
             >
               <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary-foreground">
-                <Sparkles className="size-4" />
                 Try a sample rental
               </span>
               <span className="text-2xs font-medium text-primary-foreground">
@@ -9878,10 +9898,6 @@ export function InvestCalcPage({
         {restoredFromDraft && analysisResult === null && (
           <div className="mt-4 flex flex-col gap-2 rounded-xl border border-border bg-muted/40 px-4 py-2.5 text-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-start gap-2.5 sm:items-center">
-              <Sparkles
-                className="mt-0.5 size-4 shrink-0 text-primary sm:mt-0"
-                aria-hidden
-              />
               <p
                 role="status"
                 className="min-w-0 leading-relaxed text-foreground [overflow-wrap:anywhere]"
@@ -10459,7 +10475,6 @@ export function InvestCalcPage({
                         >
                           <Calculator className="mr-2 size-5" />
                           {primaryActionLabel}
-                          <ArrowUpRight className="ml-2 size-5" />
                         </Button>
                         <p className="mt-2 text-center text-2xs leading-snug text-muted-foreground">
                           {activeRunPromisesOfferCeiling
@@ -10796,7 +10811,6 @@ export function InvestCalcPage({
                   <>
                     <Calculator className="w-5 h-5 mr-2" />
                     {primaryActionLabel}
-                    <ArrowUpRight className="w-5 h-5 ml-2" />
                   </>
                 )}
               </Button>
@@ -10899,7 +10913,12 @@ export function InvestCalcPage({
         {!isEditingAssumptions &&
           (showResults || isCalculating || analysisResult !== null) && (
             <div
-              className="mt-8 scroll-mt-20 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:scroll-mt-24"
+              // The region takes programmatic focus after a run (a landmark for
+              // assistive tech, never a mouse target), so it draws no ring: the
+              // 3px half-cobalt frame around 5,000px of report was the first
+              // thing a visitor saw (polish critique, 2026-10-20). The verdict
+              // heading receives the focus when it is on the page.
+              className="mt-8 scroll-mt-20 outline-none sm:scroll-mt-24"
               data-analysis-results="true"
               role="region"
               tabIndex={-1}
@@ -10985,6 +11004,7 @@ export function InvestCalcPage({
               <AnalysisErrorBoundary result={analysisResult}>
                 <AnalysisDashboard
                   result={analysisResult}
+                  revealKey={resultRunId}
                   values={analysisValues ?? form.getValues()}
                   dataConfidence={
                     analysisResult

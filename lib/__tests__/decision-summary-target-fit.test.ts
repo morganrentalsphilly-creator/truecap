@@ -77,7 +77,7 @@ describe("each metric tile says whether it clears its target", () => {
   });
 
   it("only receives targets on the adopted-target call site", () => {
-    const calls = [...source.matchAll(/<FirstYearSnapshot\b[\s\S]{0,180}?\/>/g)].map((m) => m[0]);
+    const calls = [...source.matchAll(/<FirstYearSnapshot\b[\s\S]{0,260}?\/>/g)].map((m) => m[0]);
     expect(calls.length).toBe(2);
     expect(calls.filter((c) => c.includes("target={target}")).length).toBe(1);
   });

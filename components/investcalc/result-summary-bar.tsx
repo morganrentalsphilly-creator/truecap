@@ -62,7 +62,9 @@ export function ResultSummaryBar({
         aria-hidden={!visible}
         className={cn(
           "absolute inset-x-0 top-2 flex items-center gap-3 rounded-md border border-border bg-card/95 px-3 py-2 shadow-md backdrop-blur-sm",
-          "transition-[opacity,transform] duration-[var(--duration-base)] ease-[var(--ease-out)] motion-reduce:transition-none",
+          // Tailwind v4 writes `translate`, not `transform`, for -translate-y-*: name
+          // that property or the slide snaps while the opacity eases.
+          "transition-[opacity,translate] duration-[var(--duration-base)] ease-[var(--ease-out)] motion-reduce:transition-none",
           visible ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0",
         )}
       >

@@ -512,7 +512,7 @@ test("a hidden expense validation error reopens both panels and focuses the fiel
   await vacancyInput.fill("51");
   await page
     .locator("#step-expenses")
-    .getByRole("button", { name: "Hide Advanced Options", exact: true })
+    .getByRole("button", { name: "Hide advanced options", exact: true })
     .click();
   await page.getByRole("button", { name: "Hide details", exact: true }).click();
   await expect(vacancyInput).toBeHidden();
@@ -602,7 +602,7 @@ test("a restored dark-strategy draft falls back safely to Buy & Hold", async ({
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "Underwrite a Buy & Hold Rental",
+      name: "Underwrite a buy & hold rental",
     }),
   ).toBeVisible();
   await expect(
@@ -954,10 +954,10 @@ test("one real anonymous deal receives an exact decision and bound PDF, then a s
   }
   const grantedStressTest = page.locator("[data-drill-row='stress-test']");
   await expect(grantedStressTest).toBeVisible();
-  await expect(grantedStressTest.getByText("PRO", { exact: true })).toHaveCount(
+  await expect(grantedStressTest.getByText("Pro", { exact: true })).toHaveCount(
     0,
   );
-  await grantedStressTest.getByRole("button", { name: /Stress Test/ }).click();
+  await grantedStressTest.getByRole("button", { name: /Stress test/ }).click();
   await expect(
     grantedStressTest.getByText("Sensitivity analysis", { exact: true }),
   ).toBeVisible();
@@ -1013,9 +1013,9 @@ test("one real anonymous deal receives an exact decision and bound PDF, then a s
   const changedStressTest = page.locator("[data-drill-row='stress-test']");
   await expect(changedStressTest).toBeVisible();
   await expect(
-    changedStressTest.getByText("PRO", { exact: true }),
+    changedStressTest.getByText("Pro", { exact: true }),
   ).toBeVisible();
-  await changedStressTest.getByRole("button", { name: /Stress Test/ }).click();
+  await changedStressTest.getByRole("button", { name: /Stress test/ }).click();
   await expect(
     changedStressTest.getByText("Sensitivity analysis", { exact: true }),
   ).toBeVisible();
@@ -1092,7 +1092,7 @@ test("next deal confirms the reset, clears property facts, and keeps reusable as
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "Buy & Hold Underwriting",
+      name: "Buy & Hold underwriting",
     }),
   ).toBeVisible();
   const address = page.getByLabel("Property Address", { exact: true });

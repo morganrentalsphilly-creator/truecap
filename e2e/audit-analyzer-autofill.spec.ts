@@ -93,7 +93,7 @@ async function expectNumericValue(locator: ReturnType<Page["getByLabel"]>, expec
 
 /**
  * Reveal the expenses advanced panel. On the fresh form it sits behind
- * "Show Advanced Options"; in edit mode the form collapses to an assumptions
+ * "Show advanced options"; in edit mode the form collapses to an assumptions
  * strip whose chips ("Taxes 1.1% default …", "Insurance …", "Vacancy …") open
  * the same #advanced-options block. Either path must expose the tax editor.
  */
@@ -102,7 +102,7 @@ async function openAdvancedExpenses(page: Page, form: ReturnType<Page["locator"]
   await page.waitForTimeout(500);
   if (await taxMode.isVisible().catch(() => false)) return;
   const chip = form.getByRole("button", { name: /^Taxes/ }).first();
-  const toggle = form.getByRole("button", { name: "Show Advanced Options", exact: true });
+  const toggle = form.getByRole("button", { name: "Show advanced options", exact: true });
   if (await chip.isVisible().catch(() => false)) {
     await chip.click();
   } else {

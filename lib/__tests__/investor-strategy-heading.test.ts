@@ -9,14 +9,14 @@ import {
 
 describe("strategy-aware underwriting heading", () => {
   it("keeps the default heading and names every active strategy truthfully", () => {
-    expect(getUnderwritingHeading(null)).toBe("Underwrite a Buy & Hold Rental");
+    expect(getUnderwritingHeading(null)).toBe("Underwrite a buy & hold rental");
     expect(getUnderwritingHeading("unknown-strategy")).toBe(
-      "Underwrite a Buy & Hold Rental",
+      "Underwrite a buy & hold rental",
     );
 
     for (const strategy of INVESTOR_STRATEGIES) {
       expect(getUnderwritingHeading(strategy.key)).toBe(
-        `${strategy.label} Underwriting`,
+        `${strategy.label} underwriting`,
       );
     }
   });
