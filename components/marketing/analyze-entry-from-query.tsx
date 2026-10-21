@@ -17,7 +17,15 @@
  * /home-authed sends a signed-in visitor), so `?sample=1` works for both.
  */
 
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
+import {
+  clearSamplePrerenderFlag,
+  isSamplePrerenderShown,
+  setSamplePrerenderFlag,
+} from "@/lib/sample-prerender";
+
+/** How long the server-rendered sample may stand in before the analyzer takes the page back. */
+const SAMPLE_PRERENDER_FALLBACK_MS = 20_000;
 import { track } from "@/lib/analytics/site-events";
 import {
   dispatchHeroAnalyzeWithFallback,
@@ -57,6 +65,22 @@ function scrub(params: URLSearchParams, keys: string[]) {
 }
 
 export function AnalyzeEntryFromQuery() {
+  // A client-side navigation to /analyze?sample=1 (the hero's link) runs no
+  // head script: set the flag before this commit paints, so the sample's
+  // server-rendered decision shows instead of the empty form (audit A2). If
+  // the live result never arrives (an error), give the analyzer back.
+  useLayoutEffect(() => {
+    if (new URLSearchParams(window.location.search).get("sample") !== "1") {
+      if (!isSamplePrerenderShown()) return;
+    } else {
+      setSamplePrerenderFlag();
+    }
+    const id = window.setTimeout(() => {
+      if (!document.querySelector("[data-decision-settled]")) clearSamplePrerenderFlag();
+    }, SAMPLE_PRERENDER_FALLBACK_MS);
+    return () => window.clearTimeout(id);
+  }, []);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;

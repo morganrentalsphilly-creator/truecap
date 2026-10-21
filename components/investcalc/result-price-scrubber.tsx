@@ -20,6 +20,7 @@
 
 import * as SliderPrimitive from "@radix-ui/react-slider";
 import { useId, useState } from "react";
+import { priceTrackDomain } from "@/lib/price-track-domain";
 import { cn } from "@/lib/utils";
 
 const usd = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
@@ -43,12 +44,7 @@ export function ResultPriceScrubber({
   compact?: boolean;
 }) {
   const id = useId();
-  const lo = Math.min(asking, ceiling);
-  const hi = Math.max(asking, ceiling);
-  const margin = Math.max(5_000, Math.round((hi - lo) * 0.25));
-  const low = Math.max(1_000, Math.floor((lo - margin) / 1_000) * 1_000);
-  const high = Math.ceil((hi + margin) / 1_000) * 1_000;
-  const pct = (p: number) => ((p - low) / (high - low)) * 100;
+  const { low, high, pct } = priceTrackDomain(asking, ceiling);
   const gap = asking - ceiling;
   const moved = price !== asking;
   const [announcement, setAnnouncement] = useState("");

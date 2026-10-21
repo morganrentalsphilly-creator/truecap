@@ -16,6 +16,7 @@ import {
   ANON_ANALYZER_PROPS,
   AnalyzePageContent,
 } from "@/components/marketing/analyze-page-content";
+import { SampleDecisionPrerender } from "@/components/investcalc/sample-decision-prerender";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { JsonLd } from "@/components/seo/json-ld";
 import { getSiteUrl } from "@/lib/site-url";
@@ -68,6 +69,23 @@ export default function AnalyzePage() {
     <div className="relative overflow-x-clip">
       <JsonLd data={webPageLd} />
       <Header initialUser={null} initialEntitlements={null} />
+      {/* Hidden unless the URL asks for the sample: then it is the first
+          paint, and the analyzer's own result takes its place (audit A2). */}
+      <SampleDecisionPrerender />
+      {/* Without JavaScript the form below is inert (audit A18): say so, and
+          point to the sample's full decision, which needs none. */}
+      <noscript>
+        <div className="max-w-7xl mx-auto px-4 pt-6 sm:px-6">
+          <p className="border-b border-border pb-3 text-base text-foreground">
+            The analyzer runs in your browser and needs JavaScript. The sample
+            deal&apos;s full decision is on the{" "}
+            <a href="/sample-decision-memo" className="tc-link">
+              sample decision memo
+            </a>
+            .
+          </p>
+        </div>
+      </noscript>
       <AnalyzePageContent analyzerProps={ANON_ANALYZER_PROPS} />
       <SiteFooter disclaimer={false} />
     </div>

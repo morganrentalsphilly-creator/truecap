@@ -23,6 +23,7 @@
 import NumberFlow from "@number-flow/react";
 import { useEffect, useState, type ComponentProps } from "react";
 import { cn } from "@/lib/utils";
+import { isSamplePrerenderShown } from "@/lib/sample-prerender";
 
 type NumberKind = "usd" | "usdSigned" | "usdCents" | "usdPerMonth" | "ratio" | "percent" | "integer";
 type Format = NonNullable<ComponentProps<typeof NumberFlow>["format"]>;
@@ -62,8 +63,13 @@ export function AnimatedNumber({
   rollIn?: boolean;
   rollInDelayMs?: number;
 }) {
-  const [shown, setShown] = useState(() => (rollIn && !prefersReducedMotion() ? 0 : value));
-  const [rolled, setRolled] = useState(!rollIn);
+  // Over the sample's server-rendered decision (audit A2) the figure is
+  // already on screen: no roll from zero.
+  const [skipRoll] = useState(() => rollIn && isSamplePrerenderShown());
+  const [shown, setShown] = useState(() =>
+    rollIn && !skipRoll && !prefersReducedMotion() ? 0 : value,
+  );
+  const [rolled, setRolled] = useState(!rollIn || skipRoll);
   useEffect(() => {
     if (rolled) {
       setShown(value);

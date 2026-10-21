@@ -47,6 +47,7 @@ import type {
 import type { InputConfidenceResult } from "@/lib/input-confidence";
 import { trackEvent } from "@/lib/analytics";
 import { scrollBehavior } from "@/lib/utils";
+import { clearSamplePrerenderFlag } from "@/lib/sample-prerender";
 import {
   isOfferCeilingUnbounded,
   NO_PRICE_LIMIT_HEADLINE,
@@ -438,6 +439,24 @@ export function FocusedDecisionSummary({
   );
   const targetKey = JSON.stringify(target);
   const previousTargetKeyRef = useRef(targetKey);
+
+  // Settled: the Offer Ceiling has resolved (or failed), so the card no
+  // longer changes shape. Only then does it take the place of the sample's
+  // server-rendered decision (audit A2; app/globals.css swaps on
+  // data-decision-settled), and hand the page back to the analyzer. The
+  // analyzer's own focus hand-off gives up after about 2.5 s; on a slow phone
+  // the card may settle later, so it takes the focus itself if nothing else
+  // has it.
+  const decisionSettled =
+    targetResolutionState !== "loading" && !isOfferCeilingLoading;
+  useEffect(() => {
+    if (!decisionSettled) return;
+    clearSamplePrerenderFlag(() => {
+      const active = document.activeElement;
+      if (active && active !== document.body && !active.matches("[data-analysis-results]")) return;
+      document.getElementById("decision-summary-title")?.focus({ preventScroll: true });
+    });
+  }, [decisionSettled]);
 
   // Buy-box, sample, or another visible target surface can resolve after first
   // paint. The parent is authoritative after an explicit commit, so replace
@@ -947,6 +966,7 @@ export function FocusedDecisionSummary({
   return (
     <section
       aria-labelledby="decision-summary-title"
+      data-decision-settled={decisionSettled ? "" : undefined}
       className="rounded-lg border border-border bg-card p-5 shadow-md max-[250px]:p-3 sm:p-6"
     >
       <div className="space-y-4">

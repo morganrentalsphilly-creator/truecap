@@ -9898,7 +9898,7 @@ export function InvestCalcPage({
     form.formState.dirtyFields as Record<string, unknown>,
   );
   return (
-    <div className="min-h-screen bg-background">
+    <div data-analyzer-root="" className="min-h-screen bg-background">
       {deletedDealRecoveryActive ? (
         <div
           role="alert"

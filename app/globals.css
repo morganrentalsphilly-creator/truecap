@@ -1010,6 +1010,22 @@ summary:has([class*="rotate-"])::marker {
   transition: color var(--duration-fast) var(--ease-out);
 }
 
+/* The sample's answer arrives with the HTML (audit A2): while <html> carries
+   data-sample (lib/sample-prerender.ts), the server-rendered decision stands
+   where the analyzer's result will land and the analyzer stays out of view.
+   The moment the live result has settled ([data-decision-settled], its Offer
+   Ceiling resolved), the same paint swaps them; the live card then clears the
+   flag. A page without the static card (the signed-in twin) is never hidden. */
+[data-sample-prerender] {
+  display: none;
+}
+html[data-sample]:not(:has([data-decision-settled])) [data-sample-prerender] {
+  display: block;
+}
+html[data-sample]:has([data-sample-prerender]):not(:has([data-decision-settled])) [data-analyzer-root] {
+  display: none;
+}
+
 /* The hero's one moment (components/home/price-scrubber.tsx, audit A3): the
    meets-range reaches out to the asking marker and draws back to the
    ceiling, once, when the track is first seen. Scale only, from and to the
