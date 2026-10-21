@@ -88,8 +88,12 @@ export function StickyCalculateBar({
     // form - enough that the in-form button is below the fold. Plain
     // scroll listener (no rAF needed) because the math is one branch
     // per scroll tick.
+    // Hysteresis: once shown, the bar stays until the page is back above
+    // 560px. Crossing 600px condenses the sticky header by 8px and scroll
+    // anchoring pulls the page back by as much, so a single threshold
+    // mounted and unmounted the bar on the same scroll (trust pass).
     const onScroll = () => {
-      setPastFold(window.scrollY > 600);
+      setPastFold((shown) => window.scrollY > (shown ? 560 : 600));
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
