@@ -31,8 +31,8 @@ const metrics = JSON.parse(
 
 /** The faces the site loads, by their capsize key. */
 const FACES = [
-  { family: "Hanken Grotesk", key: "hankenGrotesk" },
-  { family: "Geist Mono", key: "geistMono" },
+  { family: "Hanken Grotesk", key: "hankenGrotesk", fallbackName: "TrueCap Text Fallback" },
+  { family: "Geist Mono", key: "geistMono", fallbackName: "TrueCap Mono Fallback" },
 ];
 
 /** The installed faces to fall back to, with the local() names they go by. */
@@ -57,8 +57,10 @@ function overrides(face, fallback) {
   };
 }
 
+/** "TrueCap Text Fallback Roboto": named for its role, not the face it stands in for. */
 export function fallbackFamily(family, system) {
-  return `${family} Fallback ${system}`;
+  const face = FACES.find((f) => f.family === family);
+  return `${face ? face.fallbackName : `${family} Fallback`} ${system}`;
 }
 
 export function fallbackFaceCss() {
