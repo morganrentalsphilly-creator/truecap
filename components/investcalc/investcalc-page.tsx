@@ -967,11 +967,12 @@ function focusAnalysisResults() {
   const region = document.querySelector<HTMLElement>("[data-analysis-results='true']");
   region?.focus({ preventScroll: true });
   // The decision card arrives with the dashboard's lazy chunk, often a few
-  // frames after the region: hand the focus on when it mounts, for about a
-  // second, unless the user has moved on.
+  // frames after the region, and its heading is not focusable while the
+  // reveal plays (1.4 s): hand the focus on once it is, for up to ~2.5 s,
+  // unless the user has moved on.
   let frames = 0;
   const tick = () => {
-    if (frames++ > 60) return;
+    if (frames++ > 150) return;
     const active = document.activeElement;
     if (active !== region && active !== document.body) return;
     if (!focusHeading()) requestAnimationFrame(tick);
