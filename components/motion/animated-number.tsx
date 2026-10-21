@@ -14,6 +14,9 @@
  * server-rendered page, and never under reduced motion (it mounts at its
  * value).
  *
+ * Assistive tech reads an sr-only text twin; the animated host, which
+ * NumberFlow marks role="img", is hidden from it (audit A24).
+ *
  * Formats: "usd" whole dollars, "usdSigned" whole dollars with a + or −
  * sign always (the live preview's cash flow), "usdCents" two decimals, "usdPerMonth"
  * appends /mo, "ratio" two decimals (DSCR), "percent" one decimal with a %
@@ -82,15 +85,23 @@ export function AnimatedNumber({
     return () => window.clearTimeout(id);
   }, [value, rolled, rollInDelayMs]);
   const suffix = kind === "usdPerMonth" ? "/mo" : kind === "percent" ? "%" : undefined;
+  // NumberFlow's host is role="img", so assistive tech met every live figure
+  // as an image (audit A24). The figure reaches it as text instead: an sr-only
+  // twin in the same format, with the animated host hidden from it.
+  const text = `${new Intl.NumberFormat("en-US", FORMAT[kind]).format(shown)}${suffix ?? ""}`;
   return (
-    <NumberFlow
-      value={shown}
-      format={FORMAT[kind]}
-      locales="en-US"
-      suffix={suffix}
-      trend={trend}
-      className={cn("font-figure", className)}
-      willChange
-    />
+    <>
+      <span className="sr-only">{text}</span>
+      <NumberFlow
+        aria-hidden
+        value={shown}
+        format={FORMAT[kind]}
+        locales="en-US"
+        suffix={suffix}
+        trend={trend}
+        className={cn("font-figure", className)}
+        willChange
+      />
+    </>
   );
 }
