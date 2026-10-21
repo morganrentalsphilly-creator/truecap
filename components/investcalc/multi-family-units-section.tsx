@@ -322,7 +322,7 @@ export function MultiFamilyUnitsSection({
                     min={0}
                     max={20}
                     step={1}
-                    placeholder="2"
+                    placeholder="e.g. 2"
                     aria-invalid={!!unitErrors?.bedrooms}
                     aria-describedby={
                       unitErrors?.bedrooms
@@ -360,7 +360,7 @@ export function MultiFamilyUnitsSection({
                     min={0}
                     max={20}
                     step={0.5}
-                    placeholder="1"
+                    placeholder="e.g. 1"
                     aria-invalid={!!unitErrors?.bathrooms}
                     aria-describedby={
                       unitErrors?.bathrooms
@@ -398,7 +398,7 @@ export function MultiFamilyUnitsSection({
                     min={50}
                     max={100_000}
                     step={1}
-                    placeholder="850"
+                    placeholder="e.g. 850"
                     aria-invalid={!!unitErrors?.sqft}
                     aria-describedby={
                       unitErrors?.sqft ? `unit-${index}-sqft-error` : undefined
@@ -447,7 +447,7 @@ export function MultiFamilyUnitsSection({
                             min={0}
                             max={1_000_000}
                             step={50}
-                            placeholder="1,800"
+                            placeholder="e.g. 1,800"
                             aria-invalid={!!unitErrors?.monthlyRent}
                             aria-describedby={
                               unitErrors?.monthlyRent

@@ -11,6 +11,7 @@
 
 import { cn } from "@/lib/utils";
 import { formatDscr } from "@/lib/financial-presentation";
+import { runTargetsLine } from "@/lib/limiting-factor";
 import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 import { GlossaryTip } from "./glossary-tip";
 import { useEffect, useState, type ReactNode } from "react";
@@ -54,6 +55,9 @@ type Props = {
    * from the 6.75% default". Stays until dismissed or undone.
    */
   inputChange?: { text: string; onUndo: () => void; onDismiss: () => void } | null;
+  /** The targets the full run will test, in the run's words ("break-even
+   * cash flow · DSCR ≥ 1.25"), so the preview names them (audit A15). */
+  runTargets?: string | null;
 };
 
 function DesktopAction({ children }: { children: ReactNode }) {
@@ -121,6 +125,7 @@ export function LiveVerdictPanel({
   assumptionBasis,
   desktopAction,
   inputChange,
+  runTargets,
 }: Props) {
   return (
     <>
@@ -305,6 +310,11 @@ export function LiveVerdictPanel({
             // so the amber pill isn't a dead end.
             <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-2xs font-semibold leading-snug text-foreground">
               {livePreview.limitingFactor}
+            </p>
+          ) : null}
+          {runTargets ? (
+            <p data-live-run-targets="" className="mt-2.5 text-xs font-medium leading-snug text-foreground">
+              {runTargetsLine(runTargets)}
             </p>
           ) : null}
           <p className="mt-2.5 text-2xs leading-snug text-muted-foreground">

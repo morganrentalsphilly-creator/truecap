@@ -175,7 +175,7 @@ export function SingleFamilyUnitSection({
               min={0}
               max={20}
               step={1}
-              placeholder="3"
+              placeholder="e.g. 3"
               aria-invalid={!!errors.bedrooms}
               aria-describedby={errors.bedrooms ? "bedrooms-error" : undefined}
               className={cn(
@@ -211,7 +211,7 @@ export function SingleFamilyUnitSection({
                     min={0}
                     max={1_000_000}
                     step={50}
-                    placeholder="2,800"
+                    placeholder="e.g. 2,800"
                     aria-required="true"
                     aria-invalid={!!errors.monthlyRent}
                     aria-describedby={monthlyRentDescribedBy}
@@ -253,7 +253,7 @@ export function SingleFamilyUnitSection({
               min={0}
               max={20}
               step={0.5}
-              placeholder="2"
+              placeholder="e.g. 2"
               aria-invalid={!!errors.bathrooms}
               aria-describedby={
                 errors.bathrooms ? "bathrooms-error" : undefined
@@ -283,7 +283,7 @@ export function SingleFamilyUnitSection({
               min={50}
               max={100_000}
               step={1}
-              placeholder="1850"
+              placeholder="e.g. 1,850"
               aria-invalid={!!errors.sqft}
               aria-describedby={errors.sqft ? "sqft-error" : undefined}
               className={cn(
@@ -326,7 +326,7 @@ export function SingleFamilyUnitSection({
                   type="number"
                   inputMode="decimal"
                   step="0.01"
-                  placeholder="220"
+                  placeholder="e.g. 220"
                   aria-required="true"
                   aria-invalid={!!errors.avgDailyRate}
                   aria-describedby={
@@ -356,7 +356,7 @@ export function SingleFamilyUnitSection({
                   type="number"
                   inputMode="decimal"
                   step="1"
-                  placeholder="65"
+                  placeholder="e.g. 65"
                   aria-required="true"
                   aria-invalid={!!errors.occupancyPct}
                   aria-describedby={
@@ -392,7 +392,7 @@ export function SingleFamilyUnitSection({
                   type="number"
                   inputMode="decimal"
                   step="100"
-                  placeholder="15000"
+                  placeholder="e.g. 15,000"
                   aria-invalid={!!errors.strFurnishingCost}
                   aria-describedby={
                     errors.strFurnishingCost

@@ -237,7 +237,7 @@ export function PropertyDetailsSection({
                 min={10_000}
                 max={100_000_000}
                 step={100}
-                placeholder="385,000"
+                placeholder="e.g. 385,000"
                 aria-required="true"
                 aria-invalid={!!purchasePriceError}
                 aria-describedby={
@@ -349,7 +349,7 @@ export function YearBuiltField({
         min={1800}
         max={new Date().getFullYear() + 5}
         step={1}
-        placeholder="2015"
+        placeholder="e.g. 2,015"
         aria-invalid={!!errors.yearBuilt}
         aria-describedby={errors.yearBuilt ? "yearBuilt-error" : undefined}
         className={cn(

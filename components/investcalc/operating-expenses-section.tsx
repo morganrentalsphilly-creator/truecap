@@ -744,7 +744,7 @@ export function OperatingExpensesSection({
                     step="0.01"
                     min={0}
                     max={100}
-                    placeholder="0.50"
+                    placeholder="e.g. 0.50"
                     aria-invalid={!!errors.insurancePct}
                     aria-describedby={
                       errors.insurancePct ? "insuranceAmount-error" : undefined
@@ -795,7 +795,7 @@ export function OperatingExpensesSection({
                       step={1}
                       min={0}
                       max={1_000_000}
-                      placeholder="0"
+                      placeholder="e.g. 0"
                       aria-invalid={!!errors.hoaMonthly}
                       aria-describedby={
                         errors.hoaMonthly ? "hoaMonthly-error" : undefined
@@ -870,7 +870,7 @@ export function OperatingExpensesSection({
                       step={1}
                       min={0}
                       max={1_000_000}
-                      placeholder="0"
+                      placeholder="e.g. 0"
                       aria-invalid={!!errors.utilitiesMonthly}
                       aria-describedby={
                         errors.utilitiesMonthly
@@ -919,7 +919,7 @@ export function OperatingExpensesSection({
                   step="0.01"
                   min={0}
                   max={50}
-                  placeholder="10"
+                  placeholder="e.g. 10"
                   aria-invalid={!!errors.maintenancePct}
                   aria-describedby={
                     errors.maintenancePct ? "maintenancePct-error" : undefined
@@ -959,7 +959,7 @@ export function OperatingExpensesSection({
                   step="0.01"
                   min={0}
                   max={50}
-                  placeholder="5"
+                  placeholder="e.g. 5"
                   aria-invalid={!!errors.vacancyPct}
                   aria-describedby={
                     errors.vacancyPct ? "vacancyPct-error" : undefined
@@ -999,7 +999,7 @@ export function OperatingExpensesSection({
                   step="0.01"
                   min={0}
                   max={50}
-                  placeholder="8"
+                  placeholder="e.g. 8"
                   aria-invalid={!!errors.mgmtPct}
                   aria-describedby={
                     errors.mgmtPct ? "mgmtPct-error" : undefined
@@ -1039,7 +1039,7 @@ export function OperatingExpensesSection({
                   step="0.01"
                   min={0}
                   max={50}
-                  placeholder="5"
+                  placeholder="e.g. 5"
                   aria-invalid={!!errors.capexPct}
                   aria-describedby={
                     errors.capexPct ? "capexPct-error" : undefined
@@ -1087,7 +1087,7 @@ export function OperatingExpensesSection({
                       step="0.01"
                       min={0}
                       max={100}
-                      placeholder="85"
+                      placeholder="e.g. 85"
                       aria-invalid={!!errors.buildingValuePct}
                       aria-describedby={
                         errors.buildingValuePct
@@ -1166,7 +1166,7 @@ export function OperatingExpensesSection({
                   step="0.01"
                   min={0}
                   max={20}
-                  placeholder="2.5"
+                  placeholder="e.g. 2.5"
                   aria-invalid={!!errors.expenseGrowthPct}
                   aria-describedby={
                     errors.expenseGrowthPct
@@ -1203,7 +1203,7 @@ export function OperatingExpensesSection({
                   step="0.01"
                   min={0}
                   max={20}
-                  placeholder="2.5"
+                  placeholder="e.g. 2.5"
                   aria-invalid={!!errors.rentGrowthPct}
                   aria-describedby={
                     errors.rentGrowthPct ? "rentGrowthPct-error" : undefined
@@ -1241,7 +1241,7 @@ export function OperatingExpensesSection({
                       step="0.01"
                       min={0}
                       max={100}
-                      placeholder="3"
+                      placeholder="e.g. 3"
                       aria-invalid={!!errors.appreciationRatePct}
                       aria-describedby={
                         errors.appreciationRatePct
@@ -1282,7 +1282,7 @@ export function OperatingExpensesSection({
                       step="0.01"
                       min={0}
                       max={100}
-                      placeholder="6"
+                      placeholder="e.g. 6"
                       aria-invalid={!!errors.sellingCostPct}
                       aria-describedby={
                         errors.sellingCostPct
@@ -1327,7 +1327,7 @@ export function OperatingExpensesSection({
                       step="0.01"
                       min={0}
                       max={100}
-                      placeholder="24"
+                      placeholder="e.g. 24"
                       aria-invalid={!!errors.taxRatePct}
                       aria-describedby={
                         errors.taxRatePct ? "taxRatePct-error" : undefined
