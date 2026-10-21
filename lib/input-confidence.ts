@@ -13,6 +13,12 @@ import {
   type EnrichmentProvenanceInput,
 } from "./data-confidence";
 import type { InvestmentFormValues } from "./investcalc-schema";
+import {
+  isTrueCapSyntheticSampleAddress,
+  SAMPLE_DEAL_PROVENANCE,
+  SAMPLE_DEAL_VALUES,
+  type SampleInputProvenance,
+} from "./sample-deal";
 
 /**
  * v1.1 adds Year Built as a weighted readiness input. Versioning the method
@@ -507,6 +513,38 @@ function explicitVerification(
     : fallback;
 }
 
+/**
+ * The sample's inputs carry the sample's own source line (audit A1), not the
+ * phrases written for a visitor's typing ("Your entered rent"). Display only:
+ * the class, and so the points, stay as assessed. A field keeps its label once
+ * the visitor changes or verifies it; an input outside the provenance map is
+ * relabelled only where the label claims the visitor typed it.
+ */
+function withSampleProvenance(
+  values: InvestmentFormValues,
+  field: InputConfidenceField,
+): InputConfidenceField {
+  if (
+    field.sourceClass === "verified" ||
+    field.sourceClass === "missing" ||
+    field.sourceClass === "not-applicable" ||
+    inputVerificationFingerprint(values, field.key) !==
+      inputVerificationFingerprint(SAMPLE_DEAL_VALUES, field.key)
+  )
+    return field;
+  const mapped = (
+    SAMPLE_DEAL_PROVENANCE.fields as Partial<
+      Record<InputConfidenceFieldKey, SampleInputProvenance>
+    >
+  )[field.key];
+  const line =
+    mapped ??
+    (field.sourceClass === "user-estimate"
+      ? SAMPLE_DEAL_PROVENANCE.other
+      : null);
+  return line ? { ...field, sourceLabel: line.tag, reason: line.basis } : field;
+}
+
 function hasRent(values: InvestmentFormValues): boolean {
   if (
     (num(values.avgDailyRate) ?? 0) > 0 &&
@@ -562,7 +600,7 @@ export function buildInputConfidence(
     };
   };
 
-  const fields: InputConfidenceField[] = [
+  const assessedFields: InputConfidenceField[] = [
     field(
       "purchasePrice",
       explicitVerification(
@@ -1002,6 +1040,9 @@ export function buildInputConfidence(
           },
     ),
   ];
+  const fields = isTrueCapSyntheticSampleAddress(values.address)
+    ? assessedFields.map((item) => withSampleProvenance(values, item))
+    : assessedFields;
 
   const earned = fields.reduce((sum, item) => sum + item.earnedPoints, 0);
   const available = fields.reduce((sum, item) => sum + item.maxPoints, 0);

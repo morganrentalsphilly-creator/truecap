@@ -154,6 +154,72 @@ export const SAMPLE_DEAL_DISPLAY = {
   subtitle: `Single Family · $${SAMPLE_DEAL_VALUES.purchasePrice.toLocaleString("en-US")} · Built ${SAMPLE_DEAL_VALUES.yearBuilt}`,
 } as const;
 
+/** One source line for a sample input: the tag a chip shows, what the popover says, what to replace it with. */
+export type SampleInputProvenance = {
+  tag: string;
+  basis: string;
+  replaceWith: string;
+};
+
+const SAMPLE_AS_OF_LABEL = "25 Aug 2026";
+const SAMPLE_INPUT_TAG = `Sample input, ${SAMPLE_AS_OF_LABEL}`;
+
+/**
+ * Where each of the sample's inputs comes from (audit A1, 2026-10-21). DISPLAY
+ * ONLY: every surface that shows the sample (the hero's chips, the receipts,
+ * the memo, the analyzer's input tags when it runs the sample) reads its
+ * source line here, so the sample never carries two labels for one number. A
+ * real deal keeps its own labels.
+ *
+ * The rate is checked against Freddie Mac's PMMS, the series FRED publishes as
+ * MORTGAGE30US: 6.65% for the week of 20 Aug 2026, the last observation before
+ * the sample's as-of date, rounded to the fixture's 6.6%. The rent is the
+ * example's own figure, not a HUD benchmark: say so, never "HUD FMR".
+ */
+export const SAMPLE_DEAL_PROVENANCE = {
+  asOf: SAMPLE_DEAL_ANALYSIS_DATE,
+  asOfLabel: SAMPLE_AS_OF_LABEL,
+  fields: {
+    purchasePrice: {
+      tag: "Sample asking price",
+      basis: `The example's asking price, set on ${SAMPLE_AS_OF_LABEL}. Not a listing.`,
+      replaceWith: "the listing's asking price or your contract price",
+    },
+    rent: {
+      tag: SAMPLE_INPUT_TAG,
+      basis: `The example's rent, set on ${SAMPLE_AS_OF_LABEL}. It is not a HUD figure, a comp or a lease. On your own address the analyzer starts from HUD's rent benchmark and labels it.`,
+      replaceWith: "the property's leases or local rent comps",
+    },
+    interestRate: {
+      tag: "FRED, 20 Aug 2026",
+      basis:
+        "The sample's rate: FRED's 30-year fixed average for the week of 20 Aug 2026 was 6.65%, rounded here to 6.6%. It is not today's rate; your own analysis fills the latest FRED week.",
+      replaceWith: "an investor lender quote",
+    },
+    propertyTax: {
+      tag: SAMPLE_INPUT_TAG,
+      basis: `1.49% of the price a year, set for the example on ${SAMPLE_AS_OF_LABEL}. TrueCap never auto-fills property tax: on your deal you enter it.`,
+      replaceWith: "the local annual bill or a reviewed effective rate",
+    },
+    downPayment: {
+      tag: "TrueCap default",
+      basis: "20% down, the analyzer's starting down payment; the mortgage line is solved from it.",
+      replaceWith: "your lender's terms",
+    },
+  },
+  /** For any other input the sample set and the visitor has not changed. */
+  other: {
+    tag: SAMPLE_INPUT_TAG,
+    basis: `Set for the example on ${SAMPLE_AS_OF_LABEL}, not taken from the property.`,
+    replaceWith: "your own figure",
+  },
+} as const satisfies {
+  asOf: string;
+  asOfLabel: string;
+  fields: Record<string, SampleInputProvenance>;
+  other: SampleInputProvenance;
+};
+
 /**
  * Complete sample contract. Keep the legacy named exports above for existing
  * callers, but new sample surfaces should consume this object so inputs,
@@ -167,4 +233,5 @@ export const SAMPLE_DEAL_FIXTURE = {
   maoTarget: SAMPLE_DEAL_MAO_TARGET,
   targetProfile: SAMPLE_DEAL_TARGET_PROFILE,
   display: SAMPLE_DEAL_DISPLAY,
+  provenance: SAMPLE_DEAL_PROVENANCE,
 } as const;

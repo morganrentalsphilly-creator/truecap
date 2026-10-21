@@ -2,8 +2,10 @@
  * "Every number has a receipt" (OVERHAUL.md §6.3): the sources drawn as a
  * flow into the result, in Plaid's manner. HUD feeds the rent, FRED feeds
  * the rate, you feed the property tax, and the three leaders meet at the
- * Offer Ceiling. Each node is a SourcePopover: what the source is, its basis,
- * and what to replace it with, in lib/product-facts.ts's words. The leaders
+ * Offer Ceiling. Each node is a SourcePopover on the sample's own value: its
+ * source line from SAMPLE_DEAL_FIXTURE.provenance (the sample's rent is the
+ * example's, not HUD's), what fills it on the visitor's own deal, and what to
+ * replace it with. The leaders
  * draw themselves in once as the section scrolls into view, on every engine
  * (components/home/receipt-leaders.tsx, Motion pathLength), and are fully
  * drawn by default, so no-JavaScript and reduced motion see the finished
@@ -17,7 +19,6 @@
 
 import { SourcePopover } from "@/components/motion/source-popover";
 import { ReceiptLeaders } from "@/components/home/receipt-leaders";
-import { DATA_SOURCE_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { formatLedgerDollars, type SampleDealLedger } from "@/lib/sample-deal-ledger";
 import { calculateSampleDealOutcome } from "@/lib/sample-deal-analysis";
@@ -27,33 +28,36 @@ export function ReceiptFlow({ ledger }: { ledger: SampleDealLedger }) {
   const values = SAMPLE_DEAL_FIXTURE.values;
   const { maxOffer } = calculateSampleDealOutcome();
   const atCeiling = maxOffer?.achieved;
+  // The sample's values with the sample's own source line (audit A1); "what"
+  // says what fills the same input on the visitor's own deal.
+  const line = SAMPLE_DEAL_FIXTURE.provenance.fields;
   const nodes = [
     {
       key: "rent",
-      source: "HUD FMR" as const,
+      source: line.rent.tag,
       label: "Rent",
       value: `${formatLedgerDollars(values.monthlyRent ?? 0)}/mo`,
-      what: "HUD Fair Market Rent benchmark",
-      basis: `${DATA_SOURCE_FACTS.rent}. A placeholder rent for the sample, not the property's own.`,
-      replaceWith: "the property's leases or local rent comps",
+      what: "On your address: HUD's rent benchmark",
+      basis: line.rent.basis,
+      replaceWith: line.rent.replaceWith,
     },
     {
       key: "rate",
-      source: "FRED rate" as const,
+      source: line.interestRate.tag,
       label: "Mortgage rate",
       value: `${values.interestRate}%`,
-      what: "FRED 30-year fixed series",
-      basis: `${DATA_SOURCE_FACTS.mortgageRate}, with its date shown in the analyzer.`,
-      replaceWith: "an investor lender quote, before deciding",
+      what: "On your deal: the latest FRED week",
+      basis: line.interestRate.basis,
+      replaceWith: line.interestRate.replaceWith,
     },
     {
       key: "tax",
-      source: "Your input" as const,
+      source: line.propertyTax.tag,
       label: "Property tax",
-      value: "Your input",
-      what: "Never auto-filled",
-      basis: `${PROPERTY_TAX_FACTS.notAutoFilled} ${PROPERTY_TAX_FACTS.blankFieldBehavior}`,
-      replaceWith: "a local annual bill or a reviewed effective rate",
+      value: `${values.propertyTaxPct}% a year`,
+      what: "On your deal: never auto-filled, you enter it",
+      basis: line.propertyTax.basis,
+      replaceWith: line.propertyTax.replaceWith,
     },
   ];
   return (

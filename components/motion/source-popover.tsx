@@ -13,7 +13,8 @@ import type { ReactNode } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-export type SourceLabel = "HUD FMR" | "FRED rate" | "Your input" | "TrueCap default";
+/** The source's tag: "HUD FMR", "FRED, 20 Aug 2026", "Sample input, 25 Aug 2026". */
+export type SourceLabel = string;
 
 export function SourcePopover({
   source,
