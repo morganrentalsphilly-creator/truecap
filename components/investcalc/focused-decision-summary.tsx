@@ -270,7 +270,7 @@ function FirstYearSnapshot({
     >
       {whatIfPrice != null ? (
         <p className="col-span-full text-xs font-medium text-highlight-text" data-what-if-caption="">
-          At {money(whatIfPrice)}, what if
+          At {money(whatIfPrice)}
         </p>
       ) : null}
       <div className="border-t border-border pt-2" data-reveal-step="4">

@@ -957,14 +957,26 @@ function buildProvenanceInput(
  * for the summary bar's button as well).
  */
 function focusAnalysisResults() {
-  const heading = document.getElementById("decision-summary-title");
-  if (heading instanceof HTMLElement) {
+  const focusHeading = () => {
+    const heading = document.getElementById("decision-summary-title");
+    if (!(heading instanceof HTMLElement)) return false;
     heading.focus({ preventScroll: true });
-    if (document.activeElement === heading) return;
-  }
-  document
-    .querySelector<HTMLElement>("[data-analysis-results='true']")
-    ?.focus({ preventScroll: true });
+    return document.activeElement === heading;
+  };
+  if (focusHeading()) return;
+  const region = document.querySelector<HTMLElement>("[data-analysis-results='true']");
+  region?.focus({ preventScroll: true });
+  // The decision card arrives with the dashboard's lazy chunk, often a few
+  // frames after the region: hand the focus on when it mounts, for about a
+  // second, unless the user has moved on.
+  let frames = 0;
+  const tick = () => {
+    if (frames++ > 60) return;
+    const active = document.activeElement;
+    if (active !== region && active !== document.body) return;
+    if (!focusHeading()) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 }
 
 export function InvestCalcPage({
