@@ -12,7 +12,6 @@ import {
   Pencil,
   Plus,
   Search,
-  Sparkles,
   Star,
   Target,
   Trash2,
@@ -567,7 +566,6 @@ export function TemplatesManagementPage({
             know what every percent field means. */}
         <section className="rounded-lg border border-border bg-card p-4 sm:p-5">
           <div className="flex items-baseline gap-2">
-            <Sparkles className="size-4 text-primary" />
             <h2 className="text-sm font-medium text-foreground">
               Start from a strategy template
             </h2>

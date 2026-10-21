@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Controller, UseFormReturn } from "react-hook-form";
-import { Home, DollarSign, Sparkles, Loader2 } from "lucide-react";
+import { Home, DollarSign, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -165,9 +165,7 @@ export function PropertyDetailsSection({
                 aria-hidden="true"
                 className="size-3.5 shrink-0 animate-spin"
               />
-            ) : (
-              <Sparkles aria-hidden="true" className="size-3.5 shrink-0" />
-            )}
+            ) : null}
             {isAutofilling
               ? "Looking up property details…"
               : "Look up property details"}

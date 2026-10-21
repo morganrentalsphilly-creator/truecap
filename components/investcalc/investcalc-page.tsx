@@ -9972,12 +9972,14 @@ export function InvestCalcPage({
               // No aria-label: the two visible lines are the name. The old
               // label joined them with "and", so the accessible name did not
               // contain the visible text (WCAG 2.5.3).
-              className="group inline-flex min-h-11 shrink-0 flex-col items-start gap-0.5 self-start rounded-xl bg-primary px-5 py-3 text-left shadow-[0_10px_24px_rgba(0,_112,_196,0.28)] transition-transform hover:-translate-y-0.5 sm:self-end"
+              // The secondary control (audit A11): 8px, the graphite-2 line,
+              // the band on hover, no float shadow and no lift.
+              className="group inline-flex min-h-11 shrink-0 flex-col items-start gap-0.5 self-start rounded-md border border-muted-foreground bg-transparent px-5 py-3 text-left transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-band sm:self-end"
             >
-              <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary-foreground">
+              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground">
                 Try a sample rental
               </span>
-              <span className="text-2xs font-medium text-primary-foreground">
+              <span className="text-xs text-muted-foreground">
                 Preview a sample Pro report
               </span>
             </button>
@@ -10263,7 +10265,7 @@ export function InvestCalcPage({
                       </dt>
                       <dd
                         className={cn(
-                          "truncate font-mono font-bold tabular-nums",
+                          "truncate font-figure font-semibold",
                           analysisResult.netCashFlow >= 0
                             ? "text-[var(--metric-positive)]"
                             : "text-[var(--metric-negative)]",
@@ -10280,7 +10282,7 @@ export function InvestCalcPage({
                       <dt className="text-xs font-medium text-muted-foreground">
                         Cap rate
                       </dt>
-                      <dd className="font-mono font-bold tabular-nums text-foreground">
+                      <dd className="font-figure font-semibold text-foreground">
                         {analysisResult.capRate.toFixed(1)}%
                       </dd>
                     </div>
@@ -10288,7 +10290,7 @@ export function InvestCalcPage({
                       <dt className="text-xs font-medium text-muted-foreground">
                         DSCR
                       </dt>
-                      <dd className="font-mono font-bold tabular-nums text-foreground">
+                      <dd className="font-figure font-semibold text-foreground">
                         {formatDscr(
                           analysisResult.dscr,
                           analysisResult.monthlyPayment > 0,

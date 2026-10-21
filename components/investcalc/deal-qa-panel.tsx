@@ -16,7 +16,7 @@
 
 import { useMemo, useState } from "react";
 import * as Sentry from "@sentry/nextjs";
-import { ArrowUp, Loader2, MessageCircleQuestion, Sparkles } from "lucide-react";
+import { ArrowUp, Loader2, MessageCircleQuestion } from "lucide-react";
 import Link from "next/link";
 import { askDealQuestionAction } from "@/app/actions/deal-qa";
 import { trackEvent } from "@/lib/analytics";
@@ -161,7 +161,6 @@ export function DealQaPanel({
             href="/pricing"
             className="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-primary hover:underline"
           >
-            <Sparkles className="size-3.5" />
             See Pro
           </Link>
         </div>

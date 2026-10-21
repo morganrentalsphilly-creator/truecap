@@ -189,7 +189,9 @@ export function StrategyChips({
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card px-3 py-2.5 shadow-sm sm:px-4">
+    // A row on lines, not a card for one setting (audit A11): cards are for
+    // objects the visitor compares or acts on (DESIGN.md "Chrome").
+    <div className="border-y border-border py-1">
       <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-3 gap-y-1">
         <p className="flex min-w-0 flex-1 basis-[9rem] flex-wrap items-center gap-1.5 text-sm text-foreground">
           <span className="shrink-0 text-muted-foreground">Analysis type:</span>
@@ -220,7 +222,7 @@ export function StrategyChips({
               setExpanded(true);
             }
           }}
-          className="ml-auto inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 text-xs font-bold text-primary underline-offset-2 hover:bg-muted hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 "
+          className="ml-auto inline-flex min-h-11 shrink-0 items-center rounded-md px-3 text-sm font-semibold text-primary underline-offset-2 hover:bg-muted hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           {expanded ? "Done" : "Change"}
         </button>

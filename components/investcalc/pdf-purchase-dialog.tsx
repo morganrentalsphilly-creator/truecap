@@ -6,7 +6,7 @@
  * Pro subscription → /pricing (current price, terms, and plan details).
  */
 
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import type { RefObject } from "react";
 import {
@@ -77,7 +77,6 @@ export function PdfPurchaseDialog({
           >
             <div>
               <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
-                <Sparkles className="size-4 text-primary" />
                 {proOfferName}
               </p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
