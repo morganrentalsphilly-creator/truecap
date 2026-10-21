@@ -104,6 +104,15 @@ function Separated({ parts }: { parts: readonly string[] }) {
   );
 }
 
+/** A source line in the chips' grammar (the hero's and the analyzer's), from the sample's one provenance record. */
+function SourceTag({ children }: { children: string }) {
+  return (
+    <span className="whitespace-nowrap font-mono text-sm text-muted-foreground">
+      · {children}
+    </span>
+  );
+}
+
 export default function SampleDecisionMemoPage() {
   const { analysis, dealScore, maxOffer } = calculateSampleDealOutcome();
   if (!maxOffer) return null;
@@ -113,6 +122,7 @@ export default function SampleDecisionMemoPage() {
     source: "selected-targets",
   });
   const values = SAMPLE_DEAL_FIXTURE.values;
+  const provenance = SAMPLE_DEAL_FIXTURE.provenance.fields;
   const hasDebtService = analysis.monthlyPayment > 0;
   // Same four numbers and one-decimal formats as the decision card and the
   // shared viewer (lib/financial-presentation). Set in ink, as the homepage
@@ -355,15 +365,18 @@ export default function SampleDecisionMemoPage() {
               <ul className={MEMO_LIST}>
                 <li className={MEMO_LIST_ITEM}>
                   <strong className="font-semibold">Rent:</strong>{" "}
-                  {money(values.monthlyRent ?? 0)}/mo is a scenario assumption;
-                  a signed lease or rent roll could move the ceiling
-                  materially.
+                  {money(values.monthlyRent ?? 0)}/mo{" "}
+                  <SourceTag>{provenance.rent.tag}</SourceTag> is the
+                  example&apos;s figure, not a HUD benchmark or a comp; a signed
+                  lease or rent roll could move the ceiling materially.
                 </li>
                 <li className={MEMO_LIST_ITEM}>
                   <strong className="font-semibold">Financing:</strong>{" "}
-                  {values.interestRate}% at {values.downPaymentPct}% down is
-                  not a quote. Rate, points, PMI, and reserves can change cash
-                  flow and DSCR.
+                  {values.interestRate}%{" "}
+                  <SourceTag>{provenance.interestRate.tag}</SourceTag> at{" "}
+                  {values.downPaymentPct}% down is not a quote and not
+                  today&apos;s rate. Rate, points, PMI, and reserves can change
+                  cash flow and DSCR.
                 </li>
                 <li className={MEMO_LIST_ITEM}>
                   <strong className="font-semibold">Operating costs:</strong>{" "}

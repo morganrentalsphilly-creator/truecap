@@ -16,7 +16,6 @@ import Link from "next/link";
 import { PriceScrubber, type ScrubberSource } from "@/components/home/price-scrubber";
 import { LedgerTotal } from "@/components/ledger/ledger-parts";
 import { formatDscr } from "@/lib/financial-presentation";
-import { DATA_SOURCE_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { formatLedgerDollars, type SampleDealLedger } from "@/lib/sample-deal-ledger";
 import { compactSweep, type SampleDealSweep } from "@/lib/sample-deal-sweep";
@@ -42,33 +41,31 @@ export function HeroSheet({
   const rent = `${formatLedgerDollars(values.monthlyRent ?? 0)}/mo`;
   const rate = `${values.interestRate}%`;
   const downPaymentPct = `${values.downPaymentPct}%`;
+  // Every chip reads the sample's one provenance record (audit A1), so the
+  // hero, the receipts, the memo and the opened sample say the same thing.
+  const line = SAMPLE_DEAL_FIXTURE.provenance.fields;
   const sources: ScrubberSource[] = [
-    {
-      label: "Rent",
-      value: rent,
-      source: "HUD FMR",
-      basis: `${DATA_SOURCE_FACTS.rent}. A placeholder rent, not the property's own.`,
-      replaceWith: "the property's leases or local rent comps",
-    },
+    { label: "Rent", value: rent, source: line.rent.tag, basis: line.rent.basis, replaceWith: line.rent.replaceWith },
     {
       label: "Rate",
       value: rate,
-      source: "FRED rate",
-      basis: `${DATA_SOURCE_FACTS.mortgageRate}, with its date shown in the analyzer.`,
-      replaceWith: "an investor lender quote",
+      source: line.interestRate.tag,
+      basis: line.interestRate.basis,
+      replaceWith: line.interestRate.replaceWith,
     },
     {
       label: "Property tax",
-      source: "Your input",
-      basis: `${PROPERTY_TAX_FACTS.notAutoFilled} ${PROPERTY_TAX_FACTS.blankFieldBehavior}`,
-      replaceWith: "the local annual bill or a reviewed effective rate",
+      value: `${values.propertyTaxPct}%`,
+      source: line.propertyTax.tag,
+      basis: line.propertyTax.basis,
+      replaceWith: line.propertyTax.replaceWith,
     },
     {
       label: "Down payment",
       value: downPaymentPct,
-      source: "TrueCap default",
-      basis: "The analyzer's starting down payment; the mortgage line is solved from it.",
-      replaceWith: "your lender's terms",
+      source: line.downPayment.tag,
+      basis: line.downPayment.basis,
+      replaceWith: line.downPayment.replaceWith,
     },
   ];
 
