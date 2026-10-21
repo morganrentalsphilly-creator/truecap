@@ -1,0 +1,141 @@
+{
+  "mercuryDemo1440": {
+    "readyMs": 20830,
+    "url": "https://demo.mercury.com/dashboard",
+    "shot": "shots/bench/mercury/moment-launch-demo-1440.jpg",
+    "words": 452,
+    "banner": "Demo"
+  },
+  "mercuryDemoNav": {
+    "url": "https://demo.mercury.com/transactions",
+    "shot": "shots/bench/mercury/moment-launch-demo-transactions-1440.jpg"
+  },
+  "mercuryDemo390": {
+    "readyMs": 19847,
+    "url": "https://demo.mercury.com/dashboard",
+    "shot": "shots/bench/mercury/moment-launch-demo-390.jpg",
+    "words": 426,
+    "banner": "Demo"
+  },
+  "clerk": [
+    {
+      "t": "Multi-tenancy",
+      "ok": false,
+      "shot": "shots/bench/clerk/moment-hero-multi-tenancy.jpg"
+    },
+    {
+      "t": "User Button",
+      "ok": false,
+      "shot": "shots/bench/clerk/moment-hero-user-button.jpg"
+    },
+    {
+      "t": "User Profile",
+      "ok": false,
+      "shot": "shots/bench/clerk/moment-hero-user-profile.jpg"
+    },
+    {
+      "t": "Enterprise Authentication",
+      "ok": false,
+      "shot": "shots/bench/clerk/moment-hero-enterprise-authentication.jpg"
+    }
+  ],
+  "clerkMicro": {
+    "rest": {
+      "bg": "rgba(19, 19, 22, 0)",
+      "color": "rgb(19, 19, 22)",
+      "transform": "none",
+      "scale": "none",
+      "shadow": "none",
+      "outline": "rgb(19, 19, 22) none 0px",
+      "tp": "color, background-color, border-color, box-shadow",
+      "td": "0.15s",
+      "tf": "cubic-bezier(0.33, 1, 0.68, 1)"
+    },
+    "hover": {
+      "bg": "rgba(19, 19, 22, 0.02)",
+      "color": "rgb(19, 19, 22)",
+      "transform": "none",
+      "scale": "none",
+      "shadow": "none",
+      "outline": "rgb(19, 19, 22) none 0px",
+      "tp": "color, background-color, border-color, box-shadow",
+      "td": "0.1s",
+      "tf": "cubic-bezier(0.33, 1, 0.68, 1)"
+    },
+    "press": {
+      "bg": "rgba(19, 19, 22, 0.02)",
+      "color": "rgb(19, 19, 22)",
+      "transform": "none",
+      "scale": "none",
+      "shadow": "none",
+      "outline": "rgb(19, 19, 22) none 0px",
+      "tp": "color, background-color, border-color, box-shadow",
+      "td": "0.1s",
+      "tf": "cubic-bezier(0.33, 1, 0.68, 1)"
+    },
+    "focus": {
+      "bg": "rgba(19, 19, 22, 0)",
+      "color": "rgb(19, 19, 22)",
+      "transform": "none",
+      "scale": "none",
+      "shadow": "none",
+      "outline": "rgb(19, 19, 22) solid 2px",
+      "tp": "color, background-color, border-color, box-shadow",
+      "td": "0.15s",
+      "tf": "cubic-bezier(0.33, 1, 0.68, 1)"
+    },
+    "fv": true
+  },
+  "raycastMicro": {
+    "err": "TimeoutError: locator.scrollIntoViewIfNeeded: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for"
+  },
+  "raycastDock": [],
+  "raycastDockShots": [],
+  "linearMicro": {
+    "rest": {
+      "bg": "rgba(255, 255, 255, 0.05)",
+      "color": "rgb(247, 248, 248)",
+      "transform": "none",
+      "scale": "none",
+      "shadow": "rgba(255, 255, 255, 0.03) 0px 0px 0px 1px inset, rgba(255, 255, 255, 0.04) 0px 1",
+      "outline": "rgba(0, 0, 0, 0) none 0px",
+      "tp": "border, background-color, color, box-shadow, opacity, filter, transform",
+      "td": "0.16s",
+      "tf": "cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+    },
+    "hover": {
+      "bg": "rgb(25, 26, 27)",
+      "color": "rgb(247, 248, 248)",
+      "transform": "none",
+      "scale": "none",
+      "shadow": "rgba(255, 255, 255, 0.03) 0px 0px 0px 1px inset, rgba(255, 255, 255, 0.04) 0px 1",
+      "outline": "rgba(0, 0, 0, 0) none 0px",
+      "tp": "border, background-color, color, box-shadow, opacity, filter, transform",
+      "td": "0.16s",
+      "tf": "cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+    },
+    "press": {
+      "bg": "rgb(25, 26, 27)",
+      "color": "rgb(247, 248, 248)",
+      "transform": "matrix(0.970265, 0, 0, 0.970265, 0, 0)",
+      "scale": "none",
+      "shadow": "rgba(255, 255, 255, 0.03) 0px 0px 0px 1px inset, rgba(255, 255, 255, 0.04) 0px 1",
+      "outline": "rgb(247, 248, 248) none 0px",
+      "tp": "border, background-color, color, box-shadow, opacity, filter, transform",
+      "td": "0.16s",
+      "tf": "cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+    },
+    "focus": {
+      "bg": "rgba(255, 255, 255, 0.05)",
+      "color": "rgb(247, 248, 248)",
+      "transform": "none",
+      "scale": "none",
+      "shadow": "rgba(255, 255, 255, 0.03) 0px 0px 0px 1px inset, rgba(255, 255, 255, 0.04) 0px 1",
+      "outline": "rgb(94, 105, 209) solid 1px",
+      "tp": "border, background-color, color, box-shadow, opacity, filter, transform",
+      "td": "0.16s",
+      "tf": "cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+    },
+    "fv": true
+  }
+}

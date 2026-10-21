@@ -1,0 +1,230 @@
+{
+  "bare-price-rent": {
+    "ok": false,
+    "ms": 25501,
+    "verdict": null,
+    "card": null,
+    "metrics": {},
+    "alerts": [
+      "address",
+      "Address must be at least 5 characters"
+    ],
+    "whatIf": null,
+    "url": "https://usetruecap.com/analyze",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "priceFieldValue": "250,000",
+    "pageErrors": [],
+    "shot": "shots/audit/break-desktop-bare-price-rent.jpg"
+  },
+  "cash-purchase": {
+    "ok": true,
+    "ms": 826,
+    "verdict": "Meets TrueCap starter criteria at asking",
+    "card": "4821 Larchwood Ave, Philadelphia, PA 19143 Meets TrueCap starter criteria at asking Asking $250,000 Offer Ceiling: $1,296,500. Targets: break-even cash flow. Offer Ceiling Asking $250,000 Ceiling $1,296,500 Asking $250,000 is within the Offer Ceiling $1,296,500. Targets: break-even cash flow The highest price that still meets the criteria shown. How this ceiling was calculated Cash flow after reserve Meets $0/mo target Model DSCR N/A — no debt service No modeled debt service Tune targets Edit assumptions Save Next deal · keep assumptions Best next step Confirm with recent rent comps Rent is a material input — current source: Your entered rent. Two assumptions most likely to move the decision",
+    "metrics": {
+      "cash-flow": ""
+    },
+    "alerts": [
+      "High"
+    ],
+    "whatIf": {
+      "min": "1000",
+      "now": "250000",
+      "max": "1559000",
+      "text": "$250,000: cash flow $1,395 a month, meets the $0 target"
+    },
+    "url": "https://usetruecap.com/analyze",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "priceFieldValue": "250,000",
+    "pageErrors": [],
+    "shot": "shots/audit/break-desktop-cash-purchase.jpg"
+  },
+  "zero-rent": {
+    "ok": true,
+    "ms": 2121,
+    "verdict": "Does not meet TrueCap starter criteria at asking",
+    "card": "4821 Larchwood Ave, Philadelphia, PA 19143 Does not meet TrueCap starter criteria at asking Asking $250,000 Offer Ceiling: $154,500. Targets: break-even cash flow · DSCR ≥ 1.25. Offer Ceiling Ceiling $154,500 Gap $95,500 Asking $250,000 Asking $250,000 is $95,500 above the Offer Ceiling $154,500. Targets: break-even cash flow · DSCR ≥ 1.25 The highest price that still meets the criteria shown. How this ceiling was calculated Cash flow after reserve Misses $0/mo target Model DSCR Misses 1.25 target Tune targets Edit assumptions Save Next deal · keep assumptions Best next step Review the binding rule: DSCR ≥ 1.25 DSCR ≥ 1.25 is what caps the price. The asking price is $95,500 above the Offer C",
+    "metrics": {
+      "cash-flow": ""
+    },
+    "alerts": [
+      "High"
+    ],
+    "whatIf": {
+      "min": "130000",
+      "now": "250000",
+      "max": "274000",
+      "text": "$250,000: cash flow -$524 a month, misses the $0 target by $524"
+    },
+    "url": "https://usetruecap.com/analyze",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "priceFieldValue": "250,000",
+    "pageErrors": [],
+    "shot": "shots/audit/break-desktop-zero-rent.jpg"
+  },
+  "negative-cf": {
+    "ok": true,
+    "ms": 896,
+    "verdict": "Does not meet TrueCap starter criteria at asking",
+    "card": "4821 Larchwood Ave, Philadelphia, PA 19143 Does not meet TrueCap starter criteria at asking Asking $400,000 Offer Ceiling: $139,500. Targets: break-even cash flow · DSCR ≥ 1.25. Offer Ceiling Ceiling $139,500 Gap $260,500 Asking $400,000 Asking $400,000 is $260,500 above the Offer Ceiling $139,500. Targets: break-even cash flow · DSCR ≥ 1.25 The highest price that still meets the criteria shown. How this ceiling was calculated Cash flow after reserve Misses $0/mo target Model DSCR Misses 1.25 target Tune targets Edit assumptions Save Next deal · keep assumptions Best next step Review the binding rule: DSCR ≥ 1.25 DSCR ≥ 1.25 is what caps the price. The asking price is $260,500 above the Offe",
+    "metrics": {
+      "cash-flow": ""
+    },
+    "alerts": [
+      "High"
+    ],
+    "whatIf": {
+      "min": "74000",
+      "now": "400000",
+      "max": "466000",
+      "text": "$400,000: cash flow -$1,670 a month, misses the $0 target by $1,670"
+    },
+    "url": "https://usetruecap.com/analyze",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "priceFieldValue": "400,000",
+    "pageErrors": [],
+    "shot": "shots/audit/break-desktop-negative-cf.jpg"
+  },
+  "price-20k": {
+    "ok": true,
+    "ms": 1107,
+    "verdict": "Meets TrueCap starter criteria at asking",
+    "card": "1907 W Ontario St, Philadelphia, PA 19140 Meets TrueCap starter criteria at asking Asking $20,000 Offer Ceiling: $83,500. Targets: break-even cash flow · DSCR ≥ 1.25. Offer Ceiling Asking $20,000 Ceiling $83,500 Asking $20,000 is within the Offer Ceiling $83,500. Targets: break-even cash flow · DSCR ≥ 1.25 The highest price that still meets the criteria shown. How this ceiling was calculated Cash flow after reserve Meets $0/mo target Model DSCR Meets 1.25 target Tune targets Edit assumptions Save Next deal · keep assumptions Best next step Confirm with recent rent comps Rent is a material input — current source: Your entered rent. Two assumptions most likely to move the decision 1. Rent ±5% ",
+    "metrics": {
+      "cash-flow": ""
+    },
+    "alerts": [
+      "High"
+    ],
+    "whatIf": {
+      "min": "4000",
+      "now": "20000",
+      "max": "100000",
+      "text": "$20,000: cash flow $511 a month, meets the $0 target"
+    },
+    "url": "https://usetruecap.com/analyze",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "priceFieldValue": "20,000",
+    "pageErrors": [],
+    "shot": "shots/audit/break-desktop-price-20k.jpg"
+  },
+  "price-5m": {
+    "ok": true,
+    "ms": 1212,
+    "verdict": "Does not meet TrueCap starter criteria at asking",
+    "card": "1 Central Park West, New York, NY 10023 Does not meet TrueCap starter criteria at asking Asking $5,000,000 Offer Ceiling: $2,331,000. Targets: break-even cash flow · DSCR ≥ 1.25. Offer Ceiling Ceiling $2,331,000 Gap $2,669,000 Asking $5,000,000 Asking $5,000,000 is $2,669,000 above the Offer Ceiling $2,331,000. Targets: break-even cash flow · DSCR ≥ 1.25 The highest price that still meets the criteria shown. How this ceiling was calculated Cash flow after reserve Misses $0/mo target Model DSCR Misses 1.25 target Tune targets Edit assumptions Save Next deal · keep assumptions Best next step Review the binding rule: DSCR ≥ 1.25 DSCR ≥ 1.25 is what caps the price. The asking price is $2,669,000",
+    "metrics": {
+      "cash-flow": ""
+    },
+    "alerts": [
+      "High"
+    ],
+    "whatIf": {
+      "min": "1663000",
+      "now": "5000000",
+      "max": "5668000",
+      "text": "$5,000,000: cash flow -$16,361 a month, misses the $0 target by $16,361"
+    },
+    "url": "https://usetruecap.com/analyze",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "priceFieldValue": "5,000,000",
+    "pageErrors": [],
+    "shot": "shots/audit/break-desktop-price-5m.jpg"
+  },
+  "long-address": {
+    "ok": false,
+    "ms": 25236,
+    "verdict": null,
+    "card": null,
+    "metrics": {},
+    "alerts": [
+      "address",
+      "Address is too long"
+    ],
+    "whatIf": null,
+    "url": "https://usetruecap.com/analyze",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "priceFieldValue": "250,000",
+    "pageErrors": [],
+    "shot": "shots/audit/break-desktop-long-address.jpg"
+  },
+  "emoji": {
+    "ok": true,
+    "ms": 1712,
+    "verdict": "Does not meet TrueCap starter criteria at asking",
+    "card": "🏠 4821 Larchwood Ave 🙂, Philadelphia, PA 19143 Does not meet TrueCap starter criteria at asking Asking $250,000 Offer Ceiling: $223,500. Targets: break-even cash flow · DSCR ≥ 1.25. Offer Ceiling Ceiling $223,500 Gap $26,500 Asking $250,000 Asking $250,000 is $26,500 above the Offer Ceiling $223,500. Targets: break-even cash flow · DSCR ≥ 1.25 The highest price that still meets the criteria shown. How this ceiling was calculated Cash flow after reserve Meets $0/mo target Model DSCR Misses 1.25 target Tune targets Edit assumptions Save Next deal · keep assumptions Best next step Review the binding rule: DSCR ≥ 1.25 DSCR ≥ 1.25 is what caps the price. The asking price is $26,500 above the Of",
+    "metrics": {
+      "cash-flow": ""
+    },
+    "alerts": [
+      "High"
+    ],
+    "whatIf": {
+      "min": "216000",
+      "now": "250000",
+      "max": "257000",
+      "text": "$250,000: cash flow $10 a month, meets the $0 target"
+    },
+    "url": "https://usetruecap.com/analyze",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "priceFieldValue": "250,000",
+    "pageErrors": [],
+    "shot": "shots/audit/break-desktop-emoji.jpg"
+  },
+  "excel-paste": {
+    "ok": true,
+    "ms": 1772,
+    "verdict": "Does not meet TrueCap starter criteria at asking",
+    "card": "4821 Larchwood Ave, Philadelphia, PA 19143 Does not meet TrueCap starter criteria at asking Asking $250,000 Offer Ceiling: $223,500. Targets: break-even cash flow · DSCR ≥ 1.25. Offer Ceiling Ceiling $223,500 Gap $26,500 Asking $250,000 Asking $250,000 is $26,500 above the Offer Ceiling $223,500. Targets: break-even cash flow · DSCR ≥ 1.25 The highest price that still meets the criteria shown. How this ceiling was calculated Cash flow after reserve Meets $0/mo target Model DSCR Misses 1.25 target Tune targets Edit assumptions Save Next deal · keep assumptions Best next step Review the binding rule: DSCR ≥ 1.25 DSCR ≥ 1.25 is what caps the price. The asking price is $26,500 above the Offer Ce",
+    "metrics": {
+      "cash-flow": ""
+    },
+    "alerts": [
+      "High"
+    ],
+    "whatIf": {
+      "min": "216000",
+      "now": "250000",
+      "max": "257000",
+      "text": "$250,000: cash flow $10 a month, meets the $0 target"
+    },
+    "url": "https://usetruecap.com/analyze",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "priceFieldValue": "250,000",
+    "pageErrors": [],
+    "shot": "shots/audit/break-desktop-excel-paste.jpg"
+  },
+  "zero-down-high-rate": {
+    "ok": true,
+    "ms": 862,
+    "verdict": "Does not meet TrueCap starter criteria at asking",
+    "card": "4821 Larchwood Ave, Philadelphia, PA 19143 Does not meet TrueCap starter criteria at asking Asking $250,000 Offer Ceiling: $130,000. Targets: break-even cash flow · DSCR ≥ 1.25. Offer Ceiling Ceiling $130,000 Gap $120,000 Asking $250,000 Asking $250,000 is $120,000 above the Offer Ceiling $130,000. Targets: break-even cash flow · DSCR ≥ 1.25 The highest price that still meets the criteria shown. How this ceiling was calculated Cash flow after reserve Misses $0/mo target Model DSCR Misses 1.25 target Tune targets Edit assumptions Save Next deal · keep assumptions Best next step Review the binding rule: DSCR ≥ 1.25 DSCR ≥ 1.25 is what caps the price. The asking price is $120,000 above the Offe",
+    "metrics": {
+      "cash-flow": ""
+    },
+    "alerts": [
+      "High"
+    ],
+    "whatIf": {
+      "min": "100000",
+      "now": "250000",
+      "max": "280000",
+      "text": "$250,000: cash flow -$1,177 a month, misses the $0 target by $1,177"
+    },
+    "url": "https://usetruecap.com/analyze",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "priceFieldValue": "250,000",
+    "pageErrors": [],
+    "shot": "shots/audit/break-desktop-zero-down-high-rate.jpg"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "hero": {
+    "before": "236000",
+    "after": "216000",
+    "scrollY": 837
+  },
+  "result": {
+    "before": "265000",
+    "after": "249000",
+    "scrollY": 0
+  }
+}

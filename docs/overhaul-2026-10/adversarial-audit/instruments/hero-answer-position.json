@@ -1,0 +1,22 @@
+{
+  "390x844": {
+    "keyFigureLabelTop": 1417,
+    "trackTop": 1285,
+    "fold": 844
+  },
+  "412x915": {
+    "keyFigureLabelTop": 1397,
+    "trackTop": 1265,
+    "fold": 915
+  },
+  "1440x900": {
+    "keyFigureLabelTop": 624,
+    "trackTop": 492,
+    "fold": 900
+  },
+  "1095x760": {
+    "keyFigureLabelTop": 654,
+    "trackTop": 522,
+    "fold": 760
+  }
+}

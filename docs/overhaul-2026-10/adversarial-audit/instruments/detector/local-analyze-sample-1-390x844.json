@@ -1,0 +1,132 @@
+[
+  {
+    "antipattern": "nested-cards",
+    "name": "Nested cards",
+    "description": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "http://127.0.0.1:3100/analyze?sample=1",
+    "line": 0,
+    "snippet": "Card inside card"
+  },
+  {
+    "antipattern": "nested-cards",
+    "name": "Nested cards",
+    "description": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "http://127.0.0.1:3100/analyze?sample=1",
+    "line": 0,
+    "snippet": "Card inside card"
+  },
+  {
+    "antipattern": "nested-cards",
+    "name": "Nested cards",
+    "description": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "http://127.0.0.1:3100/analyze?sample=1",
+    "line": 0,
+    "snippet": "Card inside card"
+  },
+  {
+    "antipattern": "nested-cards",
+    "name": "Nested cards",
+    "description": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "http://127.0.0.1:3100/analyze?sample=1",
+    "line": 0,
+    "snippet": "Card inside card"
+  },
+  {
+    "antipattern": "nested-cards",
+    "name": "Nested cards",
+    "description": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "http://127.0.0.1:3100/analyze?sample=1",
+    "line": 0,
+    "snippet": "Card inside card"
+  },
+  {
+    "antipattern": "nested-cards",
+    "name": "Nested cards",
+    "description": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "http://127.0.0.1:3100/analyze?sample=1",
+    "line": 0,
+    "snippet": "Card inside card"
+  },
+  {
+    "antipattern": "nested-cards",
+    "name": "Nested cards",
+    "description": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "http://127.0.0.1:3100/analyze?sample=1",
+    "line": 0,
+    "snippet": "Card inside card"
+  },
+  {
+    "antipattern": "nested-cards",
+    "name": "Nested cards",
+    "description": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "http://127.0.0.1:3100/analyze?sample=1",
+    "line": 0,
+    "snippet": "Card inside card"
+  },
+  {
+    "antipattern": "nested-cards",
+    "name": "Nested cards",
+    "description": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "http://127.0.0.1:3100/analyze?sample=1",
+    "line": 0,
+    "snippet": "Card inside card"
+  },
+  {
+    "antipattern": "nested-cards",
+    "name": "Nested cards",
+    "description": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "http://127.0.0.1:3100/analyze?sample=1",
+    "line": 0,
+    "snippet": "Card inside card"
+  },
+  {
+    "antipattern": "nested-cards",
+    "name": "Nested cards",
+    "description": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "http://127.0.0.1:3100/analyze?sample=1",
+    "line": 0,
+    "snippet": "Card inside card"
+  },
+  {
+    "antipattern": "nested-cards",
+    "name": "Nested cards",
+    "description": "Cards inside cards create visual noise and excessive depth. Flatten the hierarchy — use spacing, typography, and dividers instead of nesting containers.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "http://127.0.0.1:3100/analyze?sample=1",
+    "line": 0,
+    "snippet": "Card inside card"
+  },
+  {
+    "antipattern": "text-occlusion",
+    "name": "Text occluded by an overlapping element",
+    "description": "Text is painted under an opaque element or a second text run, so part of it cannot be read. A decorative box, a stacked layer, or an inline element with leaked padding lands on the words instead of beside them. Give overlapping layers room, or move the text out from under the layer above it.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "http://127.0.0.1:3100/analyze?sample=1",
+    "line": 0,
+    "snippet": "p \"When price changes, perc\" is 50% covered by an opaque element (button.inline-flex.min-w-11.items-center.justify-center.text-sm.font-medium.transition-[color,background-color,border-color,box-shadow,opacity].duration-150.active:scale-[0.98].disabled:pointer-events-none.disabled:opacity-50.[&_svg]:pointer-events-none.[&_svg:not([class*='size-'])]:size-4.shrink-0.[&_svg]:shrink-0.focus-visible:border-ring.aria-invalid:ring-destructive/20.dark:aria-invalid:ring-destructive/40.aria-invalid:border-destructive.bg-primary.text-primary-foreground.hover:bg-primary-deep.px-4.has-[>svg]:px-3.md:h-9.h-auto.min-h-11.w-full.gap-2.whitespace-normal.rounded-md.py-2.text-center.leading-tight.sm:h-11.sm:w-auto.sm:whitespace-nowrap.sm:py-0)"
+  }
+]

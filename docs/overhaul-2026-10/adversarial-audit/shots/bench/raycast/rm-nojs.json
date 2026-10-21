@@ -1,0 +1,44 @@
+{
+  "390": {
+    "jsKB": 1263,
+    "jsCount": 45,
+    "firstScreen": [
+      "a:Store@105",
+      "a:Pro@150",
+      "a:AI@195",
+      "a:iOS@240"
+    ],
+    "rm": {
+      "running": 17,
+      "videos": 0,
+      "canvases": 1
+    },
+    "rmShot": "shots/bench/raycast/home-390-reduced-motion.jpg",
+    "noJs": {
+      "words": 1316,
+      "hiddenFirst": 0
+    },
+    "noJsShot": "shots/bench/raycast/home-390-no-js.jpg"
+  },
+  "1440": {
+    "jsKB": 993,
+    "jsCount": 42,
+    "firstScreen": [
+      "a:Store@34",
+      "a:Pro@34",
+      "a:AI@34",
+      "a:iOS@34"
+    ],
+    "rm": {
+      "running": 19,
+      "videos": 0,
+      "canvases": 1
+    },
+    "rmShot": "shots/bench/raycast/home-1440-reduced-motion.jpg",
+    "noJs": {
+      "words": 1394,
+      "hiddenFirst": 0
+    },
+    "noJsShot": "shots/bench/raycast/home-1440-no-js.jpg"
+  }
+}

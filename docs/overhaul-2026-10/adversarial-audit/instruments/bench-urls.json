@@ -1,0 +1,17 @@
+[
+  {"site": "Wise", "url": "https://wise.com/us/"},
+  {"site": "Wise", "url": "https://wise.com/us/pricing/send-money"},
+  {"site": "Stripe", "url": "https://stripe.com/"},
+  {"site": "Stripe", "url": "https://stripe.com/pricing"},
+  {"site": "Ramp", "url": "https://ramp.com/"},
+  {"site": "Ramp", "url": "https://ramp.com/pricing"},
+  {"site": "Mercury", "url": "https://mercury.com/"},
+  {"site": "Mercury", "url": "https://mercury.com/pricing"},
+  {"site": "Linear", "url": "https://linear.app/"},
+  {"site": "Linear", "url": "https://linear.app/pricing"},
+  {"site": "Raycast", "url": "https://www.raycast.com/"},
+  {"site": "Raycast", "url": "https://www.raycast.com/pricing"},
+  {"site": "Clerk", "url": "https://clerk.com/"},
+  {"site": "Clerk", "url": "https://clerk.com/pricing"},
+  {"site": "Family", "url": "https://family.co/"}
+]

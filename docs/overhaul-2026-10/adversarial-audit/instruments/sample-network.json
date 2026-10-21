@@ -1,0 +1,530 @@
+{
+  "verdictMs": 5241,
+  "reqs": [
+    {
+      "end": 692,
+      "method": "GET",
+      "url": "/analyze?sample=1",
+      "type": "document",
+      "dur": 658
+    },
+    {
+      "end": 904,
+      "method": "GET",
+      "url": "/_next/static/css/ec24ff92cf6a0ebd.css?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "stylesheet",
+      "dur": 227
+    },
+    {
+      "end": 1015,
+      "method": "GET",
+      "url": "/_next/static/css/da81069dfd52b7ba.css?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "stylesheet",
+      "dur": 343
+    },
+    {
+      "end": 1176,
+      "method": "GET",
+      "url": "/_next/static/media/313510e2713fb214-s.p.woff2?dpl=dpl_BaDA7CpD3YnSy9bWD1NfvB2RGeNi",
+      "type": "font",
+      "dur": 133
+    },
+    {
+      "end": 1235,
+      "method": "GET",
+      "url": "/_next/static/media/7d4881bb7e1bf84d-s.woff2?dpl=dpl_BaDA7CpD3YnSy9bWD1NfvB2RGeNi",
+      "type": "font",
+      "dur": 147
+    },
+    {
+      "end": 1309,
+      "method": "GET",
+      "url": "/_next/image?url=%2FLogo-png-w.png&w=128&q=75&dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "image",
+      "dur": 636
+    },
+    {
+      "end": 1341,
+      "method": "GET",
+      "url": "/_next/static/media/313510e2713fb214-s.p.woff2?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "font",
+      "dur": 666
+    },
+    {
+      "end": 1373,
+      "method": "GET",
+      "url": "/_next/static/chunks/webpack-f94a5cf481037efa.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 700
+    },
+    {
+      "end": 1509,
+      "method": "GET",
+      "url": "/_next/static/chunks/3794-f27f296ce19f718f.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 828
+    },
+    {
+      "end": 1527,
+      "method": "GET",
+      "url": "/_next/static/chunks/4bd1b696-0562a75e9b1eb3c3.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 833
+    },
+    {
+      "end": 1553,
+      "method": "GET",
+      "url": "/_next/static/chunks/main-app-d2fe5931afe2c58b.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 863
+    },
+    {
+      "end": 1616,
+      "method": "GET",
+      "url": "/_next/static/chunks/8500-e4dd1cb1bb626827.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 889
+    },
+    {
+      "end": 1679,
+      "method": "GET",
+      "url": "/_next/static/chunks/8409-0fb76a669c51a763.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 992
+    },
+    {
+      "end": 1850,
+      "method": "GET",
+      "url": "/_next/static/chunks/6320-1d70e82700491dfe.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1176
+    },
+    {
+      "end": 1872,
+      "method": "GET",
+      "url": "/_next/static/chunks/4831-35d4b23586e2c064.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1195
+    },
+    {
+      "end": 1873,
+      "method": "GET",
+      "url": "/_next/static/chunks/6183-3119ed59ab89a0a5.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1196
+    },
+    {
+      "end": 1914,
+      "method": "GET",
+      "url": "/_next/static/chunks/2429-3430c7e710f9e2b8.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1219
+    },
+    {
+      "end": 2067,
+      "method": "GET",
+      "url": "/_next/static/chunks/4440-6ecf9cf26d551b5f.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1364
+    },
+    {
+      "end": 2067,
+      "method": "GET",
+      "url": "/_next/static/chunks/4527-06dc326a9be468c7.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1388
+    },
+    {
+      "end": 2073,
+      "method": "GET",
+      "url": "/_next/static/chunks/2503-bf132f755d555f69.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1382
+    },
+    {
+      "end": 2099,
+      "method": "GET",
+      "url": "/_next/static/chunks/1139-66ab2fb1336492af.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1415
+    },
+    {
+      "end": 2122,
+      "method": "GET",
+      "url": "/_next/static/chunks/app/layout-6f4eec5353a9bafc.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1431
+    },
+    {
+      "end": 2215,
+      "method": "GET",
+      "url": "/_next/static/chunks/app/error-d403d2dc215f49c3.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1536
+    },
+    {
+      "end": 2225,
+      "method": "GET",
+      "url": "/_next/static/chunks/app/not-found-dd39490ca7a49e64.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAb",
+      "type": "script",
+      "dur": 1548
+    },
+    {
+      "end": 2229,
+      "method": "GET",
+      "url": "/_next/static/chunks/app/global-error-38f68ba388e0b067.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wL",
+      "type": "script",
+      "dur": 1553
+    },
+    {
+      "end": 2262,
+      "method": "GET",
+      "url": "/_next/static/chunks/3035-8a11c37a3efdf849.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1562
+    },
+    {
+      "end": 2277,
+      "method": "GET",
+      "url": "/_next/static/chunks/5371-f6afe85560c0820e.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1592
+    },
+    {
+      "end": 2471,
+      "method": "GET",
+      "url": "/_next/static/chunks/8480-882f3a39481701d0.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1752
+    },
+    {
+      "end": 2471,
+      "method": "GET",
+      "url": "/_next/static/chunks/1930-54e589ea40a698ce.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1752
+    },
+    {
+      "end": 2471,
+      "method": "GET",
+      "url": "/_next/static/chunks/8437-16621407156abff5.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1752
+    },
+    {
+      "end": 2471,
+      "method": "GET",
+      "url": "/_next/static/chunks/740-28477f2382266179.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1752
+    },
+    {
+      "end": 2542,
+      "method": "GET",
+      "url": "/_next/static/chunks/1123-f5c8703ca750102b.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1804
+    },
+    {
+      "end": 2559,
+      "method": "GET",
+      "url": "/_next/static/chunks/4291-8e4496a73e2dadab.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1814
+    },
+    {
+      "end": 2719,
+      "method": "GET",
+      "url": "/_next/static/chunks/6376-18eb76b83efbebf5.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 2035
+    },
+    {
+      "end": 2753,
+      "method": "GET",
+      "url": "/_next/static/chunks/1450-75ada484bf3a5b03.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 2070
+    },
+    {
+      "end": 2764,
+      "method": "GET",
+      "url": "/_next/static/chunks/1788-ebf45e391b1f6cdd.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 2087
+    },
+    {
+      "end": 2803,
+      "method": "GET",
+      "url": "/_next/static/chunks/1766-4ab10d39316c3203.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 2117
+    },
+    {
+      "end": 2904,
+      "method": "GET",
+      "url": "/_next/static/chunks/2128-06a7ecd4f43c708e.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 2210
+    },
+    {
+      "end": 2904,
+      "method": "GET",
+      "url": "/_next/static/chunks/5227-d64f678419e4755a.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 2210
+    },
+    {
+      "end": 2972,
+      "method": "GET",
+      "url": "/_next/static/chunks/6782-1062e078f2e6ef74.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 2296
+    },
+    {
+      "end": 2989,
+      "method": "GET",
+      "url": "/_next/static/chunks/1645-8f76408e4d219ae8.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 2298
+    },
+    {
+      "end": 3165,
+      "method": "GET",
+      "url": "/_next/static/chunks/7979-4cbbc8dc306608e8.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 2421
+    },
+    {
+      "end": 3246,
+      "method": "GET",
+      "url": "/_next/static/chunks/2114-3ee5576b6865e993.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 2539
+    },
+    {
+      "end": 3257,
+      "method": "GET",
+      "url": "/_next/static/chunks/7680-53907b498dedb456.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 2548
+    },
+    {
+      "end": 3286,
+      "method": "GET",
+      "url": "/_next/static/chunks/4016-c5380100e463faee.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 2544
+    },
+    {
+      "end": 3303,
+      "method": "GET",
+      "url": "/_next/static/chunks/5503-ea54c5d52029b83a.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 2627
+    },
+    {
+      "end": 3424,
+      "method": "GET",
+      "url": "/_next/static/chunks/2259-bbdfb9542593c174.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 2725
+    },
+    {
+      "end": 3458,
+      "method": "GET",
+      "url": "/_next/static/chunks/9501-cb5b673332519d4e.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 2770
+    },
+    {
+      "end": 3490,
+      "method": "GET",
+      "url": "/_next/static/chunks/app/analyze/page-53d9b677f3f02a4d.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wL",
+      "type": "script",
+      "dur": 2795
+    },
+    {
+      "end": 3699,
+      "method": "GET",
+      "url": "/_next/static/chunks/5048.4565e2ab70be037a.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1980
+    },
+    {
+      "end": 3701,
+      "method": "GET",
+      "url": "/_next/static/chunks/1652.504d4baeee72fe1c.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1980
+    },
+    {
+      "end": 3702,
+      "method": "GET",
+      "url": "/_next/static/chunks/5d015edf.db615a6ad4953d6c.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 1981
+    },
+    {
+      "end": 4189,
+      "method": "GET",
+      "url": "/_vercel/insights/script.js",
+      "type": "script",
+      "dur": 249
+    },
+    {
+      "end": 4191,
+      "method": "GET",
+      "url": "/_next/static/chunks/8314.a8b75af8d69d237c.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 340
+    },
+    {
+      "end": 4193,
+      "method": "GET",
+      "url": "/_next/static/chunks/44530001-bdee39252bc2864f.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 200
+    },
+    {
+      "end": 4245,
+      "method": "GET",
+      "url": "/_next/static/chunks/9845-eeb9b8954289f1e3.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 242
+    },
+    {
+      "end": 4311,
+      "method": "GET",
+      "url": "/_next/static/chunks/6415-5121391414643fc1.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 314
+    },
+    {
+      "end": 4349,
+      "method": "GET",
+      "url": "/_next/static/chunks/3468-9df7c905f894f7a3.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 333
+    },
+    {
+      "end": 4349,
+      "method": "GET",
+      "url": "/_next/static/chunks/7251-cce2dcfe366085e0.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 341
+    },
+    {
+      "end": 4349,
+      "method": "GET",
+      "url": "/_next/static/chunks/4450.0d929f9939b6a4c2.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 345
+    },
+    {
+      "end": 4437,
+      "method": "GET",
+      "url": "/_next/static/chunks/781-2263ebace41c11fd.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 412
+    },
+    {
+      "end": 4446,
+      "method": "GET",
+      "url": "/_next/static/chunks/123.06a6969d527fedfd.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 435
+    },
+    {
+      "end": 4539,
+      "method": "GET",
+      "url": "/?_rsc=-nT_wnnk1_qw04rI",
+      "type": "fetch",
+      "dur": 455
+    },
+    {
+      "end": 4544,
+      "method": "GET",
+      "url": "/for-investors?_rsc=-nT_wnnk1_qw04rI",
+      "type": "fetch",
+      "dur": 489
+    },
+    {
+      "end": 4682,
+      "method": "GET",
+      "url": "/for-agents?_rsc=-nT_wnnk1_qw04rI",
+      "type": "fetch",
+      "dur": 554
+    },
+    {
+      "end": 5237,
+      "method": "POST",
+      "url": "/analyze?sample=1",
+      "type": "fetch",
+      "dur": 270
+    },
+    {
+      "end": 5237,
+      "method": "GET",
+      "url": "/?_rsc=bLBeUUNueMcU4_iW",
+      "type": "fetch",
+      "dur": 233
+    },
+    {
+      "end": 5237,
+      "method": "GET",
+      "url": "/?_rsc=yTodTqH-MWDntA3w",
+      "type": "fetch",
+      "dur": 274
+    },
+    {
+      "end": 5237,
+      "method": "GET",
+      "url": "/pricing?_rsc=-nT_wnnk1_qw04rI",
+      "type": "fetch",
+      "dur": 638
+    },
+    {
+      "end": 5249,
+      "method": "GET",
+      "url": "/for-agents?_rsc=KxFjVtYdQ3EaKLIJ",
+      "type": "fetch",
+      "dur": 456
+    },
+    {
+      "end": 5663,
+      "method": "GET",
+      "url": "/_next/static/chunks/9019-6f1111e0808bc6ba.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 587
+    },
+    {
+      "end": 5719,
+      "method": "GET",
+      "url": "/_next/static/chunks/250-b94a312afc333fc7.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 644
+    },
+    {
+      "end": 5719,
+      "method": "GET",
+      "url": "/pricing?_rsc=we_KAFdlVYqZRQIy",
+      "type": "fetch",
+      "dur": 655
+    },
+    {
+      "end": 5723,
+      "method": "GET",
+      "url": "/_next/static/chunks/9662-d7cf48e6c61679af.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 645
+    },
+    {
+      "end": 5767,
+      "method": "GET",
+      "url": "/_next/static/chunks/app/page-d5fd10684241d430.js?dpl=dpl_MhnPVCKwjSUUTGuvDwgvw4wLqAbw",
+      "type": "script",
+      "dur": 673
+    }
+  ]
+}

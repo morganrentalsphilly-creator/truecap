@@ -1,0 +1,136 @@
+[
+ {
+  "file": "clerk-clerk.com_.json",
+  "error": "PROTOCOL_TIMEOUT"
+ },
+ {
+  "file": "clerk-clerk.com_pricing",
+  "url": "https://clerk.com/pricing",
+  "perf": 0.41,
+  "lcp_s": 6.7,
+  "tbt_ms": 2425,
+  "cls": 0,
+  "scriptKB": 1725,
+  "totalKB": 5696
+ },
+ {
+  "file": "family-family.co_",
+  "url": "https://family.co/",
+  "perf": 0.31,
+  "lcp_s": 27.4,
+  "tbt_ms": 1415,
+  "cls": 0,
+  "scriptKB": 1386,
+  "totalKB": 13482
+ },
+ {
+  "file": "linear-linear.app_",
+  "url": "https://linear.app/",
+  "perf": 0.31,
+  "lcp_s": 17.2,
+  "tbt_ms": 2079,
+  "cls": 0,
+  "scriptKB": 1291,
+  "totalKB": 2655
+ },
+ {
+  "file": "linear-linear.app_pricing",
+  "url": "https://linear.app/pricing",
+  "perf": 0.5,
+  "lcp_s": 8.2,
+  "tbt_ms": 404,
+  "cls": 0,
+  "scriptKB": 1051,
+  "totalKB": 1884
+ },
+ {
+  "file": "mercury-mercury.com_",
+  "url": "https://mercury.com/",
+  "perf": 0.28,
+  "lcp_s": 11.2,
+  "tbt_ms": 4887,
+  "cls": 0,
+  "scriptKB": 2602,
+  "totalKB": 4217
+ },
+ {
+  "file": "mercury-mercury.com_pricing",
+  "url": "https://mercury.com/pricing",
+  "perf": 0.56,
+  "lcp_s": 3.1,
+  "tbt_ms": 5998,
+  "cls": 0,
+  "scriptKB": 2539,
+  "totalKB": 3505
+ },
+ {
+  "file": "ramp-ramp.com_",
+  "url": "https://ramp.com/",
+  "perf": 0.36,
+  "lcp_s": 6.3,
+  "tbt_ms": 46562,
+  "cls": 0.001,
+  "scriptKB": 4262,
+  "totalKB": 13588
+ },
+ {
+  "file": "ramp-ramp.com_pricing",
+  "url": "https://ramp.com/pricing",
+  "perf": 0.44,
+  "lcp_s": 4.8,
+  "tbt_ms": 6932,
+  "cls": 0,
+  "scriptKB": 4043,
+  "totalKB": 4754
+ },
+ {
+  "file": "raycast-www.raycast.com_pricing",
+  "url": "https://www.raycast.com/pricing",
+  "perf": 0.66,
+  "lcp_s": 6.3,
+  "tbt_ms": 392,
+  "cls": 0,
+  "scriptKB": 474,
+  "totalKB": 1120
+ },
+ {
+  "file": "stripe-stripe.com_",
+  "url": "https://stripe.com/",
+  "perf": 0.44,
+  "lcp_s": 3.9,
+  "tbt_ms": 110943,
+  "cls": 0,
+  "scriptKB": 2122,
+  "totalKB": 2712
+ },
+ {
+  "file": "stripe-stripe.com_pricing",
+  "url": "https://stripe.com/pricing",
+  "perf": 0.75,
+  "lcp_s": 2.1,
+  "tbt_ms": 1005,
+  "cls": 0,
+  "scriptKB": 1088,
+  "totalKB": 1357
+ },
+ {
+  "file": "wise-wise.com_us_",
+  "url": "https://wise.com/us/",
+  "perf": 0.45,
+  "lcp_s": 3.7,
+  "tbt_ms": 5130,
+  "cls": 0,
+  "scriptKB": 2617,
+  "totalKB": 5190
+ },
+ {
+  "file": "wise-wise.com_us_pricing_send-money",
+  "url": "https://wise.com/us/pricing/send-money",
+  "perf": 0.45,
+  "lcp_s": 4.2,
+  "tbt_ms": 3266,
+  "cls": 0,
+  "scriptKB": 2176,
+  "totalKB": 3097
+ }
+]

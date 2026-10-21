@@ -1,0 +1,15 @@
+import { chromium, LIVE, denyCookies, save } from "./lib.mjs";
+const b = await chromium.launch();
+const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); await denyCookies(ctx);
+const p = await ctx.newPage();
+const t0 = Date.now(); const reqs = [];
+p.on("requestfinished", async (r) => { const t = r.timing(); reqs.push({ end: Date.now() - t0, method: r.method(), url: r.url().replace(LIVE, "").slice(0, 90), type: r.resourceType(), dur: Math.round(t.responseEnd) }); });
+await p.goto(LIVE + "/analyze?sample=1", { waitUntil: "commit" });
+await p.locator("#decision-summary-title").waitFor({ timeout: 30000 }); const v = Date.now() - t0;
+const lt = await p.evaluate(() => performance.getEntriesByType("longtask").length);
+await p.waitForTimeout(500);
+const posts = reqs.filter(r => r.method === "POST");
+const js = reqs.filter(r => r.type === "script");
+console.log("verdict", v, "posts", JSON.stringify(posts), "scripts", js.length, "last script end", Math.max(...js.map(r => r.end)));
+save("sample-network", { verdictMs: v, reqs });
+await b.close();

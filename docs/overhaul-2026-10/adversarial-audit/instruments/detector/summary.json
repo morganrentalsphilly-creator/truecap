@@ -1,0 +1,104 @@
+[
+ {
+  "file": "live-analyze-1440x900",
+  "primary": 4,
+  "advisory": 0,
+  "by": "line-length×2, nested-cards×2"
+ },
+ {
+  "file": "live-analyze-390x844",
+  "primary": 2,
+  "advisory": 0,
+  "by": "nested-cards×2"
+ },
+ {
+  "file": "live-analyze-sample-1-1440x900",
+  "primary": 26,
+  "advisory": 0,
+  "by": "line-length×13, cramped-padding×1, nested-cards×12"
+ },
+ {
+  "file": "live-analyze-sample-1-390x844",
+  "primary": 13,
+  "advisory": 0,
+  "by": "nested-cards×12, text-occlusion×1"
+ },
+ {
+  "file": "live-home-1440",
+  "primary": 17,
+  "advisory": 0,
+  "by": "line-length×1, nested-cards×12, layout-transition×1, low-contrast×3"
+ },
+ {
+  "file": "live-home-1440x900",
+  "primary": 17,
+  "advisory": 0,
+  "by": "line-length×1, nested-cards×12, layout-transition×1, low-contrast×3"
+ },
+ {
+  "file": "live-home-390x844",
+  "primary": 17,
+  "advisory": 0,
+  "by": "nested-cards×12, layout-transition×1, low-contrast×4"
+ },
+ {
+  "file": "live-pricing-1440x900",
+  "primary": 1,
+  "advisory": 0,
+  "by": "cramped-padding×1"
+ },
+ {
+  "file": "live-pricing-390x844",
+  "primary": 1,
+  "advisory": 0,
+  "by": "low-contrast×1"
+ },
+ {
+  "file": "local-analyze-1440x900",
+  "primary": 4,
+  "advisory": 0,
+  "by": "line-length×2, nested-cards×2"
+ },
+ {
+  "file": "local-analyze-390x844",
+  "primary": 2,
+  "advisory": 0,
+  "by": "nested-cards×2"
+ },
+ {
+  "file": "local-analyze-sample-1-1440x900",
+  "primary": 26,
+  "advisory": 0,
+  "by": "line-length×13, cramped-padding×1, nested-cards×12"
+ },
+ {
+  "file": "local-analyze-sample-1-390x844",
+  "primary": 13,
+  "advisory": 0,
+  "by": "nested-cards×12, text-occlusion×1"
+ },
+ {
+  "file": "local-home-1440x900",
+  "primary": 16,
+  "advisory": 0,
+  "by": "line-length×1, nested-cards×11, layout-transition×1, low-contrast×3"
+ },
+ {
+  "file": "local-home-390x844",
+  "primary": 16,
+  "advisory": 0,
+  "by": "nested-cards×11, layout-transition×1, low-contrast×4"
+ },
+ {
+  "file": "local-pricing-1440x900",
+  "primary": 1,
+  "advisory": 0,
+  "by": "cramped-padding×1"
+ },
+ {
+  "file": "local-pricing-390x844",
+  "primary": 1,
+  "advisory": 0,
+  "by": "low-contrast×1"
+ }
+]

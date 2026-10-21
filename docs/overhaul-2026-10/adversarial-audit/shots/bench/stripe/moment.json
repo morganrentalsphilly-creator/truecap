@@ -1,0 +1,11 @@
+{
+  "site": "stripe",
+  "when": "2026-10-21T14:02:31.614Z",
+  "gdpShot0": "shots/bench/stripe/moment-gdp-0.jpg",
+  "gdpShot1": "shots/bench/stripe/moment-gdp-1.jpg",
+  "gdpShot2": "shots/bench/stripe/moment-gdp-2.jpg",
+  "gdpMarkup": null,
+  "bentoRest": "shots/bench/stripe/moment-bento-rest.jpg",
+  "bentoHover": "shots/bench/stripe/moment-bento-hover.jpg",
+  "bentoAnims": 52
+}

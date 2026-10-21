@@ -1,0 +1,380 @@
+{
+  "slug": "mercury",
+  "when": "2026-10-21T13:49:28.867Z",
+  "picks": {
+    "primary": true,
+    "card": false,
+    "input": true,
+    "slider": false
+  },
+  "micro": [
+    {
+      "label": "primary",
+      "rest": {
+        "backgroundColor": "rgb(82, 102, 235)",
+        "color": "rgb(255, 255, 255)",
+        "transform": "none",
+        "boxShadow": "none",
+        "outline": "rgb(156, 180, 232) none 0px",
+        "outlineOffset": "4px",
+        "borderColor": "rgb(255, 255, 255)",
+        "opacity": "1",
+        "scale": "none",
+        "translate": "none",
+        "filter": "none",
+        "transitionProperty": "color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to",
+        "transitionDuration": "0.3s",
+        "transitionTimingFunction": "cubic-bezier(0, 0, 0.2, 1)",
+        "box": [
+          724,
+          311,
+          128,
+          40
+        ],
+        "text": "Open account",
+        "tag": "button"
+      },
+      "restShot": "shots/bench/mercury/micro-primary-rest.jpg",
+      "hover": {
+        "backgroundColor": "rgb(67, 84, 200)"
+      },
+      "hoverShot": "shots/bench/mercury/micro-primary-hover.jpg",
+      "press": {
+        "backgroundColor": "rgb(56, 71, 175)"
+      },
+      "pressShot": "shots/bench/mercury/micro-primary-press.jpg",
+      "focus": {
+        "backgroundColor": "rgb(67, 84, 200)",
+        "outline": "rgb(156, 180, 232) solid 2px"
+      },
+      "focusVisible": true,
+      "focusShot": "shots/bench/mercury/micro-primary-focus.jpg"
+    },
+    {
+      "label": "input",
+      "rest": {
+        "backgroundColor": "rgba(0, 0, 0, 0)",
+        "color": "rgb(237, 237, 243)",
+        "transform": "none",
+        "boxShadow": "none",
+        "outline": "rgb(237, 237, 243) none 0px",
+        "outlineOffset": "0px",
+        "borderColor": "rgb(237, 237, 243)",
+        "opacity": "1",
+        "scale": "none",
+        "translate": "none",
+        "filter": "none",
+        "transitionProperty": "all",
+        "transitionDuration": "0s",
+        "transitionTimingFunction": "ease",
+        "box": [
+          447,
+          308,
+          262,
+          46
+        ],
+        "text": "Enter your email",
+        "tag": "input"
+      },
+      "restShot": "shots/bench/mercury/micro-input-rest.jpg",
+      "hover": {},
+      "hoverShot": "shots/bench/mercury/micro-input-hover.jpg",
+      "focus": {
+        "outline": "rgb(16, 16, 16) none 0px"
+      },
+      "focusVisible": true,
+      "focusShot": "shots/bench/mercury/micro-input-focus.jpg"
+    }
+  ],
+  "notFound": {
+    "status": 404,
+    "path": "shots/bench/mercury/404-1440.jpg",
+    "h1": "Sorry, we can’t find that page.",
+    "inputs": 0,
+    "links": 2
+  },
+  "pricing": {
+    "390": {
+      "status": 200,
+      "first": "shots/bench/mercury/pricing-390-first.jpg",
+      "before": [
+        "Banking services and essential",
+        "$0 per month",
+        "$100/mo + $50/per person paid/",
+        "$250K",
+        "$29.90 per month",
+        "Invoice with ACH debit ($1/tra",
+        "$50 off eligible LegalZoom Com",
+        "$100/mo + $50/per person paid/",
+        "$299 per month",
+        "Invoice with ACH debit ($0/tra",
+        "$50 off eligible LegalZoom Com",
+        "$100/mo + $50/per person paid/",
+        "As a Mercury customer, you hav",
+        "It’s free for customers to pay"
+      ],
+      "toggle": {
+        "text": "",
+        "role": "switch",
+        "tag": "button",
+        "groupRole": null,
+        "nOpts": 2
+      },
+      "toggleStyles": {
+        "backgroundColor": "rgb(82, 102, 235)",
+        "color": "rgb(83, 84, 97)",
+        "transform": "none",
+        "boxShadow": "none",
+        "outline": "rgb(82, 102, 235) none 0px",
+        "outlineOffset": "4px",
+        "borderColor": "rgb(82, 102, 235)",
+        "opacity": "1",
+        "scale": "none",
+        "translate": "none",
+        "filter": "none",
+        "transitionProperty": "all",
+        "transitionDuration": "0s",
+        "transitionTimingFunction": "ease",
+        "box": [
+          40,
+          323,
+          36,
+          20
+        ],
+        "text": "",
+        "tag": "button"
+      },
+      "afterAnims": [
+        {
+          "ms": 30,
+          "anims": [
+            "width@div",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span"
+          ]
+        },
+        {
+          "ms": 120,
+          "anims": [
+            "width@div",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span"
+          ]
+        },
+        {
+          "ms": 260,
+          "anims": [
+            "width@div",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span"
+          ]
+        },
+        {
+          "ms": 500,
+          "anims": [
+            "transform@span",
+            "transform@span"
+          ]
+        }
+      ],
+      "after": [
+        "Banking services and essential",
+        "$0 per month",
+        "$100/mo + $50/per person paid/",
+        "$250K",
+        "$35 per month",
+        "Invoice with ACH debit ($1/tra",
+        "$50 off eligible LegalZoom Com",
+        "$100/mo + $50/per person paid/",
+        "$350 per month",
+        "Invoice with ACH debit ($0/tra",
+        "$50 off eligible LegalZoom Com",
+        "$100/mo + $50/per person paid/",
+        "As a Mercury customer, you hav",
+        "It’s free for customers to pay"
+      ],
+      "afterShot": "shots/bench/mercury/pricing-390-toggled.jpg",
+      "numberflow": 0,
+      "tables": [
+        {
+          "rows": 85,
+          "top": 2631,
+          "stickyHeader": true,
+          "scrollX": false,
+          "collapsibles": 15,
+          "width": 342
+        }
+      ],
+      "tableShot": "shots/bench/mercury/pricing-390-table.jpg",
+      "full": "shots/bench/mercury/pricing-390-full.jpg"
+    },
+    "1440": {
+      "status": 200,
+      "first": "shots/bench/mercury/pricing-1440-first.jpg",
+      "before": [
+        "Banking services and essential",
+        "$0 per month",
+        "$100/mo + $50/per person paid/",
+        "$250K",
+        "$29.90 per month",
+        "Invoice with ACH debit ($1/tra",
+        "$50 off eligible LegalZoom Com",
+        "$100/mo + $50/per person paid/",
+        "$299 per month",
+        "Invoice with ACH debit ($0/tra",
+        "$50 off eligible LegalZoom Com",
+        "$100/mo + $50/per person paid/",
+        "As a Mercury customer, you hav",
+        "It’s free for customers to pay"
+      ],
+      "toggle": {
+        "text": "",
+        "role": "switch",
+        "tag": "button",
+        "groupRole": null,
+        "nOpts": 2
+      },
+      "toggleStyles": {
+        "backgroundColor": "rgb(82, 102, 235)",
+        "color": "rgb(83, 84, 97)",
+        "transform": "none",
+        "boxShadow": "none",
+        "outline": "rgb(82, 102, 235) none 0px",
+        "outlineOffset": "4px",
+        "borderColor": "rgb(82, 102, 235)",
+        "opacity": "1",
+        "scale": "none",
+        "translate": "none",
+        "filter": "none",
+        "transitionProperty": "all",
+        "transitionDuration": "0s",
+        "transitionTimingFunction": "ease",
+        "box": [
+          1000,
+          434,
+          36,
+          20
+        ],
+        "text": "",
+        "tag": "button"
+      },
+      "afterAnims": [
+        {
+          "ms": 30,
+          "anims": [
+            "width@div",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span"
+          ]
+        },
+        {
+          "ms": 120,
+          "anims": [
+            "width@div",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span"
+          ]
+        },
+        {
+          "ms": 260,
+          "anims": [
+            "width@div",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span",
+            "transform@span",
+            "opacity@span"
+          ]
+        },
+        {
+          "ms": 500,
+          "anims": [
+            "transform@span",
+            "transform@span"
+          ]
+        }
+      ],
+      "after": [
+        "Banking services and essential",
+        "$0 per month",
+        "$100/mo + $50/per person paid/",
+        "$250K",
+        "$35 per month",
+        "Invoice with ACH debit ($1/tra",
+        "$50 off eligible LegalZoom Com",
+        "$100/mo + $50/per person paid/",
+        "$350 per month",
+        "Invoice with ACH debit ($0/tra",
+        "$50 off eligible LegalZoom Com",
+        "$100/mo + $50/per person paid/",
+        "As a Mercury customer, you hav",
+        "It’s free for customers to pay"
+      ],
+      "afterShot": "shots/bench/mercury/pricing-1440-toggled.jpg",
+      "numberflow": 0,
+      "tables": [
+        {
+          "rows": 85,
+          "top": 1740,
+          "stickyHeader": true,
+          "scrollX": false,
+          "collapsibles": 15,
+          "width": 1024
+        }
+      ],
+      "tableShot": "shots/bench/mercury/pricing-1440-table.jpg",
+      "full": "shots/bench/mercury/pricing-1440-full.jpg"
+    }
+  }
+}

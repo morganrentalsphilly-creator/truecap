@@ -1,0 +1,138 @@
+{
+  "device": "iphone",
+  "net": "slow4g",
+  "formFirstVisibleMs": 1502,
+  "verdictVisibleMs": 9942,
+  "frames": [
+    {
+      "ms": 264,
+      "shot": "shots/audit/sample-iphone-slow4g-00.jpg"
+    },
+    {
+      "ms": 1502,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-01.jpg"
+    },
+    {
+      "ms": 2637,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-02.jpg"
+    },
+    {
+      "ms": 2991,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-03.jpg"
+    },
+    {
+      "ms": 3248,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-04.jpg"
+    },
+    {
+      "ms": 3716,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-05.jpg"
+    },
+    {
+      "ms": 3993,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-06.jpg"
+    },
+    {
+      "ms": 4430,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-07.jpg"
+    },
+    {
+      "ms": 4962,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-08.jpg"
+    },
+    {
+      "ms": 5545,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-09.jpg"
+    },
+    {
+      "ms": 5927,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-10.jpg"
+    },
+    {
+      "ms": 6223,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-11.jpg"
+    },
+    {
+      "ms": 6954,
+      "form": true,
+      "verdict": false,
+      "h1": "Underwrite a buy & hold rental",
+      "shot": "shots/audit/sample-iphone-slow4g-12.jpg"
+    },
+    {
+      "ms": 8318,
+      "form": true,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-slow4g-13.jpg"
+    },
+    {
+      "ms": 8911,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-slow4g-14.jpg"
+    },
+    {
+      "ms": 9176,
+      "form": false,
+      "verdict": false,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-slow4g-15.jpg"
+    },
+    {
+      "ms": 9942,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-slow4g-16.jpg"
+    },
+    {
+      "ms": 10917,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-slow4g-17.jpg"
+    },
+    {
+      "ms": 12014,
+      "form": false,
+      "verdict": true,
+      "h1": "Buy & Hold underwriting",
+      "shot": "shots/audit/sample-iphone-slow4g-18.jpg"
+    }
+  ]
+}

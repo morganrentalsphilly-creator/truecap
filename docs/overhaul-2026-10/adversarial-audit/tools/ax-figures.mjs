@@ -1,0 +1,10 @@
+import { chromium, LIVE, denyCookies } from "./lib.mjs";
+const b = await chromium.launch();
+const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); await denyCookies(ctx);
+const p = await ctx.newPage(); await p.goto(LIVE + "/", { waitUntil: "networkidle" }); await p.waitForTimeout(4000);
+console.log(await p.evaluate(() => [...document.querySelectorAll("number-flow-react, number-flow")].slice(0, 3).map(e => ({ tag: e.tagName, attrs: [...e.attributes].map(a => `${a.name}=${a.value.slice(0, 40)}`), shadow: !!e.shadowRoot, shadowRole: e.shadowRoot?.querySelector("[role]")?.getAttribute("role"), shadowLabel: e.shadowRoot?.querySelector("[aria-label]")?.getAttribute("aria-label"), parent: e.parentElement?.outerHTML.slice(0, 200) }))));
+const cdp = await ctx.newCDPSession(p);
+const { nodes } = await cdp.send("Accessibility.getFullAXTree");
+const hits = nodes.filter(n => /236|1,206|1 , 2/.test(n.name?.value || "")).slice(0, 12).map(n => `${n.role?.value}: "${n.name?.value}"`);
+console.log(hits);
+await b.close();

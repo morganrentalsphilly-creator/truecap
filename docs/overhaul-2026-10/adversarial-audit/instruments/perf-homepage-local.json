@@ -1,0 +1,203 @@
+{
+  "url": "http://127.0.0.1:3100/",
+  "measuredAt": "2026-10-21T14:37:30.159Z",
+  "rawHtmlBytes": 276886,
+  "firstPartyJavaScript": {
+    "requestCount": 40,
+    "transferBytes": 438617,
+    "resources": [
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1123-f55ab395859d7135.js",
+        "transferBytes": 15208
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1139-1abe0434c4676f84.js",
+        "transferBytes": 4316
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1652.bce336aaaf7df3c1.js",
+        "transferBytes": 4975
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1766-f0686d1bb3313edf.js",
+        "transferBytes": 5359
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/1820-6bbab6abb2e86315.js",
+        "transferBytes": 4418
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/2128-b20e90fd7cbc118e.js",
+        "transferBytes": 6706
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/2429-010b1bfb30db5168.js",
+        "transferBytes": 6920
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/250-09fc63947542f33d.js",
+        "transferBytes": 6370
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/2503-0809c2e051532795.js",
+        "transferBytes": 4432
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/3035-556235e334f536dc.js",
+        "transferBytes": 13125
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/3794-4bc5594f4938d67d.js",
+        "transferBytes": 70079
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/4291-6d4debc6e5fdeb3b.js",
+        "transferBytes": 13387
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/4440-7aad41bd3cae503b.js",
+        "transferBytes": 8501
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/4527-49424ed3d9921153.js",
+        "transferBytes": 6170
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/4831-8d8d8c9f639934fb.js",
+        "transferBytes": 2889
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/4bd1b696-8a4ab4fdf0ae305a.js",
+        "transferBytes": 65065
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/5048.b96f4051dc1092ea.js",
+        "transferBytes": 72134
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/5371-58f073f98a5fdbd7.js",
+        "transferBytes": 6024
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/5d015edf.7c0ac124fa9565a7.js",
+        "transferBytes": 1945
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/6183-79893f817ca57da6.js",
+        "transferBytes": 5559
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/6320-12f83f856f77e9f6.js",
+        "transferBytes": 7486
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/6415-acef2bc1d09a83d3.js",
+        "transferBytes": 4806
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/740-4456253cdfe43c03.js",
+        "transferBytes": 7438
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/7979-994cff81f054c7bf.js",
+        "transferBytes": 8031
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/8409-29c10ce4e9f7dc38.js",
+        "transferBytes": 10517
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/8437-3cc78015a4392d59.js",
+        "transferBytes": 7226
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/8480-2e33a0e9a7b677fd.js",
+        "transferBytes": 8937
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/8500-01a63dafd809e317.js",
+        "transferBytes": 5285
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/9019-1c0cc85e56407b10.js",
+        "transferBytes": 8067
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/9662-d5c571f52c441665.js",
+        "transferBytes": 4651
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/error-af9fa138aba81e94.js",
+        "transferBytes": 3570
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/for-investors/page-2c7ca20b4f27b627.js",
+        "transferBytes": 6051
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/global-error-8797949df390c2a5.js",
+        "transferBytes": 2885
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/layout-ed1f7d9ffa2abc0c.js",
+        "transferBytes": 9070
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/not-found-e23cc5da6d8db725.js",
+        "transferBytes": 2473
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/page-176dfdd9a88a6273.js",
+        "transferBytes": 7301
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/app/privacy/page-81d9633b03ba6234.js",
+        "transferBytes": 2417
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/main-app-341c9290c79ff499.js",
+        "transferBytes": 4563
+      },
+      {
+        "url": "http://127.0.0.1:3100/_next/static/chunks/webpack-443b32169bce4256.js",
+        "transferBytes": 4261
+      },
+      {
+        "url": "http://127.0.0.1:3100/_vercel/insights/script.js",
+        "transferBytes": 0
+      }
+    ]
+  },
+  "hydration": {
+    "analyzerReadyMs": 15518,
+    "waitAfterDomContentLoadedMs": 15007,
+    "mainThreadTaskDurationMs": 1020,
+    "scriptDurationMs": 193,
+    "longTasks": {
+      "count": 3,
+      "totalDurationMs": 308
+    }
+  },
+  "coreWebVitals": {
+    "firstContentfulPaintMs": 284,
+    "lcpMs": 284,
+    "cls": 0
+  },
+  "mobileRendering": {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "horizontalOverflowPx": 0,
+    "heroAddressEntryVisible": true,
+    "heroAddressEntryAboveFold": true,
+    "heroAddressEntryAcceptsText": true
+  },
+  "accessibility": {
+    "seriousOrCriticalViolationCount": 0,
+    "violations": []
+  },
+  "calculatorReady": false,
+  "blockedExternalOrigins": [],
+  "budgetFailures": []
+}

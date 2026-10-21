@@ -1,0 +1,177 @@
+{
+  "site": "wise",
+  "when": "2026-10-21T13:59:48.219Z",
+  "inputs1440": [
+    {
+      "id": "_r_h_",
+      "name": "",
+      "type": "text",
+      "val": "1,000",
+      "aria": null,
+      "mode": "decimal",
+      "top": 639
+    },
+    {
+      "id": "_r_11_",
+      "name": "",
+      "type": "text",
+      "val": "885.52",
+      "aria": null,
+      "mode": "decimal",
+      "top": 787
+    },
+    {
+      "id": "_r_1v_",
+      "name": "",
+      "type": "text",
+      "val": "1,000",
+      "aria": null,
+      "mode": "decimal",
+      "top": 2779
+    }
+  ],
+  "typing1440": [
+    {
+      "ms": 0,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 4
+    },
+    {
+      "ms": 153,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 4
+    },
+    {
+      "ms": 308,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 4
+    },
+    {
+      "ms": 463,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 12
+    },
+    {
+      "ms": 624,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 12
+    },
+    {
+      "ms": 778,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 12
+    },
+    {
+      "ms": 933,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 12
+    },
+    {
+      "ms": 1089,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 12
+    },
+    {
+      "ms": 1243,
+      "vals": "2,500 | 2,213.33 | 1,000",
+      "anims": 3
+    },
+    {
+      "ms": 1513,
+      "vals": "2,500 | 2,213.33 | 1,000",
+      "anims": 3
+    }
+  ],
+  "typedShot1440": "shots/bench/wise/moment-1440-typed-2500.jpg",
+  "fieldStyle1440": {
+    "font": "40px 400 \"Wise Sans\"",
+    "numeric": "normal",
+    "inputmode": "decimal",
+    "parentBorder": "rgb(69, 71, 69) none"
+  },
+  "tabAfter1440": "SPAN We'll discount our fee",
+  "focusShot1440": "shots/bench/wise/moment-1440-tab-after-amount.jpg",
+  "inputs390": [
+    {
+      "id": "_r_u_",
+      "name": "",
+      "type": "text",
+      "val": "1,000",
+      "aria": null,
+      "mode": "decimal",
+      "top": 766
+    },
+    {
+      "id": "_r_1e_",
+      "name": "",
+      "type": "text",
+      "val": "885.52",
+      "aria": null,
+      "mode": "decimal",
+      "top": 933
+    },
+    {
+      "id": "_r_2c_",
+      "name": "",
+      "type": "text",
+      "val": "1,000",
+      "aria": null,
+      "mode": "decimal",
+      "top": 2982
+    }
+  ],
+  "typing390": [
+    {
+      "ms": 0,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 6
+    },
+    {
+      "ms": 155,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 6
+    },
+    {
+      "ms": 315,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 3
+    },
+    {
+      "ms": 469,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 12
+    },
+    {
+      "ms": 627,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 12
+    },
+    {
+      "ms": 782,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 12
+    },
+    {
+      "ms": 937,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 12
+    },
+    {
+      "ms": 1093,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 12
+    },
+    {
+      "ms": 1247,
+      "vals": "2,500 | 885.52 | 1,000",
+      "anims": 5
+    },
+    {
+      "ms": 1564,
+      "vals": "2,500 | 2,213.33 | 2,500",
+      "anims": 5
+    }
+  ],
+  "typedShot390": "shots/bench/wise/moment-390-typed-2500.jpg",
+  "err390": "TimeoutError: locator.evaluate: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[value*=\"1,000\"], "
+}
