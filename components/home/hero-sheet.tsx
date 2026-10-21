@@ -21,6 +21,8 @@ import { formatLedgerDollars, type SampleDealLedger } from "@/lib/sample-deal-le
 import { compactSweep, type SampleDealSweep } from "@/lib/sample-deal-sweep";
 import { calculateSampleDealOutcome } from "@/lib/sample-deal-analysis";
 
+const SCRUBBER_TOUCH_FLAG_SCRIPT = `(function(){var d=document;function f(e){var t=e.target;if(t&&t.closest&&t.closest("[data-price-scrubber]")){d.documentElement.setAttribute("data-scrubber-touched","");d.removeEventListener("pointerdown",f,true);}}d.addEventListener("pointerdown",f,true);})();`;
+
 /** "Cash flow ≥ $750/mo" reads "cash flow ≥ $750/mo" mid-sentence; an acronym keeps its capitals. */
 function inSentence(label: string): string {
   return /^[A-Z][a-z]/.test(label) ? label[0].toLowerCase() + label.slice(1) : label;
@@ -85,6 +87,11 @@ export function HeroSheet({
         <span>Every input editable · drag the price</span>
       </figcaption>
 
+      {/* Before the island hydrates, a pointer on the sheet is the visitor
+          taking the handle: flag it so the island never plays its moment
+          over them (audit A3). Inline and first, so it is listening before
+          the sheet paints. */}
+      <script dangerouslySetInnerHTML={{ __html: SCRUBBER_TOUCH_FLAG_SCRIPT }} />
       <div className="mt-4">
         <PriceScrubber
           points={compactSweep(sweep)}
