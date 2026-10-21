@@ -1,0 +1,18 @@
+{
+  "home": {
+    "rent": true,
+    "rate": true,
+    "hudFmrOnSample": false
+  },
+  "sample": {
+    "rent": true,
+    "rate": true,
+    "yourEnteredRent": false,
+    "yourRateEstimate": false,
+    "synthetic": false
+  },
+  "memo": {
+    "rent": true,
+    "rate": true
+  }
+}

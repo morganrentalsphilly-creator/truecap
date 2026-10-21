@@ -1,0 +1,291 @@
+[
+  {
+    "viewport": "390x844",
+    "statik": {
+      "card": {
+        "top": 174,
+        "left": 16,
+        "h": 661,
+        "w": 358
+      },
+      "heading": {
+        "top": 218,
+        "left": 37,
+        "h": 64,
+        "w": 316
+      },
+      "ceiling": {
+        "top": 336,
+        "left": 37,
+        "h": 46,
+        "w": 122
+      },
+      "track": {
+        "top": 421,
+        "left": 41,
+        "h": 2,
+        "w": 308
+      },
+      "figures": {
+        "top": 554,
+        "left": 37,
+        "h": 113,
+        "w": 316
+      },
+      "actions": {
+        "top": 683,
+        "left": 37,
+        "h": 131,
+        "w": 316
+      },
+      "scrollY": 0
+    },
+    "live": {
+      "card": {
+        "top": 174,
+        "left": 16,
+        "h": 974,
+        "w": 358
+      },
+      "heading": {
+        "top": 218,
+        "left": 37,
+        "h": 64,
+        "w": 316
+      },
+      "ceiling": {
+        "top": 336,
+        "left": 37,
+        "h": 46,
+        "w": 122
+      },
+      "track": {
+        "top": 421,
+        "left": 41,
+        "h": 2,
+        "w": 308
+      },
+      "figures": {
+        "top": 554,
+        "left": 37,
+        "h": 113,
+        "w": 316
+      },
+      "actions": {
+        "top": 683,
+        "left": 37,
+        "h": 131,
+        "w": 316
+      },
+      "scrollY": 0
+    },
+    "deltaTop": {
+      "card": 0,
+      "heading": 0,
+      "ceiling": 0,
+      "track": 0,
+      "figures": 0,
+      "actions": 0
+    },
+    "cls": 0,
+    "shifts": [],
+    "flag": false,
+    "focus": "decision-summary-title"
+  },
+  {
+    "viewport": "1095x760",
+    "statik": {
+      "card": {
+        "top": 182,
+        "left": 24,
+        "h": 611,
+        "w": 1047
+      },
+      "heading": {
+        "top": 230,
+        "left": 49,
+        "h": 36,
+        "w": 997
+      },
+      "ceiling": {
+        "top": 320,
+        "left": 49,
+        "h": 82,
+        "w": 220
+      },
+      "track": {
+        "top": 441,
+        "left": 53,
+        "h": 2,
+        "w": 989
+      },
+      "figures": {
+        "top": 574,
+        "left": 49,
+        "h": 117,
+        "w": 997
+      },
+      "actions": {
+        "top": 707,
+        "left": 49,
+        "h": 61,
+        "w": 997
+      },
+      "scrollY": 0
+    },
+    "live": {
+      "card": {
+        "top": 182,
+        "left": 24,
+        "h": 905,
+        "w": 1047
+      },
+      "heading": {
+        "top": 230,
+        "left": 49,
+        "h": 36,
+        "w": 997
+      },
+      "ceiling": {
+        "top": 320,
+        "left": 49,
+        "h": 82,
+        "w": 220
+      },
+      "track": {
+        "top": 441,
+        "left": 53,
+        "h": 2,
+        "w": 989
+      },
+      "figures": {
+        "top": 574,
+        "left": 49,
+        "h": 117,
+        "w": 997
+      },
+      "actions": {
+        "top": 707,
+        "left": 49,
+        "h": 61,
+        "w": 997
+      },
+      "scrollY": 0
+    },
+    "deltaTop": {
+      "card": 0,
+      "heading": 0,
+      "ceiling": 0,
+      "track": 0,
+      "figures": 0,
+      "actions": 0
+    },
+    "cls": 0.0001,
+    "shifts": [
+      [
+        82,
+        0.0001,
+        [
+          "SPAN.text-muted-foreground",
+          "#text.",
+          "SPAN.hidden text-muted-foreground sm:inline"
+        ]
+      ]
+    ],
+    "flag": false,
+    "focus": "decision-summary-title"
+  },
+  {
+    "viewport": "1440x900",
+    "statik": {
+      "card": {
+        "top": 182,
+        "left": 104,
+        "h": 611,
+        "w": 1232
+      },
+      "heading": {
+        "top": 230,
+        "left": 129,
+        "h": 36,
+        "w": 1182
+      },
+      "ceiling": {
+        "top": 320,
+        "left": 129,
+        "h": 82,
+        "w": 220
+      },
+      "track": {
+        "top": 441,
+        "left": 133,
+        "h": 2,
+        "w": 1174
+      },
+      "figures": {
+        "top": 574,
+        "left": 129,
+        "h": 117,
+        "w": 1182
+      },
+      "actions": {
+        "top": 707,
+        "left": 129,
+        "h": 61,
+        "w": 1182
+      },
+      "scrollY": 0
+    },
+    "live": {
+      "card": {
+        "top": 182,
+        "left": 104,
+        "h": 905,
+        "w": 1232
+      },
+      "heading": {
+        "top": 230,
+        "left": 129,
+        "h": 36,
+        "w": 1182
+      },
+      "ceiling": {
+        "top": 320,
+        "left": 129,
+        "h": 82,
+        "w": 220
+      },
+      "track": {
+        "top": 441,
+        "left": 133,
+        "h": 2,
+        "w": 1174
+      },
+      "figures": {
+        "top": 574,
+        "left": 129,
+        "h": 117,
+        "w": 1182
+      },
+      "actions": {
+        "top": 707,
+        "left": 129,
+        "h": 61,
+        "w": 1182
+      },
+      "scrollY": 0
+    },
+    "deltaTop": {
+      "card": 0,
+      "heading": 0,
+      "ceiling": 0,
+      "track": 0,
+      "figures": 0,
+      "actions": 0
+    },
+    "cls": 0,
+    "shifts": [],
+    "flag": false,
+    "focus": "decision-summary-title"
+  }
+]

@@ -1,0 +1,53 @@
+{
+  "iphone": {
+    "height": 12163,
+    "words": 1289,
+    "blocksBeforeInstrument": [
+      "H1:Stop forwarding listings. Start sending deals that",
+      "P:Paste the rental listing. See whether it clears yo",
+      "P:Buying for your own portfolio? Same analyzer, your",
+      "A:For investors",
+      "FORM:Analyze a deal free",
+      "A:See the sample deal",
+      "P:Free. No account. Your first full decision is incl"
+    ],
+    "frames": [
+      "shots/audit/home-390-scroll-00.jpg",
+      "shots/audit/home-390-scroll-01.jpg",
+      "shots/audit/home-390-scroll-02.jpg",
+      "shots/audit/home-390-scroll-03.jpg",
+      "shots/audit/home-390-scroll-04.jpg",
+      "shots/audit/home-390-scroll-05.jpg",
+      "shots/audit/home-390-scroll-06.jpg",
+      "shots/audit/home-390-scroll-07.jpg",
+      "shots/audit/home-390-scroll-08.jpg",
+      "shots/audit/home-390-scroll-09.jpg",
+      "shots/audit/home-390-scroll-10.jpg",
+      "shots/audit/home-390-scroll-11.jpg",
+      "shots/audit/home-390-scroll-12.jpg",
+      "shots/audit/home-390-scroll-13.jpg",
+      "shots/audit/home-390-scroll-14.jpg",
+      "shots/audit/home-390-scroll-15.jpg",
+      "shots/audit/home-390-scroll-16.jpg"
+    ]
+  },
+  "desktop": {
+    "height": 7702,
+    "words": 1277,
+    "blocksBeforeInstrument": [
+      "H1:Stop forwarding listings. Start sending deals that"
+    ],
+    "frames": [
+      "shots/audit/home-1440-scroll-00.jpg",
+      "shots/audit/home-1440-scroll-01.jpg",
+      "shots/audit/home-1440-scroll-02.jpg",
+      "shots/audit/home-1440-scroll-03.jpg",
+      "shots/audit/home-1440-scroll-04.jpg",
+      "shots/audit/home-1440-scroll-05.jpg",
+      "shots/audit/home-1440-scroll-06.jpg",
+      "shots/audit/home-1440-scroll-07.jpg",
+      "shots/audit/home-1440-scroll-08.jpg",
+      "shots/audit/home-1440-scroll-09.jpg"
+    ]
+  }
+}

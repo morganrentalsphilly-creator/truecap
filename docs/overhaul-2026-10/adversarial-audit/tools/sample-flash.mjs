@@ -14,6 +14,8 @@ while (Date.now() - t0 < (net ? 14000 : 10000)) {
   const st = await page.evaluate(() => ({
     form: !!document.querySelector("#purchasePrice") && document.querySelector("#purchasePrice").getBoundingClientRect().height > 0,
     verdict: !!document.querySelector("#decision-summary-title") && document.querySelector("#decision-summary-title").getBoundingClientRect().height > 0,
+    // Trust pass (A2): the sample's server-rendered decision, before the live one.
+    prerender: !!document.querySelector("[data-sample-prerender]") && document.querySelector("[data-sample-prerender]").getBoundingClientRect().height > 0,
     h1: document.querySelector("h1")?.innerText?.slice(0, 50) ?? null,
   })).catch(() => null);
   const ms = Date.now() - t0;
@@ -25,6 +27,8 @@ while (Date.now() - t0 < (net ? 14000 : 10000)) {
   if (verdictAt && ms - verdictAt > 1500) break;
 }
 save(`sample-flash-${label}`, { device, net: net ?? "none", formFirstVisibleMs: formAt, verdictVisibleMs: verdictAt, frames });
-const formVisibleWindow = frames.filter(f => f.form && !f.verdict).map(f => f.ms);
+const formVisibleWindow = frames.filter(f => f.form && !f.verdict && !f.prerender).map(f => f.ms);
+const prerenderFrames = frames.filter(f => f.prerender).map(f => f.ms);
+console.log(label, "static card visible", prerenderFrames.length ? `${prerenderFrames[0]}..${prerenderFrames.at(-1)}` : "never", "frames with both", frames.filter(f => f.prerender && f.verdict).length);
 console.log(label, "form first visible", formAt, "verdict visible", verdictAt, "form-only frames", formVisibleWindow.length ? `${formVisibleWindow[0]}..${formVisibleWindow.at(-1)}` : "none");
 await b.close();

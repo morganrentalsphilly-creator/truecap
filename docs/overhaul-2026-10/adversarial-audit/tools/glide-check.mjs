@@ -11,12 +11,17 @@ for (const [w,h,mobile] of sizes) {
   await page.waitForTimeout(2500);
   const atLoad = await page.evaluate(() => { const r = document.querySelector("[data-hero-ledger]").getBoundingClientRect(); const vis = Math.max(0, Math.min(innerHeight, r.bottom) - Math.max(0, r.top)); return { top: Math.round(r.top), h: Math.round(r.height), visibleRatioAtLoad: +(vis / r.height).toFixed(3) }; });
   const glidedAtLoad = (await page.evaluate(() => window.__probe.events.filter(e => e[1] === "valuenow").map(e => e[2]))).length > 1;
+  // Trust pass (A3): the handle no longer moves; the moment is the meets-range
+  // draw, reported on the scrubber root as data-glide.
+  const glideAtLoad = await page.evaluate(() => document.querySelector("[data-price-scrubber]")?.getAttribute("data-glide") ?? null);
   // Scroll so the sheet is as visible as it can be, then wait.
   await page.evaluate(() => { const el = document.querySelector("[data-hero-ledger]"); const r = el.getBoundingClientRect(); window.scrollBy(0, r.top - Math.max(0, (innerHeight - r.height) / 2)); });
   await page.waitForTimeout(2500);
   const vals = await page.evaluate(() => window.__probe.events.filter(e => e[1] === "valuenow").map(e => e[2]));
   const maxRatio = +(Math.min(1, h / atLoad.h)).toFixed(3);
-  rows.push({ viewport: `${w}x${h}`, ...atLoad, maxPossibleRatio: maxRatio, glidedAtLoad, glidedAfterScroll: vals.length > 1, distinctValues: [...new Set(vals)].length });
+  const glideAfterScroll = await page.evaluate(() => document.querySelector("[data-price-scrubber]")?.getAttribute("data-glide") ?? null);
+  const maxValuenow = Math.max(...vals.map(Number).filter(Number.isFinite));
+  rows.push({ viewport: `${w}x${h}`, ...atLoad, maxPossibleRatio: maxRatio, glidedAtLoad, glidedAfterScroll: vals.length > 1, distinctValues: [...new Set(vals)].length, glideAtLoad, glideAfterScroll, maxValuenow });
   await ctx.close();
 }
 save("glide-check", rows);
