@@ -180,6 +180,27 @@ test("FRED + HUD healthy: rate and rent autofill with labelled sources, and both
   expect(called.some((p) => p.includes("/fred/series/observations")), called.join(", ")).toBe(true);
 });
 
+// Trust pass A5 (2026-10-21): when the lookup changes an input the preview is
+// already using, the change is said under the preview's cash flow, with an
+// undo, not in a corner toast.
+test("a looked-up rate that moves the preview is explained at the figure, and Undo restores the default", async ({ page }) => {
+  mock.setFredMode("ok");
+  const form = await openAnalyzer(page);
+  await form.getByLabel("Price to analyze", { exact: true }).fill("200000");
+  await form.getByLabel("Expected gross monthly rent", { exact: true }).fill("1850");
+  await expect(page.locator("[data-live-verdict]").filter({ visible: true })).toBeVisible({ timeout: 10_000 });
+  await commitAddress(page, "350 Autofill Test Way, Columbus, OH 43215");
+  const line = page.locator("[data-lookup-change]").filter({ visible: true });
+  await expect(line).toContainText(`Rate updated to FRED ${Number(MOCK_FRED_RATE).toFixed(2)}%`, { timeout: 15_000 });
+  await expect(line).toContainText("from the 6.75% default");
+  // The rent the visitor typed stays theirs.
+  await expectNumericValue(form.getByLabel("Expected gross monthly rent", { exact: true }), 1850, 5_000);
+  await line.getByRole("button", { name: "Undo", exact: true }).click();
+  await expect(page.locator("[data-lookup-change]")).toHaveCount(0);
+  await openFinancing(page);
+  await expectNumericValue(form.getByLabel("Interest Rate %", { exact: true }), 6.75, 5_000);
+});
+
 test.describe("HUD failure modes leave rent empty and the form usable", () => {
   for (const [label, address] of [
     ["HUD 500", "400 Autofill Test Ln, Austin, TX 78701"],

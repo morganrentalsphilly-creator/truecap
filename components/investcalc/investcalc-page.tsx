@@ -438,6 +438,31 @@ type AutofillConflict = {
   currency?: boolean;
 };
 
+/** The lookup's rate swap under a preview that was already showing (audit A5). */
+type LookupRateChange = {
+  place: SelectedAddress;
+  from: number;
+  fromDefault: boolean;
+  to: number;
+  /** FRED's observation date, "2026-10-15". */
+  asOf?: string;
+};
+
+/** "Rate updated to FRED 7.40% (Oct 15) from the 6.75% default". */
+function describeLookupRateChange(change: LookupRateChange): string {
+  const date = change.asOf
+    ? new Date(`${change.asOf}T12:00:00Z`).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        timeZone: "UTC",
+      })
+    : null;
+  const from = `${Number(change.from.toFixed(3))}%`;
+  return `Rate updated to FRED ${change.to.toFixed(2)}%${
+    date && date !== "Invalid Date" ? ` (${date})` : ""
+  } from ${change.fromDefault ? `the ${from} default` : from}`;
+}
+
 /** Every field rendered inside OperatingExpensesSection's nested disclosure.
  * Validation must open both disclosure layers before it can focus one. */
 const OPERATING_EXPENSE_FIELD_PATHS = new Set([
@@ -1178,6 +1203,14 @@ export function InvestCalcPage({
   const [livePreview, setLivePreview] = useState<LivePreviewSnapshot | null>(
     null,
   );
+  // A lookup that changed an input the preview already uses is explained at
+  // the figure it moves, with an undo, not in a corner toast (audit A5). It
+  // stays until dismissed, undone, or a different property is looked up.
+  const [lookupRateChange, setLookupRateChange] =
+    useState<LookupRateChange | null>(null);
+  // The property whose looked-up rate the visitor undid: its later lookups
+  // (the bedrooms watcher re-fires them) leave the rate alone.
+  const rateLookupUndoneRef = useRef<SelectedAddress | null>(null);
   // One concise, debounced screen-reader announcement for the live preview,
   // written into a persistent sr-only region (the visible card is NOT a live
   // region). Debounced past the form watcher so fast typing doesn't flood the
@@ -2442,6 +2475,9 @@ export function InvestCalcPage({
       // identity compare after the roundtrip detects a newer selection.
       const enrichGeneration = forkGenerationRef.current;
       failedEnrichmentPlaceRef.current = null;
+      setLookupRateChange((current) =>
+        current && current.place !== place ? null : current,
+      );
       // New address → clear the previous address's captured provenance + market
       // rent BEFORE repopulating, so the confidence badge can't attribute the
       // old "from <addr>" sourcing to this deal (every enrichment path, incl.
@@ -2647,23 +2683,46 @@ export function InvestCalcPage({
         const hasUserRateDefault =
           typeof userRateDefault === "number" &&
           Number.isFinite(userRateDefault);
+        const productStartingRate = Number(defaultValues.interestRate ?? 6.75);
         if (
           mayAdoptStartingBenchmark(
             "interestRate",
             enrichment.interestRate,
-            Number(defaultValues.interestRate ?? 6.75),
-            hasUserRateDefault,
+            productStartingRate,
+            hasUserRateDefault || rateLookupUndoneRef.current === place,
           )
         ) {
+          const previousRate = Number(form.getValues("interestRate"));
+          // The preview already shows a figure when price and rent are in:
+          // then the rate swap moves a number the visitor is reading, and the
+          // explanation belongs beside that number (audit A5). A fill into a
+          // preview that is not showing yet stays in the toast.
+          const previewUsesRate =
+            Number(form.getValues("purchasePrice")) > 0 &&
+            Number(form.getValues("monthlyRent")) > 0;
           form.setValue("interestRate", enrichment.interestRate, setOpts);
           enrichmentCaptureRef.current.interestRate = {
             source: "fred",
             fetchedAt: enrichment.meta.mortgageRate?.asOf,
             value: enrichment.interestRate,
           };
-          filled.push(
-            `Interest rate ${enrichment.interestRate.toFixed(2)}% (current avg)`,
-          );
+          if (
+            previewUsesRate &&
+            Number.isFinite(previousRate) &&
+            previousRate !== enrichment.interestRate
+          ) {
+            setLookupRateChange({
+              place,
+              from: previousRate,
+              fromDefault: previousRate === productStartingRate,
+              to: enrichment.interestRate,
+              asOf: enrichment.meta.mortgageRate?.asOf,
+            });
+          } else {
+            filled.push(
+              `Interest rate ${enrichment.interestRate.toFixed(2)}% (current avg)`,
+            );
+          }
         }
       }
 
@@ -2756,6 +2815,22 @@ export function InvestCalcPage({
     },
     [runPropertyEnrichment],
   );
+
+  /** Undo the lookup's rate swap: the starting rate returns, keeps its own
+   * label (no FRED provenance, not marked as typed), and later lookups for
+   * this property leave it alone. */
+  const handleUndoLookupRateChange = useCallback(() => {
+    const change = lookupRateChange;
+    if (!change) return;
+    rateLookupUndoneRef.current = change.place;
+    delete enrichmentCaptureRef.current.interestRate;
+    form.setValue("interestRate", change.from, {
+      shouldDirty: false,
+      shouldTouch: false,
+      shouldValidate: false,
+    });
+    setLookupRateChange(null);
+  }, [form, lookupRateChange]);
 
   /**
    * Confirm a real property swap before any address entry point can combine
@@ -10481,6 +10556,15 @@ export function InvestCalcPage({
                       showGenericLivePreview ? livePreviewMsg : ""
                     }
                     assumptionBasis={livePreviewAssumptionBasis}
+                    inputChange={
+                      lookupRateChange
+                        ? {
+                            text: describeLookupRateChange(lookupRateChange),
+                            onUndo: handleUndoLookupRateChange,
+                            onDismiss: () => setLookupRateChange(null),
+                          }
+                        : null
+                    }
                     desktopAction={
                       <div>
                         <Button
