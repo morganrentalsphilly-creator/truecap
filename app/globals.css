@@ -1009,6 +1009,28 @@ summary:has([class*="rotate-"])::marker {
 [data-receipt-figure] {
   transition: color var(--duration-fast) var(--ease-out);
 }
+
+/* The hero's one moment (components/home/price-scrubber.tsx, audit A3): the
+   meets-range reaches out to the asking marker and draws back to the
+   ceiling, once, when the track is first seen. Scale only, from and to the
+   resting width, so the resting state is the complete drawing; the handle
+   never moves by itself. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-glide="playing"] [data-meets-fill] {
+    animation: tc-meets-draw var(--duration-draw) var(--ease-out) both;
+  }
+}
+@keyframes tc-meets-draw {
+  0% {
+    scale: 1 1;
+  }
+  35% {
+    scale: var(--glide-reach, 1) 1;
+  }
+  100% {
+    scale: 1 1;
+  }
+}
 [data-receipt-flow]:has([data-receipt-node="rent"] [data-state="open"]) [data-receipt-figure="cash-flow"],
 [data-receipt-flow]:has([data-receipt-node="tax"] [data-state="open"]) [data-receipt-figure="cash-flow"],
 [data-receipt-flow]:has([data-receipt-node="rate"] [data-state="open"]) [data-receipt-figure="dscr"] {

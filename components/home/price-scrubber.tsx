@@ -7,9 +7,10 @@
  * HTML and the page works without JavaScript; after hydration the handle
  * drags (pointer, touch, arrow keys), the figures roll through NumberFlow,
  * each target chip flips between "Meets" and "Misses by $X", and the verdict
- * follows. On first view the handle glides once from asking to the ceiling;
- * under reduced motion it simply rests at the ceiling. The slider announces
- * its value when a drag ends, never per tick.
+ * follows. The handle rests at the ceiling and only the visitor moves it; on
+ * first view the meets-range draws out to the asking marker and back (the
+ * effect below says when it is skipped). The slider announces its value when
+ * a drag ends, never per tick.
  *
  * Order on the sheet: the schematic (its two out-flows move with the price
  * and their arrows weigh more above the ceiling), the price track with its
@@ -43,7 +44,8 @@ export type ScrubberSource = {
 };
 
 const usd = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
-const easeOut = (t: number) => 1 - (1 - t) ** 3;
+/** Hydration later than this after first contentful paint skips the moment: the visitor is already reading. */
+const GLIDE_HYDRATION_BUDGET_MS = 1_000;
 
 export function PriceScrubber({
   points,
@@ -78,6 +80,7 @@ export function PriceScrubber({
   useEffect(() => setMounted(true), []);
   const interacted = useRef(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLSpanElement>(null);
 
   const point = useMemo(() => {
     let best = points[0];
@@ -98,48 +101,45 @@ export function PriceScrubber({
     return `${usd(p[0])}: cash flow ${usd(p[1])} a month, ${miss}`;
   };
 
-  // First view: glide from asking to the ceiling once, unless the visitor
-  // prefers reduced motion or has already taken the handle.
+  // The one authored moment (audit A3): when the track is first seen, the
+  // meets-range draws out to the asking marker and back to the ceiling, so
+  // the gap reads as the answer. The handle never moves by itself: the
+  // visitor's first act is to move it (Wise's amount, benchmarks P1). The
+  // moment is skipped under reduced motion, when the island hydrates more
+  // than a second after first paint (the visitor is already reading), and
+  // when a pointer reached the sheet before hydration (the inline listener in
+  // hero-sheet.tsx sets data-scrubber-touched on <html>).
   useEffect(() => {
     const root = rootRef.current;
-    if (!root) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let frame = 0;
-    let started = false;
-    const run = () => {
-      if (started || interacted.current) return;
-      started = true;
-      const from = asking;
-      const to = ceiling;
-      const duration = 1100;
-      const t0 = performance.now();
-      const tick = (now: number) => {
-        if (interacted.current) return;
-        const t = Math.min(1, (now - t0) / duration);
-        const v = from + (to - from) * easeOut(t);
-        setPrice(Math.round(v / 1000) * 1000);
-        if (t < 1) frame = requestAnimationFrame(tick);
-        else setPrice(to);
-      };
-      frame = requestAnimationFrame(tick);
-    };
+    const track = trackRef.current;
+    if (!root || !track) return;
+    const skip = (reason: string) => root.setAttribute("data-glide", `skipped-${reason}`);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return skip("reduced");
+    if (document.documentElement.hasAttribute("data-scrubber-touched")) return skip("touched");
+    const fcp = performance.getEntriesByName("first-contentful-paint")[0]?.startTime;
+    if (fcp != null && performance.now() - fcp > GLIDE_HYDRATION_BUDGET_MS) return skip("late");
+    let timer = 0;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          observer.disconnect();
-          // A beat after the figures paint, so the glide reads as the answer
-          // arriving rather than the page loading.
-          window.setTimeout(run, 500);
-        }
+        if (!entries.some((e) => e.isIntersecting)) return;
+        observer.disconnect();
+        // A beat after the figures paint, so the draw reads as the answer
+        // arriving rather than the page loading.
+        timer = window.setTimeout(() => {
+          if (interacted.current || document.documentElement.hasAttribute("data-scrubber-touched")) {
+            return skip("touched");
+          }
+          root.setAttribute("data-glide", "playing");
+        }, 500);
       },
       { threshold: 0.6 },
     );
-    observer.observe(root);
+    observer.observe(track);
     return () => {
       observer.disconnect();
-      cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
     };
-  }, [asking, ceiling]);
+  }, []);
 
   const pct = (p: number) => ((p - low) / (high - low)) * 100;
   // A target's state, struck forward in its color: text with a dot, never a
@@ -157,7 +157,7 @@ export function PriceScrubber({
   );
 
   return (
-    <div ref={rootRef} className="min-w-0" data-price-scrubber="">
+    <div ref={rootRef} className="min-w-0" data-price-scrubber="" data-glide="idle">
       <Schematic
         rent={inputs.rent}
         rate={inputs.rate}
@@ -206,6 +206,9 @@ export function PriceScrubber({
         <SliderPrimitive.Root
           // 44px tall: Radix takes the pointer on the root, so the whole band
           // around the track is the drag target, whatever the thumb's size.
+          // The moment observes this band, not the whole sheet: at 375×667
+          // the sheet is taller than the screen and never 60% visible.
+          ref={trackRef}
           className="relative flex h-11 w-full touch-none items-center select-none"
           min={low}
           max={high}
@@ -224,8 +227,15 @@ export function PriceScrubber({
             {/* The range of prices that meets the Buy Box, in the highlight. */}
             <span
               aria-hidden
-              className="absolute top-1/2 left-0 h-2 -translate-y-1/2 bg-highlight/85"
-              style={{ width: `${pct(ceiling)}%` }}
+              data-meets-fill=""
+              className="absolute top-1/2 left-0 h-2 origin-left -translate-y-1/2 bg-highlight/85"
+              style={{
+                width: `${pct(ceiling)}%`,
+                // How far the fill reaches at the asking marker, as a scale of
+                // its resting width (globals.css, tc-meets-draw).
+                ["--glide-reach" as string]: (pct(asking) / pct(ceiling)).toFixed(4),
+              }}
+              onAnimationEnd={() => rootRef.current?.setAttribute("data-glide", "played")}
             />
             <SliderPrimitive.Range className="absolute h-full bg-transparent" />
             <span aria-hidden className="absolute top-1/2 left-0 h-3 w-px -translate-y-1/2 bg-foreground" />

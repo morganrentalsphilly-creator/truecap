@@ -355,8 +355,12 @@ and takes the float shadow; reduced motion keeps it still.
   authored moment per surface, not an entrance on every section; a figure
   announces its change politely and only when a drag ends; reduced motion
   shows the end state everywhere.
-- **The homepage's moments** (Phase 3): the price handle glides once from
-  asking to the ceiling and the verdict flips; the scroll story's frame
+- **The homepage's moments** (Phase 3; the first revised in the trust pass,
+  2026-10-21): when the price track is first seen, its meets-range reaches
+  out to the asking marker and draws back to the ceiling (scale only); the
+  handle never moves by itself, and the moment is skipped when hydration
+  lands more than a second after first paint or a pointer touched the sheet
+  first; the scroll story's frame
   changes as three steps pass; the sources draw their leaders into the
   result; the co-branding preview recolors as you type.
 
