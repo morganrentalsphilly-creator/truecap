@@ -234,6 +234,12 @@ export type DashboardDeal = {
   maxOfferBasis?: DealOfferBasis | null;
   /** Human-readable exact criteria for the max-offer number. */
   maxOfferBasisLabel?: string | null;
+  /**
+   * The price minus the solved Offer Ceiling (offerCeilingGap), set beside
+   * maxOffer on the server so the home's list only formats it. Positive when
+   * the price is above the ceiling. Null without both numbers.
+   */
+  offerGap?: number | null;
   id: string;
   address: string;
   propertyType: "single-family" | "multi-family" | "owner-occupant" | null;
@@ -280,6 +286,22 @@ export type DashboardDeal = {
   /** False when the visible metrics are an older recorded standard. */
   methodologyIsCurrent?: boolean;
 };
+
+/**
+ * Gap = price − Offer Ceiling, Compare's "Gap to Asking" (lib/compare-metrics
+ * offerGap) and the triage table's askingGap: positive means the price is
+ * above the highest price that still meets the deal's targets. Null when
+ * either number is missing, so a deal without a solved ceiling never shows a
+ * gap of its full price.
+ */
+export function offerCeilingGap(
+  purchasePrice: number | null | undefined,
+  maxOffer: number | null | undefined
+): number | null {
+  if (purchasePrice == null || maxOffer == null) return null;
+  if (!Number.isFinite(purchasePrice) || !Number.isFinite(maxOffer)) return null;
+  return purchasePrice - maxOffer;
+}
 
 export function toNumber(value: NumericLike): number | null {
   if (value == null || value === "") return null;

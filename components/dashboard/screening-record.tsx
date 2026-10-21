@@ -16,6 +16,9 @@
  *   • The passed-on gap total would need an unbounded extra query plus a
  *     solve per archived row. Omitted rather than approximated.
  *
+ * Since the 2026-10 audit (Q1) it sits under the deal list as two ruled
+ * rows, not a card of display-size figures: the list is the home's lead.
+ *
  * PRESENTATION ONLY.
  */
 
@@ -42,32 +45,28 @@ export function ScreeningRecord({
   const clearing = judged.filter((d) => (d.maxOffer as number) >= (d.purchasePrice as number));
 
   return (
-    <section
-      aria-labelledby="screening-record-heading"
-      className="rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5"
-    >
-      <h2 id="screening-record-heading" className="text-base font-semibold text-foreground">
+    <section aria-labelledby="screening-record-heading">
+      <h2
+        id="screening-record-heading"
+        className="border-b border-foreground pb-2 text-base font-semibold text-foreground"
+      >
         Your screening record
       </h2>
-      <dl className="mt-3 grid grid-cols-2 gap-4">
-        <div>
-          <dt className="text-xs font-medium text-muted-foreground">
-            Deals saved
-          </dt>
-          <dd className="mt-0.5 font-figure text-2xl font-semibold tabular-nums text-foreground">
+      <dl>
+        <div className="flex items-baseline justify-between gap-3 border-b border-rule-soft py-2.5">
+          <dt className="text-sm text-muted-foreground">Deals saved</dt>
+          <dd className="font-figure font-semibold text-foreground">
             {totalSavedDeals.toLocaleString("en-US")}
           </dd>
         </div>
-        <div>
-          <dt className="text-xs font-medium text-muted-foreground">
-            Work at asking
-          </dt>
-          <dd className="mt-0.5 font-figure text-2xl font-semibold tabular-nums text-foreground">
+        <div className="flex items-baseline justify-between gap-3 border-b border-rule-soft py-2.5">
+          <dt className="text-sm text-muted-foreground">Work at asking</dt>
+          <dd className="font-figure font-semibold text-foreground">
             {judged.length === 0 ? "—" : `${clearing.length}/${judged.length}`}
           </dd>
         </div>
       </dl>
-      <p className="mt-3 text-2xs leading-relaxed text-muted-foreground">
+      <p className="mt-2 text-2xs leading-relaxed text-muted-foreground">
         {judged.length === 0
           ? "Once your deals have an Offer Ceiling, this shows how many meet the modeled targets at the asking price."
           : `${clearing.length} of ${judged.length} deals shown here have an Offer Ceiling at or above their asking price. Verify the material inputs, then record your own decision.`}

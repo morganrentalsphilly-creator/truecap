@@ -13,7 +13,6 @@ import {
   Layers,
   Percent,
   Plus,
-  Target,
   TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -1008,6 +1007,216 @@ export function DashboardHome({
       ? candidateName
       : "";
 
+  // ── Decision Center — fact-based comparisons derived from active deals:
+  // highest Screening Index, first cash-flow-negative deal to review, highest
+  // modeled 10-yr upside, and a next workflow action. Ruled rows, not tiles:
+  // since the 2026-10 audit (Q1) the focused home opens on the deal list and
+  // this sits under it, quieter. With one active deal it would crown that
+  // deal three times (FFM-2), so the focused home shows it from two.
+  const highlightRow =
+    "-mx-2 flex min-h-11 items-center justify-between gap-3 rounded-md px-2 py-2.5 transition-[background-color] duration-150 hover:bg-band focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
+  const decisionCenterSection =
+    decisionCenter && (!focusedDashboard || data.allDeals.length >= 2) ? (
+      <section aria-labelledby="decision-center-heading">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 border-b border-foreground">
+          <h2
+            id="decision-center-heading"
+            className="py-2 text-base font-semibold text-foreground"
+          >
+            Decision center
+          </h2>
+          <Link
+            href={decisionCenter.nextAction.href}
+            prefetch={false}
+            className="inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-2 hover:underline"
+          >
+            Next: {decisionCenter.nextAction.label}
+          </Link>
+        </div>
+        <ul>
+          <li className="border-b border-rule-soft">
+            <Link
+              href={
+                decisionCenter.best
+                  ? `/dashboard/saved-analyses/${decisionCenter.best.id}`
+                  : "/dashboard/saved-analyses"
+              }
+              prefetch={false}
+              aria-label={`Open highest-scoring deal: ${decisionCenter.best?.address ?? "My Deals"}`}
+              className={highlightRow}
+            >
+              <span className="min-w-0">
+                <span className="block text-xs text-muted-foreground">
+                  Highest Deal score
+                </span>
+                <span className="block truncate text-sm font-semibold text-foreground">
+                  {decisionCenter.best?.address ?? "—"}
+                </span>
+                <span className="block truncate text-xs text-muted-foreground">
+                  {decisionCenter.best?.score != null ? (
+                    <>
+                      Deal score{" "}
+                      <span className="font-figure text-foreground">
+                        {Math.round(decisionCenter.best.score)}
+                      </span>
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                  {decisionCenter.best?.recommendation
+                    ? ` · ${recommendationLabel(decisionCenter.best.recommendation)}`
+                    : ""}
+                </span>
+              </span>
+              <span className="shrink-0 text-xs font-semibold text-primary">
+                Open deal
+              </span>
+            </Link>
+          </li>
+          <li className="border-b border-rule-soft">
+            <Link
+              href={
+                decisionCenter.needsReview
+                  ? `/dashboard/saved-analyses/${decisionCenter.needsReview.id}`
+                  : "/dashboard/saved-analyses?state=active"
+              }
+              prefetch={false}
+              aria-label={
+                decisionCenter.needsReview
+                  ? `Review ${decisionCenter.needsReview.address}`
+                  : decisionCenter.cashFlowCoverageComplete
+                    ? "View active deals"
+                    : "Review deals missing cash-flow data"
+              }
+              className={highlightRow}
+            >
+              <span className="min-w-0">
+                <span className="block text-xs text-muted-foreground">
+                  Needs review
+                </span>
+                {decisionCenter.needsReview ? (
+                  <>
+                    <span className="block truncate text-sm font-semibold text-foreground">
+                      {decisionCenter.needsReview.address}
+                    </span>
+                    <span className="block truncate text-xs text-muted-foreground">
+                      {/* A cash flow is a flow: red by the Sign rule. */}
+                      <span className="font-figure text-negative">
+                        {formatSignedCurrency(
+                          decisionCenter.needsReview.cashFlowMonthly,
+                        )}
+                        /mo
+                      </span>{" "}
+                      · {decisionCenter.negativeCount} cash-flow negative
+                    </span>
+                  </>
+                ) : decisionCenter.cashFlowCoverageComplete ? (
+                  <span className="block text-sm font-semibold text-foreground">
+                    All active deals cash-flow positive
+                  </span>
+                ) : (
+                  <span className="block text-sm font-semibold text-foreground">
+                    Cash flow known for {decisionCenter.cashFlowKnownCount} of{" "}
+                    {decisionCenter.cashFlowTotalCount} active deals
+                  </span>
+                )}
+              </span>
+              <span className="shrink-0 text-xs font-semibold text-primary">
+                {decisionCenter.needsReview
+                  ? "Review deal"
+                  : decisionCenter.cashFlowCoverageComplete
+                    ? "View active deals"
+                    : "Review missing data"}
+              </span>
+            </Link>
+          </li>
+          <li className="border-b border-rule-soft">
+            <Link
+              href={
+                decisionCenter.bestUpside
+                  ? `/dashboard/saved-analyses/${decisionCenter.bestUpside.id}`
+                  : "/dashboard/saved-analyses"
+              }
+              prefetch={false}
+              aria-label={`Open highest modeled-upside deal: ${decisionCenter.bestUpside?.address ?? "My Deals"}`}
+              className={highlightRow}
+            >
+              <span className="min-w-0">
+                <span className="block text-xs text-muted-foreground">
+                  Highest modeled upside
+                </span>
+                <span className="block truncate text-sm font-semibold text-foreground">
+                  {decisionCenter.bestUpside?.address ?? "—"}
+                </span>
+                <span
+                  className="block truncate text-xs text-muted-foreground"
+                  title={
+                    decisionCenter.bestUpside?.roiPct != null
+                      ? bestUpsideSubline(decisionCenter.bestUpside.roiPct)
+                          .title
+                      : undefined
+                  }
+                >
+                  {decisionCenter.bestUpside?.roiPct != null
+                    ? bestUpsideSubline(decisionCenter.bestUpside.roiPct).text
+                    : "Run a 10-yr projection"}
+                </span>
+              </span>
+              <span className="shrink-0 text-xs font-semibold text-primary">
+                {decisionCenter.bestUpside ? "Open deal" : "View My Deals"}
+              </span>
+            </Link>
+          </li>
+          {/* PV-1: the personal row — how many active deals pass the user's
+              own criteria, deep-linking to My Deals pre-filtered to the fits
+              (?buyBox=1 seeds the existing buyBoxOnly filter). Only for users
+              with ≥1 active box AND ≥2 deals (CONFLICT #8). */}
+          {buyBoxSummary ? (
+            <li className="border-b border-rule-soft">
+              <Link
+                // 0 passing + the fit filter = an empty list with no
+                // explanation; land unfiltered instead so the per-deal
+                // "Misses buy box" badges show the gaps.
+                href={
+                  buyBoxSummary.passingCount > 0
+                    ? "/dashboard/saved-analyses?buyBox=1"
+                    : "/dashboard/saved-analyses"
+                }
+                prefetch={false}
+                className={highlightRow}
+              >
+                <span className="min-w-0">
+                  <span className="block text-xs text-muted-foreground">
+                    Meets your buy box
+                  </span>
+                  <span className="block truncate text-sm font-semibold text-foreground">
+                    <span className="font-figure">
+                      {buyBoxSummary.passingCount}
+                    </span>{" "}
+                    of{" "}
+                    <span className="font-figure">
+                      {buyBoxSummary.evaluatedCount}
+                    </span>{" "}
+                    deals
+                  </span>
+                </span>
+                <span className="shrink-0 text-xs font-semibold text-primary">
+                  {buyBoxSummary.passingCount > 0
+                    ? "See the deals that pass"
+                    : "None pass yet — see the gaps"}
+                </span>
+              </Link>
+            </li>
+          ) : null}
+        </ul>
+        <p className="mt-2 max-w-prose text-2xs leading-relaxed text-muted-foreground">
+          These highlights compare modeled outputs only. Deal score is a
+          heuristic summary of the modeled numbers; verify every material
+          assumption before relying on a comparison.
+        </p>
+      </section>
+    ) : null;
+
   return (
     <div className="flex-1 min-w-0 flex flex-col">
       <Topbar
@@ -1150,213 +1359,9 @@ export function DashboardHome({
             the page (2026-10 go-to-market audit, row P1-67). */}
         {leadsSlot}
 
-        {/* ── Decision Center — fact-based comparisons derived from active
-            deals: highest Screening Index, first cash-flow-negative deal to
-            review, highest modeled 10-yr upside, and a next workflow action. */}
-        {decisionCenter ? (
-          <section
-            aria-label="Decision center"
-            className="rounded-lg border border-border bg-card p-4 sm:p-5"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0">
-                <h2 className="text-xs font-medium text-muted-foreground">
-                  Decision center
-                </h2>
-                <p className="mt-1 max-w-3xl text-xs leading-relaxed text-muted-foreground">
-                  These highlights compare modeled outputs only. Deal score is
-                  a heuristic summary of the modeled numbers; verify every
-                  material assumption before relying on a comparison.
-                </p>
-              </div>
-              <Link
-                href={decisionCenter.nextAction.href}
-                prefetch={false}
-                className="inline-flex min-h-11 items-center text-xs font-semibold text-primary underline-offset-2 hover:underline"
-              >
-                Next: {decisionCenter.nextAction.label}
-              </Link>
-            </div>
-            {/* Horizontal snap rail below sm — three stacked full-width
-                tiles made the "band" a full screen tall at 375px
-                (mobile density audit DH-3). Grid from sm: as before; when the
-                buy-box tile (PV-1) joins, 2×2 at sm and one row of 4 at xl so
-                the fourth tile never orphans onto its own row. */}
-            <div
-              className={cn(
-                "mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:overflow-visible sm:pb-0 [&>*]:min-w-[72%] [&>*]:snap-start sm:[&>*]:min-w-0",
-                buyBoxSummary
-                  ? "sm:grid-cols-2 xl:grid-cols-4"
-                  : "sm:grid-cols-3",
-              )}
-            >
-              <Link
-                href={
-                  decisionCenter.best
-                    ? `/dashboard/saved-analyses/${decisionCenter.best.id}`
-                    : "/dashboard/saved-analyses"
-                }
-                prefetch={false}
-                aria-label={`Open highest-scoring deal: ${decisionCenter.best?.address ?? "My Deals"}`}
-                className="rounded-md border border-success/30 bg-success/5 p-3 transition hover:bg-success/10 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              >
-                <div className="flex items-center gap-1.5 text-xs font-medium text-success">
-                  <Award className="h-3.5 w-3.5" /> Highest Deal score
-                </div>
-                <div className="mt-1 truncate text-sm font-bold text-foreground">
-                  {decisionCenter.best?.address ?? "—"}
-                </div>
-                <div className="truncate text-xs text-muted-foreground">
-                  {decisionCenter.best?.score != null
-                    ? `Deal score ${Math.round(decisionCenter.best.score)}`
-                    : "—"}
-                  {decisionCenter.best?.recommendation
-                    ? ` · ${recommendationLabel(decisionCenter.best.recommendation)}`
-                    : ""}
-                </div>
-                <span className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-success">
-                  Open deal
-                </span>
-              </Link>
-              <Link
-                href={
-                  decisionCenter.needsReview
-                    ? `/dashboard/saved-analyses/${decisionCenter.needsReview.id}`
-                    : "/dashboard/saved-analyses?state=active"
-                }
-                prefetch={false}
-                aria-label={
-                  decisionCenter.needsReview
-                    ? `Review ${decisionCenter.needsReview.address}`
-                    : decisionCenter.cashFlowCoverageComplete
-                      ? "View active deals"
-                      : "Review deals missing cash-flow data"
-                }
-                className={cn(
-                  "rounded-md border p-3 transition focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-                  decisionCenter.needsReview
-                    ? "border-destructive/30 bg-destructive/5"
-                    : decisionCenter.cashFlowCoverageComplete
-                      ? "border-border bg-muted/20"
-                      : "border-warning/35 bg-warning/10",
-                )}
-              >
-                <div
-                  className={cn(
-                    "flex items-center gap-1.5 text-xs font-medium",
-                    decisionCenter.needsReview
-                      ? "text-destructive"
-                      : decisionCenter.cashFlowCoverageComplete
-                        ? "text-muted-foreground"
-                        : "text-warning-foreground",
-                  )}
-                >
-                  {decisionCenter.needsReview ||
-                  !decisionCenter.cashFlowCoverageComplete ? (
-                    <AlertTriangle className="h-3.5 w-3.5" />
-                  ) : null}{" "}
-                  Needs review
-                </div>
-                {decisionCenter.needsReview ? (
-                  <>
-                    <div className="mt-1 truncate text-sm font-bold text-foreground">
-                      {decisionCenter.needsReview.address}
-                    </div>
-                    <div className="truncate text-xs text-muted-foreground">
-                      {formatSignedCurrency(
-                        decisionCenter.needsReview.cashFlowMonthly,
-                      )}
-                      /mo · {decisionCenter.negativeCount} cash-flow negative
-                    </div>
-                  </>
-                ) : decisionCenter.cashFlowCoverageComplete ? (
-                  <div className="mt-1 text-sm font-semibold text-foreground">
-                    All active deals cash-flow positive ✓
-                  </div>
-                ) : (
-                  <div className="mt-1 text-sm font-semibold text-foreground">
-                    Cash flow known for {decisionCenter.cashFlowKnownCount} of{" "}
-                    {decisionCenter.cashFlowTotalCount} active deals
-                  </div>
-                )}
-                <span className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-primary">
-                  {decisionCenter.needsReview
-                    ? "Review deal"
-                    : decisionCenter.cashFlowCoverageComplete
-                      ? "View active deals"
-                      : "Review missing data"}
-                </span>
-              </Link>
-              <Link
-                href={
-                  decisionCenter.bestUpside
-                    ? `/dashboard/saved-analyses/${decisionCenter.bestUpside.id}`
-                    : "/dashboard/saved-analyses"
-                }
-                prefetch={false}
-                aria-label={`Open highest modeled-upside deal: ${decisionCenter.bestUpside?.address ?? "My Deals"}`}
-                className="rounded-md border border-primary/30 bg-primary/5 p-3 transition hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              >
-                <div className="flex items-center gap-1.5 text-xs font-medium text-primary">
-                  <TrendingUp className="h-3.5 w-3.5" /> Highest modeled upside
-                </div>
-                <div className="mt-1 truncate text-sm font-bold text-foreground">
-                  {decisionCenter.bestUpside?.address ?? "—"}
-                </div>
-                <div
-                  className="truncate text-xs text-muted-foreground"
-                  title={
-                    decisionCenter.bestUpside?.roiPct != null
-                      ? bestUpsideSubline(decisionCenter.bestUpside.roiPct)
-                          .title
-                      : undefined
-                  }
-                >
-                  {decisionCenter.bestUpside?.roiPct != null
-                    ? bestUpsideSubline(decisionCenter.bestUpside.roiPct).text
-                    : "Run a 10-yr projection"}
-                </div>
-                <span className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-primary">
-                  {decisionCenter.bestUpside
-                    ? "Open deal"
-                    : "View My Deals"}
-                </span>
-              </Link>
-              {/* PV-1: the personal tile — how many active deals pass the
-                  user's own criteria, deep-linking to My Deals pre-filtered
-                  to the fits (?buyBox=1 seeds the existing buyBoxOnly
-                  filter). Only for users with ≥1 active box AND ≥2 deals
-                  (CONFLICT #8) — everyone else keeps the 3-tile band. */}
-              {buyBoxSummary ? (
-                <Link
-                  // 0 passing + the fit filter = an empty list with no
-                  // explanation; land unfiltered instead so the per-deal
-                  // "Misses buy box" badges show the gaps.
-                  href={
-                    buyBoxSummary.passingCount > 0
-                      ? "/dashboard/saved-analyses?buyBox=1"
-                      : "/dashboard/saved-analyses"
-                  }
-                  prefetch={false}
-                  className="rounded-md border border-[var(--brand-green)]/30 bg-[var(--brand-green-light)]/50 p-3 transition hover:bg-[var(--brand-green-light)]"
-                >
-                  <div className="flex items-center gap-1.5 text-xs font-medium text-[var(--brand-green)]">
-                    <Target className="h-3.5 w-3.5" /> Meets your buy box
-                  </div>
-                  <div className="mt-1 truncate text-sm font-bold text-foreground">
-                    {buyBoxSummary.passingCount} of{" "}
-                    {buyBoxSummary.evaluatedCount} deals
-                  </div>
-                  <div className="truncate text-xs text-muted-foreground">
-                    {buyBoxSummary.passingCount > 0
-                      ? "See the deals that pass"
-                      : "None pass yet — see the gaps"}
-                  </div>
-                </Link>
-              ) : null}
-            </div>
-          </section>
-        ) : null}
+        {/* The kill-switch layout keeps the Decision center above its
+            modules; the focused home sets it under the deal list. */}
+        {!focusedDashboard ? decisionCenterSection : null}
 
         {/* Due this week — overdue / due-within-7d due-diligence deadlines
             (inspection, appraisal, financing contingencies) across active
@@ -1379,24 +1384,37 @@ export function DashboardHome({
         />
 
         {/* ── Your deals (Aug-2026 rebuild) ─────────────────────────
-            ONE table replacing Portfolio Overview, Pipeline, Top
+            ONE list replacing Portfolio Overview, Pipeline, Top
             Performers, the Deal Comparison chart, Portfolio Signals and
             Risk vs Return — and the first dashboard surface ever to carry
-            an Offer Ceiling per deal, plus the gap to asking. */}
+            an Offer Ceiling per deal, plus the gap to asking. Since the
+            2026-10 audit (Q1) the home opens on it: only the notices that
+            render when something waits on the user (a lead, a deadline, a
+            rate change) sit above it, and the aggregates sit below. */}
         {focusedDashboard ? (
           <>
-            <YourDealsTable deals={data.allDeals} />
-            {/* Truthfulness: the table shows a bounded recent sample. Without
-                this line a 40-deal user reads 20 rows as their whole book. */}
-            {sampledNote ? (
-              <p className="px-1 text-2xs text-muted-foreground">
-                {sampledNote}
-              </p>
-            ) : null}
-            <ScreeningRecord
-              deals={data.allDeals}
-              totalSavedDeals={data.savedTotalCount ?? data.stats.totalDeals}
-            />
+            <div>
+              <YourDealsTable deals={data.allDeals} />
+              {/* Truthfulness: the list shows a bounded recent sample.
+                  Without this line a 40-deal user reads 20 rows as their
+                  whole book. */}
+              {sampledNote ? (
+                <p className="mt-1 max-w-prose text-2xs text-muted-foreground">
+                  {sampledNote}
+                </p>
+              ) : null}
+            </div>
+            <div className="grid gap-8 xl:grid-cols-5">
+              {decisionCenterSection ? (
+                <div className="xl:col-span-3">{decisionCenterSection}</div>
+              ) : null}
+              <div className="xl:col-span-2">
+                <ScreeningRecord
+                  deals={data.allDeals}
+                  totalSavedDeals={data.savedTotalCount ?? data.stats.totalDeals}
+                />
+              </div>
+            </div>
           </>
         ) : null}
 
@@ -1433,7 +1451,7 @@ export function DashboardHome({
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-5">
                 <div>
                   <div className="text-xs font-medium text-muted-foreground">
-                    Owned Equity
+                    Owned equity
                   </div>
                   <div className="mt-1 text-lg font-semibold tabular-nums leading-tight break-words text-foreground sm:text-2xl">
                     {owned.totalEquity != null
@@ -1464,7 +1482,7 @@ export function DashboardHome({
                 </div>
                 <div>
                   <div className="text-xs font-medium text-muted-foreground">
-                    Built Since Close
+                    Built since close
                   </div>
                   <div
                     className={cn(
@@ -1486,7 +1504,7 @@ export function DashboardHome({
                 </div>
                 <div>
                   <div className="text-xs font-medium text-muted-foreground">
-                    Monthly Cash Flow
+                    Monthly cash flow
                   </div>
                   <div
                     className={cn(
@@ -1542,7 +1560,7 @@ export function DashboardHome({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <StatCard
-                    label="Pipeline Value"
+                    label="Pipeline value"
                     value={
                       portfolio.activeCount > 0
                         ? formatCurrency(portfolio.totalValue, true)
@@ -1560,7 +1578,7 @@ export function DashboardHome({
                     changeSuffix=""
                   />
                   <StatCard
-                    label="Monthly Cash Flow"
+                    label="Monthly cash flow"
                     value={
                       portfolio.cashFlowSampleCount > 0
                         ? formatSignedCurrency(portfolio.totalCashFlow)
@@ -1689,7 +1707,7 @@ export function DashboardHome({
                     </div>
                     <div className="rounded-md border border-border bg-card p-3">
                       <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                        <DollarSign className="h-3.5 w-3.5" /> Cash to Close
+                        <DollarSign className="h-3.5 w-3.5" /> Cash to close
                       </div>
                       <div className="mt-1 text-lg font-bold text-foreground">
                         {kpis.cashToClose == null
@@ -1720,7 +1738,7 @@ export function DashboardHome({
                               : "text-warning-foreground",
                         )}
                       >
-                        <AlertTriangle className="h-3.5 w-3.5" /> Needs Review
+                        <AlertTriangle className="h-3.5 w-3.5" /> Needs review
                       </div>
                       <div className="mt-1 text-lg font-bold text-foreground">
                         {!kpis.cashFlowCoverageComplete &&
@@ -1822,7 +1840,7 @@ export function DashboardHome({
                       },
                       {
                         icon: DollarSign,
-                        label: "Highest Cash Flow",
+                        label: "Highest cash flow",
                         value: formatSignedCurrency(
                           highlights.byCashFlow?.cashFlowMonthly,
                         ),
@@ -1837,7 +1855,7 @@ export function DashboardHome({
                         // read as nonsense beside annual cap rates. Extreme
                         // values (finding 5) render the framed band; the raw
                         // figure stays reachable via valueTitle (title attr).
-                        label: "Highest 10-Yr ROI (cumulative)",
+                        label: "Highest 10-yr ROI (cumulative)",
                         value: formatRoiHeadline(highlights.byRoi?.roiPct, {
                           decimals: 1,
                           compact: true,
@@ -1867,7 +1885,7 @@ export function DashboardHome({
                           <span className="block text-xs font-medium text-muted-foreground">
                             {row.label}
                           </span>
-                          <span className="block truncate text-sm font-semibold text-foreground sm:text-[15px]">
+                          <span className="block truncate text-sm font-semibold text-foreground sm:text-base">
                             {row.address}
                           </span>
                         </span>
