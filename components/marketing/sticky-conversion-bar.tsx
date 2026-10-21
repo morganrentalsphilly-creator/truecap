@@ -5,8 +5,8 @@
  * the user has scrolled past the hero (~600px) — at that point they've
  * read enough to be evaluating. Mobile-prominent (it's the main funnel
  * for paid traffic); a compact float from 640px; docked full width on the
- * bottom edge from 1024px. It stands down while the hero, the plans or the
- * close (each with its own action) is on screen.
+ * bottom edge from 1024px, where it also stands down while the hero, the
+ * plans or the close (each with its own action) is on screen.
  *
  * Dismissible. Hides on the /auth and /pricing routes via the parent
  * not rendering it.
@@ -38,6 +38,9 @@ export function StickyConversionBar() {
 
   useEffect(() => {
     if (typeof IntersectionObserver === "undefined") return;
+    // From 1024px, where the bar docks across the page. On a phone the hero
+    // holds the whole sheet, so the bar keeps its scroll threshold instead.
+    if (!window.matchMedia("(min-width: 1024px)").matches) return;
     const targets = document.querySelectorAll("[data-page-hero], [data-sticky-suppress]");
     if (targets.length === 0) return;
     const inView = new Set<Element>();
