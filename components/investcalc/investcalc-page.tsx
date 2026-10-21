@@ -110,6 +110,7 @@ import {
 import {
   autofillPropertyIdentity,
   decideAutofillFieldWrite,
+  isRentAutofillable,
   isSameAutofillProperty,
   normalizeAutofillPropertyAddress,
 } from "@/lib/autofill-field-ownership";
@@ -2683,7 +2684,12 @@ export function InvestCalcPage({
           | number
           | undefined
           | null;
-        const isEmpty = isEmptyNumber(current);
+        // A typed 0 is an answer: "empty" comes from the dirty state, not
+        // the value (audit A6; lib/autofill-field-ownership.ts).
+        const isEmpty = isRentAutofillable({
+          value: current,
+          dirty: Boolean(form.formState.dirtyFields.monthlyRent),
+        });
         if (isEmpty) {
           form.setValue("monthlyRent", enrichment.monthlyRent, {
             shouldDirty: false,

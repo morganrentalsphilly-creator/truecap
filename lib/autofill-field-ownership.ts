@@ -151,6 +151,26 @@ export function decideAutofillFieldWrite({
   return { action: "conflict", reason: "different-value" };
 }
 
+/**
+ * May the address lookup fill the rent field? (audit A6, 2026-10-21)
+ *
+ * An empty field, yes. A 0 is an answer when the visitor typed it (a vacant
+ * unit, a deal they are stress-testing), so it is kept; only a 0 the visitor
+ * never touched, a reset's placeholder, is still filled. The value alone
+ * cannot tell the two apart: the dirty state can.
+ */
+export function isRentAutofillable({
+  value,
+  dirty,
+}: {
+  value: unknown;
+  dirty: boolean;
+}): boolean {
+  const current = toFiniteNumber(value);
+  if (current === null) return true;
+  return current === 0 && !dirty;
+}
+
 function toFiniteNumber(value: unknown): number | null {
   if (typeof value === "number") {
     return Number.isFinite(value) ? value : null;
