@@ -1,0 +1,195 @@
+{
+  "label": "after",
+  "widths": {
+    "375": {
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "overflow": false,
+      "listTop": 227,
+      "viewportHeight": 812,
+      "sections": [
+        "div: Welcome back, Sam @80",
+        "div: Your deals @221",
+        "div: Decision center @1350"
+      ],
+      "smallTargets": [],
+      "gaps": [
+        {
+          "text": "−$44,500",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "−$36,000",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "−$26,000",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "−$15,500",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "−$12,500",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "+$29,000",
+          "color": "oklch(0.52 0.2 25)",
+          "font": "tabular-nums"
+        }
+      ]
+    },
+    "768": {
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "overflow": false,
+      "listTop": 193,
+      "viewportHeight": 1024,
+      "sections": [
+        "div: Welcome back, Sam @88",
+        "div: Your deals @187",
+        "div: Decision center @1068"
+      ],
+      "smallTargets": [],
+      "gaps": [
+        {
+          "text": "−$44,500",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "−$36,000",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "−$26,000",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "−$15,500",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "−$12,500",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "+$29,000",
+          "color": "oklch(0.52 0.2 25)",
+          "font": "tabular-nums"
+        }
+      ]
+    },
+    "1095": {
+      "scrollWidth": 1095,
+      "clientWidth": 1095,
+      "overflow": false,
+      "listTop": 193,
+      "viewportHeight": 760,
+      "sections": [
+        "div: Welcome back, Sam @88",
+        "div: Your deals @187",
+        "div: Decision center @1068"
+      ],
+      "smallTargets": [],
+      "gaps": [
+        {
+          "text": "−$44,500",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "−$36,000",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "−$26,000",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "−$15,500",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "−$12,500",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "+$29,000",
+          "color": "oklch(0.52 0.2 25)",
+          "font": "tabular-nums"
+        }
+      ]
+    },
+    "1440": {
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "overflow": false,
+      "listTop": 193,
+      "viewportHeight": 900,
+      "sections": [
+        "div: Welcome back, Sam @88",
+        "div: Your deals @187",
+        "div: Decision center @807"
+      ],
+      "smallTargets": [],
+      "gaps": [
+        {
+          "text": "−$44,500",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "−$36,000",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "−$26,000",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "−$15,500",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "−$12,500",
+          "color": "oklch(0.5 0.15 150)",
+          "font": "tabular-nums"
+        },
+        {
+          "text": "+$29,000",
+          "color": "oklch(0.52 0.2 25)",
+          "font": "tabular-nums"
+        }
+      ]
+    }
+  },
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Refused to execute script from 'http://127.0.0.1:3100/_vercel/insights/script.js' because its MIME type ('text/plain') is not executable, and strict MIME type checking is enabled.",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Refused to execute script from 'http://127.0.0.1:3100/_vercel/insights/script.js' because its MIME type ('text/plain') is not executable, and strict MIME type checking is enabled.",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Refused to execute script from 'http://127.0.0.1:3100/_vercel/insights/script.js' because its MIME type ('text/plain') is not executable, and strict MIME type checking is enabled.",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Refused to execute script from 'http://127.0.0.1:3100/_vercel/insights/script.js' because its MIME type ('text/plain') is not executable, and strict MIME type checking is enabled."
+  ]
+}

@@ -36,7 +36,13 @@ describe("persisted Tune-target propagation across saved-deal surfaces", () => {
       /normalizeMaoTarget\(\s*row\.result_snapshot\?\.maxOfferTarget\s*\)/
     );
     expect(page).toContain("maxOfferBasisLabel: basisLabelById.get(deal.id) ?? null");
-    expect(table).toContain("Criteria: {deal.maxOfferBasisLabel}");
+    // Re-anchored: your-deals-table.tsx — both layouts hand the exact
+    // criteria to the shared ⓘ note (offer-criteria-note.tsx), which renders
+    // "Criteria: {basisLabel}"; the phone row's <details> copy is gone.
+    expect(table).toContain("basisLabel={deal.maxOfferBasisLabel}");
+    expect(
+      read("../../components/investcalc/offer-criteria-note.tsx"),
+    ).toContain("Criteria: {basisLabel");
   });
 
   it("gates Compare MAO and recomputes it from the persisted target", () => {

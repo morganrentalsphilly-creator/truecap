@@ -290,10 +290,15 @@ describe("My Deals methodology truth wiring", () => {
     // so its trigger must honor the repo's 44px touch-target contract —
     // size-11 hit area, negative margin keeps the 24px layout footprint.
     expect(noteSource).toContain("-m-2.5 inline-flex size-11");
-    // The dashboard-home MOBILE card keeps its tap-sized disclosure.
-    expect(dashboardTableSource).toContain("<details");
-    expect(dashboardTableSource).toContain(
-      "View exact Offer Ceiling criteria",
-    );
+    // Re-anchored: your-deals-table.tsx — the dashboard home's phone row
+    // opens the same ⓘ note as its desktop row instead of a per-row <details>
+    // line; the note's trigger is the 44px target pinned above, so the exact
+    // criteria stay one tap away at every width.
+    expect(
+      dashboardTableSource.match(
+        /<OfferCriteriaNote\s+basisLabel=\{deal\.maxOfferBasisLabel\}/g,
+      )?.length,
+    ).toBe(2);
+    expect(dashboardTableSource).not.toContain("<details");
   });
 });

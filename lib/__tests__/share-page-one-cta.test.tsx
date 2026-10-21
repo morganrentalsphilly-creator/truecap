@@ -375,7 +375,14 @@ describe("the agent's leads card on the dashboard", () => {
     const slot = home.indexOf("{leadsSlot}");
     expect(slot).toBeGreaterThan(-1);
     expect(home.indexOf("{leadsSlot}", slot + 1)).toBe(-1);
-    expect(home.indexOf('aria-label="Decision center"')).toBeGreaterThan(slot);
+    // Re-anchored: DashboardHome.tsx — the Decision center is built once as
+    // `decisionCenterSection` before the JSX (its markup now precedes
+    // <main>), so the deal sections are anchored on where they MOUNT: the
+    // kill-switch layout's Decision center and the focused home's list.
+    expect(
+      home.indexOf("{!focusedDashboard ? decisionCenterSection : null}"),
+    ).toBeGreaterThan(slot);
+    expect(home.indexOf("<YourDealsTable")).toBeGreaterThan(slot);
     expect(home.indexOf("<main")).toBeLessThan(slot);
   });
 

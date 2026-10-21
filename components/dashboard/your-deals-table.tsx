@@ -1,23 +1,22 @@
 "use client";
 
 /**
- * "Your deals" — ONE sortable table that replaces six dashboard modules
+ * "Your deals" — the list the dashboard home opens on: one row per active
+ * saved deal with its screening result, Deal score, Offer Ceiling, price and
+ * the gap between the last two as a signed figure (benchmarks P9: density by
+ * sign, rows on soft lines, no boxes). It replaced six dashboard modules
  * (Portfolio Overview, Pipeline, Top Performers, the Deal Comparison bar
- * chart, Portfolio Signals, and Risk vs Return).
+ * chart, Portfolio Signals, and Risk vs Return) in Aug 2026, and since the
+ * 2026-10 audit (Q1) it leads the page instead of sitting under tiles.
  *
- * The point of the screen: this is the first surface in the dashboard's
- * history to show an Offer Ceiling per deal, and the gap between it and the
- * asking price. A portfolio dashboard for an acquisition decision system
- * had no column for the number that answers it.
- *
- * PRESENTATION ONLY. maxOffer arrives already solved from
- * app/dashboard/page.tsx (lib/deal-offer-line — the same path My Deals
- * uses); nothing here computes a price.
+ * PRESENTATION ONLY. maxOffer and offerGap arrive already solved from
+ * app/dashboard/page.tsx (lib/deal-offer-line, the same path My Deals uses,
+ * and offerCeilingGap); nothing here computes a price or a gap.
  */
 
 import { Fragment, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowUpDown, ArrowUpRight } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DashboardDeal } from "@/lib/dashboard-deal-mapping";
 import { sortDealsWithinMethodologyCohorts } from "@/lib/dashboard-deal-mapping";
@@ -25,17 +24,76 @@ import { Verdict } from "@/components/investcalc/verdict";
 import { OfferCriteriaNote } from "@/components/investcalc/offer-criteria-note";
 
 // No timestamp exists on DashboardDeal, so there is no "recently updated"
-// sort to offer. Default to the gap — the column the table exists for.
+// sort to offer. Default to the gap — the column the list exists for.
 type SortKey = "gap" | "maxOffer" | "score" | "address";
 
 const money = (n: number | null | undefined) =>
   n == null ? "—" : `$${Math.round(n).toLocaleString("en-US")}`;
 
-/** Gap = asking − Offer Ceiling. Positive means asking is ABOVE what works. */
-function gapOf(deal: DashboardDeal): number | null {
-  const asking = deal.purchasePrice ?? null;
-  if (asking == null || deal.maxOffer == null) return null;
-  return asking - deal.maxOffer;
+/**
+ * The gap as a signed figure: "+$12,400" when the price is above the
+ * ceiling, "−$8,000" (a true minus sign) when it is below, "$0" at it.
+ * Green or red by the Sign rule (DESIGN.md "Color"): a price at or under the
+ * ceiling passes the deal's targets, one above it misses them. The sign
+ * carries the direction without colour; screen readers hear it in words.
+ */
+function GapFigure({
+  gap,
+  className,
+}: {
+  gap: number | null | undefined;
+  className?: string;
+}) {
+  if (gap == null) {
+    return (
+      <span className={cn("font-figure text-muted-foreground", className)}>
+        <span aria-hidden>—</span>
+        <span className="sr-only">No Offer Ceiling, so no gap</span>
+      </span>
+    );
+  }
+  // Sign and colour follow the figure as shown, so a gap of $0.40 never
+  // reads "+$0" in red.
+  const shown = Math.round(gap);
+  const amount = money(Math.abs(shown));
+  return (
+    <span
+      className={cn(
+        "whitespace-nowrap font-figure font-semibold",
+        shown > 0 ? "text-negative" : "text-positive",
+        className,
+      )}
+    >
+      <span aria-hidden>
+        {shown > 0 ? "+" : shown < 0 ? "−" : ""}
+        {amount}
+      </span>
+      <span className="sr-only">
+        {shown > 0
+          ? `${amount} above the Offer Ceiling`
+          : shown < 0
+            ? `${amount} below the Offer Ceiling`
+            : "Equal to the Offer Ceiling"}
+      </span>
+    </span>
+  );
+}
+
+/** The model-version tag beside an address: metadata, so a 4px Geist Mono tag. */
+function MethodologyTag({ deal }: { deal: DashboardDeal }) {
+  if (!deal.methodologyLabel) return null;
+  return (
+    <span
+      className="inline-flex rounded-sm border border-border px-1.5 py-0.5 font-mono text-2xs text-muted-foreground"
+      title={
+        deal.methodologyIsCurrent === false
+          ? `${deal.methodologyLabel}. Re-underwrite before comparing with the current model.`
+          : deal.methodologyLabel
+      }
+    >
+      {deal.methodologyLabel}
+    </span>
+  );
 }
 
 /**
@@ -68,12 +126,12 @@ function SortableTh({
     <th
       scope="col"
       aria-sort={active ? (desc ? "descending" : "ascending") : "none"}
-      className={cn("px-3 py-2 text-left", className)}
+      className={cn("px-3 py-1 text-left", className)}
     >
       <button
         type="button"
         onClick={() => onToggle(sortKey)}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-md text-xs font-medium whitespace-nowrap text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
       >
         {label}
         <span className="sr-only">
@@ -87,7 +145,9 @@ function SortableTh({
 
 export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
   const [sortKey, setSortKey] = useState<SortKey>("gap");
-  const [desc, setDesc] = useState(true);
+  // The gap opens ascending: the most room under the ceiling first, so the
+  // deals that work at their price lead and the misses follow.
+  const [desc, setDesc] = useState(false);
 
   const sorted = useMemo(() => {
     const rows = [...deals];
@@ -95,7 +155,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
       const valueFor = (deal: DashboardDeal) => {
         if (sortKey === "score") return deal.score;
         if (sortKey === "maxOffer") return deal.maxOffer ?? null;
-        return gapOf(deal);
+        return deal.offerGap ?? null;
       };
       return sortDealsWithinMethodologyCohorts(
         rows,
@@ -132,7 +192,7 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
     if (key === sortKey) setDesc((d) => !d);
     else {
       setSortKey(key);
-      setDesc(true);
+      setDesc(key === "gap" ? false : true);
     }
   };
 
@@ -145,41 +205,55 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
         ? "High to low"
         : "Low to high";
 
+  // A cohort header separates model versions; a book on one version has
+  // nothing to separate, so it gets none (the same reasoning that dropped
+  // the per-row "Recorded" badge, lib/dashboard-deal-mapping.ts).
+  const startsCohortAt = (index: number) =>
+    methodologySensitiveSort &&
+    hasMixedMethodologies &&
+    (index === 0 ||
+      sorted[index - 1]?.methodologyComparisonKey !==
+        sorted[index]?.methodologyComparisonKey);
+
   return (
-    <section aria-labelledby="your-deals-heading" className="rounded-lg border border-border bg-card shadow-sm">
-      <div className="flex items-baseline justify-between gap-3 px-4 py-3 sm:px-5">
-        <h2 id="your-deals-heading" className="text-base font-semibold text-foreground">
+    <section aria-labelledby="your-deals-heading">
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 id="your-deals-heading" className="text-xl font-semibold text-foreground">
           Your deals
         </h2>
         <Link
           href="/dashboard/saved-analyses"
-          className="inline-flex min-h-11 items-center rounded-md px-1 text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className="inline-flex min-h-11 items-center rounded-md px-1 text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           View all
         </Link>
       </div>
 
       {methodologySensitiveSort && hasMixedMethodologies ? (
-        <p className="border-t border-border bg-muted/30 px-4 py-2 text-xs text-muted-foreground sm:px-5">
+        <p className="mb-2 text-xs text-muted-foreground">
           Current and recorded model versions are grouped, then sorted only
           within their own version.
         </p>
       ) : null}
 
-      {/* Phones and tablets get real deal cards rather than a clipped six-column
-          table. The same `sorted` array powers both layouts, so changing the
-          compact sort controls preserves the exact desktop ordering contract. */}
-      <div data-deal-layout="cards" className="border-t border-border lg:hidden">
-        <div className="flex flex-wrap items-end gap-2 border-b border-border bg-muted/20 px-4 py-3 sm:px-5">
-          <label className="min-w-0 flex-1 text-xs font-bold text-muted-foreground">
+      {/* Below 1280px: one row per deal, the address and the signed gap on
+          the first line, the screening result and the figures under it. At
+          1024px beside the rail the content is ~775px wide, too narrow for
+          six columns without clipping the gap, so the table waits for xl.
+          The same `sorted` array powers both layouts, so the compact sort
+          controls keep the desktop table's exact ordering contract. */}
+      <div data-deal-layout="list" className="xl:hidden">
+        <div className="flex items-end gap-2 pb-3">
+          <label className="min-w-0 flex-1 text-xs font-medium text-muted-foreground">
             Sort deals
             <select
               value={sortKey}
               onChange={(event) => {
-                setSortKey(event.target.value as SortKey);
-                setDesc(true);
+                const next = event.target.value as SortKey;
+                setSortKey(next);
+                setDesc(next === "gap" ? false : true);
               }}
-              className="mt-1 min-h-11 w-full rounded-lg border border-input bg-background px-3 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="mt-1 min-h-11 w-full rounded-lg border border-input bg-field px-3 text-base font-semibold text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
             >
               <option value="gap">Gap to ceiling</option>
               <option value="maxOffer">Offer Ceiling</option>
@@ -191,171 +265,124 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
             type="button"
             onClick={() => setDesc((current) => !current)}
             aria-label={`Sort ${mobileDirectionLabel}. Activate to reverse the order.`}
-            className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-input bg-background px-3 text-xs font-bold text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-input bg-field px-3 text-xs font-semibold text-foreground transition-[background-color] duration-150 hover:bg-band focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             <ArrowUpDown aria-hidden className="size-4" />
             <span>{mobileDirectionLabel}</span>
           </button>
         </div>
 
-        <div className="space-y-3 p-3 sm:p-4">
-          {sorted.map((deal, dealIndex) => {
-            const gap = gapOf(deal);
-            const dealHeadingId = `dashboard-deal-${deal.id}`;
-            const startsMethodologyCohort =
-              methodologySensitiveSort &&
-              (dealIndex === 0 ||
-                sorted[dealIndex - 1]?.methodologyComparisonKey !==
-                  deal.methodologyComparisonKey);
-            return (
-              <Fragment key={deal.id}>
-              {startsMethodologyCohort ? (
-                <div className="rounded-md border border-border bg-muted/40 px-3 py-2">
-                  <p className="text-xs font-bold text-foreground">
+        <ul className="border-t border-foreground">
+          {sorted.map((deal, dealIndex) => (
+            <Fragment key={deal.id}>
+              {startsCohortAt(dealIndex) ? (
+                <li className="border-b border-rule-soft bg-band px-3 py-2">
+                  <p className="text-xs font-semibold text-foreground">
                     {deal.methodologyGroupLabel ?? "Current underwriting"}
                   </p>
                   <p className="text-2xs text-muted-foreground">
                     Sorted only within this model version.
                   </p>
-                </div>
+                </li>
               ) : null}
-              <article
-                aria-labelledby={dealHeadingId}
-                className="rounded-md border border-border bg-background p-4 shadow-sm"
-              >
-                <Link
-                  id={dealHeadingId}
-                  href={`/dashboard/saved-analyses/${deal.id}`}
-                  className="flex min-h-11 min-w-0 items-center justify-between gap-3 rounded-md font-bold text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                  title={deal.address ?? undefined}
-                >
-                  <span className="min-w-0 break-words">{deal.address ?? "Untitled deal"}</span>
-                  <ArrowUpRight aria-hidden className="size-4 shrink-0" />
-                </Link>
-                {deal.methodologyLabel ? (
-                  <span
-                    className="mt-1 inline-flex rounded-full border border-border px-2 py-0.5 text-xs font-semibold text-muted-foreground"
-                    title={
-                      deal.methodologyIsCurrent === false
-                        ? `${deal.methodologyLabel}. Re-underwrite before comparing with the current model.`
-                        : deal.methodologyLabel
-                    }
+              <li className="border-b border-rule-soft pb-2.5">
+                <div className="flex items-start justify-between gap-3">
+                  <Link
+                    id={`dashboard-deal-${deal.id}`}
+                    href={`/dashboard/saved-analyses/${deal.id}`}
+                    className="flex min-h-11 min-w-0 items-center justify-between gap-3 rounded-md font-semibold text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                    title={deal.address ?? undefined}
                   >
-                    {deal.methodologyLabel}
-                  </span>
-                ) : null}
-
-                <dl className="mt-3 grid grid-cols-2 gap-3">
-                  <div className="rounded-lg bg-muted/30 p-3">
-                    <dt className="text-xs font-medium text-muted-foreground">
-                      Offer Ceiling
-                    </dt>
-                    <dd className="mt-1 font-figure text-lg font-semibold tabular-nums text-foreground">
-                      {money(deal.maxOffer)}
-                    </dd>
-                  </div>
-                  <div className="rounded-lg bg-muted/30 p-3">
-                    <dt className="text-xs font-medium text-muted-foreground">
-                      Price
-                    </dt>
-                    <dd className="mt-1 font-figure text-lg font-bold tabular-nums text-foreground">
-                      {money(deal.purchasePrice)}
-                    </dd>
-                  </div>
-                  {deal.maxOffer != null && deal.maxOfferBasisLabel ? (
-                    <div className="col-span-2">
-                      <details className="text-xs text-muted-foreground">
-                        <summary className="inline-flex min-h-11 cursor-pointer items-center font-semibold text-primary underline-offset-2 hover:underline">
-                          View exact Offer Ceiling criteria
-                        </summary>
-                        <p className="mt-1 break-words leading-relaxed">
-                          Criteria: {deal.maxOfferBasisLabel}
-                        </p>
-                      </details>
-                    </div>
-                  ) : null}
-                  <div className="rounded-lg border border-border p-3">
-                    <dt className="text-xs font-medium text-muted-foreground">
+                    <span className="min-w-0 break-words">{deal.address ?? "Untitled deal"}</span>
+                  </Link>
+                  <span className="flex min-h-11 shrink-0 flex-col items-end justify-center">
+                    <GapFigure gap={deal.offerGap} />
+                    <span aria-hidden className="text-2xs text-muted-foreground">
                       Gap
-                    </dt>
-                    <dd
-                      className={cn(
-                        "mt-1 font-figure text-sm font-bold tabular-nums",
-                        gap == null
-                          ? "text-muted-foreground"
-                          : gap > 0
-                            ? "text-[var(--metric-negative)]"
-                            : "text-[var(--metric-positive)]"
-                      )}
-                    >
-                      {gap == null
-                        ? "—"
-                        : gap > 0
-                          ? `${money(Math.abs(gap))} over`
-                          : gap < 0
-                            ? `${money(Math.abs(gap))} under`
-                            : "At ceiling"}
-                    </dd>
+                    </span>
+                  </span>
+                </div>
+                {deal.methodologyLabel ? (
+                  <div className="mb-1.5">
+                    <MethodologyTag deal={deal} />
                   </div>
-                  <div className="rounded-lg border border-border p-3">
-                    <dt className="text-xs font-medium text-muted-foreground">
-                      Deal score
-                    </dt>
-                    <dd className="mt-1 font-figure text-sm font-bold tabular-nums text-foreground">
-                      {deal.score ?? "—"}
-                    </dd>
-                  </div>
-                </dl>
-
-                <div className="mt-3 flex min-h-11 items-center border-t border-border pt-3">
+                ) : null}
+                {/* mt-1: the ⓘ's 44px hit area reaches 10px above its line;
+                    the gap keeps it off the address link's text. */}
+                <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
                   {deal.recommendation ? (
                     <Verdict recommendation={deal.recommendation} variant="compact" />
                   ) : (
-                    <span className="text-xs text-muted-foreground">Not screened</span>
+                    <span>Not screened</span>
                   )}
+                  {/* Plain label-and-figure runs, so the chip, the ceiling,
+                      the price and the score wrap as one line of text. */}
+                  <span className="inline-flex items-center gap-1.5">
+                    Offer Ceiling
+                    <span className="inline-flex items-center gap-1 font-figure text-sm font-semibold text-foreground">
+                      {money(deal.maxOffer)}
+                      {deal.maxOffer != null && deal.maxOfferBasisLabel ? (
+                        <OfferCriteriaNote basisLabel={deal.maxOfferBasisLabel} />
+                      ) : null}
+                    </span>
+                  </span>
+                  <span className="inline-flex items-baseline gap-1.5">
+                    Price
+                    <span className="font-figure text-sm text-foreground">
+                      {money(deal.purchasePrice)}
+                    </span>
+                  </span>
+                  <span className="inline-flex items-baseline gap-1.5">
+                    Deal score
+                    <span className="font-figure text-sm text-foreground">
+                      {deal.score ?? "—"}
+                    </span>
+                  </span>
                 </div>
-              </article>
-              </Fragment>
-            );
-          })}
-        </div>
+              </li>
+            </Fragment>
+          ))}
+        </ul>
       </div>
 
-      {/* Desktop keeps the dense sortable comparison table. At narrower
-          breakpoints the card renderer above is the only visible layout. */}
-      <div data-deal-layout="table" className="hidden overflow-x-auto border-t border-border lg:block" tabIndex={0}>
-        <table className="w-full min-w-[720px] text-sm">
+      {/* From 1280px the dense sortable table, on the same lines. Fixed
+          layout: the five figure columns keep their widths and the address
+          takes the rest, truncating, so no width clips the gap. */}
+      <div data-deal-layout="table" className="hidden overflow-x-auto border-t border-foreground xl:block" tabIndex={0}>
+        <table className="w-full table-fixed text-sm">
           <caption className="sr-only">
-            Your saved deals with Offer Ceiling, asking price, the gap between them, and a Deal score
+            Your saved deals with the screening result, Deal score, Offer
+            Ceiling, price, and the gap between the price and the Offer Ceiling
           </caption>
-          <thead className="bg-muted/30">
-            <tr>
+          <colgroup>
+            <col />
+            <col className="w-40" />
+            <col className="w-26" />
+            <col className="w-34" />
+            <col className="w-26" />
+            <col className="w-28" />
+          </colgroup>
+          <thead>
+            <tr className="border-b border-border">
               <SortableTh label="Property" sortKey="address" activeKey={sortKey} desc={desc} onToggle={toggle} />
-              <SortableTh label="Offer Ceiling" sortKey="maxOffer" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
-              <th scope="col" className="px-3 py-2 text-right text-xs font-medium text-muted-foreground">
-                Price
-              </th>
-              <SortableTh label="Gap" sortKey="gap" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
-              <th scope="col" className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">
+              <th scope="col" className="whitespace-nowrap px-3 py-1 text-left text-xs font-medium text-muted-foreground">
                 Screening result
               </th>
               <SortableTh label="Deal score" sortKey="score" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
+              <SortableTh label="Offer Ceiling" sortKey="maxOffer" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
+              <th scope="col" className="whitespace-nowrap px-3 py-1 text-right text-xs font-medium text-muted-foreground">
+                Price
+              </th>
+              <SortableTh label="Gap" sortKey="gap" activeKey={sortKey} desc={desc} onToggle={toggle} className="text-right" />
             </tr>
           </thead>
           <tbody>
-            {sorted.map((deal, i) => {
-              const gap = gapOf(deal);
-              const startsMethodologyCohort =
-                methodologySensitiveSort &&
-                (i === 0 ||
-                  sorted[i - 1]?.methodologyComparisonKey !==
-                    deal.methodologyComparisonKey);
-              return (
-                <Fragment key={deal.id}>
-                {startsMethodologyCohort ? (
-                  <tr className="border-y border-border bg-muted/40">
+            {sorted.map((deal, i) => (
+              <Fragment key={deal.id}>
+                {startsCohortAt(i) ? (
+                  <tr className="border-b border-rule-soft bg-band">
                     <td colSpan={6} className="px-3 py-2 text-left">
-                      <span className="text-xs font-bold text-foreground">
+                      <span className="text-xs font-semibold text-foreground">
                         {deal.methodologyGroupLabel ?? "Current underwriting"}
                       </span>
                       <span className="ml-2 text-2xs text-muted-foreground">
@@ -364,30 +391,33 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                     </td>
                   </tr>
                 ) : null}
-                <tr className={`transition-colors hover:bg-muted/40 ${i % 2 === 0 ? "bg-card" : "bg-muted/20"}`}>
-                  <td className="max-w-[240px] px-3 py-2.5">
+                <tr className="border-b border-rule-soft transition-[background-color] duration-150 hover:bg-band">
+                  <td className="px-3 py-1">
                     <Link
                       href={`/dashboard/saved-analyses/${deal.id}`}
-                      className="flex min-h-11 items-center truncate rounded-md font-semibold text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                      className="flex min-h-11 min-w-0 items-center rounded-md font-semibold text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                       title={deal.address ?? undefined}
                     >
-                      {deal.address ?? "Untitled deal"}
+                      <span className="truncate">{deal.address ?? "Untitled deal"}</span>
                     </Link>
                     {deal.methodologyLabel ? (
-                      <span
-                        className="mt-0.5 inline-flex rounded-full border border-border px-2 py-0.5 text-xs font-semibold text-muted-foreground"
-                        title={
-                          deal.methodologyIsCurrent === false
-                            ? `${deal.methodologyLabel}. Re-underwrite before comparing with the current model.`
-                            : deal.methodologyLabel
-                        }
-                      >
-                        {deal.methodologyLabel}
-                      </span>
+                      <div className="pb-2">
+                        <MethodologyTag deal={deal} />
+                      </div>
                     ) : null}
                   </td>
-                  <td className="px-3 py-2.5 text-right text-foreground">
-                    <div className="flex items-center justify-end gap-1 whitespace-nowrap font-figure font-bold tabular-nums">
+                  <td className="whitespace-nowrap px-3 py-1">
+                    {deal.recommendation ? (
+                      <Verdict recommendation={deal.recommendation} variant="compact" />
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Not screened</span>
+                    )}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-1 text-right font-figure text-muted-foreground">
+                    {deal.score ?? "—"}
+                  </td>
+                  <td className="px-3 py-1 text-right text-foreground">
+                    <div className="flex items-center justify-end gap-1 whitespace-nowrap font-figure font-semibold">
                       {/* ⓘ BEFORE the number: digits stay flush on the
                         column's right edge, so rows without a ceiling ("—")
                         and rows with one share a single right edge. */}
@@ -399,64 +429,27 @@ export function YourDealsTable({ deals }: { deals: DashboardDeal[] }) {
                       {money(deal.maxOffer)}
                     </div>
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-right font-figure tabular-nums text-muted-foreground">
+                  <td className="whitespace-nowrap px-3 py-1 text-right font-figure text-muted-foreground">
                     {money(deal.purchasePrice)}
                   </td>
-                  <td
-                    className={cn(
-                      "whitespace-nowrap px-3 py-2.5 text-right font-figure font-semibold tabular-nums",
-                      gap == null
-                        ? "text-muted-foreground"
-                        : gap > 0
-                          ? "text-[var(--metric-negative)]"
-                          : "text-[var(--metric-positive)]"
-                    )}
-                  >
-                    {/* Direction was carried by colour plus a bare "+".
-                        The word makes it legible without hue. */}
-                    {gap == null ? (
-                      "—"
-                    ) : (
-                      <>
-                        {money(Math.abs(gap))}
-                        <span className="ml-1 text-xs font-semibold">
-                          {gap > 0 ? "over" : gap < 0 ? "under" : "at"}
-                        </span>
-                        <span className="sr-only">
-                          {gap > 0
-                            ? " above the Offer Ceiling"
-                            : gap < 0
-                              ? " below the Offer Ceiling"
-                              : " equal to the Offer Ceiling"}
-                        </span>
-                      </>
-                    )}
-                  </td>
-                  <td className="px-3 py-2.5">
-                    {deal.recommendation ? (
-                      <Verdict recommendation={deal.recommendation} variant="compact" />
-                    ) : (
-                      <span className="text-xs text-muted-foreground">Not screened</span>
-                    )}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2.5 text-right font-figure tabular-nums text-foreground">
-                    {deal.score ?? "—"}
+                  <td className="px-3 py-1 text-right">
+                    <GapFigure gap={deal.offerGap} />
                   </td>
                 </tr>
-                </Fragment>
-              );
-            })}
+              </Fragment>
+            ))}
           </tbody>
         </table>
       </div>
-      {/* Exact per-deal criteria render beneath each ceiling; the footer can
-          therefore explain the gap without pretending a mixed table shares
-          one target basis. */}
-      <p className="border-t border-border px-4 py-2 text-2xs text-muted-foreground sm:px-5">
-        Gap is the asking price minus the Offer Ceiling, the highest price that
-        still meets the targets shown for that deal. A positive gap means the
-        asking price is above your ceiling. Deal score is a heuristic summary of
-        the modeled numbers, 0–100.
+      {/* Exact per-deal criteria open from the ⓘ beside each ceiling; the
+          note can therefore explain the gap without pretending a mixed list
+          shares one target basis. "Price", not "asking": this screen cannot
+          tell an asking price from an automated estimate. */}
+      <p className="mt-2 max-w-prose text-2xs leading-relaxed text-muted-foreground">
+        Gap is the price minus the Offer Ceiling, the highest price that still
+        meets the targets shown for that deal: plus means the price is above
+        the ceiling, minus that it is under. Deal score is a heuristic summary
+        of the modeled numbers, 0–100.
       </p>
     </section>
   );
