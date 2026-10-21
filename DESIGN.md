@@ -616,6 +616,35 @@ rows with a source tag and a "Mark verified" control; the Deal score is a
 figure on a rule; the sign-up prompt sits below the numbers it asks the
 visitor to trust; the two disclosures carry a hint of their contents.
 
+### The home (2026-10-21, audit Q1)
+
+The signed-in home opens on the deal list (founder's answer to the
+adversarial audit's Q1; benchmarks P9, density by sign). Only the notices
+that render when something waits on the user (a lead, a deadline, a rate
+change) sit above it.
+
+- **The list** is on the sheet, not in a card: an H4 "Your deals", one 1px
+  graphite line, then one row per deal on soft lines with the band on hover.
+  From 1280px a sortable table at fixed column widths (property, screening
+  result, Deal score, Offer Ceiling, price, gap; the address truncates);
+  below it, where the rail leaves about 775px at 1024, each row carries the
+  address and the gap on its first line and the verdict, the ceiling, the
+  price and the score under it. The exact criteria open from the ⓘ beside
+  every ceiling.
+- **The gap is signed**: the price minus the Offer Ceiling, Compare's
+  convention, "+$12,400" above the ceiling and "−$8,000" (a true minus) under
+  it, in the figure face; green when the price passes (at or under the
+  ceiling), red when it misses, by the Sign rule. It is set beside the solved
+  ceiling on the server (`offerCeilingGap`), never in the component. The list
+  opens with the most room first. The price column says "Price", not
+  "Asking": the home cannot tell an asking price from an estimate.
+- **Aggregates sit under the list, quieter**: the Decision center as ruled
+  rows (a label, the deal, its evidence, one action; no tiles, icons or
+  washes), shown from two active deals, and the screening record as two ruled
+  figures; side by side from 1280px. No KPI tile renders above the list.
+- The kill-switch layout (`focused_dashboard` off) keeps its stat cards,
+  with sentence-case labels.
+
 ## Token strategy
 
 - One stylesheet, `app/globals.css`: `:root` holds the palette, the radius
