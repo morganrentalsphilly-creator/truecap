@@ -15,8 +15,9 @@
  *      'denied' BEFORE gtag.js loads. So gtag boots in a privacy-safe
  *      mode that doesn't set tracking cookies.
  *   2. This banner shows on first visit (no decision stored).
- *   3. User picks Accept (all consent granted) or Reject (consent
- *      stays denied — gtag still runs but only sends anonymous pings).
+ *   3. User picks Accept (storage and measurement consent granted; ad
+ *      personalization stays denied) or Reject (consent stays denied and
+ *      the Google tags are never loaded).
  *   4. We call gtag('consent', 'update', ...) to flip the consent state
  *      live, and persist the choice to localStorage so subsequent visits
  *      skip the banner.
@@ -41,9 +42,18 @@ import { notifyCookieConsentChanged } from "@/lib/use-cookie-banner";
  * (embedded iframe on a third-party site — the partner owns their
  * own consent UX) or visually disruptive.
  */
-const HIDE_ON_PATHS = ["/embed"];
+export const HIDE_ON_PATHS = ["/embed"];
 
 const STORAGE_KEY = "truecap_cookie_consent_v1";
+/** The same key, for the footer's "Cookie choices" control. */
+export const COOKIE_CONSENT_STORAGE_KEY = STORAGE_KEY;
+
+/**
+ * Dispatched by the footer's "Cookie choices" control
+ * (components/marketing/cookie-choices-button.tsx) after it has cleared the
+ * stored decision. The banner listens for it and asks again.
+ */
+export const COOKIE_CHOICE_RESET_EVENT = "truecap:cookie-choice-reset";
 
 type ConsentValue = "granted" | "denied";
 
@@ -69,8 +79,13 @@ function writeStoredConsent(value: ConsentValue): void {
 /**
  * Push the consent update to gtag. Safe no-op if gtag hasn't loaded
  * (dev mode, ad blockers).
+ *
+ * Accept means measurement only: ad_personalization is sent as "denied"
+ * whatever the choice, so accepting never opts a visitor into remarketing
+ * audiences or personalized ads, which neither the banner nor /privacy names.
+ * components/analytics/google-measurement.tsx sends the same values.
  */
-function pushGtagConsent(value: ConsentValue): void {
+export function pushGtagConsent(value: ConsentValue): void {
   try {
     if (typeof window === "undefined") return;
     const gtag = window.gtag;
@@ -79,7 +94,7 @@ function pushGtagConsent(value: ConsentValue): void {
       ad_storage: value,
       analytics_storage: value,
       ad_user_data: value,
-      ad_personalization: value,
+      ad_personalization: "denied",
     });
   } catch {
     /* never let analytics break the UI */
@@ -99,6 +114,17 @@ export function CookieConsentBanner() {
 
   useEffect(() => {
     setDecision(readStoredConsent() ?? "pending");
+  }, []);
+
+  // The footer's "Cookie choices" control clears the stored decision and
+  // dispatches this event; show the banner again so the visitor can choose.
+  // A separate event from COOKIE_CONSENT_EVENT on purpose: re-reading storage
+  // on that one would reopen the banner right after a choice in a browser
+  // whose storage is blocked.
+  useEffect(() => {
+    const reopen = () => setDecision("pending");
+    window.addEventListener(COOKIE_CHOICE_RESET_EVENT, reopen);
+    return () => window.removeEventListener(COOKIE_CHOICE_RESET_EVENT, reopen);
   }, []);
 
   // Focus the banner the moment it becomes visible. It's a role="dialog"

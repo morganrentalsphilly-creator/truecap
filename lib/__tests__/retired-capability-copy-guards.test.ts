@@ -169,10 +169,28 @@ describe("retired capability copy and control boundaries", () => {
       "Agent Pro checkout is not configured on this deployment.",
     );
 
-    const terms = source("app/terms/page.tsx");
-    expect(terms).not.toContain("and Agent Pro subscriptions");
-    expect(terms).not.toContain("Agent Pro provides");
+    // Agent Pro is sold again (lib/stripe/plan-prices.ts isAgentProConfigured,
+    // the /pricing card, /for-agents), and sign-up binds every agent to these
+    // Terms. Until 2026-10 this test required the Terms NOT to name Agent Pro,
+    // which left section 5 saying no public page promised a client workflow.
+    // It now pins the wording approved on 2026-08-23 (commit 0d7b90f) and the
+    // absence of that false sentence. Exit modeling is still not offered
+    // (lib/entitlements-catalog.ts exit_scenarios shipped: false), and neither
+    // is the client portal (agent_portal shipped: false).
+    const terms = source("app/terms/page.tsx").replace(/\s+/g, " ");
+    expect(terms).toContain("paid TrueCap Pro and Agent Pro subscriptions");
+    expect(terms).toContain("TrueCap Pro and Agent Pro plans are billed in advance");
+    expect(terms).toContain("5. Agent Pro and client information");
+    expect(terms).toContain(
+      "Agent Pro provides client-workspace and co-branded reporting tools.",
+    );
+    expect(terms).toContain(
+      "Co-branding does not transfer ownership of TrueCap or authorize a white-label, resale, or sublicensing arrangement.",
+    );
+    expect(terms).not.toMatch(/promises that such a workflow is available/);
+    expect(terms).not.toMatch(/No current public page/);
     expect(terms).not.toContain("exit modeling");
+    expect(terms).not.toMatch(/client portal/i);
   });
 
   it("rejects the audited universal tax and return promises", () => {

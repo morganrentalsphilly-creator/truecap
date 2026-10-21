@@ -56,7 +56,15 @@ describe("performance contract", () => {
     expect(update).toContain("analytics_storage: 'granted'");
     expect(update).toContain("ad_storage: 'granted'");
     expect(update).toContain("ad_user_data: 'granted'");
-    expect(update).toContain("ad_personalization: 'granted'");
+    // Accept is measurement only (audit row P1-55, option a): the banner asks
+    // for "analytics + paid-ad measurement" and /privacy names no remarketing,
+    // so ad personalization is never granted. Until 2026-10 this line pinned
+    // ad_personalization: 'granted'.
+    expect(update).toContain("ad_personalization: 'denied'");
+    expect(google).not.toContain("ad_personalization: 'granted'");
+    const banner = read("components/marketing/cookie-consent-banner.tsx");
+    expect(banner).toContain('ad_personalization: "denied"');
+    expect(banner).not.toContain("ad_personalization: value");
   });
 
   it("targets modern browsers so the legacy polyfills chunk is not shipped", () => {

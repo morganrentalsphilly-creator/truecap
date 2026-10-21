@@ -71,8 +71,10 @@ describe("global interaction accessibility baseline", () => {
   });
 
   it("keeps shared footer links at least 44px and the retired pricing banner inert", () => {
-    expect(siteFooter.match(/min-h-11/g)).toHaveLength(6);
-    expect(siteFooter.match(/min-w-11/g)).toHaveLength(6);
+    // Seven: the six link slots plus the "Cookie choices" button added to
+    // the legal row in 2026-10 (it was 6 before that control existed).
+    expect(siteFooter.match(/min-h-11/g)).toHaveLength(7);
+    expect(siteFooter.match(/min-w-11/g)).toHaveLength(7);
     expect(foundingPricingBanner).toContain("return null");
     expect(foundingPricingBanner).not.toContain("<button");
     expect(foundingPricingBanner).not.toContain("<a");
