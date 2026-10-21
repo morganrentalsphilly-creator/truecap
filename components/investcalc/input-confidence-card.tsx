@@ -90,13 +90,13 @@ const CHECK_INSTRUCTION: Record<InputConfidenceFieldKey, string> = {
 const SOURCE_TAG_CLASS =
   "inline-flex max-w-full items-center rounded-sm border border-border px-1.5 py-0.5 font-mono text-2xs leading-tight text-muted-foreground [overflow-wrap:anywhere]";
 
+// A quiet row action, not a button in a box (audit A12): text on the row,
+// the band on hover, the site's 3px ring on focus, a 44px target.
 const VERIFY_TOGGLE_CLASS =
-  "inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-md border px-3 text-sm font-semibold transition-[color,background-color,border-color] duration-150 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-semibold transition-[color,background-color] duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-band disabled:pointer-events-none disabled:opacity-50";
 
 function verifyToggleTone(verified: boolean): string {
-  return verified
-    ? "border-positive/30 bg-positive-light text-positive"
-    : "border-input bg-card text-foreground hover:bg-band";
+  return verified ? "text-positive" : "text-primary";
 }
 
 function offerCheckLabel(
