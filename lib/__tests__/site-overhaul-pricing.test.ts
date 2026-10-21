@@ -60,10 +60,13 @@ describe("Phase 9 — pricing page", () => {
     // months, "billed annually (total)") is the shared CadenceToggle module,
     // which /pricing and the homepage both render through.
     const cadence = read("components/marketing/cadence-toggle.tsx");
+    // The note's arithmetic sits in cadence-pricing.ts, a plain module the
+    // homepage's server component may call (a "use client" export cannot be).
+    const pricing = read("components/marketing/cadence-pricing.ts");
     expect(toggle).toContain("PaidPlanPrice");
     expect(toggle).toContain("paidPriceNote");
     expect(cadence).toContain("annualMonthlyEquivalent");
-    expect(cadence).toContain("billed annually");
+    expect(pricing).toContain("billed annually");
   });
 
   it("carries one honest DealCheck comparison that links to /vs/dealcheck", () => {

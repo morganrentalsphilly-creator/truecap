@@ -24,7 +24,7 @@ import {
   type FeatureKey,
 } from "@/lib/entitlements-catalog";
 import { agentProPlanAnswers, freePlanAnswers, proPlanAnswers } from "@/components/marketing/plan-answers";
-import { parsePriceLabel } from "@/components/marketing/cadence-toggle";
+import { parsePriceLabel } from "@/components/marketing/cadence-pricing";
 import { ruleFitLabel } from "@/lib/decision-contract";
 // Section and plan-card links sit below the fold: they prefetch on hover or
 // focus, not on scroll (see the component's doc comment).
