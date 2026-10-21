@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   autofillPropertyIdentity,
   decideAutofillFieldWrite,
+  isRentAutofillable,
   isSameAutofillProperty,
   normalizeAutofillPropertyAddress,
 } from "@/lib/autofill-field-ownership";
@@ -154,5 +155,34 @@ describe("address-bound autofill provenance", () => {
         formattedAddress: "123 Main St, Philadelphia, PA",
       }),
     ).toBe(false);
+  });
+});
+
+// Audit A6 (2026-10-21): a typed $0 rent was overwritten with HUD's figure
+// within 3 s, because the rent fill read 0 as "empty". Whether the visitor
+// answered is a question for the field's dirty state, not its value.
+describe("isRentAutofillable", () => {
+  it.each([
+    ["undefined", undefined],
+    ["null", null],
+    ["an empty string", ""],
+    ["NaN (an untouched valueAsNumber input)", Number.NaN],
+  ])("fills an empty field: %s", (_, value) => {
+    expect(isRentAutofillable({ value, dirty: false })).toBe(true);
+    expect(isRentAutofillable({ value, dirty: true })).toBe(true);
+  });
+
+  it("keeps a typed 0: the visitor answered", () => {
+    expect(isRentAutofillable({ value: 0, dirty: true })).toBe(false);
+    expect(isRentAutofillable({ value: "0", dirty: true })).toBe(false);
+  });
+
+  it("still fills a 0 the visitor never touched (a reset's placeholder)", () => {
+    expect(isRentAutofillable({ value: 0, dirty: false })).toBe(true);
+  });
+
+  it("never fills over a typed rent", () => {
+    expect(isRentAutofillable({ value: 1_850, dirty: true })).toBe(false);
+    expect(isRentAutofillable({ value: 1_850, dirty: false })).toBe(false);
   });
 });
