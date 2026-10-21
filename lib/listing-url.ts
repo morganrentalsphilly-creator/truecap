@@ -201,7 +201,13 @@ export function parseListingUrl(raw: string): ParsedListing | null {
       const st = segs[0];
       const city = segs[1];
       const addrSlug = segs[hi - 1];
-      const address = `${deslug(addrSlug)} ${deslug(city)} ${st}`
+      // Redfin puts the ZIP at the end of the street slug: move it to the
+      // end, so the address reads street, city, state, ZIP (audit A25).
+      const streetWithZip = deslug(addrSlug);
+      const zipMatch = streetWithZip.match(/\s(\d{5})(?:-\d{4})?$/);
+      const street = zipMatch ? streetWithZip.slice(0, zipMatch.index).trim() : streetWithZip;
+      const state = US_STATES.has(st.toUpperCase()) ? st.toUpperCase() : st;
+      const address = `${street}, ${deslug(city)}, ${state}${zipMatch ? ` ${zipMatch[1]}` : ""}`
         .replace(/\s+/g, " ")
         .trim();
       if (/\d/.test(address)) {

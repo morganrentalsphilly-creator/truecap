@@ -26,6 +26,17 @@ describe("parseListingUrl", () => {
     expect(r!.address).toContain("CA");
   });
 
+  // Audit A25 (2026-10-21): the ZIP sat inside the street ("5919 Belmar Ter
+  // 19143 Philadelphia PA"); the address reads street, city, state, ZIP.
+  it("composes a Redfin address as street, city, state and ZIP", () => {
+    const r = parseListingUrl("https://www.redfin.com/PA/Philadelphia/5919-Belmar-Ter-19143/home/38912345");
+    expect(r!.address).toBe("5919 Belmar Ter, Philadelphia, PA 19143");
+    expect(r!.state).toBe("PA");
+    expect(r!.zip).toBe("19143");
+    const noZip = parseListingUrl("https://www.redfin.com/CA/San-Francisco/123-Main-St/home/178901234");
+    expect(noZip!.address).toBe("123 Main St, San Francisco, CA");
+  });
+
   it("parses a Realtor.com detail URL", () => {
     const r = parseListingUrl(
       "https://www.realtor.com/realestateandhomes-detail/123-Main-St_Austin_TX_78701_M12345-67890"
