@@ -21,6 +21,7 @@ import {
 import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import {
   buildDashboardDeal,
+  offerCeilingGap,
   resolveDealMethodologyPresentation,
   sortDealsWithinMethodologyCohorts,
   type SavedAnalysisDashboardRow,
@@ -729,12 +730,17 @@ export default async function DashboardPage() {
         // One unsolvable deal must never take down the dashboard.
       }
     }
-    const withOffer = (deal: DashboardDeal) => ({
-      ...deal,
-      maxOffer: offerById.get(deal.id) ?? null,
-      maxOfferBasis: basisById.get(deal.id) ?? null,
-      maxOfferBasisLabel: basisLabelById.get(deal.id) ?? null,
-    });
+    const withOffer = (deal: DashboardDeal) => {
+      const maxOffer = offerById.get(deal.id) ?? null;
+      return {
+        ...deal,
+        maxOffer,
+        maxOfferBasis: basisById.get(deal.id) ?? null,
+        maxOfferBasisLabel: basisLabelById.get(deal.id) ?? null,
+        // The home's list shows this signed; it is never re-derived there.
+        offerGap: offerCeilingGap(deal.purchasePrice, maxOffer),
+      };
+    };
     dashboardData.allDeals = dashboardData.allDeals.map(withOffer);
     dashboardData.topDeals = dashboardData.topDeals.map(withOffer);
   }

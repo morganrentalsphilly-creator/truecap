@@ -8,16 +8,23 @@ const source = readFileSync(
 );
 
 describe("dashboard deal list responsive contract", () => {
-  it("uses cards below lg and reserves the dense table for desktop", () => {
-    expect(source).toContain('data-deal-layout="cards" className="border-t border-border lg:hidden"');
+  it("uses rows on lines below xl and reserves the dense table for wide desktops", () => {
+    // Re-anchored: your-deals-table.tsx — the phone and tablet layout is one
+    // row per deal on soft lines, not a card per deal inside a card (the
+    // 2026-10 audit, Q1; DESIGN.md "a card around a list"). Still one layout
+    // per width: the list below xl and the table from xl, since at 1024px
+    // beside the rail six columns clipped the gap (1095px capture).
+    expect(source).toContain('data-deal-layout="list" className="xl:hidden"');
     expect(source).toContain(
-      'data-deal-layout="table" className="hidden overflow-x-auto border-t border-border lg:block"'
+      'data-deal-layout="table" className="hidden overflow-x-auto border-t border-foreground xl:block"'
     );
+    expect(source).not.toContain('data-deal-layout="cards"');
+    expect(source).not.toMatch(/<article\b/);
 
-    const cards = source.indexOf('data-deal-layout="cards"');
+    const list = source.indexOf('data-deal-layout="list"');
     const table = source.indexOf('data-deal-layout="table"');
-    expect(cards).toBeGreaterThan(-1);
-    expect(table).toBeGreaterThan(cards);
+    expect(list).toBeGreaterThan(-1);
+    expect(table).toBeGreaterThan(list);
   });
 
   it("preserves all sort choices and a reversible direction on cards", () => {
