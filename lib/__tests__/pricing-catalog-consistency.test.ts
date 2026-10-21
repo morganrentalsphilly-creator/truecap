@@ -162,9 +162,13 @@ describe("unshipped entitlements never reach a marketing surface", () => {
   });
 
   it("pricing card + profile switcher render no unshipped feature label", () => {
+    // Re-anchored: the plan cards' rows (both /pricing's and the homepage's)
+    // derive in components/marketing/plan-answers.ts.
+    const answersSrc = readFileSync(join(ROOT, "components/marketing/plan-answers.ts"), "utf8");
     const toggleSrc = readFileSync(join(ROOT, "components/marketing/pricing-toggle-plans.tsx"), "utf8");
     const profileSrc = readFileSync(join(ROOT, "app/profile/page.tsx"), "utf8");
-    expect(toggleSrc).toMatch(/f\.shipped !== false/);
+    expect(answersSrc).toMatch(/f\.shipped !== false/);
+    expect(toggleSrc).toContain("agentProPlanAnswers()");
     expect(profileSrc).toMatch(/feature\.shipped !== false/);
     for (const f of unshipped) {
       // The literal label must not be hand-typed on either surface (comments

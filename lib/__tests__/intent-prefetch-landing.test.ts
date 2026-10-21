@@ -350,8 +350,9 @@ describe("paid landing pages: intent-only prefetch (source)", () => {
     ).toEqual([]);
     // Every stage the chooser lists jumps to a fragment, so the mapped
     // {stage.href} anchor is never a route.
+    // Re-anchored: the stages run in the cards' order (Free, Pro, Agent Pro).
     const stageHrefs = [...stripComments(page).matchAll(/^\s+href: ("[^"]*"),$/gm)].map((m) => m[1]);
-    expect(stageHrefs).toEqual(['"#agent-pro"', '"#plans"', '"#pro"']);
+    expect(stageHrefs).toEqual(['"#plans"', '"#pro"', '"#agent-pro"']);
   });
 });
 

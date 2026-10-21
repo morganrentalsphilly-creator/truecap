@@ -57,15 +57,33 @@ describe("the sample deal price sweep", () => {
     for (const p of sweep.points) expect(p.meets).toBe(p.price <= sweep.ceiling);
   });
 
+  it("carries the schematic's two out-flows, which foot to the engine's cash flow at every price", () => {
+    // The drawing reads rent in, the mortgage out, everything else out, and
+    // the cash flow landing: rent − mortgage − operating = cash flow, so the
+    // three figures on the sheet can never disagree with the engine's.
+    const rent = analysis.monthlyRentalIncome;
+    for (const p of sweep.points) {
+      expect(p.mortgage).toBeGreaterThan(0);
+      expect(p.operating).toBeGreaterThan(0);
+      expect(rent - p.mortgage - p.operating).toBeCloseTo(p.cashFlow, 6);
+    }
+    const atAsking = sweep.points.find((p) => p.price === sweep.asking)!;
+    expect(atAsking.mortgage).toBe(analysis.monthlyPayment + analysis.pmiMonthly);
+  });
+
   it("compacts to what the sheet prints, without losing the flip", () => {
     const compact = compactSweep(sweep);
     expect(compact).toHaveLength(sweep.points.length);
-    const [price, cashFlow, dscr, coc, meets] = compact.find(([p]) => p === sweep.ceiling)!;
+    const [price, cashFlow, dscr, coc, meets, mortgage, operating] = compact.find(([p]) => p === sweep.ceiling)!;
     expect(price).toBe(sweep.ceiling);
     expect(cashFlow).toBe(Math.round(maxOffer!.achieved.netCashFlow));
     expect(dscr).toBe(Math.round(maxOffer!.achieved.dscr * 100) / 100);
     expect(coc).toBe(Math.round(maxOffer!.achieved.cocReturn * 10) / 10);
     expect(meets).toBe(1);
+    expect(mortgage).toBe(Math.round(maxOffer!.achieved.monthlyPayment + maxOffer!.achieved.pmiMonthly));
+    expect(operating).toBe(
+      Math.round(maxOffer!.achieved.monthlyRentalIncome - maxOffer!.achieved.monthlyPayment - maxOffer!.achieved.pmiMonthly - maxOffer!.achieved.netCashFlow),
+    );
     expect(JSON.stringify(compact).length).toBeLessThan(4_000);
   });
 });

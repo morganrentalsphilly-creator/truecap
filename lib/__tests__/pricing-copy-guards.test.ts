@@ -43,10 +43,20 @@ describe("saved-deal copy — surfaces stay aligned with the runtime gates", () 
   });
 
   it("pricing card's Free save bullet carries the editing caveat", () => {
-    const source = read("../../components/marketing/pricing-toggle-plans.tsx");
-    expect(source).toContain("Save up to 5 deals (editing saved deals is Pro)");
-    // The bare bullet promised editing the update path doesn't deliver.
-    expect(source).not.toContain('"Save up to 5 deals"');
+    // Re-anchored: the plan cards' rows are one source for /pricing and the
+    // homepage (components/marketing/plan-answers.ts); the save cap is the
+    // catalog's own free cell, and the row still says editing is Pro.
+    const source = read("../../components/marketing/plan-answers.ts");
+    expect(source).toContain('freeCell("save_deal")');
+    expect(source).toContain("(editing saved deals is Pro).");
+    for (const file of [
+      "../../components/marketing/pricing-toggle-plans.tsx",
+      "../../components/marketing/landing-sections.tsx",
+    ]) {
+      expect(read(file)).toContain("freePlanAnswers()");
+      // The bare bullet promised editing the update path doesn't deliver.
+      expect(read(file)).not.toContain('"Save up to 5 deals"');
+    }
   });
 
   it("homepage FAQ no longer claims saving is Pro-only", () => {

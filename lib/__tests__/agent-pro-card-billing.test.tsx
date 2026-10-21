@@ -67,8 +67,10 @@ function agentCard(html: string): string {
 describe("/pricing Agent Pro card", () => {
   it("opens on Annual with the catalog's annual figures when Stripe's price is missing", () => {
     const html = renderPlans();
-    // The page opens on Annual (the toggle's pressed segment).
-    expect(html).toMatch(/aria-pressed="true"[^>]*>Annual/);
+    // The page opens on Annual (the toggle's checked segment).
+    // Re-anchored: the toggle is the shared CadenceToggle radiogroup
+    // (components/marketing/cadence-toggle.tsx), whose segments are radios.
+    expect(html).toMatch(/aria-checked="true"[^>]*>Annual/);
     const card = agentCard(html);
     expect(card).toContain(formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD / 12));
     expect(card).toContain(`billed annually (${formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD)})`);
@@ -120,7 +122,8 @@ describe("/pricing Agent Pro card", () => {
 
   it("gives the billing toggle no figure, so it is true beside both paid cards", () => {
     const html = renderPlans();
-    const toggle = html.slice(html.indexOf('role="group"'), html.indexOf("<article"));
+    // Re-anchored: the shared CadenceToggle is a radiogroup.
+    const toggle = html.slice(html.indexOf('role="radiogroup"'), html.indexOf("<article"));
     const text = toggle.replace(/<[^>]+>/g, "|").replace(/^[^|]*\|/, "");
     expect(text).toContain("Annual |costs less");
     expect(text).not.toMatch(/\d|%/);

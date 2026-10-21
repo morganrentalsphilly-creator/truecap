@@ -354,9 +354,11 @@ async function PricingSignedOutAgentLine({ children }: { children: ReactNode }) 
  * Which plan answers which job, with its monthly price: the hero's aside.
  * Each paid price is the same expression its card shows on Monthly (the
  * Stripe display price, else the catalog fallback), so the two never
- * disagree; nothing here is typed by hand. Agent stage first (2026-09
- * agent-first pass); investor stages follow. The plan name jumps to its
- * card (Free has no fragment of its own, so it lands on the plans).
+ * disagree; nothing here is typed by hand. The stages run in the cards'
+ * order, Free · Pro · Agent Pro, so the list and the row under it read the
+ * same way (the agent line under the hero's actions keeps the agent-first
+ * address). The plan name jumps to its card (Free has no fragment of its
+ * own, so it lands on the plans).
  *
  * Rendered twice: as the Suspense fallback with no Stripe price (the catalog
  * amounts), then with the display prices. A display price is shown only when
@@ -375,18 +377,6 @@ function PricingStages({
   proOfferName: string;
 }) {
   const stages = [
-    ...(agentProConfigured
-      ? [
-          {
-            job: "Win investor clients",
-            product: "Agent Pro",
-            href: "#agent-pro",
-            price: agentMonthly?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD),
-            period: agentMonthly ? `/${agentMonthly.period}` : "/month",
-            answer: "Screen each listing against the client's own Buy Box and send the decision memo under your name.",
-          },
-        ]
-      : []),
     {
       job: "Screen the deal",
       product: "Free",
@@ -400,9 +390,23 @@ function PricingStages({
       product: proOfferName,
       href: "#pro",
       price: monthly?.amountLabel ?? formatPublicUsd(PUBLIC_PRO_MONTHLY_USD),
-      period: `/${monthly?.period ?? "month"}`,
+      // The cards say "/mo" (the shared price presentation); the stage list
+      // says the same, whatever Stripe calls the interval.
+      period: "/mo",
       answer: "Find your Offer Ceiling and what could break the deal before you make the offer.",
     },
+    ...(agentProConfigured
+      ? [
+          {
+            job: "Win investor clients",
+            product: "Agent Pro",
+            href: "#agent-pro",
+            price: agentMonthly?.amountLabel ?? formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD),
+            period: "/mo",
+            answer: "Screen each listing against the client's own Buy Box and send the decision memo under your name.",
+          },
+        ]
+      : []),
   ];
 
   return (

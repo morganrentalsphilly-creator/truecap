@@ -4,15 +4,19 @@
  * the rate, you feed the property tax, and the three leaders meet at the
  * Offer Ceiling. Each node is a SourcePopover: what the source is, its basis,
  * and what to replace it with, in lib/product-facts.ts's words. The leaders
- * draw themselves in as the section scrolls into view (CSS scroll-driven
- * animation, globals.css `.tc-leader`), and are fully drawn by default, so
- * Firefox, no-JavaScript and reduced motion all see the finished drawing.
+ * draw themselves in once as the section scrolls into view, on every engine
+ * (components/home/receipt-leaders.tsx, Motion pathLength), and are fully
+ * drawn by default, so no-JavaScript and reduced motion see the finished
+ * drawing. While a source's popover is open, its leader goes solid and the
+ * result figure it feeds brightens (globals.css, on data-receipt-node,
+ * data-receipt-leader and data-receipt-figure).
  *
  * SERVER COMPONENT. The figures come from the engine's ledger and the
- * sample fixture; the popovers are the one client leaf.
+ * sample fixture; the popovers and the leaders are the client leaves.
  */
 
 import { SourcePopover } from "@/components/motion/source-popover";
+import { ReceiptLeaders } from "@/components/home/receipt-leaders";
 import { DATA_SOURCE_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { formatLedgerDollars, type SampleDealLedger } from "@/lib/sample-deal-ledger";
@@ -53,10 +57,13 @@ export function ReceiptFlow({ ledger }: { ledger: SampleDealLedger }) {
     },
   ];
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,2fr)_minmax(0,5fr)] lg:items-center lg:gap-0">
+    <div
+      data-receipt-flow=""
+      className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,2fr)_minmax(0,5fr)] lg:items-center lg:gap-0"
+    >
       <ol className="grid gap-3" aria-label="The starting values and where each comes from">
         {nodes.map((n) => (
-          <li key={n.key} className="rounded-lg border border-border bg-card p-4 shadow-xs">
+          <li key={n.key} data-receipt-node={n.key} className="rounded-lg border border-border bg-card p-4 shadow-xs">
             <SourcePopover
               source={n.source}
               basis={n.basis}
@@ -77,19 +84,22 @@ export function ReceiptFlow({ ledger }: { ledger: SampleDealLedger }) {
           phones the flow reads top to bottom and the leaders become one
           vertical dashed line. */}
       <div className="relative mx-auto h-10 w-px border-l border-dashed border-primary lg:h-full lg:w-full lg:border-0" aria-hidden>
-        <svg viewBox="0 0 120 240" preserveAspectRatio="none" className="hidden h-full w-full lg:block">
-          <path className="tc-leader fill-none stroke-primary" strokeWidth="1.5" strokeDasharray="5 4" d="M0 40 C 60 40, 60 120, 120 120" pathLength="1" />
-          <path className="tc-leader fill-none stroke-primary" strokeWidth="1.5" strokeDasharray="5 4" d="M0 120 H120" pathLength="1" />
-          <path className="tc-leader fill-none stroke-primary" strokeWidth="1.5" strokeDasharray="5 4" d="M0 200 C 60 200, 60 120, 120 120" pathLength="1" />
-        </svg>
+        <ReceiptLeaders />
       </div>
       <div className="rounded-lg bg-navy p-5 text-navy-foreground shadow-lg sm:p-6">
         <p className="font-mono text-xs text-navy-muted">Result · sample deal</p>
         <p className="mt-2 text-sm text-navy-muted">Offer Ceiling</p>
         <p className="font-display font-figure text-key-sm text-white sm:text-key">{formatLedgerDollars(ledger.offerCeiling)}</p>
         {atCeiling ? (
+          // Each figure names the sources that feed it, so an open source
+          // popover can brighten it: rent and the property tax move the cash
+          // flow, the rate moves the mortgage and so the DSCR.
           <p className="mt-3 font-figure text-sm text-navy-muted">
-            Cash flow {formatLedgerDollars(atCeiling.netCashFlow)}/mo · DSCR {formatDscr(atCeiling.dscr, true)} · CoC {atCeiling.cocReturn.toFixed(1)}%
+            <span data-receipt-figure="cash-flow">Cash flow {formatLedgerDollars(atCeiling.netCashFlow)}/mo</span>
+            {" · "}
+            <span data-receipt-figure="dscr">DSCR {formatDscr(atCeiling.dscr, true)}</span>
+            {" · "}
+            <span>CoC {atCeiling.cocReturn.toFixed(1)}%</span>
           </p>
         ) : null}
         <p className="mt-3 text-sm text-navy-muted">

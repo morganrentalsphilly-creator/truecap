@@ -56,8 +56,14 @@ describe("Phase 9 — pricing page", () => {
   it("opens on annual with the effective monthly figure and the real annual charge", () => {
     const toggle = read("components/marketing/pricing-toggle-plans.tsx");
     expect(toggle).toContain('activePaidPlanSlug?.endsWith("_monthly") ? "monthly" : "annual"');
-    expect(toggle).toContain("annualMonthlyEquivalent");
-    expect(toggle).toContain("billed annually");
+    // Re-anchored: the price presentation (the annual charge over twelve
+    // months, "billed annually (total)") is the shared CadenceToggle module,
+    // which /pricing and the homepage both render through.
+    const cadence = read("components/marketing/cadence-toggle.tsx");
+    expect(toggle).toContain("PaidPlanPrice");
+    expect(toggle).toContain("paidPriceNote");
+    expect(cadence).toContain("annualMonthlyEquivalent");
+    expect(cadence).toContain("billed annually");
   });
 
   it("carries one honest DealCheck comparison that links to /vs/dealcheck", () => {
