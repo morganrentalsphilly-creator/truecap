@@ -75,9 +75,10 @@ export { FaqSection };
  * as three steps scroll past. Step 1 pastes the listing and the starting
  * values fill in with their source chips; step 2 runs the Buy Box check and
  * the binding target lights up; step 3 resolves the Offer Ceiling and the
- * send-to-client card arrives. From 1024px the sheet is sticky beside the
- * steps and StoryObserver picks the active step; on phones, and without
- * JavaScript, each step keeps its own sheet in flow. The full line items
+ * send-to-client card arrives. From 1024px ONE sheet is sticky beside the
+ * steps and accumulates each step's rows (audit A16; StoryObserver arms the
+ * entrance); on phones each step keeps its own frame in flow, and without
+ * JavaScript the sheet is complete. The full line items
  * stay behind "See every line": they are the proof.
  */
 const STORY_STEPS = [
@@ -121,15 +122,118 @@ function SheetRow({ label, value, chip, tone }: { label: string; value: ReactNod
 }
 
 /**
- * The story's three frames. The pinned panel renders all three (CSS shows
- * the active one); each step's inline frame, below 1024px and without
- * JavaScript, renders `only` its own, so a phone sees one frame per step.
+ * The sample's inputs with their sources: the sample's own provenance record
+ * (SAMPLE_DEAL_FIXTURE.provenance, audit A1), as the hero and the receipts
+ * label them, never "HUD FMR" for the example's own rent.
+ */
+function StoryInputRows({ ledger }: { ledger: SampleDealLedger }) {
+  const values = SAMPLE_DEAL_FIXTURE.values;
+  const line = SAMPLE_DEAL_FIXTURE.provenance.fields;
+  return (
+    <>
+      <SheetRow label="Asking price" value={formatLedgerDollars(ledger.askingPrice)} chip={line.purchasePrice.tag} />
+      <SheetRow label="Rent" value={`${formatLedgerDollars(values.monthlyRent ?? 0)}/mo`} chip={line.rent.tag} />
+      <SheetRow label="Mortgage rate" value={`${values.interestRate}%`} chip={line.interestRate.tag} />
+      <SheetRow label="Property tax" value={`${values.propertyTaxPct}% of price`} chip={line.propertyTax.tag} tone="flag" />
+      <SheetRow label="Down payment" value={`${values.downPaymentPct}%`} chip={line.downPayment.tag} />
+    </>
+  );
+}
+
+/** The Buy Box rows at asking, the binding target marked. */
+function StoryBuyBoxRows({ ledger }: { ledger: SampleDealLedger }) {
+  const shortfall = ledger.cashFlowShortfall;
+  return (
+    <>
+      <div className="flex items-baseline justify-between gap-3 border-b border-rule-soft py-2 text-sm">
+        <span>
+          Cash flow after reserves
+          <span className="block text-xs text-muted-foreground">Target ≥ {formatLedgerDollars(ledger.target.monthlyCashFlow ?? 0)}/mo · binding</span>
+        </span>
+        <span className="text-right">
+          <span className="font-figure font-semibold">{formatLedgerDollars(ledger.cashFlowMonthly.asking)}/mo</span>
+          <span className="block text-xs font-semibold text-highlight-text">
+            {shortfall != null ? `Misses by ${formatLedgerDollars(shortfall)}` : "Meets"}
+          </span>
+        </span>
+      </div>
+      <div className="flex items-baseline justify-between gap-3 py-2 text-sm">
+        <span>
+          DSCR
+          <span className="block text-xs text-muted-foreground">Target ≥ {ledger.target.dscr}</span>
+        </span>
+        <span className="text-right">
+          <span className="font-figure font-semibold">{formatDscr(ledger.dscr.asking, true)}</span>
+          <span className="block text-xs font-semibold text-positive">Meets</span>
+        </span>
+      </div>
+      <p className="mt-2 border-t border-border pt-2 text-sm">
+        Meets the Buy Box at asking:{" "}
+        <LedgerVerdict pass={ledger.meetsTargets.asking}>{ledger.meetsTargets.asking ? "Yes" : "No"}</LedgerVerdict>
+      </p>
+    </>
+  );
+}
+
+/** The Offer Ceiling and the send card. */
+function StoryCeilingRows({ ledger }: { ledger: SampleDealLedger }) {
+  return (
+    <>
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="font-display text-lg">Offer Ceiling</span>
+        <span className="highlight-stroke font-display font-figure text-key-sm">{formatLedgerDollars(ledger.offerCeiling)}</span>
+      </div>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {ledger.belowAsking > 0 ? `${formatLedgerDollars(ledger.belowAsking)} below asking.` : "Asking clears the targets."}{" "}
+        Meets the Buy Box: <LedgerVerdict pass={ledger.meetsTargets.ceiling}>{ledger.meetsTargets.ceiling ? "Yes" : "No"}</LedgerVerdict>.
+      </p>
+      <div className="mt-3 border-t border-border pt-3 text-sm">
+        <p className="font-semibold">Send to client</p>
+        <p className="text-muted-foreground">A share link that opens without an account, and the decision memo, co-branded with Pro.</p>
+      </div>
+    </>
+  );
+}
+
+/**
+ * The pinned sheet from 1024px (audit A16): ONE sheet that accumulates, not
+ * three frames that crossfade. The listing's inputs with their sources, then
+ * the Buy Box rows with the binding target, then the Offer Ceiling and the
+ * send card. Every row is in the HTML and visible by default; StoryObserver
+ * lets each step's rows enter once as the step is reached (globals.css), and
+ * the sheet rests complete.
+ */
+function StorySheet({ ledger }: { ledger: SampleDealLedger }) {
+  const caption = "flex justify-between gap-3 border-b border-border pb-2 font-mono text-xs text-muted-foreground";
+  return (
+    <div className="rounded-lg bg-card p-5 shadow-lg" data-story-sheet="">
+      <p className={caption}>
+        <span>The sample deal</span>
+        <span>{ledger.title}</span>
+      </p>
+      <div className="mt-2" data-story-row="1">
+        <p className="pt-1 text-xs font-medium text-muted-foreground">The listing</p>
+        <StoryInputRows ledger={ledger} />
+      </div>
+      <div className="mt-4 border-t border-border pt-2" data-story-row="2">
+        <p className="pt-1 text-xs font-medium text-muted-foreground">The Buy Box, at asking</p>
+        <StoryBuyBoxRows ledger={ledger} />
+      </div>
+      <div className="mt-4 border-t-2 border-foreground pt-3" data-story-row="3">
+        <StoryCeilingRows ledger={ledger} />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The story's frames below 1024px: each step's inline frame renders `only`
+ * its own, so a phone sees one frame per step (the pinned StorySheet serves
+ * 1024px and up).
  */
 function StoryFrames({ ledger, only }: { ledger: SampleDealLedger; only?: 1 | 2 | 3 }) {
-  const values = SAMPLE_DEAL_FIXTURE.values;
   const frameClass = "rounded-lg bg-card p-4 shadow-lg sm:p-5";
   const caption = "flex justify-between gap-3 border-b border-border pb-2 font-mono text-xs text-muted-foreground";
-  const shortfall = ledger.cashFlowShortfall;
   const show = (n: 1 | 2 | 3) => only == null || only === n;
   return (
     <>
@@ -140,11 +244,7 @@ function StoryFrames({ ledger, only }: { ledger: SampleDealLedger; only?: 1 | 2 
             <span>{ledger.title}</span>
           </p>
           <div className="mt-2">
-            <SheetRow label="Asking price" value={formatLedgerDollars(ledger.askingPrice)} chip="Your input" />
-            <SheetRow label="Rent" value={`${formatLedgerDollars(values.monthlyRent ?? 0)}/mo`} chip="HUD FMR" />
-            <SheetRow label="Mortgage rate" value={`${values.interestRate}%`} chip="FRED rate" />
-            <SheetRow label="Property tax" value={`${values.propertyTaxPct}% of price`} chip="Your input" tone="flag" />
-            <SheetRow label="Down payment" value={`${values.downPaymentPct}%`} chip="TrueCap default" />
+            <StoryInputRows ledger={ledger} />
           </div>
         </div>
       ) : null}
@@ -155,32 +255,7 @@ function StoryFrames({ ledger, only }: { ledger: SampleDealLedger; only?: 1 | 2 
             <span>at asking</span>
           </p>
           <div className="mt-2">
-            <div className="flex items-baseline justify-between gap-3 border-b border-rule-soft py-2 text-sm">
-              <span>
-                Cash flow after reserves
-                <span className="block text-xs text-muted-foreground">Target ≥ {formatLedgerDollars(ledger.target.monthlyCashFlow ?? 0)}/mo · binding</span>
-              </span>
-              <span className="text-right">
-                <span className="font-figure font-semibold">{formatLedgerDollars(ledger.cashFlowMonthly.asking)}/mo</span>
-                <span className="block text-xs font-semibold text-highlight-text">
-                  {shortfall != null ? `Misses by ${formatLedgerDollars(shortfall)}` : "Meets"}
-                </span>
-              </span>
-            </div>
-            <div className="flex items-baseline justify-between gap-3 py-2 text-sm">
-              <span>
-                DSCR
-                <span className="block text-xs text-muted-foreground">Target ≥ {ledger.target.dscr}</span>
-              </span>
-              <span className="text-right">
-                <span className="font-figure font-semibold">{formatDscr(ledger.dscr.asking, true)}</span>
-                <span className="block text-xs font-semibold text-positive">Meets</span>
-              </span>
-            </div>
-            <p className="mt-2 border-t border-border pt-2 text-sm">
-              Meets the Buy Box at asking:{" "}
-              <LedgerVerdict pass={ledger.meetsTargets.asking}>{ledger.meetsTargets.asking ? "Yes" : "No"}</LedgerVerdict>
-            </p>
+            <StoryBuyBoxRows ledger={ledger} />
           </div>
         </div>
       ) : null}
@@ -190,17 +265,8 @@ function StoryFrames({ ledger, only }: { ledger: SampleDealLedger; only?: 1 | 2 
             <span>Step 3 · the Offer Ceiling</span>
             <span>send to client</span>
           </p>
-          <div className="mt-3 flex items-baseline justify-between gap-3">
-            <span className="font-display text-lg">Offer Ceiling</span>
-            <span className="highlight-stroke font-display font-figure text-key-sm">{formatLedgerDollars(ledger.offerCeiling)}</span>
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {ledger.belowAsking > 0 ? `${formatLedgerDollars(ledger.belowAsking)} below asking.` : "Asking clears the targets."}{" "}
-            Meets the Buy Box: <LedgerVerdict pass={ledger.meetsTargets.ceiling}>{ledger.meetsTargets.ceiling ? "Yes" : "No"}</LedgerVerdict>.
-          </p>
-          <div className="mt-3 border-t border-border pt-3 text-sm">
-            <p className="font-semibold">Send to client</p>
-            <p className="text-muted-foreground">A share link that opens without an account, and the decision memo, co-branded with Pro.</p>
+          <div className="mt-3">
+            <StoryCeilingRows ledger={ledger} />
           </div>
         </div>
       ) : null}
@@ -217,14 +283,16 @@ export function HowTrueCapWorks() {
     ceiling: { lead: `${ceiling.title}.`, body: ceiling.body },
   };
   return (
-    <Section id={HOMEPAGE_WALKTHROUGH_ID} rhythm="open" aria-labelledby="how-it-works-heading" data-story-root="">
+    // The standard rhythm, not "open": one sheet needs less travel than
+    // three crossfading frames did (audit A16).
+    <Section id={HOMEPAGE_WALKTHROUGH_ID} aria-labelledby="how-it-works-heading" data-story-root="">
       <SectionHeading id="how-it-works-heading">From listing to offer in three steps.</SectionHeading>
       {ledger ? (
         <StoryObserver rootId={HOMEPAGE_WALKTHROUGH_ID}>
           <div className="mt-8 grid gap-x-12 gap-y-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start xl:gap-x-16">
             <ol className="grid gap-10 lg:gap-0">
               {STORY_STEPS.map((step) => (
-                <li key={step.n} data-story-step={step.n} className="grid gap-4 lg:min-h-[20rem] lg:py-8">
+                <li key={step.n} data-story-step={step.n} className="grid gap-4 lg:min-h-[12rem] lg:py-6">
                   <div className="flex gap-4">
                     <span aria-hidden className="mt-1 w-8 shrink-0 font-figure text-sm font-semibold text-muted-foreground">
                       {step.n}
@@ -242,9 +310,10 @@ export function HowTrueCapWorks() {
                 </li>
               ))}
             </ol>
-            {/* The pinned sheet from 1024px: the three frames stack and the active one shows (globals.css). */}
-            <div className="hidden lg:sticky lg:top-24 lg:grid" aria-hidden data-story-panel="">
-              <StoryFrames ledger={ledger} />
+            {/* The pinned sheet from 1024px: one sheet that accumulates a step's
+                rows as the step is reached (globals.css), resting complete. */}
+            <div className="hidden lg:sticky lg:top-24 lg:block" data-story-panel="">
+              <StorySheet ledger={ledger} />
             </div>
           </div>
           <details className="tc-accordion group mt-10 border-t border-border">

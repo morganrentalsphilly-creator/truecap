@@ -942,40 +942,22 @@ summary:has([class*="rotate-"])::marker {
    where the browser supports it and the visitor has not asked for less.
    ============================================================ */
 
-/* The scroll story's pinned frame (components/home/story-observer.tsx): from
-   1024px the three frames stack in one sticky panel and the active step's
-   frame shows; below, and without JavaScript, every step keeps its own
-   frame in flow. */
-@media (min-width: 1024px) {
-  [data-story-root] [data-story-frame] {
-    grid-area: 1 / 1;
+/* The scroll story's pinned sheet (components/home/story-observer.tsx, audit
+   A16): from 1024px ONE sheet accumulates. While the story is armed (it was
+   below the fold at hydration, and the visitor has not asked for less
+   motion), a step's rows wait until the step is reached, then enter once at
+   the base duration and stay; the resting state is the complete sheet. Not
+   tied to scroll position: nothing hides again (P1-73). */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  [data-story-root][data-story-armed] [data-story-row] {
+    transition:
+      opacity var(--duration-base) var(--ease-out),
+      translate var(--duration-base) var(--ease-out);
+  }
+  [data-story-root][data-story-armed]:not([data-story-reached="2"], [data-story-reached="3"]) [data-story-row="2"],
+  [data-story-root][data-story-armed]:not([data-story-reached="3"]) [data-story-row="3"] {
     opacity: 0;
-    transform: translateY(8px);
-    transition: opacity var(--duration-base) var(--ease-out), transform var(--duration-base) var(--ease-out);
-    pointer-events: none;
-  }
-  [data-story-root]:not([data-active-step]) [data-story-frame="1"],
-  [data-story-root][data-active-step="1"] [data-story-frame="1"],
-  [data-story-root][data-active-step="2"] [data-story-frame="2"],
-  [data-story-root][data-active-step="3"] [data-story-frame="3"] {
-    opacity: 1;
-    transform: none;
-    pointer-events: auto;
-  }
-  /* Without scripting the observer never picks a step, so the three frames
-     sit in flow under one another: the page is complete without JavaScript
-     (OVERHAUL.md §9). A browser without the `scripting` feature keeps the
-     first frame, as before. */
-  @media (scripting: none) {
-    [data-story-root] [data-story-panel] {
-      row-gap: 1rem;
-    }
-    [data-story-root] [data-story-frame] {
-      grid-area: auto;
-      opacity: 1;
-      transform: none;
-      pointer-events: auto;
-    }
+    translate: 0 12px;
   }
 }
 

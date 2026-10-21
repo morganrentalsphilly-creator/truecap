@@ -1,11 +1,16 @@
 "use client";
 
 /**
- * The scroll story's one piece of JavaScript (OVERHAUL.md §6.2): as the three
- * steps scroll past, it writes the active step's number onto the story's
- * root (`data-active-step`), and CSS in globals.css shows that step's frame in
- * the pinned panel from 1024px. Without JavaScript, or on phones, every step
- * keeps its own frame in flow, so the story is complete either way.
+ * The scroll story's one piece of JavaScript (OVERHAUL.md §6.2; audit A16).
+ * From 1024px the story is ONE pinned sheet that accumulates: a step's rows
+ * enter once, as the step reaches the middle of the viewport, and stay.
+ *
+ * It writes two attributes on the story's root, which globals.css reads:
+ * `data-story-armed` while the story was still below the fold when the page
+ * hydrated (so no row that is already on screen ever hides to enter), and
+ * never under reduced motion; `data-story-reached`, the furthest step
+ * reached, which only grows. Without JavaScript, under reduced motion, or
+ * when the page opens on the story, the sheet is complete from the start.
  */
 
 import { useEffect, type ReactNode } from "react";
@@ -14,28 +19,28 @@ export function StoryObserver({ rootId, children }: { rootId: string; children: 
   useEffect(() => {
     const root = document.getElementById(rootId);
     if (!root || typeof IntersectionObserver === "undefined") return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Only a story still below the fold is armed: rows that would hide must
+    // not be on screen.
+    if (root.getBoundingClientRect().top < window.innerHeight) return;
     const steps = Array.from(root.querySelectorAll<HTMLElement>("[data-story-step]"));
     if (steps.length === 0) return;
-    const ratios = new Map<HTMLElement, number>();
-    const pick = () => {
-      let best: HTMLElement | null = null;
-      let bestRatio = 0;
-      for (const step of steps) {
-        const ratio = ratios.get(step) ?? 0;
-        if (ratio > bestRatio) {
-          best = step;
-          bestRatio = ratio;
-        }
-      }
-      if (best) root.dataset.activeStep = best.dataset.storyStep;
-    };
+    root.dataset.storyArmed = "";
+    let reached = 0;
     const observer = new IntersectionObserver(
       (entries) => {
-        for (const entry of entries) ratios.set(entry.target as HTMLElement, entry.intersectionRatio);
-        pick();
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const n = Number((entry.target as HTMLElement).dataset.storyStep);
+          if (n > reached) {
+            reached = n;
+            root.dataset.storyReached = String(n);
+          }
+        }
+        if (reached >= steps.length) observer.disconnect();
       },
       // The band across the middle of the viewport decides the step.
-      { rootMargin: "-35% 0px -35% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] },
+      { rootMargin: "-35% 0px -35% 0px" },
     );
     for (const step of steps) observer.observe(step);
     return () => observer.disconnect();
