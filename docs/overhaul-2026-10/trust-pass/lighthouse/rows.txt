@@ -1,0 +1,3 @@
+http://127.0.0.1:3100/ n=3 perf=0.88 a11y=1.00 LCP=3.7s TBT=35ms CLS=0.000 script=350KB total=555KB
+http://127.0.0.1:3100/analyze n=3 perf=0.89 a11y=1.00 LCP=3.6s TBT=90ms CLS=0.000 script=569KB total=753KB
+http://127.0.0.1:3100/pricing n=3 perf=0.93 a11y=1.00 LCP=3.3s TBT=16ms CLS=0.002 script=357KB total=516KB

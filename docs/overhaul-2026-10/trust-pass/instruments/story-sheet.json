@@ -1,0 +1,48 @@
+{
+  "js": {
+    "sectionHeight": 1066,
+    "timeline": [
+      {
+        "step": 1,
+        "rows": [
+          1,
+          0,
+          0
+        ],
+        "armed": true
+      },
+      {
+        "step": 2,
+        "rows": [
+          1,
+          1,
+          0
+        ],
+        "armed": true
+      },
+      {
+        "step": 3,
+        "rows": [
+          1,
+          1,
+          1
+        ],
+        "armed": true
+      }
+    ],
+    "atRest": [
+      1,
+      1,
+      1
+    ]
+  },
+  "noJs": {
+    "sectionHeight": 1066,
+    "timeline": [],
+    "atRest": [
+      1,
+      1,
+      1
+    ]
+  }
+}

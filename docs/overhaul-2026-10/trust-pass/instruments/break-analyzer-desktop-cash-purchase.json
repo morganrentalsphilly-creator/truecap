@@ -1,0 +1,21 @@
+{
+  "cash-purchase": {
+    "ok": true,
+    "ms": 851,
+    "verdict": "Meets TrueCap starter criteria at asking",
+    "card": "4821 Larchwood Ave, Philadelphia, PA 19143 Meets TrueCap starter criteria at asking Asking $250,000 Offer Ceiling: No price limit under these targets. Targets: break-even cash flow. Offer Ceiling No price limit under these targets Targets: break-even cash flow Add a cap-rate or cash-on-cash target to set one. How this ceiling was calculated Cash flow after reserves $1,395/mo Meets $0/mo target Model DSCR N/A — no debt service No modeled debt service Tune targets Edit assumptions Save Next deal · keep assumptions Best next step Confirm with recent rent comps Rent is a material input — current source: Your entered rent. Two assumptions most likely to move the decision 1. Rent ±5% moves cash fl",
+    "metrics": {
+      "cash-flow": "$1,395/mo"
+    },
+    "alerts": [
+      "High"
+    ],
+    "whatIf": null,
+    "url": "http://127.0.0.1:3100/analyze",
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "priceFieldValue": "250,000",
+    "pageErrors": [],
+    "shot": "shots/audit/break-desktop-cash-purchase.jpg"
+  }
+}

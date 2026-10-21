@@ -79,7 +79,8 @@ await record("close form: the field takes focus", await close.evaluate((el) => e
 await page.goto(BASE + "/analyze?sample=1", { waitUntil: "networkidle" });
 await page.locator('[data-analysis-results="true"]').waitFor({ state: "visible", timeout: 30000 });
 await page.waitForTimeout(1800);
-const ceilingSummary = page.locator("summary").filter({ hasText: "How this ceiling was calculated" }).first();
+// visible: the sample's hidden static card (trust pass, A2) carries the same summary.
+const ceilingSummary = page.locator("summary").filter({ hasText: "How this ceiling was calculated", visible: true }).first();
 await ceilingSummary.scrollIntoViewIfNeeded();
 await ceilingSummary.focus();
 await page.keyboard.press("Enter");

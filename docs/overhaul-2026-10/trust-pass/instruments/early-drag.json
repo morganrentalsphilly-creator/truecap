@@ -1,0 +1,33 @@
+{
+  "dragAtMs": 1130,
+  "diamond": {
+    "slider": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "hidden": "visible/none"
+    },
+    "static": {
+      "x": 129.84375,
+      "y": 282.796875,
+      "cls": "absolute top-1/2 size-5 -translate-x-1/2 -translate-y-1/2 rotate-45 border-2 bor"
+    }
+  },
+  "valueRightAfterDrag": "236000",
+  "valuenowTimeline": [
+    [
+      2310,
+      "valuenow",
+      "236000"
+    ],
+    [
+      2862,
+      "load"
+    ]
+  ],
+  "shots": [
+    "shots/audit/flow-early-drag-0.jpg",
+    "shots/audit/flow-early-drag-10s.jpg"
+  ]
+}

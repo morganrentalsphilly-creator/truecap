@@ -1,0 +1,24 @@
+{
+  "branch-390": {
+    "height": 974,
+    "actionsBottom": 814,
+    "focus": "decision-summary-title"
+  },
+  "branch-1440": {
+    "height": 905,
+    "actionsBottom": 768,
+    "focus": "decision-summary-title"
+  },
+  "main-390": {
+    "height": 1189,
+    "actionsBottom": 838,
+    "focus": "decision-summary-title"
+  },
+  "main-1440": {
+    "height": 1012,
+    "actionsBottom": 792,
+    "focus": "decision-summary-title"
+  },
+  "shorter-390": "18%",
+  "shorter-1440": "11%"
+}

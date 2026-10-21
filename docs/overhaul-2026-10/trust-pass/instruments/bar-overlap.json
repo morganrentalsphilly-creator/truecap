@@ -1,0 +1,14 @@
+{
+  "1440x900": {
+    "stops": 18,
+    "barShown": 4,
+    "overPlan": 0,
+    "allDocked": true
+  },
+  "1095x760": {
+    "stops": 22,
+    "barShown": 7,
+    "overPlan": 0,
+    "allDocked": true
+  }
+}

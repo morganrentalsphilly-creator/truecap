@@ -1,0 +1,20 @@
+{
+  "zero-rent": {
+    "rentTyped": "0",
+    "rentAfter3s": "0",
+    "toastsBeforeRun": [],
+    "rentAfterRun": "0",
+    "toasts": [],
+    "verdict": null,
+    "shot": "shots/audit/break-zero-rent-toast.jpg"
+  },
+  "zero-rent-no-beds": {
+    "rentTyped": "0",
+    "rentAfter3s": "0",
+    "toastsBeforeRun": [],
+    "rentAfterRun": "0",
+    "toasts": [],
+    "verdict": null,
+    "shot": "shots/audit/break-zero-rent-no-beds-toast.jpg"
+  }
+}
