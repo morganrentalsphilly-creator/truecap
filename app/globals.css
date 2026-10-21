@@ -940,10 +940,27 @@ summary:has([class*="rotate-"])::marker {
 }
 
 /* The receipt flow's leaders (components/home/receipt-leaders.tsx) are drawn
-   once on entry by Motion, on every engine; here only the open state: while
-   a source's popover is open (Radix marks its trigger data-state="open"),
-   that source's leader goes solid and the result figure it feeds brightens.
-   Drawn and dashed is the default, so nothing here hides content. */
+   once on entry, on every engine, by a keyframe on the mask path's stroke:
+   the island arms the mask only when the section is still below the fold
+   and plays it when the section enters the viewport (an IntersectionObserver;
+   never under reduced motion, never without JavaScript), so the drawn and
+   dashed state is the default and nothing in view ever hides to redraw. The
+   open state: while a source's popover is open (Radix marks its trigger
+   data-state="open"), that source's leader goes solid and the result figure
+   it feeds brightens. */
+.tc-leader-mask {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+[data-receipt-leaders="play"] .tc-leader-mask {
+  animation: tc-leader-draw var(--duration-draw) var(--ease-out) both;
+  animation-delay: calc(var(--tc-leader-index, 0) * 80ms);
+}
+@keyframes tc-leader-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
 [data-receipt-flow]:has([data-receipt-node="rent"] [data-state="open"]) [data-receipt-leader="rent"],
 [data-receipt-flow]:has([data-receipt-node="rate"] [data-state="open"]) [data-receipt-leader="rate"],
 [data-receipt-flow]:has([data-receipt-node="tax"] [data-state="open"]) [data-receipt-leader="tax"] {
