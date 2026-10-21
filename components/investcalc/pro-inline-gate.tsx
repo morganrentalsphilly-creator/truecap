@@ -11,7 +11,7 @@
  * to hide its existence.
  */
 
-import { ArrowRight, Lock, Sparkles } from "lucide-react";
+import { Lock } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/lib/analytics";
@@ -19,8 +19,8 @@ import { usePostCheckoutUpsellSuppression } from "@/hooks/use-post-checkout-upse
 import { GuaranteeBadge } from "@/components/marketing/guarantee-badge";
 
 interface ProInlineGateProps {
-  /** Brand-color icon at the top - same icon as the gated feature uses. */
-  icon: React.ComponentType<{ className?: string }>;
+  /** The gated feature's icon; accepted for the callers, no longer drawn (no icon tiles). */
+  icon?: React.ComponentType<{ className?: string }>;
   /** Headline of the gated feature, e.g. "Offer Ceiling". */
   title: string;
   /** One-line description of what the user would see if unlocked. */
@@ -29,7 +29,7 @@ interface ProInlineGateProps {
   previewBullets: string[];
 }
 
-export function ProInlineGate({ icon: Icon, title, description, previewBullets }: ProInlineGateProps) {
+export function ProInlineGate({ title, description, previewBullets }: ProInlineGateProps) {
   // Post-checkout suppression: while BillingSuccessBanner is confirming a
   // fresh purchase (billing=success poll pending), render nothing — a buyer
   // must never see a trial pitch seconds after paying. Fails OPEN to false
@@ -54,29 +54,24 @@ export function ProInlineGate({ icon: Icon, title, description, previewBullets }
   if (suppressed) return null;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border-2 border-primary/25 bg-gradient-to-br from-[var(--brand-blue-light)] via-card to-card p-5 shadow-sm sm:p-6">
+    <div className="rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6">
       <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-primary/15 text-primary">
-            <Icon className="size-4" />
-          </span>
-          <div>
-            <p className="text-base font-bold text-foreground">{title}</p>
-            <p className="text-xs text-muted-foreground">{description}</p>
-          </div>
+        <div className="min-w-0">
+          <p className="font-display text-lg text-foreground">{title}</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
         </div>
-        <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground">
-          <Lock className="size-2.5" />
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-sm border border-border px-1.5 py-0.5 font-mono text-2xs text-muted-foreground">
+          <Lock className="size-3" aria-hidden />
           Pro
         </span>
       </div>
 
-      {/* Preview bullets - make the gated feature feel tangible */}
-      <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+      {/* What the unlocked feature shows, as rows on lines. */}
+      <ul className="mt-4 border-t border-border">
         {previewBullets.map((bullet) => (
           <li
             key={bullet}
-            className="rounded-xl border border-border bg-card px-3 py-2 text-xs font-medium text-foreground/70"
+            className="border-b border-rule-soft py-2 text-sm text-foreground"
           >
             {bullet}
           </li>
@@ -93,11 +88,9 @@ export function ProInlineGate({ icon: Icon, title, description, previewBullets }
           }
         }
         // min-h-11: 44px target (the global floor covers buttons, not links).
-        className="group mt-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-primary hover:underline"
+        className="group mt-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
       >
-        <Sparkles className="size-4" />
         See {title} for this deal · Compare Pro plans
-        <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
       </Link>
       {/* Risk reversal at the moment of the ask, same as every paid CTA on
           the marketing side. */}

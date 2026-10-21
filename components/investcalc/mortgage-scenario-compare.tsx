@@ -75,12 +75,13 @@ export function MortgageScenarioCompare({
   // expanding the comparison panel. Honest about being a Pro feature.
   if (!isPro) {
     return (
-      <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-4 sm:p-5">
+      // A ruled row, not a dashed box (2026-10 polish).
+      <div className="border-t border-border pt-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Lock className="size-4 shrink-0 text-muted-foreground" />
+            <Lock className="size-4 shrink-0 text-muted-foreground" aria-hidden />
             <span>
-              <strong className="text-foreground">See how financing changes this deal.</strong>{" "}
+              <strong className="font-semibold text-foreground">See how financing changes this deal.</strong>{" "}
               Compare 25% down, a 15-year term, and DSCR loans without rebuilding the model.
             </span>
           </div>
@@ -88,7 +89,7 @@ export function MortgageScenarioCompare({
               floor, and at h-8 this was the one 32px control on the result. */}
           <Link
             href="/pricing"
-            className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-3 text-xs font-bold text-primary-foreground hover:opacity-90"
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-input bg-transparent px-4 text-sm font-semibold text-foreground transition-colors duration-150 hover:bg-band focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             Compare loan structures
           </Link>
@@ -98,34 +99,36 @@ export function MortgageScenarioCompare({
   }
 
   // Collapsed state styled to MATCH LoanAmortizationView exactly —
-  // same border, padding, chevron, type hierarchy. The two "advanced
-  // views" should feel like siblings, not jagged siblings with
-  // different right-side metadata fighting for attention.
+  // same rule, chevron, type hierarchy. The two "advanced views" should
+  // feel like siblings, not jagged siblings with different right-side
+  // metadata fighting for attention.
   if (!open) {
     return (
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={() => changeOpen(true)}
-        aria-label="Open the compare financing scenarios panel"
-        className="group flex min-h-11 w-full cursor-pointer items-center gap-2.5 rounded-xl border border-border bg-card p-3 text-left transition-colors hover:border-primary/40 hover:bg-muted/30 sm:p-4"
-      >
-        <ChevronRight
-          aria-hidden
-          className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
-        />
-        <span className="min-w-0 flex-1">
-          <span className="block text-sm font-semibold text-foreground">
-            Compare financing scenarios
-            <span className="ml-1.5 align-middle text-xs font-medium text-primary">
-              Pro
+      <div className="border-t border-border pt-3">
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={() => changeOpen(true)}
+          aria-label="Open the compare financing scenarios panel"
+          className="group flex min-h-11 w-full cursor-pointer items-center gap-2.5 rounded-md text-left transition-colors duration-150 hover:bg-band focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        >
+          <ChevronRight
+            aria-hidden
+            className="size-4 shrink-0 text-muted-foreground"
+          />
+          <span className="min-w-0 flex-1">
+            <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              Compare financing scenarios
+              <span className="inline-flex shrink-0 rounded-sm border border-border px-1.5 py-0.5 font-mono text-2xs font-normal leading-tight text-muted-foreground">
+                Pro
+              </span>
+            </span>
+            <span className="mt-0.5 block font-figure text-2xs leading-snug text-muted-foreground">
+              +5pp down, 15-yr term, DSCR loan, side by side
             </span>
           </span>
-          <span className="mt-0.5 block text-2xs leading-snug text-muted-foreground">
-            +5pp down, 15-yr term, DSCR loan - side-by-side
-          </span>
-        </span>
-      </button>
+        </button>
+      </div>
     );
   }
 
@@ -137,14 +140,14 @@ export function MortgageScenarioCompare({
       // -1: a programmatic focus target, not a tab stop, so it takes no ring.
       tabIndex={-1}
       aria-label="Mortgage scenario comparison"
-      className="rounded-2xl border border-border bg-card p-4 outline-none sm:p-5"
+      className="border-t border-border pt-3 outline-none"
     >
-      <div className="mb-3 flex items-center justify-between gap-3">
+      <div className="mb-3 flex items-center justify-between gap-3 border-b border-border pb-3">
         <div>
-          <p className="text-xs font-medium text-foreground">
+          <p className="text-sm font-semibold text-foreground">
             Compare financing
           </p>
-          <p className="mt-0.5 text-2xs text-muted-foreground">
+          <p className="mt-0.5 text-sm text-muted-foreground">
             Same property, four different ways to finance it
           </p>
         </div>
@@ -174,13 +177,13 @@ export function MortgageScenarioCompare({
                   <th
                     key={s.key}
                     scope="col"
-                    className={`py-2 px-3 text-2xs font-bold ${
-                      s.isBaseline ? "text-foreground" : "text-foreground/80"
+                    className={`py-2 px-3 text-xs font-semibold ${
+                      s.isBaseline ? "text-foreground" : "text-muted-foreground"
                     }`}
                   >
                     {s.label}
                     {s.isBaseline ? (
-                      <span className="ml-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
+                      <span className="ml-1 rounded-sm border border-border px-1.5 py-0.5 font-mono text-2xs font-normal text-muted-foreground">
                         Now
                       </span>
                     ) : null}
@@ -246,26 +249,19 @@ export function MortgageScenarioCompare({
         </ScrollX>
       </div>
 
-      {/* Mobile - vertical cards */}
-      <div className="space-y-3 sm:hidden">
+      {/* Mobile - one ruled row per scenario */}
+      <div className="divide-y divide-border sm:hidden">
         {scenarios.map((s) => (
-          <div
-            key={s.key}
-            className={`rounded-xl border p-3 ${
-              s.isBaseline
-                ? "border-primary/30 bg-primary/5"
-                : "border-border bg-background"
-            }`}
-          >
+          <div key={s.key} className="py-3">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-sm font-bold text-foreground">{s.label}</span>
+              <span className="text-sm font-semibold text-foreground">{s.label}</span>
               {s.isBaseline ? (
-                <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground">
+                <span className="rounded-sm border border-border px-1.5 py-0.5 font-mono text-2xs text-muted-foreground">
                   Current
                 </span>
               ) : null}
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 font-figure text-xs text-muted-foreground">
               {s.downPaymentPct.toFixed(0)}% down · {s.loanTermYears} yr · {s.interestRatePct.toFixed(2)}%
             </p>
             <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
@@ -300,7 +296,7 @@ export function MortgageScenarioCompare({
               />
             </div>
             <p className="mt-2 text-2xs text-muted-foreground">
-              Cash needed: <span className="font-bold text-foreground">{fmtUsd(s.result.totalCashRequired)}</span>
+              Cash to close: <span className="font-figure font-semibold text-foreground">{fmtUsd(s.result.totalCashRequired)}</span>
             </p>
           </div>
         ))}
@@ -327,7 +323,7 @@ function ScenarioRow({
   tone?: (index: number) => "positive" | "negative" | "neutral";
 }) {
   return (
-    <tr className="border-b border-border/50 last:border-b-0">
+    <tr className="border-b border-rule-soft last:border-b-0">
       <th scope="row" className="py-2 pr-3 text-left text-xs font-semibold text-muted-foreground">
         {label}
       </th>
@@ -335,15 +331,15 @@ function ScenarioRow({
         const t = tone?.(i) ?? "neutral";
         const cellClass =
           t === "positive"
-            ? "text-[var(--metric-positive,#16a34a)]"
+            ? "text-positive"
             : t === "negative"
-              ? "text-[var(--metric-negative,#dc2626)]"
+              ? "text-negative"
               : "text-foreground";
         return (
           <td
             key={i}
-            className={`py-2 px-3 tabular-nums ${
-              emphasize ? "font-bold" : "font-medium"
+            className={`py-2 px-3 font-figure ${
+              emphasize ? "font-semibold" : "font-normal"
             } ${cellClass}`}
           >
             {cell}
@@ -365,16 +361,16 @@ function MobileMetric({
 }) {
   const toneClass =
     tone === "positive"
-      ? "text-[var(--metric-positive,#16a34a)]"
+      ? "text-positive"
       : tone === "negative"
-        ? "text-[var(--metric-negative,#dc2626)]"
+        ? "text-negative"
         : "text-foreground";
   return (
-    <div className="rounded-lg bg-muted/30 px-2 py-1.5">
+    <div className="border-t border-rule-soft pt-1.5">
       <p className="text-xs font-medium text-muted-foreground">
         {label}
       </p>
-      <p className={`mt-0.5 text-sm font-bold tabular-nums ${toneClass}`}>{value}</p>
+      <p className={`mt-0.5 font-figure text-sm font-semibold ${toneClass}`}>{value}</p>
     </div>
   );
 }

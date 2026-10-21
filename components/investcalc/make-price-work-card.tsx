@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * "Or — make your current price work": the inverse of the Offer Ceiling.
+ * "Make your current price work": the inverse of the Offer Ceiling.
  *
  * Offer Ceiling answers "what should I pay?". This answers the question every
  * buyer asks next — "but what if I still want THIS house at THIS price?" —
@@ -16,6 +16,10 @@
  * COMPUTE: the exact inverse results arrive from the same entitlement-aware
  * server boundary as Offer Ceiling. This component is presentation-only, so
  * Free browsers never receive or calculate the paid thresholds.
+ *
+ * Blueprint (2026-10): a ruled row, not a dashed box. The heading sits on a
+ * 1px line; the two required figures are rows on soft lines in the figure
+ * face.
  */
 
 import type { OfferCeilingExactResult } from "@/lib/offer-ceiling-access-contract";
@@ -34,39 +38,54 @@ export function MakePriceWorkCard({
   const reqRate = result.requiredInterestRate;
 
   return (
-    <div className="rounded-xl border border-dashed border-border p-4 sm:p-5">
-      <div className="text-xs font-medium text-muted-foreground">
-        Or — make your current price work
-      </div>
+    <div className="border-t border-foreground pt-3">
+      <p className="text-sm font-semibold text-foreground">
+        Or make your current price work
+      </p>
       {result.currentMeets ? (
-        <p className="mt-1.5 text-sm text-foreground">
-          Your current price ({money(currentPrice)}) already clears these targets. ✓
+        <p className="mt-1.5 text-sm text-positive">
+          Your current price (
+          <span className="font-figure">{money(currentPrice)}</span>) already
+          clears these targets.
         </p>
       ) : (
-        <div className="mt-1.5 space-y-1 text-sm text-foreground">
-          <p className="text-xs text-muted-foreground">At {money(currentPrice)}, you&apos;d need:</p>
-          <p>
-            Rent{" "}
-            {reqRent && !reqRent.unreachable ? (
-              <>
-                ≥ <span className="font-bold text-primary">{money(reqRent.value)}/mo</span>
-              </>
-            ) : (
-              <span className="text-muted-foreground">— not reachable by rent alone</span>
-            )}
+        <div className="mt-1.5">
+          <p className="text-sm text-muted-foreground">
+            At <span className="font-figure">{money(currentPrice)}</span>,
+            you&apos;d need:
           </p>
-          {reqRate === null ? null : (
-            <p>
-              or rate{" "}
-              {!reqRate.unreachable ? (
-                <>
-                  ≤ <span className="font-bold text-primary">{reqRate.value}%</span>
-                </>
-              ) : (
-                <span className="text-muted-foreground">— not reachable by rate alone</span>
-              )}
-            </p>
-          )}
+          <dl className="mt-2 divide-y divide-rule-soft border-t border-rule-soft text-sm">
+            <div className="flex items-baseline justify-between gap-4 py-1.5">
+              <dt className="text-muted-foreground">Rent</dt>
+              <dd className="text-right">
+                {reqRent && !reqRent.unreachable ? (
+                  <span className="font-figure font-semibold text-foreground">
+                    ≥ {money(reqRent.value)}/mo
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">
+                    Not reachable by rent alone
+                  </span>
+                )}
+              </dd>
+            </div>
+            {reqRate === null ? null : (
+              <div className="flex items-baseline justify-between gap-4 py-1.5">
+                <dt className="text-muted-foreground">or rate</dt>
+                <dd className="text-right">
+                  {!reqRate.unreachable ? (
+                    <span className="font-figure font-semibold text-foreground">
+                      ≤ {reqRate.value}%
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">
+                      Not reachable by rate alone
+                    </span>
+                  )}
+                </dd>
+              </div>
+            )}
+          </dl>
         </div>
       )}
     </div>

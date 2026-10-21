@@ -19,7 +19,7 @@ export function TenYearProjectionSummaryCards({
     <SummaryCardGrid
       items={[
         {
-          label: "10-Yr Cumulative CF (Pre-Tax)",
+          label: "10-yr cumulative CF (pre-tax)",
           value: formatCurrency(finalYear?.cumulativeCashFlowAnnual ?? 0),
           tone: (finalYear?.cumulativeCashFlowAnnual ?? 0) >= 0 ? "positive" : "negative",
           labelTooltip:
@@ -28,12 +28,12 @@ export function TenYearProjectionSummaryCards({
         ...(showTaxMetrics
           ? [
               {
-                label: "Best Annual After-Tax CF",
+                label: "Best annual after-tax CF",
                 value: formatCurrency(bestAfterTax),
                 tone: bestAfterTax >= 0 ? ("positive" as const) : ("negative" as const),
               },
               {
-                label: "10-Yr Cumulative CF (After-Tax)",
+                label: "10-yr cumulative CF (after-tax)",
                 value: formatCurrency(totalAfterTax),
                 tone: totalAfterTax >= 0 ? ("positive" as const) : ("negative" as const),
                 labelTooltip:

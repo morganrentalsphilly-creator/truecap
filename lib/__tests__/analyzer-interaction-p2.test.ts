@@ -291,8 +291,14 @@ describe("focus follows the surface that replaced the pressed button (P2-69)", (
     expect(edit).toContain("?.focus({ preventScroll: true });");
     expect(page).toMatch(/data-editing-assumptions-banner="true"\s+tabIndex=\{-1\}/);
     const done = page.slice(page.indexOf("const handleBackToResult = useCallback"), page.indexOf("const handleInputTabClick"));
-    expect(done).toContain(`.querySelector<HTMLElement>("[data-analysis-results='true']")`);
-    expect(done).toContain("?.focus({ preventScroll: true });");
+    // The handoff goes through focusAnalysisResults(): the verdict heading
+    // first (the summary bar's target too), the results region when no
+    // decision card rendered. Neither draws a ring (polish pass, 2026-10-20).
+    expect(done).toContain("focusAnalysisResults();");
+    const helper = page.slice(page.indexOf("function focusAnalysisResults()"), page.indexOf("function focusAnalysisResults()") + 700);
+    expect(helper).toContain('document.getElementById("decision-summary-title")');
+    expect(helper).toContain(`.querySelector<HTMLElement>("[data-analysis-results='true']")`);
+    expect(helper).toContain("focus({ preventScroll: true })");
   });
 
   it("moves into the financing comparison when it opens and back to its trigger when it closes", () => {
@@ -449,11 +455,17 @@ describe("the confidence card points to nothing that is not there (P2-27)", () =
 describe("wide result tables say they scroll (P2-153)", () => {
   it("passes the cue and the pinned first column on all three tables", () => {
     const projections = read("components/investcalc/ten-year-projections/table.tsx");
-    expect(projections).toMatch(/<ScrollX\s+label="Table"\s+cue\s+stickyFirstColumn\s+className="overflow-x-auto rounded-2xl border border-border bg-card"/);
+    // Re-anchored: ten-year-projections/table.tsx — the table sits on a 1px
+    // line inside the ledger row's card (Blueprint), not in a card of its own.
+    expect(projections).toMatch(/<ScrollX\s+label="Table"\s+cue\s+stickyFirstColumn\s+className="overflow-x-auto border-t border-border"/);
     const amortization = read("components/investcalc/loan-amortization-view.tsx");
     expect(amortization).toMatch(/<ScrollX\s+label="Table"\s+cue\s+stickyFirstColumn/);
     const confidence = read("components/investcalc/input-confidence-card.tsx");
-    expect(confidence.match(/<ScrollX label="Input confidence table" cue stickyFirstColumn /g)).toHaveLength(2);
+    // Re-anchored: input-confidence-card.tsx — the default branch's
+    // unreachable advocacy ternaries are gone (the advocacy cohort returns
+    // earlier), so one full table remains; it still carries the cue and the
+    // pinned first column.
+    expect(confidence.match(/<ScrollX label="Input confidence table" cue stickyFirstColumn /g)).toHaveLength(1);
   });
 });
 
@@ -464,7 +476,10 @@ describe("the cash-flow strip keeps a four-digit figure inside its card (P2-154)
       dashboard.indexOf("function CashFlowOverTimeStrip"),
       dashboard.indexOf("// NetCashFlowCard was deleted"),
     );
-    expect(strip).toContain('className="@container rounded-2xl border border-border bg-card p-4 sm:p-5"');
+    // Re-anchored: analysis-dashboard.tsx — the strip is a card at the
+    // object radius (rounded-lg) since the 2026-10 polish; the container
+    // query contract is unchanged.
+    expect(strip).toContain('className="@container rounded-lg border border-border bg-card p-4 sm:p-5"');
     expect(strip).toContain("@max-[14.5rem]:grid-cols-1");
     expect(strip).toContain("@max-[21rem]:text-sm");
     expect(strip).toContain("@max-[21rem]:px-1.5");

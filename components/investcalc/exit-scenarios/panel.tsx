@@ -86,8 +86,8 @@ export function ExitScenariosPanel({
   if (isLoadingSnapshot && years.length === 0) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-24 w-full rounded-2xl" />
-        <Skeleton className="h-80 w-full rounded-2xl" />
+        <Skeleton className="h-24 w-full rounded-lg" />
+        <Skeleton className="h-80 w-full rounded-lg" />
       </div>
     );
   }
@@ -102,7 +102,7 @@ export function ExitScenariosPanel({
       />
       <PanelInsight>{buildExitInsight(years)}</PanelInsight>
       <SnapshotStatusCard
-        title="Exit Scenarios"
+        title="Exit scenarios"
         snapshotSource={snapshotSource}
         isLoading={isLoadingSnapshot}
       />

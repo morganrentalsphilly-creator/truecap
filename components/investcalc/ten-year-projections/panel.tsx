@@ -80,8 +80,8 @@ export function TenYearProjectionsPanel({
   if (isLoadingSnapshot && projectionYears.length === 0) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-24 w-full rounded-2xl" />
-        <Skeleton className="h-80 w-full rounded-2xl" />
+        <Skeleton className="h-24 w-full rounded-lg" />
+        <Skeleton className="h-80 w-full rounded-lg" />
       </div>
     );
   }
@@ -94,7 +94,7 @@ export function TenYearProjectionsPanel({
       />
       <PanelInsight>{buildProjectionInsight(projectionYears)}</PanelInsight>
       <SnapshotStatusCard
-        title="10-Year Projections"
+        title="10-year projections"
         snapshotSource={snapshotSource}
         isLoading={isLoadingSnapshot}
       />

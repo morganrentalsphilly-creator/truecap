@@ -50,12 +50,12 @@ test("Pro is never gated: projections and stress test open, then save â†’ edit â
     }
     const projections = page.locator("[data-drill-row='projections']");
     await expect(projections).toBeVisible();
-    await expect(projections.getByText("PRO", { exact: true })).toHaveCount(0);
+    await expect(projections.getByText("Pro", { exact: true })).toHaveCount(0);
     await projections.getByRole("button").first().click();
     await expect(projections.getByText(/Year 10|10-year/i).first()).toBeVisible({ timeout: 30_000 });
     const stress = page.locator("[data-drill-row='stress-test']");
-    await expect(stress.getByText("PRO", { exact: true })).toHaveCount(0);
-    await stress.getByRole("button", { name: /Stress Test/ }).click();
+    await expect(stress.getByText("Pro", { exact: true })).toHaveCount(0);
+    await stress.getByRole("button", { name: /Stress test/ }).click();
     await expect(stress.getByText("Sensitivity analysis", { exact: true })).toBeVisible({ timeout: 30_000 });
 
     // Save, then edit and save again.

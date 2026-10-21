@@ -61,14 +61,17 @@ describe("advocacy decision accessibility and reflow guards", () => {
     expect(ledger).toContain('<ul className="divide-y divide-border sm:hidden">');
     // The wide table sits in the keyboard-reachable ScrollX region (2026-09
     // audit); the reflow contract (cards below sm, table from sm) is unchanged.
-    // Both tables (this branch and the default one) carry the scroll cue and
-    // the pinned first column: between 640 and about 860px the last column
-    // was off-screen with nothing to say so (P2-153).
+    // The full-ledger table carries the scroll cue and the pinned first
+    // column: between 640 and about 860px the last column was off-screen
+    // with nothing to say so (P2-153).
+    // Re-anchored: input-confidence-card.tsx — the default branch's
+    // unreachable advocacy ternaries (the cohort returns earlier) are gone,
+    // so the file holds one such table, not two.
     expect(
       ledger.split(
         '<ScrollX label="Input confidence table" cue stickyFirstColumn className="hidden overflow-x-auto sm:block">',
       ),
-    ).toHaveLength(3);
+    ).toHaveLength(2);
     // ScrollX names the region and makes it a tab stop only while it
     // overflows; a caller-side aria-label left a named role-less div (P2-73).
     expect(ledger).not.toContain("Scrollable input confidence table");

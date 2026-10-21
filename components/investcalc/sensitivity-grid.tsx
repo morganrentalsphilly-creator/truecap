@@ -7,10 +7,12 @@
  * Self-contained, additive to the analysis dashboard. Reads the current
  * form values, runs the existing calc in mutated scenarios, renders a
  * 3-row grid. Does not modify form state.
+ *
+ * Blueprint (2026-10): one card, a heading on a 1px line, the three axes
+ * as rows on soft lines, every figure in the figure face. No inner box.
  */
 
 import { useMemo } from "react";
-import { Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import {
@@ -30,11 +32,10 @@ const fmtPct = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
 
 function pickColor(scenarioName: string, baseRefValue: number, value: number) {
   if (scenarioName === "Base") return "text-foreground";
-  // Better than base → green; worse → red
+  // Better than base is green; worse is red (the Sign rule: a pass or a
+  // miss against the base, never emphasis).
   const better = value >= baseRefValue;
-  return better
-    ? "text-[var(--metric-positive)]"
-    : "text-[var(--metric-negative)]";
+  return better ? "text-positive" : "text-negative";
 }
 
 /** Non-color cue (▲ better / ▼ worse than base) so the direction survives
@@ -58,7 +59,7 @@ function ScenarioCell({
   const isCashPurchase = result.monthlyPayment <= 0;
   return (
     <div className="space-y-0.5">
-      <div className={cn("text-sm font-semibold tabular-nums", pickColor(scenarioName, baseResult.netCashFlow, result.netCashFlow))}>
+      <div className={cn("font-figure text-sm font-semibold", pickColor(scenarioName, baseResult.netCashFlow, result.netCashFlow))}>
         {pickGlyph(scenarioName, baseResult.netCashFlow, result.netCashFlow) ? (
           <span aria-hidden="true" className="mr-0.5">
             {pickGlyph(scenarioName, baseResult.netCashFlow, result.netCashFlow)}
@@ -66,7 +67,7 @@ function ScenarioCell({
         ) : null}
         {fmtCash(result.netCashFlow)}/mo
       </div>
-      <div className="text-2xs text-muted-foreground tabular-nums">
+      <div className="font-figure text-2xs text-muted-foreground">
         <span className={cn(pickColor(scenarioName, baseResult.capRate, result.capRate))}>
           {fmtPct(result.capRate)} cap
         </span>{" "}
@@ -98,10 +99,10 @@ function ScenarioCell({
 function Row({ row }: { row: SensitivityRow }) {
   const base = row.scenarios.find((s) => s.name === "Base")!;
   return (
-    <div className="py-3 first:pt-0 last:pb-0 border-t border-border first:border-t-0">
+    <div className="py-3">
       {/* Mobile: stacked label header + 1-col scenarios; sm+: 4-col grid */}
       <div className="sm:hidden">
-        <div className="text-xs font-medium text-muted-foreground mb-2">
+        <div className="mb-2 text-xs font-medium text-muted-foreground">
           {row.label}
         </div>
         <div className="space-y-2.5">
@@ -111,7 +112,7 @@ function Row({ row }: { row: SensitivityRow }) {
                 <div className="text-xs font-semibold text-muted-foreground">
                   {s.name}
                 </div>
-                <div className="text-3xs text-muted-foreground">{s.deltaLabel}</div>
+                <div className="font-figure text-2xs text-muted-foreground">{s.deltaLabel}</div>
               </div>
               <div className="flex-1 min-w-0 text-right">
                 <ScenarioCell result={s.result} baseResult={base.result} scenarioName={s.name} />
@@ -127,12 +128,12 @@ function Row({ row }: { row: SensitivityRow }) {
           <div className="text-xs font-medium text-muted-foreground">
             {row.label}
           </div>
-          <div className="text-3xs text-muted-foreground mt-0.5">±change</div>
+          <div className="mt-0.5 text-2xs text-muted-foreground">±change</div>
         </div>
         {row.scenarios.map((s) => (
           <div key={s.name}>
-            <div className="text-xs text-muted-foreground mb-1 font-semibold">
-              {s.name} · <span className="text-muted-foreground font-normal">{s.deltaLabel}</span>
+            <div className="mb-1 text-xs font-semibold text-muted-foreground">
+              {s.name} · <span className="font-figure font-normal text-muted-foreground">{s.deltaLabel}</span>
             </div>
             <ScenarioCell result={s.result} baseResult={base.result} scenarioName={s.name} />
           </div>
@@ -149,26 +150,25 @@ export function SensitivityGrid({ values }: SensitivityGridProps) {
   }, [values]);
 
   return (
-    <div className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6">
-      <div className="flex items-center gap-2 mb-1.5">
-        <Activity className="w-4 h-4 text-primary" />
-        <span className="font-semibold text-sm text-foreground">
+    <div className="rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6">
+      <div className="border-b border-border pb-3">
+        <p className="text-sm font-semibold text-foreground">
           Sensitivity analysis
-        </span>
+        </p>
+        <p className="mt-0.5 text-sm text-muted-foreground">
+          How the deal holds up if rent comes in lower, vacancy spikes, or rates
+          move 1pp against you. The base column is what you entered.
+        </p>
       </div>
-      <p className="text-xs text-muted-foreground mb-4">
-        How the deal holds up if rent comes in lower, vacancy spikes, or rates
-        move 1pp against you. The base column is what you entered.
-      </p>
 
       {report ? (
-        <div className="rounded-xl border border-border bg-[var(--background)] px-4 py-2 sm:px-5">
+        <div className="divide-y divide-rule-soft">
           {report.map((row) => (
             <Row key={row.axis} row={row} />
           ))}
         </div>
       ) : (
-        <div className="text-xs text-muted-foreground">
+        <div className="pt-3 text-xs text-muted-foreground">
           Enter purchase price, rent, and financing to see sensitivity.
         </div>
       )}

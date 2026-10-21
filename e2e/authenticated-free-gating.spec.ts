@@ -51,7 +51,7 @@ test("a free run shows Pro badges on gated rows, gates the PDF, and still saves"
     for (const row of ["projections", "stress-test"]) {
       const drill = page.locator(`[data-drill-row='${row}']`);
       await expect(drill, row).toBeVisible();
-      await expect(drill.getByText("PRO", { exact: true }), `${row} carries the Pro badge`).toBeVisible();
+      await expect(drill.getByText("Pro", { exact: true }), `${row} carries the Pro badge`).toBeVisible();
     }
 
     await summary.locator("summary").filter({ hasText: "More actions" }).click();
@@ -63,8 +63,8 @@ test("a free run shows Pro badges on gated rows, gates the PDF, and still saves"
     await expect(save).toBeEnabled({ timeout: 20_000 });
     await save.click();
     await expect(page).toHaveURL(/[?&]savedDeal=[0-9a-f-]{36}(?:&|$)/i, { timeout: 30_000 });
-    // A free account's button carries the "PRO" pill for re-saves, so its
-    // accessible name is "Saved PRO".
+    // A free account's button carries the "Pro" tag for re-saves, so its
+    // accessible name is "Saved Pro".
     await expect(summary.getByRole("button", { name: /^Saved\b/ })).toBeVisible({ timeout: 30_000 });
   } finally {
     await deleteRegressionDealsByAddress(page, address).catch(() => 0);

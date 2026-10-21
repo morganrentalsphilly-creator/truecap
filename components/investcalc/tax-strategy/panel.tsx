@@ -76,8 +76,8 @@ export function TaxStrategyPanel({
   if (isLoadingSnapshot && years.length === 0) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-24 w-full rounded-2xl" />
-        <Skeleton className="h-80 w-full rounded-2xl" />
+        <Skeleton className="h-24 w-full rounded-lg" />
+        <Skeleton className="h-80 w-full rounded-lg" />
       </div>
     );
   }
@@ -87,7 +87,7 @@ export function TaxStrategyPanel({
       <TaxStrategySummaryCards years={years} />
       <PanelInsight>{buildTaxInsight(years)}</PanelInsight>
       <SnapshotStatusCard
-        title="Illustrative Tax Impact"
+        title="Illustrative tax impact"
         snapshotSource={snapshotSource}
         isLoading={isLoadingSnapshot}
       />

@@ -107,21 +107,21 @@ export function ResultsRegion({
 
   return (
     <details
-      className="group rounded-2xl border border-border bg-card shadow-sm"
+      className="group rounded-lg border border-border bg-card shadow-sm"
       open={hydrated ? open : defaultOpen}
       onToggle={(event) => handleToggle((event.currentTarget as HTMLDetailsElement).open)}
     >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:px-5">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-lg px-4 py-3.5 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:px-5">
         <span className="min-w-0">
-          <span className="block text-base font-extrabold text-foreground">{question}</span>
+          <span className="block font-display text-lg text-foreground">{question}</span>
           {payoff ? (
-            <span className="mt-0.5 block text-xs text-muted-foreground">{payoff}</span>
+            <span className="mt-0.5 block text-sm text-muted-foreground">{payoff}</span>
           ) : null}
         </span>
         <ChevronDown
           aria-hidden
           className={cn(
-            "size-5 shrink-0 text-muted-foreground transition-transform",
+            "size-5 shrink-0 text-muted-foreground transition-transform duration-150",
             "group-open:rotate-180"
           )}
         />

@@ -21,15 +21,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import {
- 
-  Bookmark,
-  History,
-  Loader2,
-  Share2,
-  Smartphone,
-  X,
-} from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import {
   isTrueCapSyntheticSampleAddress,
@@ -82,15 +74,14 @@ export function SignupPromptCard({
     <div className="rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6">
       {/* Header — pill + dismiss */}
       <div className="flex items-start justify-between gap-3">
-        <span className="inline-flex items-center gap-1.5 rounded-sm border border-border px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
-          <Bookmark className="size-3" aria-hidden />
+        <span className="inline-flex items-center rounded-sm border border-border px-1.5 py-0.5 font-mono text-2xs text-muted-foreground">
           Free plan
         </span>
         <button
           type="button"
           onClick={() => setDismissed(true)}
           aria-label="Dismiss signup prompt"
-          className="inline-flex size-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="inline-flex size-11 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-band hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           <X className="size-4" />
         </button>
@@ -105,23 +96,12 @@ export function SignupPromptCard({
         account—we&apos;ll save this deal automatically.
       </p>
 
-      {/* Benefit bullets — stacked on mobile, 3-up on sm+ */}
+      {/* What the free account gives: three rows on lines (stacked on
+          phones, 3-up from sm). No icons: the words carry it. */}
       <ul className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
-        <BenefitChip
-          icon={History}
-          label="Save up to 5"
-          sub="Reopen later · editing is Pro"
-        />
-        <BenefitChip
-          icon={Smartphone}
-          label="Any device"
-          sub="After you save"
-        />
-        <BenefitChip
-          icon={Share2}
-          label="Read-only links"
-          sub="Share a saved deal"
-        />
+        <BenefitRow label="Save up to 5" sub="Reopen later · editing is Pro" />
+        <BenefitRow label="Any device" sub="After you save" />
+        <BenefitRow label="Read-only links" sub="Share a saved deal" />
       </ul>
 
       {/* Primary CTA — Google one-tap. Email signup as the alternate
@@ -149,26 +129,26 @@ export function SignupPromptCard({
 
         <div className="flex items-center justify-center gap-2 text-2xs text-muted-foreground">
           <span className="h-px w-8 bg-border" />
-          <span>OR</span>
+          <span>or</span>
           <span className="h-px w-8 bg-border" />
         </div>
 
         <Link
           href="/auth/sign-up?next=/dashboard/new"
           onClick={() => beginSignup("email")}
-          className="inline-flex h-11 w-full items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
+          className="inline-flex h-11 w-full items-center justify-center rounded-md border border-input bg-transparent px-5 text-sm font-semibold text-foreground transition-colors duration-150 hover:bg-band focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           Sign up with email
         </Link>
       </div>
 
       {/* Risk-reversal */}
-      <p className="mt-4 border-t border-border/60 pt-3 text-2xs text-muted-foreground">
+      <p className="mt-4 border-t border-border pt-3 text-2xs text-muted-foreground">
         Free plan · No card · Already have an account?{" "}
         <Link
           href="/auth/login?next=/dashboard/new"
           onClick={() => beginSignup("sign_in")}
-          className="inline-flex min-h-11 min-w-11 items-center justify-center px-1 font-semibold text-foreground hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className="tc-link inline-flex min-h-11 min-w-11 items-center justify-center px-1 font-semibold focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           Sign in
         </Link>
@@ -177,24 +157,11 @@ export function SignupPromptCard({
   );
 }
 
-function BenefitChip({
-  icon: Icon,
-  label,
-  sub,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  sub: string;
-}) {
+function BenefitRow({ label, sub }: { label: string; sub: string }) {
   return (
-    <li className="flex items-start gap-2 border-t border-border pt-2">
-      <Icon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-      <div className="min-w-0">
-        <div className="text-sm font-semibold text-foreground">{label}</div>
-        <div className="text-2xs leading-snug text-muted-foreground">
-          {sub}
-        </div>
-      </div>
+    <li className="min-w-0 border-t border-border pt-2">
+      <div className="text-sm font-semibold text-foreground">{label}</div>
+      <div className="text-2xs leading-snug text-muted-foreground">{sub}</div>
     </li>
   );
 }

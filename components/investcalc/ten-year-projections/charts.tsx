@@ -26,12 +26,13 @@ import {
 } from "@/components/investcalc/analysis-panels/shared/formatters";
 import type { ProjectionYear } from "@/lib/ten-year-projections";
 
+// Sentence case, acronyms kept (DESIGN.md chrome rules).
 const chartConfig = {
-  netCashFlowAnnual: { label: "Net Cash Flow", color: "var(--color-chart-1)" },
-  rentalIncomeAnnual: { label: "Rental Income", color: "var(--color-chart-2)" },
-  operatingExpensesAnnual: { label: "Operating Expenses", color: "var(--color-chart-5)" },
-  debtServiceAnnual: { label: "Financing Outflow (P&I + MI)", color: "var(--color-chart-3)" },
-  cumulativeCashFlowAnnual: { label: "Cumulative Cash Flow", color: "var(--color-chart-4)" },
+  netCashFlowAnnual: { label: "Net cash flow", color: "var(--color-chart-1)" },
+  rentalIncomeAnnual: { label: "Rental income", color: "var(--color-chart-2)" },
+  operatingExpensesAnnual: { label: "Operating expenses", color: "var(--color-chart-5)" },
+  debtServiceAnnual: { label: "Financing outflow (P&I + MI)", color: "var(--color-chart-3)" },
+  cumulativeCashFlowAnnual: { label: "Cumulative cash flow", color: "var(--color-chart-4)" },
 } as const;
 
 export function TenYearProjectionCharts({
@@ -44,7 +45,7 @@ export function TenYearProjectionCharts({
   const animate = useChartDrawAnimation();
   return (
     <div className="grid min-w-0 gap-3 sm:gap-4 xl:grid-cols-2">
-      <ChartCard title="Annual Cash Flow">
+      <ChartCard title="Annual cash flow">
         <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <BarChart data={projectionYears}>
             <CartesianGrid vertical={false} />
@@ -56,7 +57,7 @@ export function TenYearProjectionCharts({
         </ChartContainer>
       </ChartCard>
 
-      <ChartCard title="Income vs Expenses">
+      <ChartCard title="Income vs expenses">
         <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <LineChart data={projectionYears}>
             <CartesianGrid vertical={false} />
@@ -97,7 +98,7 @@ export function TenYearProjectionCharts({
         </ChartContainer>
       </ChartCard>
 
-      <ChartCard title="Cumulative Cash Flow" className="xl:col-span-2">
+      <ChartCard title="Cumulative cash flow" className="xl:col-span-2">
         <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[280px]">
           <AreaChart data={projectionYears}>
             <CartesianGrid vertical={false} />

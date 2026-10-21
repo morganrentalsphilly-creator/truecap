@@ -35,7 +35,7 @@ export function ExitScenarioSummaryCards({
       columnsClassName="md:grid-cols-2 xl:grid-cols-4"
       items={[
         {
-          label: "Highest Modeled Profit",
+          label: "Highest modeled profit",
           value: bestYear
             ? `${formatCurrency(bestYear.totalProfit)} · Y${bestYear.year}`
             : "—",
@@ -45,12 +45,12 @@ export function ExitScenarioSummaryCards({
             : undefined,
         },
         {
-          label: "Year 5 Profit",
+          label: "Year 5 profit",
           value: formatCurrency(year5?.totalProfit ?? 0),
           tone: (year5?.totalProfit ?? 0) >= 0 ? "positive" : "negative",
         },
         {
-          label: "Year 10 Profit",
+          label: "Year 10 profit",
           value: formatCurrency(year10?.totalProfit ?? 0),
           tone: (year10?.totalProfit ?? 0) >= 0 ? "positive" : "negative",
         },

@@ -3,6 +3,11 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
+/**
+ * One chart inside a Pro panel: its title on a 1px line, the chart under it.
+ * Lines, not a card, because the panel already sits inside the ledger row's
+ * card (DESIGN.md: lines carry structure inside an object).
+ */
 export function ChartCard({
   title,
   className,
@@ -13,7 +18,7 @@ export function ChartCard({
   children: ReactNode;
 }) {
   return (
-    <div className={cn("min-w-0 overflow-hidden rounded-2xl border border-border bg-card p-3 sm:p-4", className)}>
+    <div className={cn("min-w-0 overflow-hidden border-t border-border pt-3", className)}>
       <p className="mb-3 text-sm font-semibold text-foreground sm:mb-4">{title}</p>
       {children}
     </div>

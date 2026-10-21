@@ -24,14 +24,15 @@ import {
 } from "@/components/investcalc/analysis-panels/shared/formatters";
 import type { ExitScenarioYear } from "@/lib/exit-scenarios";
 
+// Sentence case (DESIGN.md chrome rules).
 const chartConfig = {
   equity: { label: "Equity", color: "var(--color-chart-2)" },
-  propertyValue: { label: "Property Value", color: "var(--color-chart-1)" },
-  remainingLoanBalance: { label: "Loan Balance", color: "var(--color-chart-5)" },
-  totalProfit: { label: "Total Profit", color: "var(--color-chart-4)" },
-  netSaleProceeds: { label: "Net Sale Proceeds", color: "var(--color-chart-1)" },
-  cumulativeCashFlow: { label: "Cumulative Cash Flow", color: "var(--color-chart-2)" },
-  cumulativeTaxBenefit: { label: "Cumulative Tax Benefit", color: "var(--color-chart-4)" },
+  propertyValue: { label: "Property value", color: "var(--color-chart-1)" },
+  remainingLoanBalance: { label: "Loan balance", color: "var(--color-chart-5)" },
+  totalProfit: { label: "Total profit", color: "var(--color-chart-4)" },
+  netSaleProceeds: { label: "Net sale proceeds", color: "var(--color-chart-1)" },
+  cumulativeCashFlow: { label: "Cumulative cash flow", color: "var(--color-chart-2)" },
+  cumulativeTaxBenefit: { label: "Cumulative tax benefit", color: "var(--color-chart-4)" },
 } as const;
 
 export function ExitScenarioCharts({
@@ -44,7 +45,7 @@ export function ExitScenarioCharts({
   const animate = useChartDrawAnimation();
   return (
     <div className="grid min-w-0 gap-3 sm:gap-4 xl:grid-cols-2">
-      <ChartCard title="Equity Growth">
+      <ChartCard title="Equity growth">
         <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <LineChart data={years}>
             <CartesianGrid vertical={false} />
@@ -63,7 +64,7 @@ export function ExitScenarioCharts({
         </ChartContainer>
       </ChartCard>
 
-      <ChartCard title="Property Value vs Loan Balance">
+      <ChartCard title="Property value vs loan balance">
         <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <LineChart data={years}>
             <CartesianGrid vertical={false} />
@@ -91,7 +92,7 @@ export function ExitScenarioCharts({
         </ChartContainer>
       </ChartCard>
 
-      <ChartCard title="Total Profit Over Time">
+      <ChartCard title="Total profit over time">
         <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <LineChart data={years}>
             <CartesianGrid vertical={false} />
@@ -110,7 +111,7 @@ export function ExitScenarioCharts({
         </ChartContainer>
       </ChartCard>
 
-      <ChartCard title="Profit Breakdown">
+      <ChartCard title="Profit breakdown">
         <ChartContainer config={chartConfig} className="h-[240px] w-full sm:h-[260px]">
           <BarChart data={years}>
             <CartesianGrid vertical={false} />

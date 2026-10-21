@@ -136,7 +136,7 @@ function MetricCard({
         </span>
       )}
       {sub && !isLoading && (
-        <span className="text-3xs leading-tight text-muted-foreground sm:text-2xs">
+        <span className="text-2xs leading-tight text-muted-foreground">
           {sub}
         </span>
       )}
