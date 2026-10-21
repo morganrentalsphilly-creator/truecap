@@ -75,6 +75,7 @@ export function ResultPriceScrubber({
         {ceiling <= asking ? (
           <>
             {ceilingLabel}
+            {gap > 0 && !moved ? <span className="text-muted-foreground">Gap {usd(gap)}</span> : null}
             {askingLabel}
           </>
         ) : (
@@ -86,8 +87,11 @@ export function ResultPriceScrubber({
       </div>
       <SliderPrimitive.Root
         // 44px tall: Radix takes the pointer on the root, so the band around
-        // the track is the drag target whatever the thumb's size.
-        className="relative mt-1.5 flex h-11 w-full touch-none items-center select-none"
+        // the track is the drag target whatever the thumb's size. The band
+        // overlaps its neighbours (negative margins) so the card keeps the
+        // static track's height: the decision's actions have to end inside
+        // the first phone screen (public-product.spec, 390×844).
+        className="relative -my-2.5 mt-[-4px] flex h-11 w-full touch-none items-center select-none"
         min={low}
         max={high}
         step={1_000}
@@ -143,8 +147,8 @@ export function ResultPriceScrubber({
       <p
         id={`${id}-help`}
         className={cn(
-          "flex min-h-5 items-center justify-center gap-2 text-center font-figure text-xs text-muted-foreground",
-          compact ? "mt-1" : "mt-1.5",
+          "flex items-center justify-center gap-2 text-center font-figure text-xs text-muted-foreground",
+          moved ? "mt-2 min-h-5" : "sr-only",
         )}
       >
         {moved ? (
@@ -152,15 +156,18 @@ export function ResultPriceScrubber({
             <span className="text-highlight-text">What if you offered {usd(price)}</span>
             <button
               type="button"
-              className="tc-link inline-flex min-h-11 items-center font-sans"
+              // 44px target without a 44px line: the box overlaps the line.
+              className="tc-link -my-3 inline-flex min-h-11 items-center font-sans"
               onClick={() => onPriceChange(asking)}
             >
               Back to asking
             </button>
           </>
         ) : gap > 0 ? (
-          <span aria-hidden>Gap {usd(gap)}</span>
-        ) : null}
+          `Asking ${usd(asking)} is ${usd(gap)} above the Offer Ceiling ${usd(ceiling)}.`
+        ) : (
+          `Asking ${usd(asking)} is within the Offer Ceiling ${usd(ceiling)}.`
+        )}
       </p>
       <span className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {announcement}
