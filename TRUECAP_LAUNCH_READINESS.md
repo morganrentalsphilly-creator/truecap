@@ -8,7 +8,7 @@ Lead with agents screening one rental for multiple clients, transparent assumpti
 
 Keep Pro $29.99/month or $300/year; Agent Pro $59.99/month or $590/year. Keep 21 days, three property analyses and one comparison, with same-property revisions no longer using another slot. No discount, subscription entitlement or live Stripe Price change is approved here.
 
-**Owner decision:** 100 clients currently share 12 Buy Boxes. Recommend testing 100 Agent Pro boxes (one per client), retaining 12 Pro boxes, after bulk-screen performance checks and explicit allowance approval. Limits are centralized but unchanged. Do not advertise unlimited client criteria.
+**Owner decision:** 100 clients currently share 12 Buy Boxes. Recommend testing 100 Agent Pro boxes (one per client), retaining 12 Pro boxes, after production capacity review and explicit allowance approval. Limits are centralized but unchanged. Do not advertise unlimited client criteria.
 
 ## Data economics
 
@@ -42,3 +42,5 @@ Use existing consent-aware PostHog events for landing → start → activation �
 ## Demonstration
 
 Guided sample: https://usetruecap.com/analyze?sample=1. Representative report: https://usetruecap.com/sample-decision-memo. Methodology: https://usetruecap.com/methodology. Agent journey: https://usetruecap.com/for-agents. Smoke-test after deployment. Synthetic QA reports are demonstrations, never customer results or verified property evidence.
+
+Synthetic local compute benchmark (three runs, 100 clients): 12 boxes 25–39ms; proposed 100 boxes 157–189ms, including an IRR-target variant. No allowances changed. This excludes database/network/rendering and does not establish production latency.
