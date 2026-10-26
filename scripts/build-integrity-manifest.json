@@ -1,9 +1,9 @@
 {
   "_readme": "Pinned sha256 of every file that executes during a build (or decides what does). Verified by scripts/verify-build-integrity.mjs in the build-chain-guard CI job. Any drift fails CI until someone regenerates this file on purpose: `node scripts/verify-build-integrity.mjs --update`. Exists because of the 2026-06-01 incident — see the header of that script.",
   "algorithm": "sha256",
-  "generatedAt": "2026-10-26T19:01:25.709Z",
+  "generatedAt": "2026-10-26T19:12:08.258Z",
   "files": {
-    ".github/workflows/ci.yml": "14bdcce2f13d99b666192b3351c41ab5afcb9d0c6c6cfd39d0c35f046494c0f0",
+    ".github/workflows/ci.yml": "02b530eddf7f7210edcbe36981379480344afcf2436322707ed25a48bc39885a",
     "eslint.config.mjs": "d9787e67d053e8478afb11f3b26f67eb6b48ac2c7dabcd8b6a0f6e58ff8f462f",
     "instrumentation-client.ts": "09cbd764d2153e22ea48ce725a78b487b2dfe57475eb210731d7ddbc577e5f69",
     "instrumentation.ts": "158fe4c748f1599b56a1681e417ceddcda7ce40b988f95fca298c5ab548ca38c",
