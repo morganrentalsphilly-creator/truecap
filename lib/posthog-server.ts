@@ -39,6 +39,11 @@ const HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com";
 // modules that import this file but never actually use it.
 let client: PostHog | null = null;
 
+/** Whether a server capture can be attempted; an intentional hold is not a failure. */
+export function isServerAnalyticsConfigured(): boolean {
+  return Boolean(process.env.POSTHOG_API_KEY);
+}
+
 function getClient(): PostHog | null {
   const apiKey = process.env.POSTHOG_API_KEY;
   if (!apiKey) return null;

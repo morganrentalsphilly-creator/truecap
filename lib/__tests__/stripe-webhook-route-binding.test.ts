@@ -28,8 +28,11 @@ vi.mock("@/lib/stripe/client", () => ({
   }),
 }));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminSupabaseClient: () => mocks.admin }));
-vi.mock("@/lib/posthog-server", () => ({ captureServerEvent: vi.fn(async () => true) }));
-vi.mock("@/lib/analytics/site-events-server", () => ({ trackServer: vi.fn(async () => undefined) }));
+vi.mock("@/lib/posthog-server", () => ({
+  captureServerEvent: vi.fn(async () => true),
+  isServerAnalyticsConfigured: vi.fn(() => true),
+}));
+vi.mock("@/lib/analytics/site-events-server", () => ({ trackServer: vi.fn(async () => true) }));
 vi.mock("@/lib/email/trial-emails", () => ({ scheduleTrialOnboardingEmails: vi.fn() }));
 vi.mock("@/lib/stripe/subscription-checkout-intent", () => ({
   completeSubscriptionCheckoutIntentFromWebhook: vi.fn(async () => null),
@@ -44,6 +47,8 @@ vi.mock("@/lib/analytics/canonical-event-claim", () => ({
 
 import * as Sentry from "@sentry/nextjs";
 import { trackServer } from "@/lib/analytics/site-events-server";
+import { captureServerEvent, isServerAnalyticsConfigured } from "@/lib/posthog-server";
+import { claimCanonicalAnalyticsEvent, releaseCanonicalAnalyticsEventClaim } from "@/lib/analytics/canonical-event-claim";
 import { createFakeAdmin } from "./helpers/fake-supabase-admin";
 import { POST } from "@/app/api/stripe/webhooks/route";
 
@@ -122,6 +127,11 @@ function makeFake(extra: { ledger?: Record<string, unknown>[]; users?: Array<{ i
 }
 
 beforeEach(() => {
+  vi.mocked(trackServer).mockReset().mockResolvedValue(true);
+  vi.mocked(captureServerEvent).mockReset().mockResolvedValue(true);
+  vi.mocked(isServerAnalyticsConfigured).mockReset().mockReturnValue(true);
+  vi.mocked(claimCanonicalAnalyticsEvent).mockReset().mockResolvedValue(true);
+  vi.mocked(releaseCanonicalAnalyticsEventClaim).mockReset().mockResolvedValue(true);
   vi.mocked(Sentry.captureMessage).mockClear();
   vi.mocked(Sentry.captureException).mockClear();
   mocks.constructEvent.mockReset();
@@ -216,6 +226,32 @@ describe("POST /api/stripe/webhooks — claim, duplicate, retry", () => {
 });
 
 describe("POST /api/stripe/webhooks — funnel analytics", () => {
+  it.each([
+    { label: "PostHog paused, Vercel accepted", configured: false, captured: false, siteCaptured: true, retained: true },
+    { label: "PostHog paused, Vercel failed or disabled", configured: false, captured: false, siteCaptured: false, retained: false },
+    { label: "PostHog failed, Vercel accepted", configured: true, captured: false, siteCaptured: true, retained: false },
+    { label: "PostHog accepted, Vercel failed", configured: true, captured: true, siteCaptured: false, retained: true },
+  ])("deduplicates a checkout across distinct provider events: $label", async ({ configured, captured, siteCaptured, retained }) => {
+    makeFake();
+    const claims = new Set<string>();
+    vi.mocked(claimCanonicalAnalyticsEvent).mockImplementation(async (_admin, { dedupeKey }) => {
+      if (claims.has(dedupeKey)) return false;
+      claims.add(dedupeKey);
+      return true;
+    });
+    vi.mocked(releaseCanonicalAnalyticsEventClaim).mockImplementation(async (_admin, { dedupeKey }) => claims.delete(dedupeKey));
+    vi.mocked(isServerAnalyticsConfigured).mockReturnValue(configured);
+    vi.mocked(captureServerEvent).mockResolvedValue(captured);
+    vi.mocked(trackServer).mockResolvedValue(siteCaptured);
+    mocks.subscriptionsRetrieve.mockResolvedValue(subscriptionObject({ metadata: { user_id: U1, plan_slug: "pro_monthly" } }));
+    const session = { client_reference_id: U1, metadata: { user_id: U1, supabase_user_id: U1, plan_slug: "pro_monthly" } };
+
+    expect((await deliver(checkoutEvent("evt_same_checkout_a", session))).status).toBe(200);
+    expect((await deliver(checkoutEvent("evt_same_checkout_b", session))).status).toBe(200);
+    expect(trackServer).toHaveBeenCalledTimes(retained ? 1 : 2);
+    expect(claims.has("cs_1")).toBe(retained);
+  });
+
   it("fires checkout_completed (server-side) exactly once for a synced paid checkout, never for a skipped one", async () => {
     vi.mocked(trackServer).mockClear();
     const fake = makeFake();

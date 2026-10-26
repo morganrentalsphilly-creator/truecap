@@ -3,8 +3,9 @@
 /**
  * AnimatedNumber: a figure that rolls between values (NumberFlow), formatted
  * for the locale with tabular numerals, inside the text face. The server and
- * the first client render print the plain formatted value, so the figure is
- * in the HTML and never shifts; NumberFlow animates only later changes.
+ * the first client render print the plain formatted value. Unchanged figures
+ * stay as text instead of building a shadow tree of animated digits;
+ * NumberFlow mounts when a value actually changes.
  * Reduced motion: NumberFlow respects the preference itself
  * (respectMotionPreference defaults on), so the number just changes.
  *
@@ -24,7 +25,7 @@
  */
 
 import NumberFlow from "@number-flow/react";
-import { useEffect, useState, type ComponentProps } from "react";
+import { useEffect, useState, type ComponentProps, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { isSamplePrerenderShown } from "@/lib/sample-prerender";
 
@@ -39,6 +40,17 @@ const FORMAT: Record<NumberKind, Format> = {
   ratio: { minimumFractionDigits: 2, maximumFractionDigits: 2 },
   percent: { minimumFractionDigits: 1, maximumFractionDigits: 1 },
   integer: { maximumFractionDigits: 0 },
+};
+
+// Match NumberFlow's static fallback box, including its digit-mask padding.
+// Promotion must not move the surrounding line or change the figure's width.
+const STATIC_NUMBER_STYLE: CSSProperties = {
+  display: "inline-block",
+  direction: "ltr",
+  whiteSpace: "nowrap",
+  lineHeight: 1,
+  fontKerning: "none",
+  paddingBlock: "calc(round(nearest, calc(var(--number-flow-mask-height, 0.25em) / 2), 1px) * 2)",
 };
 
 function prefersReducedMotion(): boolean {
@@ -73,6 +85,11 @@ export function AnimatedNumber({
     rollIn && !skipRoll && !prefersReducedMotion() ? 0 : value,
   );
   const [rolled, setRolled] = useState(!rollIn || skipRoll);
+  const [animated, setAnimated] = useState(rollIn && !skipRoll);
+  // Promote before the effect updates `shown`, so NumberFlow receives the
+  // previous value on mount and can animate the first change as well.
+  // Once promoted, retain the host even when a figure returns to its start.
+  if (!animated && !Object.is(value, shown)) setAnimated(true);
   useEffect(() => {
     if (rolled) {
       setShown(value);
@@ -92,16 +109,22 @@ export function AnimatedNumber({
   return (
     <>
       <span className="sr-only">{text}</span>
-      <NumberFlow
-        aria-hidden
-        value={shown}
-        format={FORMAT[kind]}
-        locales="en-US"
-        suffix={suffix}
-        trend={trend}
-        className={cn("font-figure", className)}
-        willChange
-      />
+      {animated ? (
+        <NumberFlow
+          aria-hidden
+          value={shown}
+          format={FORMAT[kind]}
+          locales="en-US"
+          suffix={suffix}
+          trend={trend}
+          className={cn("font-figure", className)}
+          willChange
+        />
+      ) : (
+        <span aria-hidden data-static-number="" className={cn("font-figure", className)} style={STATIC_NUMBER_STYLE}>
+          {text}
+        </span>
+      )}
     </>
   );
 }

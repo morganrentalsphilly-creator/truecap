@@ -67,6 +67,10 @@ export type SiteEventProps = {
   upgrade_nudge_shown: { placement: "third_deal" | "limit_reached" };
   upgrade_nudge_clicked: { placement: "third_deal" | "limit_reached" };
   trial_offer_redeemed: { plan: string };
+  client_matches_generated: { source: "saved_deal"; count: number };
+  client_match_saved: { source: "saved_deal" };
+  client_match_exported: { source: "saved_deal" };
+  rental_evidence_saved: { source: "saved_deal" };
 };
 
 export type SiteEvent = keyof SiteEventProps;
@@ -93,6 +97,10 @@ export const SITE_EVENTS: readonly SiteEvent[] = [
   "upgrade_nudge_shown",
   "upgrade_nudge_clicked",
   "trial_offer_redeemed",
+  "client_matches_generated",
+  "client_match_saved",
+  "client_match_exported",
+  "rental_evidence_saved",
 ];
 
 export const CONSENT_STORAGE_KEY = "truecap_cookie_consent_v1";
@@ -118,9 +126,27 @@ export function readStoredAnalyticsConsent(): "granted" | "denied" | null {
   }
 }
 
-function sanitizeProps(props: Record<string, unknown> | undefined): Record<string, Primitive> {
+function sanitizeProps(event: SiteEvent, props: Record<string, unknown> | undefined): Record<string, Primitive> {
   const out: Record<string, Primitive> = {};
   if (!props) return out;
+  // These workflows hold private client names, addresses and underwriting
+  // values. Their active analytics stream accepts only the documented source
+  // and an aggregate screening count, even if a future caller passes a row.
+  if (
+    event === "client_matches_generated" ||
+    event === "client_match_saved" ||
+    event === "client_match_exported" ||
+    event === "rental_evidence_saved"
+  ) {
+    if (props.source === "saved_deal") out.source = "saved_deal";
+    if (
+      event === "client_matches_generated" &&
+      typeof props.count === "number" &&
+      Number.isSafeInteger(props.count) &&
+      props.count >= 0
+    ) out.count = props.count;
+    return out;
+  }
   for (const [key, value] of Object.entries(props)) {
     if (value === undefined || value === null) continue;
     if (typeof value === "string") out[key] = value.slice(0, 80);
@@ -146,7 +172,7 @@ function loadVercelTrack() {
  */
 export function track<E extends SiteEvent>(event: E, props: SiteEventProps[E]): void {
   if (typeof window === "undefined") return;
-  const clean = sanitizeProps(props as Record<string, unknown>);
+  const clean = sanitizeProps(event, props as Record<string, unknown>);
   try {
     (window.__tcEvents ??= []).push({ event, props: clean, at: Date.now() });
   } catch {

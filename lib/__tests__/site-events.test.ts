@@ -40,21 +40,27 @@ afterEach(() => {
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe("typed track()", () => {
-  it("names the thirteen funnel events and the two measurement events", () => {
+  it("names the funnel, measurement, lifecycle and client-workflow events", () => {
     // 13 funnel events, plus cookie_consent_choice and primary_cta_clicked
     // (go-to-market audit 2026-10, rows P1-52 and P2-115), plus the six
     // funnel-leak events (docs/funnel-leaks-plan.md).
-    expect(SITE_EVENTS).toHaveLength(21);
+    expect(SITE_EVENTS).toHaveLength(25);
     expect(new Set(SITE_EVENTS).size).toBe(SITE_EVENTS.length);
     expect(SITE_EVENTS).toContain("checkout_completed");
     expect(SITE_EVENTS.slice(13, 15)).toEqual(["cookie_consent_choice", "primary_cta_clicked"]);
-    expect(SITE_EVENTS.slice(15)).toEqual([
+    expect(SITE_EVENTS.slice(15, 21)).toEqual([
       "memo_requested",
       "memo_sent",
       "sequence_email_sent",
       "upgrade_nudge_shown",
       "upgrade_nudge_clicked",
       "trial_offer_redeemed",
+    ]);
+    expect(SITE_EVENTS.slice(21)).toEqual([
+      "client_matches_generated",
+      "client_match_saved",
+      "client_match_exported",
+      "rental_evidence_saved",
     ]);
   });
 
@@ -86,6 +92,60 @@ describe("typed track()", () => {
   it("is a no-op during server rendering", () => {
     delete (globalThis as unknown as { window?: TestWindow }).window;
     expect(() => track("sample_viewed", { source: "hero" })).not.toThrow();
+  });
+});
+
+describe("client workflow measurement", () => {
+  const events = [
+    "client_matches_generated",
+    "client_match_saved",
+    "client_match_exported",
+    "rental_evidence_saved",
+  ] as const;
+
+  it.each([null, "denied", "granted"] as const)(
+    "keeps the four workflows measurable with consent %s without leaking private row fields",
+    async (consent) => {
+      if (consent) storage.set(CONSENT_STORAGE_KEY, consent);
+      const props = {
+        source: "saved_deal" as const,
+        count: 2,
+        client_name: "Private client",
+        address: "Private property",
+        monthly_rent: 2100,
+        notes: "Private note",
+        share_token: "private-capability",
+      };
+      for (const event of events) track(event, props);
+      await flush();
+      const expected = events.map((event) => ({
+        event,
+        ...(event === "client_matches_generated"
+          ? { source: "saved_deal", count: 2 }
+          : { source: "saved_deal" }),
+      }));
+      expect(vi.mocked(vercelTrack).mock.calls).toEqual(
+        expected.map(({ event, ...properties }) => [event, properties]),
+      );
+      const win = (globalThis as unknown as { window: TestWindow }).window;
+      expect(win.__tcEvents?.map(({ event, props: properties }) => ({ event, ...properties }))).toEqual(expected);
+      expect(win.dataLayer).toEqual(consent === "granted" ? expected : undefined);
+    },
+  );
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, -1, 1.5])(
+    "rejects an invalid aggregate count %s",
+    async (count) => {
+      track("client_matches_generated", { source: "saved_deal", count });
+      await flush();
+      expect(vercelTrack).toHaveBeenCalledWith("client_matches_generated", { source: "saved_deal" });
+    },
+  );
+
+  it("does not forward arbitrary text passed as the source at runtime", async () => {
+    track("client_match_saved", { source: "Private client name" as "saved_deal" });
+    await flush();
+    expect(vercelTrack).toHaveBeenCalledWith("client_match_saved", {});
   });
 });
 

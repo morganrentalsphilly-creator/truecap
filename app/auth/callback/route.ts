@@ -9,7 +9,7 @@ import { linkMemoLeadToUser } from "@/lib/memo-lead";
 import { sendTrialWelcomeNow } from "@/lib/email/send-sequence";
 import { isFunnelFlagOn } from "@/lib/funnel-flags";
 import { getSiteUrl } from "@/lib/site-url";
-import { captureServerEvent } from "@/lib/posthog-server";
+import { captureServerEvent, isServerAnalyticsConfigured } from "@/lib/posthog-server";
 import {
   canonicalAnalyticsEventId,
   claimCanonicalAnalyticsEvent,
@@ -136,10 +136,12 @@ function scheduleNewOAuthAccountAnalytics(
           claimState = "unavailable";
         }
         if (claimState === "duplicate") continue;
+        let siteCaptured = false;
         if (analyticsEvent.event === "account_created") {
           // Site funnel (docs/analytics.md) — once per new Google account.
-          await trackServer("signup_completed", { method: "google" });
-          await trackServer("trial_started", { method: "google" });
+          const signupCaptured = await trackServer("signup_completed", { method: "google" });
+          const trialCaptured = await trackServer("trial_started", { method: "google" });
+          siteCaptured = signupCaptured && trialCaptured;
         }
         const captured = await captureServerEvent({
           distinctId: user.id,
@@ -150,7 +152,13 @@ function scheduleNewOAuthAccountAnalytics(
           ),
           properties: { referral_source: referralSource },
         });
-        if (!captured && claimState === "claimed") {
+        // A deliberately paused PostHog stream must not erase the successful
+        // Vercel claim. Actual transport failures remain retryable.
+        if (
+          !captured &&
+          (isServerAnalyticsConfigured() || !siteCaptured) &&
+          claimState === "claimed"
+        ) {
           await releaseCanonicalAnalyticsEventClaim(admin, claimInput);
         }
       }

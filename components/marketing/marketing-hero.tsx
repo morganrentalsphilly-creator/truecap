@@ -18,7 +18,7 @@
  * it. The other client island is <HeroAddressForm />.
  */
 
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { HERO_LISTING_EXPECTATION } from "@/lib/hero-copy";
 import { HeroSheet } from "@/components/home/hero-sheet";
@@ -90,9 +90,9 @@ export function MarketingHero() {
             Buying for your own portfolio? Same analyzer, your own Buy Box.{" "}
             {/* A 44px tap target from padding that the negative margin takes
                 back out of the line box, so the cue keeps its body leading. */}
-            <Link href="/for-investors" className="tc-link -my-3 inline-block py-3">
+            <IntentPrefetchLink href="/for-investors" className="tc-link -my-3 inline-block py-3">
               For investors
-            </Link>
+            </IntentPrefetchLink>
           </p>
 
           {/* The one primary action; its secondary is the sample-deal link.
