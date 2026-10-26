@@ -197,6 +197,7 @@ export function CookieConsentBanner() {
               {" for analytics & ads. "}
               <Link
                 href="/privacy"
+                prefetch={false}
                 data-cookie-privacy-link=""
                 className="tc-link -my-3.5 inline-flex min-h-11 min-w-11 items-center font-medium"
               >
@@ -207,6 +208,7 @@ export function CookieConsentBanner() {
               {" for analytics and ad measurement. Reject keeps only essential cookies. "}
               <Link
                 href="/privacy"
+                prefetch={false}
                 data-cookie-privacy-link=""
                 className="tc-link -my-3.5 inline-flex min-h-11 min-w-11 items-center font-medium"
               >

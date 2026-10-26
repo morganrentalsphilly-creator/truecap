@@ -8,6 +8,7 @@ import { DealClientSelect } from "@/components/investcalc/deal-client-select";
 import { listSavedClientMatchesAction, saveClientDealMatchAction, exportSavedClientMatchAction, prepareClientMatchShareAction, type ClientMatchesResult } from "@/app/actions/client-deal-matches";
 import { ShareLinkButton } from "@/components/investcalc/share-link-button";
 import { trackEvent } from "@/lib/analytics";
+import { track } from "@/lib/analytics/site-events";
 
 const STATUS = { meets: "Meets selected criteria", misses: "Misses selected criteria", "needs-verification": "Needs verification", "no-criteria": "Set a Buy Box" };
 
@@ -35,7 +36,12 @@ export function ClientDealScreening({ savedDealId, clientId }: { savedDealId: st
     setNotice(null);
     try {
       const next = await saveClientDealMatchAction({ savedDealId, clientId, buyBoxId, sourceFingerprint });
-      if (next.ok) { trackEvent("client_match_saved", { source: "saved_deal" }); setSaved(next); setNotice("Client match saved with its current assumptions and criteria."); }
+      if (next.ok) {
+        trackEvent("client_match_saved", { source: "saved_deal" });
+        track("client_match_saved", { source: "saved_deal" });
+        setSaved(next);
+        setNotice("Client match saved with its current assumptions and criteria.");
+      }
       else setNotice(next.message);
     } catch { setNotice("Couldn't save this match. Your property and existing matches are unchanged."); }
   });
@@ -47,6 +53,7 @@ export function ClientDealScreening({ savedDealId, clientId }: { savedDealId: st
       const { downloadPdfFromBase64 } = await import("@/lib/pdf/download");
       downloadPdfFromBase64(next.pdfBase64, next.filename);
       trackEvent("client_match_exported", { source: "saved_deal" });
+      track("client_match_exported", { source: "saved_deal" });
       setNotice("Client report downloaded with the saved criteria and financing assumptions.");
     } catch { setNotice("Couldn't export the client report. Your saved match is unchanged."); }
   });
@@ -65,7 +72,10 @@ export function ClientDealScreening({ savedDealId, clientId }: { savedDealId: st
     try {
       const next = await screenSavedDealForClientsAction({ savedDealId });
       setResult(next);
-      if (next.ok) trackEvent("client_matches_generated", { source: "saved_deal", count: next.screens.length });
+      if (next.ok) {
+        trackEvent("client_matches_generated", { source: "saved_deal", count: next.screens.length });
+        track("client_matches_generated", { source: "saved_deal", count: next.screens.length });
+      }
     } catch {
       setResult({ ok: false, message: "Couldn't screen clients. Your saved deal is unchanged. Try again." });
     } finally { setPending(false); }

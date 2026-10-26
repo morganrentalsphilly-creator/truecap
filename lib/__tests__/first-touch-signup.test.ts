@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   after: vi.fn(),
   trackServer: vi.fn(),
   captureServerEvent: vi.fn(),
+  isServerAnalyticsConfigured: vi.fn(),
   claim: vi.fn(),
   release: vi.fn(),
   sendLifecycleEmailNow: vi.fn(),
@@ -47,7 +48,10 @@ vi.mock("@supabase/ssr", () => ({
   }),
 }));
 vi.mock("@/lib/analytics/site-events-server", () => ({ trackServer: mocks.trackServer }));
-vi.mock("@/lib/posthog-server", () => ({ captureServerEvent: mocks.captureServerEvent }));
+vi.mock("@/lib/posthog-server", () => ({
+  captureServerEvent: mocks.captureServerEvent,
+  isServerAnalyticsConfigured: mocks.isServerAnalyticsConfigured,
+}));
 vi.mock("@/lib/email/send-lifecycle", () => ({ sendLifecycleEmailNow: mocks.sendLifecycleEmailNow }));
 vi.mock("@/lib/analytics/canonical-event-claim", () => ({
   canonicalAnalyticsEventId: (event: string, key: string) => `${event}:${key}`,
@@ -93,7 +97,8 @@ beforeEach(() => {
   );
   mocks.claim.mockResolvedValue(true);
   mocks.captureServerEvent.mockResolvedValue(true);
-  mocks.trackServer.mockResolvedValue(undefined);
+  mocks.isServerAnalyticsConfigured.mockReturnValue(true);
+  mocks.trackServer.mockResolvedValue(true);
 });
 
 async function runAfterTasks() {
@@ -223,6 +228,45 @@ describe("OAuth callback: new Google account", () => {
       headers: cookie ? { cookie } : {},
     });
   }
+
+  it.each([
+    { label: "PostHog paused, Vercel accepted", configured: false, captured: false, siteCaptured: true, retained: true },
+    { label: "PostHog paused, Vercel failed or disabled", configured: false, captured: false, siteCaptured: false, retained: false },
+    { label: "PostHog failed, Vercel accepted", configured: true, captured: false, siteCaptured: true, retained: false },
+    { label: "PostHog accepted, Vercel failed", configured: true, captured: true, siteCaptured: false, retained: true },
+  ])("keeps OAuth claims consistent with transport outcomes: $label", async ({ configured, captured, siteCaptured, retained }) => {
+    const claims = new Set<string>();
+    mocks.claim.mockImplementation(async (_admin, { eventName }: { eventName: string }) => {
+      if (claims.has(eventName)) return false;
+      claims.add(eventName);
+      return true;
+    });
+    mocks.release.mockImplementation(async (_admin, { eventName }: { eventName: string }) => claims.delete(eventName));
+    mocks.isServerAnalyticsConfigured.mockReturnValue(configured);
+    mocks.captureServerEvent.mockResolvedValue(captured);
+    mocks.trackServer.mockResolvedValue(siteCaptured);
+    mocks.exchangeCodeForSession.mockResolvedValue({ data: { user: googleUser() }, error: null });
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      expect((await GET(callbackRequest())).status).toBe(307);
+      await runAfterTasks();
+    }
+
+    expect(mocks.trackServer).toHaveBeenCalledTimes(retained ? 2 : 4);
+    expect(claims.has("account_created")).toBe(retained);
+    // The PostHog-only event has no Vercel fallback to claim as delivered.
+    expect(claims.has("product_evaluation_started")).toBe(captured);
+  });
+
+  it("releases an OAuth claim when only one of its Vercel events was accepted", async () => {
+    mocks.isServerAnalyticsConfigured.mockReturnValue(false);
+    mocks.captureServerEvent.mockResolvedValue(false);
+    mocks.trackServer.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+    mocks.exchangeCodeForSession.mockResolvedValue({ data: { user: googleUser() }, error: null });
+    await GET(callbackRequest());
+    await runAfterTasks();
+    expect(mocks.release).toHaveBeenCalledWith(expect.anything(), { eventName: "account_created", dedupeKey: USER_ID });
+  });
 
   it("saves the validated first touch and reports its source as referral_source", async () => {
     mocks.exchangeCodeForSession.mockResolvedValue({ data: { user: googleUser() }, error: null });

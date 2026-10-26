@@ -4,6 +4,10 @@ One typed helper, `track()` in `lib/analytics/site-events.ts`, fans every funnel
 
 Properties are minimal and never personal: no addresses, emails, prices, or underwriting inputs.
 
+Server delivery uses a small maintained adapter for the installed `@vercel/analytics/server` ingestion protocol. The SDK has no server URL override or `beforeSend` hook and otherwise includes the request-context URL, including OAuth query parameters. The adapter sends only a fixed route per event, an empty referrer, the event's allowed property keys, and the standard user-agent/IP headers; it never forwards request cookies, authorization, host, URL, query parameters or fragments. It requires a Vercel production/preview deployment context. Production uses a valid HTTPS `NEXT_PUBLIC_SITE_URL` origin with `VERCEL_URL` fallback; preview always uses its own `VERCEL_URL`. An existing deployment-protection bypass is forwarded only as its dedicated header. Requests reject redirects, time out after two seconds, and return true only for a successful HTTP status. HTTP acceptance does not prove dashboard ingestion. `lib/__tests__/site-events-server.test.ts` compares the wire fields against the installed SDK; review that contract on SDK upgrades. The adapter deliberately does not use request-context globals or add a public ingestion route.
+
+OAuth and checkout canonical claims remain durable when Vercel accepts all associated events while PostHog is intentionally unconfigured. With both transports disabled or failed, claims are released for a later provider retry. A configured PostHog failure still releases the claim, preserving its existing retry behavior; that retry can repeat an already-accepted Vercel event. A partial Vercel success has the same limitation. This is best-effort measurement, not a universal exactly-once delivery guarantee. PostHog-only events are not marked delivered while that transport is off.
+
 ## Events
 
 | Event | Fires where | Properties |
@@ -29,6 +33,12 @@ Properties are minimal and never personal: no addresses, emails, prices, or unde
 | `upgrade_nudge_clicked` | Its "See Pro plans" link | `placement` |
 | `trial_offer_redeemed` | Stripe webhook, when a completed checkout carried the trial-end annual coupon | `plan` |
 | `primary_cta_clicked` | A click on a primary call to action: the hero and final address forms, the sticky bar, `AnalyzeCtaLink`, `ScrollToFormButton`, and the analyzer button on content pages (`TrackedContentCtaLink`) | `source` (hero_address / hero_listing / final_address / final_listing / sticky_bar / content_inline_cta / the link's own `analyticsSource`, for example vs_hero) |
+| `client_matches_generated` | A saved property's client screening action returned successfully, including an empty result | `source` (saved_deal), `count` (nonnegative integer number of screened Buy Boxes) |
+| `client_match_saved` | The server accepted saving a frozen client match; a rejected or failed save sends nothing | `source` (saved_deal) |
+| `client_match_exported` | The client PDF action succeeded and the browser initiated its download | `source` (saved_deal) |
+| `rental_evidence_saved` | A new private comparable reference saved successfully; archive/restore does not count again | `source` (saved_deal) |
+
+The four client-workflow events reach the active Vercel stream even while PostHog is on hold. Their existing PostHog calls remain for any future authorized reactivation. The site-event runtime allowlist strips all fields except the fixed source and the aggregate screening count; client names/IDs, property addresses, rents, notes and share links never enter these payloads. These are successful operations, not unique clients or unique saved records: explicitly saving an already-saved match can count another successful save action.
 
 ## The five weekly ratios
 

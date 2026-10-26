@@ -13,7 +13,7 @@ import {
   type SubscriptionSyncResult,
 } from "@/lib/stripe/subscription-sync";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
-import { captureServerEvent } from "@/lib/posthog-server";
+import { captureServerEvent, isServerAnalyticsConfigured } from "@/lib/posthog-server";
 import { scheduleTrialOnboardingEmails } from "@/lib/email/trial-emails";
 import {
   completeSubscriptionCheckoutIntentFromWebhook,
@@ -331,7 +331,7 @@ export async function POST(req: Request) {
           // are swallowed inside captureServerEvent so they can't
           // corrupt the webhook idempotency contract.
           // Site funnel (docs/analytics.md): the only event the browser can't see.
-          await trackServer("checkout_completed", {
+          let siteCaptured = await trackServer("checkout_completed", {
             plan: session.metadata?.plan_slug ?? "unknown",
             interval: (session.metadata?.plan_slug ?? "").includes("annual")
               ? "annual"
@@ -346,9 +346,10 @@ export async function POST(req: Request) {
             trialEndCoupon &&
             session.metadata?.checkout_discount_coupon_id === trialEndCoupon
           ) {
-            await trackServer("trial_offer_redeemed", {
+            const offerCaptured = await trackServer("trial_offer_redeemed", {
               plan: session.metadata?.plan_slug ?? "unknown",
             });
+            siteCaptured = siteCaptured && offerCaptured;
           }
           const analyticsCaptured = await captureServerEvent({
             distinctId,
@@ -362,7 +363,11 @@ export async function POST(req: Request) {
               referral_source: "stripe_checkout",
             },
           });
-          if (!analyticsCaptured && subscriptionClaim === "claimed") {
+          if (
+            !analyticsCaptured &&
+            (isServerAnalyticsConfigured() || !siteCaptured) &&
+            subscriptionClaim === "claimed"
+          ) {
             await releaseCanonicalAnalyticsEventClaim(
               admin,
               subscriptionClaimInput,

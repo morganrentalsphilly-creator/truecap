@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { trackEvent } from "@/lib/analytics";
+import { track } from "@/lib/analytics/site-events";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +36,7 @@ export function ManualRentEvidence({ savedDealId }: { savedDealId: string }) {
       const result = await saveRentEvidenceAction({ ...draft, savedDealId, sourceUrl: draft.sourceUrl.trim() || null, monthlyRent: Number(draft.monthlyRent), bedrooms: optional(draft.bedrooms), bathrooms: optional(draft.bathrooms), sqft: optional(draft.sqft), monthlyAdjustment: Number(draft.monthlyAdjustment) });
       if (!result.ok) { setError(result.message); return; }
       trackEvent("rental_evidence_saved", { source: "saved_deal" });
+      track("rental_evidence_saved", { source: "saved_deal" });
       setItems(result.evidence); setDraft(empty()); setNotice("Comparable reference saved. The property's rent assumption is unchanged.");
     } catch { setError("Couldn't save. Your inputs are still here; try again."); }
   });

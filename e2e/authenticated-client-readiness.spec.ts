@@ -60,6 +60,9 @@ test("Agent Pro saves separate client matches, preserves history, exports a PDF,
     expect(boxes.error).toBeNull();
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`/dashboard/saved-analyses/${dealId}`);
+    const clientWorkflowEvents = () => page.evaluate(() => (window.__tcEvents ?? [])
+      .filter(({ event }) => ["client_matches_generated", "client_match_saved", "client_match_exported", "rental_evidence_saved"].includes(event))
+      .map(({ event, props }) => ({ event, props })));
     const screen = page.getByRole("region", { name: "Which clients could this fit?" });
     await screen.getByRole("button", { name: "Screen my clients" }).click();
     await expect(screen.getByRole("button", { name: "Refresh screening", exact: true })).toBeEnabled();
@@ -83,6 +86,13 @@ test("Agent Pro saves separate client matches, preserves history, exports a PDF,
     await expect(screen.getByText(/criteria changed/)).toBeVisible();
     const unchanged = await admin.from("agent_deal_matches").select("*").eq("user_id", userId).order("id");
     expect(JSON.stringify(unchanged.data)).toBe(original);
+    // Two successful saves, not three attempted saves: rejected stale criteria
+    // must not inflate the active (Vercel) workflow funnel.
+    await expect.poll(clientWorkflowEvents).toEqual([
+      { event: "client_matches_generated", props: { source: "saved_deal", count: 2 } },
+      { event: "client_match_saved", props: { source: "saved_deal" } },
+      { event: "client_match_saved", props: { source: "saved_deal" } },
+    ]);
     const savedCashMatch = screen.getByRole("listitem").filter({ has: page.getByText("Fixture client A · Cash criteria", { exact: true }) }).filter({ has: page.getByRole("button", { name: "Export client PDF" }) });
     const downloadPromise = page.waitForEvent("download");
     await savedCashMatch.getByRole("button", { name: "Export client PDF" }).click();
@@ -136,6 +146,15 @@ test("Agent Pro saves separate client matches, preserves history, exports a PDF,
     await evidence.getByLabel("Show archived references").check();
     await evidence.getByRole("button", { name: "Restore reference" }).click();
     await expect(evidence.getByText("Fixture comparable 1", { exact: true })).toBeVisible();
+    // Exact payloads exclude client identity, property data, financial values,
+    // private notes and link capabilities. Archive/restore is not a new save.
+    await expect.poll(clientWorkflowEvents).toEqual([
+      { event: "client_matches_generated", props: { source: "saved_deal", count: 2 } },
+      { event: "client_match_saved", props: { source: "saved_deal" } },
+      { event: "client_match_saved", props: { source: "saved_deal" } },
+      { event: "client_match_exported", props: { source: "saved_deal" } },
+      { event: "rental_evidence_saved", props: { source: "saved_deal" } },
+    ]);
     const stranger = createClient(url, process.env.E2E_SUPABASE_ANON_KEY!, { auth: { persistSession: false } });
     expect((await stranger.auth.signInWithPassword({ email: otherEmail, password })).error).toBeNull();
     const hidden = await stranger.from("agent_deal_matches").select("id").eq("user_id", userId);
