@@ -57,7 +57,7 @@ export function CheckoutCancelledBanner({
             : hadPriorSubscription
               ? "Your plan is here whenever you're ready to pick it back up."
               : evaluation.status === "exhausted"
-                ? "Your free-trial runs are already used up; no subscription was started."
+                ? "Your trial property slots are used; revisions remain available until expiry. No subscription was started."
                 : evaluation.status === "expired"
                   ? "Your free trial has already ended; no subscription was started."
                   : "Free screening remains available; subscribe only when you choose to."}

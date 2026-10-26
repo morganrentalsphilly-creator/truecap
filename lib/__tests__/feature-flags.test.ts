@@ -26,6 +26,7 @@ describe("product feature flags", () => {
    *   old layout live.
    */
   const KILL_SWITCH_FLAGS: FeatureFlagKey[] = [
+    "agent_client_matching",
     "input_confidence",
     "offer_ready_status",
     "new_homepage_positioning",

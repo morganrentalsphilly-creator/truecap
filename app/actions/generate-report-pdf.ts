@@ -41,6 +41,9 @@
  */
 
 import { z } from "zod";
+import { loadOwnedClientMatch } from "@/lib/client-underwriting-server";
+import { chooseMaoTargetFromBuyBox } from "@/lib/mao-targets";
+import { TRUECAP_UNDERWRITING_STANDARD_VERSION } from "@/lib/underwriting-methodology";
 import { reportDataSchema } from "@/lib/report-payload-schema";
 import * as Sentry from "@sentry/nextjs";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -110,6 +113,7 @@ export type GenerateReportPdfResult =
 const inputSchema = z
   .object({
     values: releasedInvestmentFormSchema,
+    clientMatchId: z.string().uuid().optional(),
     // Legacy callers may still send this display payload, but the server
     // discards it and rebuilds every financial output. New callers omit it so
     // paid Offer Ceiling math never has to run in the browser.
@@ -146,7 +150,9 @@ const inputSchema = z
       })
       .optional(),
   })
-  .strict();
+  .strict()
+  .refine(input => !input.clientMatchId || (!input.savedExport && !input.claim && input.mode === "agent"),
+    { message: "Client match exports require their own Agent report context." });
 
 // ── Abuse brake ─────────────────────────────────────────────────────────────
 
@@ -459,6 +465,21 @@ function normalizedValuesJson(raw: unknown): string | null {
 async function prepareReportInput(
   input: z.infer<typeof inputSchema>,
 ): Promise<PreparedReportInput> {
+  if (input.clientMatchId) {
+    const match = await loadOwnedClientMatch(input.clientMatchId);
+    if (!match.ok) return { ok: false, result: { ok: false, code: "ENTITLEMENT_REQUIRED", message: match.message } };
+    const snapshot = match.snapshot;
+    if (snapshot.methodologyVersion !== TRUECAP_UNDERWRITING_STANDARD_VERSION) return {
+      ok: false, result: { ok: false, code: "FROZEN_METHODOLOGY", message: "This match uses an earlier methodology. Its snapshot is preserved; run a fresh screening to create a new report." },
+    };
+    return {
+      ok: true, values: snapshot.values,
+      maxOfferTarget: chooseMaoTargetFromBuyBox(snapshot.criteria, { isCashPurchase: snapshot.values.downPaymentPct >= 100 }),
+      maxOfferTargetSource: "buy-box", trustedPresentation: { clientScreening: {
+        screen: snapshot.screen, methodologyVersion: snapshot.methodologyVersion, screenedAt: snapshot.screenedAt,
+      } },
+    };
+  }
   if (!input.savedExport) {
     return {
       ok: true,

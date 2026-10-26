@@ -45,7 +45,9 @@ describe("historical result reproducibility wiring", () => {
     expect(builder).not.toContain("input.trustedRecordedResult");
     expect(builder).not.toContain("parseCompareSnapshotV1");
     expect(builder).toContain("const result = currentResult");
-    expect(builder).toContain("maxOffer: buildReportMaxOffer");
+    // Full client scope can suppress a ceiling; published ceilings still use
+    // the canonical builder, never recorded browser-calculated outputs.
+    expect(builder).toContain("maxOffer: clientScreen && clientScreen.offerCeiling === null ? null : buildReportMaxOffer");
   });
 
   it("captures opaque-share outputs and labels legacy input-only shares", () => {

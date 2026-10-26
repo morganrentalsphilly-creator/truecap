@@ -50,6 +50,7 @@ export const PDF_DISCLAIMER_TEXT =
   "TrueCap models a deal from the assumptions you see and can edit. It is not an appraisal, a lender decision, or investment advice. Our articles and guides are general information, not tax, legal or investment advice; confirm the specifics with a qualified professional. The math is published in our Methodology.";
 
 export interface ReportData {
+  clientScreening?: import("@/lib/client-deal-match-schema").ClientReportContext;
   generatedAt: Date;
   /** Standard that produced the financial result. Optional only for legacy
    * report payloads; never relabel a frozen historical result as current. */
@@ -1398,7 +1399,7 @@ function buyBoxCardLayout(doc: jsPDF, v: BuyBoxPdfVerdict, w: number) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   const personalLines = v.personalLine
-    ? (doc.splitTextToSize(v.personalLine, w - 32) as string[]).slice(0, 2)
+    ? (doc.splitTextToSize(v.personalLine, w - 32) as string[])
     : [];
   const personalLineH = 8.5 * 1.35;
   const rows = Math.ceil(v.checks.length / 2);
@@ -2955,9 +2956,10 @@ function pageDownside(
     cw,
     64,
     "Stressed DSCR",
-    formatDscr(stressed.dscr, financed),
+    financed ? formatDscr(stressed.dscr, true) : "N/A",
     {
       tone: financed && stressed.dscr < 1 ? "danger" : "neutral",
+      sub: financed ? undefined : "No debt service",
       themeColor,
     },
   );
@@ -4533,7 +4535,17 @@ async function buildInvestmentPDFDocument(
   // to the captured target/source; mixing in today's box could contradict the
   // saved decision. A frozen rule-by-rule Buy Box snapshot can be reintroduced
   // only once its identity/version is persisted with the analysis.
-  const buyBoxVerdict: BuyBoxPdfVerdict | null = null;
+  const captured = d.clientScreening;
+  const buyBoxVerdict: BuyBoxPdfVerdict | null = captured ? {
+    boxName: `${captured.screen.clientName} / ${captured.screen.buyBoxName ?? "Client criteria"}`,
+    multi: false, activeCount: 1, passingCount: captured.screen.status === "meets" ? 1 : 0,
+    passes: captured.screen.status === "meets",
+    headline: captured.screen.status === "meets" ? "Meets selected client criteria" : captured.screen.status === "misses" ? "Misses selected client criteria" : "Selected criteria need verification",
+    passedCount: captured.screen.checks.filter(check => check.pass === true).length,
+    applicableCount: captured.screen.checks.filter(check => check.pass !== null).length,
+    personalLine: `Client: ${captured.screen.clientName}. Criteria: ${captured.screen.buyBoxName ?? "Selected criteria"}. ${captured.screen.financingDescription}. Screened ${captured.screenedAt.slice(0, 10)} using v${captured.methodologyVersion}. Preliminary criteria fit, not financing approval or an investment recommendation.`,
+    checks: captured.screen.checks,
+  } : null;
   const buyBoxStateResolved = true;
 
   // Cover page first — the "arrival" beat (address + rule fit + key numbers).

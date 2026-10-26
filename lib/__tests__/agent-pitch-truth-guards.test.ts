@@ -211,9 +211,10 @@ describe("TrueCap's own product on the money and persona pages", () => {
   });
 
   it("states the Buy Box cap as the action that enforces it does", () => {
-    // The cap is a private constant in a "use server" file, so the copy
-    // cannot import it: a change there must fail here and reach the copy.
-    expect(read("app/actions/user-buy-boxes.ts")).toContain("const MAX_BUY_BOXES = 12");
+    // Check the centralized value and its enforcement binding; copy still
+    // fails if the approved allowance changes without matching disclosure.
+    expect(read("lib/commercial-limits.ts")).toContain("MAX_BUY_BOXES = 12");
+    expect(read("app/actions/user-buy-boxes.ts")).toContain("const MAX_BUY_BOXES = COMMERCIAL_WORKSPACE_LIMITS.buyBoxes");
     expect(copy("app/pricing/page.tsx")).toContain(
       "assign Buy Boxes to clients (up to 12 per account)",
     );

@@ -131,7 +131,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "How does the free trial work?",
-    a: `A new account gets ${EVALUATION_FACTS.durationDays} days, ${EVALUATION_FACTS.dealLimit} Pro analyses and ${EVALUATION_FACTS.comparisonLimit} comparison. A rerun with changed inputs counts as a new analysis. No card is collected, no charge is scheduled, and nothing auto-renews. If you later subscribe, checkout shows the exact charge before you confirm.`,
+    a: `A new account gets ${EVALUATION_FACTS.durationDays} days, ${EVALUATION_FACTS.dealLimit} Pro analyses and ${EVALUATION_FACTS.comparisonLimit} comparison. Revisions to the same property do not use another trial analysis. No card is collected, no charge is scheduled, and nothing auto-renews. If you later subscribe, checkout shows the exact charge before you confirm.`,
   },
   {
     q: "What does Pro add?",
@@ -312,7 +312,7 @@ async function PricingLede({ proOfferName }: { proOfferName: string }) {
           : pricingEvaluation.status === "active" && evaluationAllowance
             ? `Your free trial has ${evaluationAllowance}.`
             : pricingEvaluation.status === "exhausted"
-              ? "Your free-trial runs are complete. Keep screening deals free, or subscribe when you want another complete Pro decision."
+              ? "Your trial property slots are used. Revise those properties until the trial expires, or subscribe to analyze another property."
               : pricingEvaluation.status === "expired"
                 ? "Your free trial has ended. Keep screening deals free, or subscribe when you want another complete Pro decision."
                 : `Screen any deal free. Use ${proOfferName} to review Buy Box fit, the Offer Ceiling, what could break, and how to share the underwrite.`}
@@ -943,9 +943,9 @@ export default function PricingPage() {
               Plus / {formatUsdWhole(DEALCHECK_COMPARISON.proMonthlyUsd)} Pro a month, billed yearly)
             </SectionHeading>
             <p className="mt-3 max-w-[62ch] text-pretty text-lg leading-relaxed text-muted-foreground">
-              DealCheck is a calculator; TrueCap is a decision — Offer Ceiling, Buy
-              Box fit, downside stress test, and a memo. If you only need metrics,
-              DealCheck or a spreadsheet is fine.
+              Both tools support rental analysis, purchase criteria, offer calculations,
+              and reports. TrueCap brings editable assumptions, published methodology,
+              downside checks, and client-specific Buy Boxes into one screening workflow.
               {agentProConfigured
                 ? " Every DealCheck plan exports a PDF report; putting your own name and logo on it needs DealCheck Pro. For agents, Agent Pro is for screening each listing against a specific client's Buy Box, that client's Offer Ceiling, and a co-branded decision memo the client can open without an account."
                 : ""}

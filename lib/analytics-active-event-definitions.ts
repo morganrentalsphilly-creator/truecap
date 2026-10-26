@@ -49,6 +49,10 @@ export const ACTIVE_ANALYTICS_EVENT_DEFINITIONS = {
   ]),
   buy_box_result_viewed: productAccount(["passes"]),
   agent_client_created: professionalAccount(["source"]),
+  client_match_saved: professionalAccount(["source"]),
+  client_match_exported: professionalAccount(["source"]),
+  rental_evidence_saved: productAccount(["source"]),
+  client_matches_generated: professionalAccount(["source", "count"]),
   agent_pro_page_viewed: professional(["path"]),
   client_report_shared: professionalAccount(["report_type"]),
   assumption_verified: productAccount([

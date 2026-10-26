@@ -143,7 +143,9 @@ export function resolveProductAccessState(input: {
         hasPaidAccess: false,
         hasAgentAccess: false,
         canAnalyzeDecision: true,
-        canAnalyzeProDeal: dealsRemaining > 0,
+        // Revisions to metered properties remain available. The consuming
+        // action enforces the property limit atomically before publishing.
+        canAnalyzeProDeal: true,
         canRunComparison: comparisonsRemaining > 0,
         // Export remains available for already-metered deals throughout the
         // 21-day window. The PDF action independently binds authorization to

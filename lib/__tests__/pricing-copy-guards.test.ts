@@ -132,7 +132,7 @@ describe("no-card product evaluation", () => {
     // ("Pro analyses") and says what counts as one. It pinned "includes
     // {limit} complete" and "Pro deals and {limit} comparison." before.
     expect(plans).toMatch(
-      /free trial includes \{PRODUCT_EVALUATION_DEAL_LIMIT\} Pro\s+analyses and \{PRODUCT_EVALUATION_COMPARISON_LIMIT\} comparison\. A rerun with changed inputs\s+counts as a new analysis\./,
+      /free trial includes \{PRODUCT_EVALUATION_DEAL_LIMIT\} Pro\s+analyses and \{PRODUCT_EVALUATION_COMPARISON_LIMIT\} comparison\. Revisions to the same property do not use another trial analysis\./,
     );
     expect(plans).not.toMatch(/Pro\s+deals and/);
     expect(signup).toContain(
@@ -142,7 +142,7 @@ describe("no-card product evaluation", () => {
     // Row P1-07: the sign-up box says what the trial counts. The ledger holds
     // one row per distinct set of inputs (lib/evaluation-resource-key.ts).
     expect(signup).toMatch(
-      /full comparison\. A rerun with\s+changed inputs counts as a new analysis\./,
+      /full comparison\. Revisions to the same property do not use another trial analysis\./,
     );
     for (const source of [plans, signup]) {
       expect(source).not.toMatch(

@@ -834,6 +834,9 @@ jobs:
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_ci_placeholder
       STRIPE_PRICE_PRO_MONTHLY: price_ci_placeholder_monthly
       STRIPE_PRICE_PRO_ANNUAL: price_ci_placeholder_annual
+      # Exercise Agent Pro client reports against disposable local accounts.
+      STRIPE_PRICE_AGENT_PRO_MONTHLY: price_ci_agent_monthly
+      STRIPE_PRICE_AGENT_PRO_ANNUAL: price_ci_agent_annual
       # Address-enrichment providers are served by the loopback mock that
       # e2e/audit-analyzer-autofill.spec.ts starts on :3199 (2026-09 audit).
       # The action only honours loopback overrides; the keys are placeholders.
@@ -962,7 +965,21 @@ jobs:
         run: npm run build
 
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The hosted runner's Azure Ubuntu mirror repeatedly stalled on fonts.
+          # Select Ubuntu's official archive before starting apt so a timed-out
+          # sudo child cannot retain the package lock during a fallback attempt.
+          # Keep all Playwright dependencies and fail if installation fails.
+          for source in /etc/apt/apt-mirrors.txt /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+            if [ -f "$source" ]; then
+              sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g; s|https://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' "$source"
+            fi
+          done
+          printf 'Acquire::Retries "2";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' | sudo tee /etc/apt/apt.conf.d/99truecap-ci-retry >/dev/null
+          npx playwright install --with-deps chromium
 
       - name: Browser regressions
         run: npm run test:e2e

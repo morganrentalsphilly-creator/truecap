@@ -29,7 +29,7 @@ describe("My Deals PDF target continuity", () => {
     expect(page).toContain(
       "includeDerivedMaxOffer: !resolved.usesRecordedSnapshot",
     );
-    expect(serverBuilder).toContain("maxOffer: buildReportMaxOffer({");
+    expect(serverBuilder).toContain("maxOffer: clientScreen && clientScreen.offerCeiling === null ? null : buildReportMaxOffer({");
     expect(serverBuilder).not.toContain("buildRecordedReportMaxOffer(");
     expect(serverBuilder).toContain("targetSourceInput: targetSource");
     expect(reportMaxOffer).toContain("readRecordedOfferCeiling(snapshotInput)");

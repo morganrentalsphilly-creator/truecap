@@ -575,8 +575,7 @@ export default async function ForAgentsPage() {
                 <span className="mt-4 block text-pretty text-sm">
                   A new account gets a {PRODUCT_EVALUATION_DAYS}-day free trial with{" "}
                   {PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and{" "}
-                  {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card. A rerun with
-                  changed inputs counts as a new analysis. Co-branding,
+                  {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card. Revisions to the same property do not use another trial analysis. Co-branding,
                   the client roster and client Buy Boxes are part of the Agent Pro
                   subscription, not the trial.
                 </span>
@@ -614,7 +613,7 @@ export default async function ForAgentsPage() {
                       </dd>
                       <dd className="mt-1 text-sm text-muted-foreground">
                         {PRODUCT_EVALUATION_DAYS} days, {PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses, no
-                        card. A rerun with changed inputs counts as a new one. The
+                        card. Revisions to the same property do not use another trial analysis. The
                         roster starts with Agent Pro.
                       </dd>
                     </div>

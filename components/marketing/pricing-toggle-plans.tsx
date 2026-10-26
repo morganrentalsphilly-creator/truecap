@@ -365,8 +365,7 @@ function PricingTrialTerms({
       <p>
         <strong className="font-semibold text-foreground">New account: $0 today, no card.</strong>{" "}
         The {PRODUCT_EVALUATION_DAYS}-day free trial includes {PRODUCT_EVALUATION_DEAL_LIMIT} Pro
-        analyses and {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. A rerun with changed inputs
-        counts as a new analysis.
+        analyses and {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. Revisions to the same property do not use another trial analysis.
         {tier === "agent_pro"
           ? " Co-branded share pages and PDFs start with a Pro or Agent Pro subscription, and the client roster and client Buy Boxes with Agent Pro, not the trial."
           : " Co-branded share pages and PDFs start with a Pro subscription, not the trial."}{" "}
@@ -389,8 +388,8 @@ function PricingTrialTerms({
   if (evaluation.status === "exhausted") {
     return (
       <p>
-        <strong className="font-semibold text-foreground">Your free-trial runs are complete.</strong>{" "}
-        Free screening remains available; subscribe only when you choose to run another complete Pro decision.
+        <strong className="font-semibold text-foreground">Your trial property slots are used.</strong>{" "}
+        Revise your trial properties until the trial expires. Free screening remains available; subscribe when you need to analyze another property.
       </p>
     );
   }

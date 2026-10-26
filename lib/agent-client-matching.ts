@@ -6,7 +6,7 @@
  * message, or reads PII. Callers get opaque client ids and transparent check
  * counts so a future UI can explain every suggestion before an agent acts.
  *
- * The feature is dark by default through `agent_client_matching`. Keeping the
+ * The feature is kill-switchable through `agent_client_matching`. Keeping the
  * flag check inside the evaluator prevents an accidental caller from exposing
  * suggestions before the rollout has been approved.
  */
@@ -14,6 +14,7 @@
 import {
   buyBoxHasCriteria,
   evaluateBuyBox,
+  unresolvedBuyBoxChecks,
   type BuyBoxDealMetrics,
   type NamedBuyBox,
 } from "@/lib/buy-box";
@@ -44,9 +45,11 @@ export type AgentClientMatch = {
 
 function statusForCounts(
   matchedCheckCount: number,
-  failedCheckCount: number
+  failedCheckCount: number,
+  unresolvedCheckCount: number,
 ): AgentClientMatchStatus {
   const applicable = matchedCheckCount + failedCheckCount;
+  if (failedCheckCount === 0 && unresolvedCheckCount > 0) return "insufficient-data";
   if (applicable === 0) return "insufficient-data";
   if (failedCheckCount === 0) return "match";
   if (matchedCheckCount > 0) return "partial";
@@ -100,7 +103,7 @@ export function evaluateAgentClientMatches(
     const match: AgentClientMatch = {
       clientId: box.clientId,
       buyBoxId: box.id,
-      status: statusForCounts(result.passedCount, result.failedCount),
+      status: statusForCounts(result.passedCount, result.failedCount, unresolvedBuyBoxChecks(result.checks).length),
       matchedCheckCount: result.passedCount,
       failedCheckCount: result.failedCount,
       skippedCheckCount,

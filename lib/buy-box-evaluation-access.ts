@@ -1,5 +1,5 @@
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
-import { buildEvaluationDealResourceKey } from "@/lib/evaluation-resource-key";
+import { buildEvaluationDealResourceKey, buildEvaluationPropertyResourceKey } from "@/lib/evaluation-resource-key";
 
 export type BuyBoxDealAuthorizationInput = {
   id: string;
@@ -28,7 +28,9 @@ export function resolveBuyBoxAuthorizedDealIds(args: {
   for (const deal of args.deals) {
     if (!deal.values) continue;
     const resourceKey = buildEvaluationDealResourceKey(deal.values);
-    if (resourceKey && args.meteredResourceKeys.has(resourceKey)) {
+    const propertyKey = buildEvaluationPropertyResourceKey(deal.values);
+    if ((resourceKey && args.meteredResourceKeys.has(resourceKey)) ||
+      (propertyKey && args.meteredResourceKeys.has(propertyKey))) {
       authorized.add(deal.id);
     }
   }

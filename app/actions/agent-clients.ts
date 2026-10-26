@@ -15,6 +15,7 @@
  */
 
 import { z } from "zod";
+import { COMMERCIAL_WORKSPACE_LIMITS } from "@/lib/commercial-limits";
 import * as Sentry from "@sentry/nextjs";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { requireVerifiedEntitlements, hasPlanFeature } from "@/lib/entitlements";
@@ -30,6 +31,7 @@ import {
 import { computeDealOfferLine } from "@/lib/deal-offer-line";
 import { listBuyBoxesAction } from "@/app/actions/user-buy-boxes";
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
+import { clientFinancingSchema, readClientFinancing, type ClientFinancing } from "@/lib/client-underwriting-preferences";
 
 export type AgentClient = {
   id: string;
@@ -39,10 +41,11 @@ export type AgentClient = {
   notes: string | null;
   isArchived: boolean;
   createdAt: string;
+  financingAssumptions?: ClientFinancing | null;
 };
 
 export type AgentClientsActionResult =
-  | { ok: true; clients: AgentClient[] }
+  | { ok: true; clients: AgentClient[]; supportsFinancing?: boolean }
   | {
       ok: false;
       code:
@@ -64,12 +67,13 @@ const clientSchema = z
     email: z.string().trim().email().max(254).nullable().optional().or(z.literal("").transform(() => null)),
     phone: z.string().trim().max(40).nullable().optional().or(z.literal("").transform(() => null)),
     notes: z.string().trim().max(2000).nullable().optional().or(z.literal("").transform(() => null)),
-    isArchived: z.boolean().default(false),
+    isArchived: z.boolean().optional(),
+    financingAssumptions: clientFinancingSchema.optional(),
   })
   .strict();
 
 /** Practical roster ceiling — an agent juggling more than this needs a CRM. */
-const MAX_CLIENTS = 100;
+const MAX_CLIENTS = COMMERCIAL_WORKSPACE_LIMITS.agentClients;
 
 type ClientRow = {
   id: string;
@@ -79,6 +83,7 @@ type ClientRow = {
   notes: string | null;
   is_archived: boolean | null;
   created_at: string;
+  financing_assumptions?: unknown;
 };
 
 function mapRow(row: ClientRow): AgentClient {
@@ -90,6 +95,7 @@ function mapRow(row: ClientRow): AgentClient {
     notes: row.notes,
     isArchived: Boolean(row.is_archived),
     createdAt: row.created_at,
+    financingAssumptions: readClientFinancing(row.financing_assumptions),
   };
 }
 
@@ -129,12 +135,19 @@ async function fetchClients(
   supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
   userId: string
 ): Promise<AgentClientsActionResult> {
-  const { data, error } = await supabase
+  const columns = "id, name, email, phone, notes, is_archived, created_at";
+  const query = (withFinancing: boolean) => supabase
     .from("agent_clients")
-    .select("id, name, email, phone, notes, is_archived, created_at")
+    .select(withFinancing ? `${columns}, financing_assumptions` : columns)
     .eq("agent_user_id", userId)
     .order("is_archived", { ascending: true })
     .order("created_at", { ascending: false });
+  let { data, error } = await query(true);
+  let supportsFinancing = true;
+  if (error?.code === "42703" || error?.code === "PGRST204") {
+    supportsFinancing = false;
+    ({ data, error } = await query(false));
+  }
   if (error) {
     if (isMissingTable(error)) {
       return { ok: false, code: "MIGRATION_PENDING", message: "Client rosters aren't enabled yet." };
@@ -142,7 +155,7 @@ async function fetchClients(
     Sentry.captureException(error, { tags: { feature: "agent-clients" } });
     return { ok: false, code: "SERVER_ERROR", message: "Couldn't load your clients. Please try again." };
   }
-  return { ok: true, clients: ((data ?? []) as ClientRow[]).map(mapRow) };
+  return { ok: true, clients: ((data ?? []) as unknown as ClientRow[]).map(mapRow), supportsFinancing };
 }
 
 export async function listAgentClientsAction(): Promise<AgentClientsActionResult> {
@@ -160,7 +173,7 @@ export async function upsertAgentClientAction(input: unknown): Promise<AgentClie
   const gate = await requireAgentPro();
   if (!gate.ok) return gate.result;
   const { supabase, userId } = gate;
-  const { id, name, email, phone, notes, isArchived } = parsed.data;
+  const { id, name, email, phone, notes, isArchived, financingAssumptions } = parsed.data;
 
   if (!id) {
     const { count, error: countError } = await supabase
@@ -170,6 +183,10 @@ export async function upsertAgentClientAction(input: unknown): Promise<AgentClie
     if (countError && isMissingTable(countError)) {
       return { ok: false, code: "MIGRATION_PENDING", message: "Client rosters aren't enabled yet." };
     }
+    if (countError) {
+      Sentry.captureException(countError, { tags: { feature: "agent-clients", stage: "count" } });
+      return { ok: false, code: "SERVER_ERROR", message: "Couldn't check your roster. Please try again." };
+    }
     if ((count ?? 0) >= MAX_CLIENTS) {
       return { ok: false, code: "LIMIT_REACHED", message: `Rosters cap at ${MAX_CLIENTS} clients.` };
     }
@@ -178,10 +195,13 @@ export async function upsertAgentClientAction(input: unknown): Promise<AgentClie
   const row = {
     agent_user_id: userId,
     name,
-    email: email ?? null,
-    phone: phone ?? null,
-    notes: notes ?? null,
-    is_archived: isArchived,
+    // Omitted optional fields on a partial edit preserve stored data. An
+    // explicit null/empty string still clears a field intentionally.
+    ...(!id || email !== undefined ? { email: email ?? null } : {}),
+    ...(!id || phone !== undefined ? { phone: phone ?? null } : {}),
+    ...(!id || notes !== undefined ? { notes: notes ?? null } : {}),
+    ...(!id || isArchived !== undefined ? { is_archived: isArchived ?? false } : {}),
+    ...(financingAssumptions !== undefined ? { financing_assumptions: financingAssumptions } : {}),
     updated_at: new Date().toISOString(),
   };
   const query = id
