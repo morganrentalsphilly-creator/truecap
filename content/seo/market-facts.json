@@ -37,6 +37,54 @@
         }
       ]
     },
+    "daytona-beach": {
+      "countyEffectiveTaxRate": null,
+      "rentalLicensing": {
+        "required": true,
+        "summary": "Daytona Beach requires owners of residential rental properties with fewer than five units to register the property with the city annually, for long-term rentals of six months and one day or longer.",
+        "source": {
+          "url": "https://daytonabeach.gov/266/Rental-Property-Program",
+          "title": "Rental Property Program",
+          "publisher": "City of Daytona Beach",
+          "retrievedAt": "2026-10-26"
+        }
+      },
+      "faq": [
+        {
+          "q": "Does Daytona Beach require long-term rental properties to register with the city?",
+          "a": "Yes. The city's rental property ordinance requires owners of residential rental properties with fewer than five units to register annually, covering long-term rentals of six months and one day or longer.",
+          "sources": [
+            {
+              "url": "https://daytonabeach.gov/266/Rental-Property-Program",
+              "title": "Rental Property Program",
+              "retrievedAt": "2026-10-26"
+            }
+          ]
+        },
+        {
+          "q": "Does Daytona Beach inspect registered rental units?",
+          "a": "No. The city's rental registration program does not require an inspection; an owner may request a voluntary interior and exterior inspection, and a unit that passes has its registration fees waived the following year.",
+          "sources": [
+            {
+              "url": "https://daytonabeach.gov/266/Rental-Property-Program",
+              "title": "Rental Property Program",
+              "retrievedAt": "2026-10-26"
+            }
+          ]
+        },
+        {
+          "q": "What does rental registration cost in Daytona Beach?",
+          "a": "The program charges a $40 initial application fee, a $50 per-unit initial registration fee and a $75 per-unit annual renewal fee.",
+          "sources": [
+            {
+              "url": "https://daytonabeach.gov/266/Rental-Property-Program",
+              "title": "Rental Property Program",
+              "retrievedAt": "2026-10-26"
+            }
+          ]
+        }
+      ]
+    },
     "atlanta": {
       "countyEffectiveTaxRate": null,
       "rentalLicensing": null,
