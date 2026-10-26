@@ -21,6 +21,7 @@
  */
 
 import { z } from "zod";
+import { boundedArray } from "@/lib/bounded-array";
 import type { AnalysisResult } from "@/lib/calc-analysis";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { buildDealQaContext } from "@/lib/deal-qa";
@@ -47,17 +48,18 @@ export const dealQaBuyBoxContextSchema = z.object({
   personalLine: shortText(240).optional(),
   /** Multi-box rollup, e.g. "Deal meets 1 of 2 of the user's buy boxes". */
   summary: shortText(160).optional(),
-  checks: z
-    .array(
+  checks: boundedArray(
+    z.array(
       z.object({
         label: shortText(40),
         target: shortText(60),
         actual: shortText(60),
         pass: z.boolean().nullable(),
         gapText: shortText(80).optional(),
-      })
-    )
-    .max(10),
+      }),
+    ),
+    10,
+  ),
 });
 
 export const dealQaMaoContextSchema = z.object({
@@ -92,8 +94,8 @@ export const dealQaCompsContextSchema = z.object({
   rentHigh: finite.nullable().optional(),
   listPrice: finite.nullable().optional(),
   listingStatus: shortText(40).nullable().optional(),
-  saleComps: z.array(qaCompSchema).max(8),
-  rentComps: z.array(qaCompSchema).max(8),
+  saleComps: boundedArray(z.array(qaCompSchema), 8),
+  rentComps: boundedArray(z.array(qaCompSchema), 8),
 });
 
 /** The optional context block the client forwards with a question/summary

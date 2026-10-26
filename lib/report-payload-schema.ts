@@ -17,6 +17,7 @@ import { clientReportContextSchema } from "@/lib/client-deal-match-schema";
  */
 
 import { z } from "zod";
+import { boundedArray } from "@/lib/bounded-array";
 import { specialistAnalysisSnapshotSchema } from "@/lib/specialist-analysis-snapshot";
 
 const money = z.number().finite();
@@ -82,9 +83,9 @@ const inputConfidenceSchema = z
     stageLabel: z.string().max(120),
     sensitivityRisk: z.enum(["low", "moderate", "high"]),
     methodVersion: z.string().max(40),
-    verifiedAssumptions: z.array(z.string().max(120)).max(60),
-    unverifiedAssumptions: z
-      .array(
+    verifiedAssumptions: boundedArray(z.array(z.string().max(120)), 60),
+    unverifiedAssumptions: boundedArray(
+      z.array(
         z
           .object({
             label: z.string().max(120),
@@ -93,8 +94,9 @@ const inputConfidenceSchema = z
             reason: z.string().max(500),
           })
           .strict(),
-      )
-      .max(60),
+      ),
+      60,
+    ),
   })
   .strict();
 
@@ -124,8 +126,8 @@ const reportDataSchema = z
     }),
     financing: z.record(z.string(), z.number()),
     expenses: z.record(z.string(), z.number().nullable()),
-    units: z
-      .array(
+    units: boundedArray(
+      z.array(
         z.object({
           label: z.string().max(80),
           beds: z.number(),
@@ -138,8 +140,9 @@ const reportDataSchema = z
           // blanked the comps $/sqft column.
           isOwnerOccupied: z.boolean().optional(),
         }),
-      )
-      .max(60),
+      ),
+      60,
+    ),
     performance: z.object({
       recommendation: z.string().max(40),
       dealScore: z.number(),
@@ -165,9 +168,10 @@ const reportDataSchema = z
         vacancyAllowance: money,
         renovationIncomeLoss: money.optional(),
         effectiveGrossIncome: money,
-        operatingExpenses: z
-          .array(z.object({ label: z.string().max(60), amount: money }))
-          .max(20),
+        operatingExpenses: boundedArray(
+          z.array(z.object({ label: z.string().max(60), amount: money })),
+          20,
+        ),
         operatingExpensesTotal: money,
         noi: money,
         annualDebtService: money,
@@ -212,21 +216,21 @@ const reportDataSchema = z
       year10Equity: money.optional(),
       bestAnnualAfterTax: money.optional(),
       totalAfterTax: money.optional(),
-      rows: z.array(projectionRow).max(120),
+      rows: boundedArray(z.array(projectionRow), 120),
     }),
     taxStrategy: z.object({
       year1Taxable: money,
       year1Savings: money,
       totalBenefit10y: money,
       annualDepreciation: money,
-      rows: z.array(taxRow).max(120),
+      rows: boundedArray(z.array(taxRow), 120),
     }),
     exitScenarios: z.object({
       bestYear: z.number(),
       year5Profit: money,
       year10Profit: money,
       totalROI: z.number(),
-      rows: z.array(exitRow).max(120),
+      rows: boundedArray(z.array(exitRow), 120),
     }),
     clientScreening: clientReportContextSchema.optional(),
     comps: z
@@ -239,8 +243,8 @@ const reportDataSchema = z
         rentRange: z
           .object({ low: money.nullable(), high: money.nullable() })
           .nullable(),
-        saleComps: z.array(compRow).max(50),
-        rentComps: z.array(compRow).max(50),
+        saleComps: boundedArray(z.array(compRow), 50),
+        rentComps: boundedArray(z.array(compRow), 50),
         // Same trap as pricePerSqft above: undeclared meant the "Pulled
         // <date> via RentCast" provenance line never rendered.
         fetchedAt: z.string().max(40).nullable().optional(),

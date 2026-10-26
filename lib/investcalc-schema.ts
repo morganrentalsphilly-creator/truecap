@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { boundedArray } from "@/lib/bounded-array";
 import {
   DEFAULT_APPRECIATION_RATE,
   DEFAULT_SELLING_COST_PCT,
@@ -279,10 +280,7 @@ export const investmentFormSchema = z
 
     // Multi-family units (bounded — see MAX_UNITS: keeps the share-link payload
     // and per-unit enrichment fan-out from being an unbounded-work vector).
-    units: z
-      .array(unitSchema)
-      .max(MAX_UNITS, `Max ${MAX_UNITS} units`)
-      .optional(),
+    units: boundedArray(z.array(unitSchema), MAX_UNITS, `Max ${MAX_UNITS} units`).optional(),
 
     // Financing
     financingMode: financingModeSchema.optional(),
