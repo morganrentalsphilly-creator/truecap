@@ -120,8 +120,10 @@ test("Agent Pro saves separate client matches, preserves history, exports a PDF,
       await expect(recipientPage.getByRole("heading", { name: "This share link isn't available", exact: true })).toBeVisible();
       await expect(recipientPage.getByRole("heading", { name: "Rental analysis", exact: true })).toHaveCount(0);
     } finally { await recipient.close(); }
-    await page.keyboard.press("Escape");
+    await sharing.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(sharing).toBeHidden();
     const evidence = page.getByRole("region", { name: "Review rental comparables" });
+    await expect(evidence).toBeVisible();
     await evidence.getByText("Add a comparable reference", { exact: true }).click();
     await evidence.getByLabel("Comparable address", { exact: true }).fill("Fixture comparable 1");
     await evidence.getByLabel("Source or document reference").fill("Agent-reviewed lease");
