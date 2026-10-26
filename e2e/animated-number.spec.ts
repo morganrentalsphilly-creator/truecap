@@ -26,7 +26,7 @@ for (const reducedMotion of ["reduce", "no-preference"] as const) {
       });
     });
     await page.goto("/", { waitUntil: "networkidle" });
-    await expect(page.locator("[data-hero-form-ready=true]")).toBeAttached();
+    await expect(page.locator("[data-hero-address-form][data-hero-form-ready=true]")).toBeAttached();
     const scrubber = page.locator("[data-price-scrubber]");
     const slider = scrubber.getByRole("slider", { name: "Offer price" });
     await expect(slider).toBeAttached();
