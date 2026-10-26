@@ -53,7 +53,11 @@ export async function saveClientDealMatchAction(input: unknown): Promise<ClientM
     .insert({ user_id: context.userId, saved_analysis_id: parsed.data.savedDealId,
       client_id: client.id, buy_box_id: box.id, source_fingerprint: fingerprint, snapshot });
   if (error && error.code !== "23505") {
-    Sentry.captureException(error, { tags: { feature: "client-deal-matches", stage: "save" } });
+    // Postgres error details can contain the rejected snapshot row. Keep
+    // addresses, client names and financial inputs out of telemetry.
+    Sentry.captureException(new Error("Client match storage request failed"), {
+      tags: { feature: "client-deal-matches", stage: "save", databaseCode: /^[A-Z0-9]{5,8}$/.test(error.code ?? "") ? error.code : "unknown" },
+    });
     return unavailable(error);
   }
   return listSavedClientMatchesAction({ savedDealId: parsed.data.savedDealId });
