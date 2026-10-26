@@ -28,6 +28,7 @@
  */
 
 import { z } from "zod";
+import { boundedArray } from "@/lib/bounded-array";
 import { isSmallAreaEntity, pickZipSafmrRent } from "@/lib/property-enrichment/hud-safmr";
 
 export type EnrichPropertyInput = {
@@ -81,9 +82,7 @@ const enrichInputSchema = z.object({
   bedrooms: z.number().int().min(0).max(20).optional().catch(undefined),
   // Bounded like `bedrooms`; capped at 24 entries so a malformed payload
   // can't fan out into an unbounded number of HUD lookups.
-  unitBedrooms: z
-    .array(z.number().int().min(0).max(20))
-    .max(24)
+  unitBedrooms: boundedArray(z.array(z.number().int().min(0).max(20)), 24)
     .optional()
     .catch(undefined),
 });

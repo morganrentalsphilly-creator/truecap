@@ -22,6 +22,7 @@ import { toServerErrorResult } from "@/lib/db-error";
  */
 
 import { z } from "zod";
+import { boundedArray } from "@/lib/bounded-array";
 import { COMMERCIAL_WORKSPACE_LIMITS } from "@/lib/commercial-limits";
 import {
   US_STATE_OPTIONS,
@@ -98,11 +99,11 @@ const boxSchema = z
     minIrrPct: nullableNumber(-99.9, 1000),
     maxCashRequired: nullableNumber(0, 1_000_000_000),
     maxPurchasePrice: nullableNumber(0, MAX_PURCHASE_PRICE),
-    propertyTypes: z
-      .array(z.enum(["single-family", "multi-family", "owner-occupant"]))
-      .max(3)
-      .default([]),
-    targetStates: z.array(z.string()).max(60).default([]),
+    propertyTypes: boundedArray(
+      z.array(z.enum(["single-family", "multi-family", "owner-occupant"])),
+      3,
+    ).default([]),
+    targetStates: boundedArray(z.array(z.string()), 60).default([]),
     isActive: z.boolean().default(true),
     isDefault: z.boolean().default(false),
     /** Agent Pro: scope this box to a roster client. Silently dropped when

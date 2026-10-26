@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { boundedArray } from "@/lib/bounded-array";
 import * as Sentry from "@sentry/nextjs";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { hasPaidPlanSubscription } from "@/lib/entitlements";
@@ -28,7 +29,7 @@ const usageSchema = z.discriminatedUnion("kind", [
   z
     .object({
       kind: z.literal("comparison"),
-      dealIds: z.array(z.string().uuid()).min(2).max(4),
+      dealIds: boundedArray(z.array(z.string().uuid()).min(2), 4),
     })
     .strict(),
 ]);
