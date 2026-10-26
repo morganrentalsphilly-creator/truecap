@@ -22,6 +22,7 @@ import { toServerErrorResult } from "@/lib/db-error";
  */
 
 import { z } from "zod";
+import { COMMERCIAL_WORKSPACE_LIMITS } from "@/lib/commercial-limits";
 import {
   US_STATE_OPTIONS,
   buyBoxHasCriteria,
@@ -58,7 +59,7 @@ import { getBuyBoxAuthorizedDealIds } from "@/lib/buy-box-access-server";
 import { activeMeteredEvaluationDealGrantsAccess } from "@/lib/evaluation-access-server";
 
 const KNOWN_STATE_ABBRS = new Set(US_STATE_OPTIONS.map((s) => s.abbr));
-const MAX_BUY_BOXES = 12;
+const MAX_BUY_BOXES = COMMERCIAL_WORKSPACE_LIMITS.buyBoxes;
 /** Sane cap on the save-feedback evaluation query (active deals only). */
 const FIT_FEEDBACK_DEALS_LIMIT = 200;
 

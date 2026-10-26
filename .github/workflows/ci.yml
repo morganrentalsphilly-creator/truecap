@@ -834,6 +834,9 @@ jobs:
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_ci_placeholder
       STRIPE_PRICE_PRO_MONTHLY: price_ci_placeholder_monthly
       STRIPE_PRICE_PRO_ANNUAL: price_ci_placeholder_annual
+      # Exercise Agent Pro client reports against disposable local accounts.
+      STRIPE_PRICE_AGENT_PRO_MONTHLY: price_ci_agent_monthly
+      STRIPE_PRICE_AGENT_PRO_ANNUAL: price_ci_agent_annual
       # Address-enrichment providers are served by the loopback mock that
       # e2e/audit-analyzer-autofill.spec.ts starts on :3199 (2026-09 audit).
       # The action only honours loopback overrides; the keys are placeholders.

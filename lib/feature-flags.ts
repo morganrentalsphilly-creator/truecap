@@ -81,7 +81,7 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlagState = Object.freeze({
   three_deal_guarantee: false,
   saved_deal_watch: false,
   batch_underwriting: false,
-  agent_client_matching: false,
+  agent_client_matching: true,
   new_homepage_positioning: true,
   brrrr_strategy_model: false,
   fix_flip_strategy_model: false,

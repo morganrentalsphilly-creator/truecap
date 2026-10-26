@@ -7,7 +7,10 @@ import { hasPaidPlanSubscription } from "@/lib/entitlements";
 import {
   buildEvaluationComparisonResourceKey,
   buildEvaluationDealResourceKey,
+  buildEvaluationPropertyResourceKey,
 } from "@/lib/evaluation-resource-key";
+import { getActiveMeteredEvaluationDealLedger } from "@/lib/evaluation-access-server";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { releasedInvestmentFormSchema } from "@/lib/underwriting-model-release";
 import { captureServerEvent } from "@/lib/posthog-server";
 import { isFunnelFlagOn } from "@/lib/funnel-flags";
@@ -119,8 +122,34 @@ export async function consumeProductEvaluationUsageAction(
 
   const resourceKey =
     parsed.data.kind === "deal"
-      ? buildEvaluationDealResourceKey(parsed.data.values)
+      ? buildEvaluationPropertyResourceKey(parsed.data.values)
       : buildEvaluationComparisonResourceKey(parsed.data.dealIds);
+  if (parsed.data.kind === "deal" && resourceKey) {
+    const ledger = await getActiveMeteredEvaluationDealLedger(supabase, user.id);
+    if (!ledger.active) {
+      return { ok: false, code: "NOT_ELIGIBLE", message: "No active free trial could be verified. Refresh your account and try again." };
+    }
+    const exact = buildEvaluationDealResourceKey(parsed.data.values);
+    // Reuse historical exact rows rather than charging existing users again.
+    const legacyKey = ledger.legacyKeysByProperty?.get(resourceKey) ??
+      (exact && ledger.resourceKeys.has(exact) ? exact : null);
+    if (ledger.active && legacyKey && !ledger.resourceKeys.has(resourceKey)) {
+      // One-time upgrade of an owned, verified legacy grant. This changes
+      // identity only: no row is inserted/deleted, no credit count changes.
+      // RLS intentionally forbids caller writes to the ledger. The server
+      // scopes this privileged update to both authenticated owner and digest.
+      try {
+        const { error } = await createAdminSupabaseClient()
+          .from("product_evaluation_usage").update({ resource_key: resourceKey })
+          .eq("user_id", user.id).eq("kind", "deal").eq("resource_key", legacyKey);
+        // A concurrent promotion to this property already preserves access.
+        if (error && error.code !== "23505") throw error;
+      } catch (error) {
+        Sentry.captureException(error, { tags: { feature: "product-evaluation", stage: "property-grant" } });
+        return { ok: false, code: "SERVER_ERROR", message: "Couldn't preserve your existing trial deal. No new analysis was used. Try again." };
+      }
+    }
+  }
   if (!resourceKey) {
     return {
       ok: false,
@@ -186,7 +215,7 @@ export async function consumeProductEvaluationUsageAction(
       ok: true,
       access: "evaluation",
       ...(nudgeOn &&
-      parsed.data.kind === "deal" &&
+      parsed.data.kind === "deal" && wasNewUsage &&
       dealsUsed >= PRODUCT_EVALUATION_DEAL_LIMIT
         ? { upgradeNudge: "third_deal" as const }
         : {}),
@@ -206,7 +235,9 @@ export async function consumeProductEvaluationUsageAction(
     return {
       ok: false,
       code: "LIMIT_REACHED",
-      message: "This free-trial allowance has been used.",
+      message: parsed.data.kind === "deal"
+        ? "Your trial property slots are used. You can still revise previously metered properties until the trial expires."
+        : "Your trial comparison allowance has been used.",
       ...(nudgeOn && reason === "deal_limit_reached"
         ? { upgradeNudge: "limit_reached" as const }
         : {}),

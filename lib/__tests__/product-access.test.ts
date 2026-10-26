@@ -58,7 +58,7 @@ describe("product access transitions", () => {
       })
     ).toMatchObject({
       kind: "evaluation",
-      canAnalyzeProDeal: false,
+      canAnalyzeProDeal: true,
       canRunComparison: true,
       canExportDecisionPack: true,
       dealsRemaining: 0,
@@ -78,7 +78,7 @@ describe("product access transitions", () => {
       }),
     ).toMatchObject({
       kind: "evaluation",
-      canAnalyzeProDeal: false,
+      canAnalyzeProDeal: true,
       canRunComparison: false,
       canExportDecisionPack: true,
     });

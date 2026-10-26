@@ -313,8 +313,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
               analysis per distinct set of inputs. Running the same inputs
               again reuses its ledger row; any changed input is a new row. */}
           Complete {PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and{" "}
-          {PRODUCT_EVALUATION_COMPARISON_LIMIT} full comparison. A rerun with
-          changed inputs counts as a new analysis.{" "}
+          {PRODUCT_EVALUATION_COMPARISON_LIMIT} full comparison. Revisions to the same property do not use another trial analysis.{" "}
           {/* An agent who arrives from an Agent Pro CTA is told, before the
               account exists, what the trial leaves out: the same sentence
               /for-agents puts beside that CTA (lib/entitlements.ts: the

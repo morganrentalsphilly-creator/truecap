@@ -30,6 +30,8 @@ import {
   type DealHistoryAvailability,
 } from "@/components/investcalc/deal-history-timeline";
 import { DealClientSelect } from "@/components/investcalc/deal-client-select";
+import { ManualRentEvidence } from "@/components/investcalc/manual-rent-evidence";
+import { ClientDealScreening } from "@/components/investcalc/client-deal-screening";
 import { ShareLinkButton } from "@/components/investcalc/share-link-button";
 import { listAgentClientsAction } from "@/app/actions/agent-clients";
 import {
@@ -876,6 +878,10 @@ export default async function DealWorkspacePage({
               so its sticky travel range covers every workspace card. */}
           <DealWorkspaceAnchorChips />
 
+          {canUseClientWorkflow && !isArchivedDeal && !isClosedDeal && isFeatureEnabled("agent_client_matching") ? (
+            <ClientDealScreening savedDealId={dealRow.id} clientId={dealRow.client_id ?? null} />
+          ) : null}
+
           {/* Rate-alert deep link (?rate=): the deal re-underwritten at the
               alert's rate, above the fold — this is what the email promised.
               Shows only while the param is present (implicit dismiss). */}
@@ -1023,6 +1029,7 @@ export default async function DealWorkspacePage({
               last-write-wins with the analyzer copy. */}
           <div id="deal-notes" className="scroll-mt-36">
             <DealNotesPanel savedDealId={dealRow.id} />
+            <div className="mt-6"><ManualRentEvidence savedDealId={dealRow.id} /></div>
           </div>
           <div id="deal-comments" className="scroll-mt-36">
             <DealCommentsPanel savedDealId={dealRow.id} />

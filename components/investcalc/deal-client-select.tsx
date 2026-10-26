@@ -57,7 +57,7 @@ export function DealClientSelect({
         const name = clients.find((c) => c.id === nextClientId)?.name;
         toast({
           title: nextClientId ? `Assigned to ${name ?? "client"}` : "Removed from client",
-          description: nextClientId ? "It now shows on their portal." : "It no longer shows on their portal.",
+          description: nextClientId ? "Saved to this client's opportunities. Create a share link when you're ready to send the report." : "The deal is kept in My Deals without a client assignment.",
         });
         router.refresh();
       } catch (err) {
@@ -72,7 +72,7 @@ export function DealClientSelect({
     <div className="flex items-center gap-1.5">
       <UserRound className="size-4 text-muted-foreground" aria-hidden />
       <Select value={value} onValueChange={onChange} disabled={isPending}>
-        <SelectTrigger className="h-9 w-[170px] text-sm" aria-label="Assign this deal to a client">
+        <SelectTrigger className="min-h-11 w-[170px] text-sm" aria-label="Assign this deal to a client">
           <SelectValue placeholder="For client" />
         </SelectTrigger>
         <SelectContent>

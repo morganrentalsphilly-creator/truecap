@@ -89,7 +89,7 @@ describe("evaluateBuyBox", () => {
     expect(r.failedCount).toBe(0);
   });
 
-  it("treats an unreadable metric as N/A (skipped), not a fail", () => {
+  it("withholds a match when a selected metric is unknown even if another passes", () => {
     const r = evaluateBuyBox(
       { ...EMPTY_BUY_BOX, minCapRatePct: 6, minCocPct: 8 },
       { ...baseMetrics, capRatePct: null }
@@ -97,8 +97,21 @@ describe("evaluateBuyBox", () => {
     const cap = r.checks.find((c) => c.id === "capRate")!;
     expect(cap.pass).toBeNull();
     // CoC still applies and passes.
-    expect(r.passes).toBe(true);
+    expect(r.passes).toBe(false);
     expect(r.passedCount).toBe(1);
+    expect(r.personalLine).toContain("Verify cap rate");
+  });
+
+  it.each([NaN, Infinity, -Infinity])("does not treat nonfinite metric %s as evidence", (capRatePct) => {
+    const r = evaluateBuyBox(fullCriteria, { ...baseMetrics, capRatePct });
+    expect(r.passes).toBe(false);
+    expect(r.checks.find((check) => check.id === "capRate")?.pass).toBeNull();
+  });
+
+  it("requires the selected market to be known before claiming fit", () => {
+    const r = evaluateBuyBox(fullCriteria, { ...baseMetrics, state: null });
+    expect(r.passes).toBe(false);
+    expect(r.personalLine).toContain("Verify market");
   });
 
   it("requires one unique IRR and never guesses through multiple roots", () => {

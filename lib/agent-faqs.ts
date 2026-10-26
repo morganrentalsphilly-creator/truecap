@@ -95,7 +95,7 @@ export const AGENT_FAQS: readonly MarketingFaq[] = [
     // "The free trial", not a trial of Agent Pro: the trial is Pro deal
     // analyses, and Agent Pro's roster is never part of it.
     q: "What does the free trial include, and do I need a card?",
-    a: `Creating an account never asks for a card. The ${PRODUCT_EVALUATION_DAYS}-day trial covers ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, enough to see the memo and the Offer Ceiling on your own listings; a rerun with changed inputs counts as a new analysis. Co-branding, client rosters and client Buy Boxes are part of the Agent Pro subscription, not the trial; checkout shows the exact charge before you confirm.`,
+    a: `Creating an account never asks for a card. The ${PRODUCT_EVALUATION_DAYS}-day trial covers ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, enough to see the memo and the Offer Ceiling on your own listings; revisions to the same property do not use another trial analysis. Co-branding, client rosters and client Buy Boxes are part of the Agent Pro subscription, not the trial; checkout shows the exact charge before you confirm.`,
   },
   {
     q: "Can I cancel?",

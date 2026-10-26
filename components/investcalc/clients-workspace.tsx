@@ -30,7 +30,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useActionConfirm } from "@/components/ui/action-confirm-dialog";
 import { trackEvent } from "@/lib/analytics";
 
-type Editor = { id?: string; name: string; email: string; phone: string };
+import { ClientFinancingEditor } from "@/components/investcalc/client-financing-editor";
+import type { ClientFinancing } from "@/lib/client-underwriting-preferences";
+
+type Editor = { id?: string; name: string; email: string; phone: string; notes: string; financingAssumptions?: ClientFinancing | null };
 
 const AGENT_WORKFLOW_STEPS = [
   "Client",
@@ -44,6 +47,7 @@ const AGENT_WORKFLOW_STEPS = [
 
 export function ClientsWorkspace({
   initialClients,
+  supportsFinancing = false,
   initialCounts,
   countsFailed = false,
   portalsAvailable = false,
@@ -51,6 +55,7 @@ export function ClientsWorkspace({
   loadError,
 }: {
   initialClients: AgentClient[];
+  supportsFinancing?: boolean;
   initialCounts: ClientDealSummary[];
   /** True when the deal-count query failed — cards must not claim "No deals
    *  yet", which reads as fact rather than a load failure. */
@@ -90,8 +95,8 @@ export function ClientsWorkspace({
           name: editor.name,
           email: editor.email || null,
           phone: editor.phone || null,
-          notes: null,
-          isArchived: false,
+          notes: editor.notes || null,
+          ...(supportsFinancing && editor.financingAssumptions ? { financingAssumptions: editor.financingAssumptions } : {}),
         });
         if (r.ok) {
           const created = !editor.id;
@@ -198,7 +203,7 @@ export function ClientsWorkspace({
           </p>
         </div>
         {!editor ? (
-          <Button type="button" onClick={() => setEditor({ name: "", email: "", phone: "" })} className="shrink-0 gap-1.5">
+          <Button type="button" onClick={() => setEditor({ name: "", email: "", phone: "", notes: "", financingAssumptions: { kind: "deal" } })} className="shrink-0 gap-1.5">
             <Plus className="size-4" /> Add client
           </Button>
         ) : null}
@@ -259,7 +264,7 @@ export function ClientsWorkspace({
               value={editor.name}
               placeholder="e.g. The Nguyens"
               onChange={(e) => setEditor({ ...editor, name: e.target.value })}
-              className="h-10 text-sm"
+              className="min-h-11 text-sm"
             />
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -272,7 +277,7 @@ export function ClientsWorkspace({
                 type="email"
                 value={editor.email}
                 onChange={(e) => setEditor({ ...editor, email: e.target.value })}
-                className="h-10 text-sm"
+                className="min-h-11 text-sm"
               />
             </div>
             <div className="space-y-1">
@@ -283,10 +288,24 @@ export function ClientsWorkspace({
                 id="cw-phone"
                 value={editor.phone}
                 onChange={(e) => setEditor({ ...editor, phone: e.target.value })}
-                className="h-10 text-sm"
+                className="min-h-11 text-sm"
               />
             </div>
           </div>
+          <div className="space-y-1">
+            <Label htmlFor="cw-notes">Private notes (optional)</Label>
+            <textarea id="cw-notes" value={editor.notes} maxLength={2000}
+              className="min-h-24 w-full rounded-md border border-input bg-background p-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onChange={(e) => setEditor({ ...editor, notes: e.target.value })}
+              aria-describedby="cw-notes-help" />
+            <p id="cw-notes-help" className="text-sm text-muted-foreground">
+              For your own follow-up. These notes are not included in shared reports.
+            </p>
+          </div>
+          {supportsFinancing ? <>
+            {editor.financingAssumptions === null ? <p role="status" className="text-sm text-destructive">Stored financing needs review. Choose a financing option to replace it; editing other client details preserves the existing record.</p> : null}
+            <ClientFinancingEditor value={editor.financingAssumptions ?? { kind: "deal" }} onChange={financingAssumptions => setEditor({ ...editor, financingAssumptions })} />
+          </> : null}
           <div className="flex items-center gap-2">
             <Button type="button" size="sm" onClick={save} disabled={isSaving || editor.name.trim().length === 0}>
               {editor.id ? "Save" : "Add client"}
@@ -304,9 +323,9 @@ export function ClientsWorkspace({
           <p className="mt-2 font-semibold text-foreground">No clients yet</p>
           <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
             Add a buyer, set the criteria they&rsquo;re shopping for, then assign deals to them from My Deals.
-            Each client gets a link to a live page showing everything you&rsquo;ve screened for them.
+            Open an assigned deal to create a client-specific report and share link.
           </p>
-          <Button type="button" className="mt-4 gap-1.5" onClick={() => setEditor({ name: "", email: "", phone: "" })}>
+          <Button type="button" className="mt-4 gap-1.5" onClick={() => setEditor({ name: "", email: "", phone: "", notes: "", financingAssumptions: { kind: "deal" } })}>
             <Plus className="size-4" /> Add your first client
           </Button>
         </div>
@@ -343,7 +362,7 @@ export function ClientsWorkspace({
                     type="button"
                     size="sm"
                     variant="ghost"
-                    onClick={() => setEditor({ id: c.id, name: c.name, email: c.email ?? "", phone: c.phone ?? "" })}
+                    onClick={() => setEditor({ id: c.id, name: c.name, email: c.email ?? "", phone: c.phone ?? "", notes: c.notes ?? "", financingAssumptions: c.financingAssumptions === undefined ? { kind: "deal" } : c.financingAssumptions })}
                     disabled={isSaving}
                   >
                     Edit

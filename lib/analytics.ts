@@ -172,6 +172,10 @@ export type FunnelEvent =
   | "deal_alert_opened" // properties: alert_type
   | "pipeline_stage_changed" // properties: from_stage, to_stage, moved_to_offer_ready
   | "agent_client_created" // properties: source
+  | "client_match_saved"
+  | "client_match_exported"
+  | "rental_evidence_saved"
+  | "client_matches_generated" // properties: source, count; never client IDs/names or financial values
   | "client_report_shared" // properties: report_type
   | "buy_box_result_viewed"
   | "max_offer_teaser_viewed"

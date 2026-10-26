@@ -41,7 +41,6 @@ describe("evaluateAgentClientMatches", () => {
   it("fails closed while the rollout flag is off", () => {
     const boxes = [clientBox("box-a", "client-a", { minCapRatePct: 6 })];
 
-    expect(evaluateAgentClientMatches(deal, boxes)).toEqual([]);
     expect(
       evaluateAgentClientMatches(
         deal,
@@ -141,5 +140,25 @@ describe("evaluateAgentClientMatches", () => {
     );
 
     expect(results.map((result) => result.clientId)).toEqual(["client-a", "client-z"]);
+  });
+
+  it("withholds a client match if a second adopted criterion is unknown", () => {
+    const [result] = evaluateAgentClientMatches(
+      { ...deal, state: null },
+      [clientBox("unknown-market", "client-a", { minCapRatePct: 6, targetStates: ["PA"] })],
+      enabled,
+    );
+    expect(result.status).toBe("insufficient-data");
+    expect(result.matchedCheckCount).toBe(1);
+    expect(result.personalLine).toContain("Verify market");
+  });
+
+  it("allows genuinely inapplicable cash DSCR alongside a satisfied criterion", () => {
+    const [result] = evaluateAgentClientMatches(
+      { ...deal, isCashPurchase: true, dscr: 0 },
+      [clientBox("cash", "client-a", { minCapRatePct: 6, minDscr: 1.25 })],
+      enabled,
+    );
+    expect(result.status).toBe("match");
   });
 });

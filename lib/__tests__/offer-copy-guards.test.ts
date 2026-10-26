@@ -84,7 +84,8 @@ describe("offer trust language", () => {
 
     expect(agentPage).toContain("up to 100 clients");
     expect(agentPage).not.toMatch(/no software-enforced roster cap/i);
-    expect(actions).toContain("const MAX_CLIENTS = 100");
+    expect(read("lib/commercial-limits.ts")).toContain("MAX_CLIENTS = 100");
+    expect(actions).toContain("const MAX_CLIENTS = COMMERCIAL_WORKSPACE_LIMITS.agentClients");
   });
 
   it("states the 12-Buy-Box account cap wherever Agent Pro ties a Buy Box to each client", () => {
@@ -93,7 +94,8 @@ describe("offer trust language", () => {
     // Up to 100 clients"), /pricing's value stack ("Up to 100 clients, each
     // with a Buy Box") and the catalog label ("buy boxes per buyer") promised
     // more than the product holds.
-    expect(read("app/actions/user-buy-boxes.ts")).toContain("const MAX_BUY_BOXES = 12");
+    expect(read("lib/commercial-limits.ts")).toContain("MAX_BUY_BOXES = 12");
+    expect(read("app/actions/user-buy-boxes.ts")).toContain("const MAX_BUY_BOXES = COMMERCIAL_WORKSPACE_LIMITS.buyBoxes");
 
     const home = read("components/marketing/landing-sections.tsx");
     // The homepage Agent Pro PlanCard: its data attribute to its action, and

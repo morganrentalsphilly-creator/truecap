@@ -6619,8 +6619,9 @@ export function InvestCalcPage({
         if (!usage.ok) {
           toast({
             title:
-              usage.code === "LIMIT_REACHED" || usage.code === "EXPIRED"
-                ? "Free trial complete"
+              usage.code === "LIMIT_REACHED"
+                ? "Trial property limit reached"
+                : usage.code === "EXPIRED" ? "Free trial ended"
                 : "Could not verify free-trial access",
             description: usage.message,
             variant: usage.code === "SERVER_ERROR" ? "destructive" : "warning",

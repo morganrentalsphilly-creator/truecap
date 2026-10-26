@@ -1,3 +1,4 @@
+import { clientReportContextSchema } from "@/lib/client-deal-match-schema";
 /**
  * Wire schema for the report payload the PDF server action accepts.
  *
@@ -227,6 +228,7 @@ const reportDataSchema = z
       totalROI: z.number(),
       rows: z.array(exitRow).max(120),
     }),
+    clientScreening: clientReportContextSchema.optional(),
     comps: z
       .object({
         valueEstimate: money.nullable(),

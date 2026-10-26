@@ -80,8 +80,8 @@ const trial = {
   deals: numberConstant(access, "PRODUCT_EVALUATION_DEAL_LIMIT", "lib/product-access.ts"),
   comparisons: numberConstant(access, "PRODUCT_EVALUATION_COMPARISON_LIMIT", "lib/product-access.ts"),
 };
-const maxClients = numberConstant(read("app/actions/agent-clients.ts"), "MAX_CLIENTS", "app/actions/agent-clients.ts");
-const maxBuyBoxes = numberConstant(read("app/actions/user-buy-boxes.ts"), "MAX_BUY_BOXES", "app/actions/user-buy-boxes.ts");
+const maxClients = numberConstant(read("lib/commercial-limits.ts"), "MAX_CLIENTS", "lib/commercial-limits.ts");
+const maxBuyBoxes = numberConstant(read("lib/commercial-limits.ts"), "MAX_BUY_BOXES", "lib/commercial-limits.ts");
 
 const redirects = read("lib/historical-tool-redirects.ts");
 const redirectBlock = redirects.match(/HISTORICAL_TOOL_REDIRECTS\s*=\s*\{([\s\S]*?)\}\s*as const/);

@@ -77,3 +77,16 @@ export function buildEvaluationComparisonResourceKey(
   if (ids.length < 2) return null;
   return buildEvaluationResourceKey("comparison", JSON.stringify(ids));
 }
+
+/** Trial identity is the normalized property address, not its assumptions.
+ * Keep unit numbers: two units must never receive the same grant. Exact-result
+ * keys above remain unchanged for anonymous and purchased report grants.
+ */
+export function buildEvaluationPropertyResourceKey(values: InvestmentFormValues): string | null {
+  if (!buildEvaluationDealResourceKey(values)) return null;
+  const address = values.address.normalize("NFKC").trim().toLowerCase()
+    .replace(/[.,]/g, " ").replace(/\s+/g, " ").trim();
+  if (!address) return null;
+  return buildEvaluationResourceKey("deal", `property-v1\0${address}`)
+    .replace(/^deal:/, "property-v1:");
+}

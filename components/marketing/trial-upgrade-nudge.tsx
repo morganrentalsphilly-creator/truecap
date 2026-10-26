@@ -23,11 +23,11 @@ export type TrialUpgradeNudgeKind = "third_deal" | "limit_reached";
 const COPY: Record<TrialUpgradeNudgeKind, { title: string; body: string }> = {
   third_deal: {
     title: "That was your third Pro deal",
-    body: "Your free trial includes three complete Pro deals, and this was the last one. This result stays open. Pro keeps the Offer Ceiling, downside testing, comparisons, and reports on every deal you run next.",
+    body: "Your three trial property slots are now used. Revise these properties until your trial expires. Pro keeps the Offer Ceiling, downside testing, comparisons, and reports on every deal you run next.",
   },
   limit_reached: {
     title: "You've used your three Pro deals",
-    body: "Your free trial covers three complete Pro deals. Pro runs the Offer Ceiling, downside testing, comparisons, and reports on every deal, with no limit.",
+    body: "Your three trial property slots are used. Revisions to those properties remain available until expiry. Pro runs the Offer Ceiling, downside testing, comparisons, and reports on every deal, with no limit.",
   },
 };
 

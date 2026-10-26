@@ -111,7 +111,7 @@ export type BuyBoxCheck = {
 export type BuyBoxResult = {
   /** Criteria exist AND the box is active. */
   active: boolean;
-  /** Overall: at least one check applied and none failed. */
+  /** At least one check applied, none failed, and no selected rule is unknown. */
   passes: boolean;
   checks: BuyBoxCheck[];
   passedCount: number;
@@ -174,19 +174,30 @@ function relGap(diff: number, target: number): number {
   return denom > 0 ? Math.abs(diff) / denom : Math.abs(diff);
 }
 
+/** A cash purchase genuinely has no DSCR; every other skipped rule needs evidence. */
+export function unresolvedBuyBoxChecks(checks: readonly BuyBoxCheck[]): BuyBoxCheck[] {
+  return checks.filter((check) => check.pass === null && !(
+    check.id === "dscr" && check.actual === NO_DEBT_SERVICE_DSCR_LABEL
+  ));
+}
+
+function finiteMetric(value: number | null | undefined): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
 /**
  * Evaluate a deal against the Buy Box. Only criteria the user actually
  * set produce a check; a metric we can't read (or DSCR on a cash deal)
  * yields a `pass: null` check that doesn't count for or against the
- * deal. The overall `passes` is true only when ≥1 check applied and
- * none failed.
+ * deal. Missing evidence prevents an overall pass even when another rule
+ * passes. Only genuinely inapplicable cash-purchase DSCR can be skipped.
  */
 export function evaluateBuyBox(criteria: BuyBoxCriteria, metrics: BuyBoxDealMetrics): BuyBoxResult {
   const checks: BuyBoxCheck[] = [];
   const gaps: GapRank[] = [];
 
   if (criteria.minCapRatePct != null) {
-    const a = metrics.capRatePct;
+    const a = finiteMetric(metrics.capRatePct);
     const check: BuyBoxCheck = {
       id: "capRate",
       label: "Cap rate",
@@ -203,7 +214,7 @@ export function evaluateBuyBox(criteria: BuyBoxCriteria, metrics: BuyBoxDealMetr
   }
 
   if (criteria.minCocPct != null) {
-    const a = metrics.cocPct;
+    const a = finiteMetric(metrics.cocPct);
     const check: BuyBoxCheck = {
       id: "coc",
       label: "Cash-on-cash",
@@ -220,7 +231,7 @@ export function evaluateBuyBox(criteria: BuyBoxCriteria, metrics: BuyBoxDealMetr
   }
 
   if (criteria.minDscr != null) {
-    const a = metrics.dscr;
+    const a = finiteMetric(metrics.dscr);
     const cashNa = metrics.isCashPurchase;
     const check: BuyBoxCheck = {
       id: "dscr",
@@ -238,7 +249,7 @@ export function evaluateBuyBox(criteria: BuyBoxCriteria, metrics: BuyBoxDealMetr
   }
 
   if (criteria.minCashFlowMonthly != null) {
-    const a = metrics.cashFlowMonthly;
+    const a = finiteMetric(metrics.cashFlowMonthly);
     const check: BuyBoxCheck = {
       id: "cashFlow",
       label: "Monthly cash flow",
@@ -313,7 +324,7 @@ export function evaluateBuyBox(criteria: BuyBoxCriteria, metrics: BuyBoxDealMetr
   }
 
   if (criteria.maxPurchasePrice != null) {
-    const a = metrics.purchasePrice;
+    const a = finiteMetric(metrics.purchasePrice);
     const check: BuyBoxCheck = {
       id: "price",
       label: "Purchase price",
@@ -355,6 +366,7 @@ export function evaluateBuyBox(criteria: BuyBoxCriteria, metrics: BuyBoxDealMetr
 
   const applicable = checks.filter((c) => c.pass !== null);
   const failed = applicable.filter((c) => c.pass === false);
+  const unresolved = unresolvedBuyBoxChecks(checks);
 
   // Personal one-liner: the biggest miss on a fail, the tightest margin on
   // a pass — ranked by normalized relative gap so pp / $ / ratio units
@@ -364,6 +376,8 @@ export function evaluateBuyBox(criteria: BuyBoxCriteria, metrics: BuyBoxDealMetr
   if (failed.length > 0 && numericMisses.length > 0) {
     const c = numericMisses[0]!.check;
     personalLine = `Biggest gap — ${c.label}: ${c.actual} vs ${c.target} (${c.gapText})`;
+  } else if (unresolved.length > 0) {
+    personalLine = `Verify ${unresolved.map((check) => check.label.toLowerCase()).join(", ")} before confirming criteria fit.`;
   } else if (applicable.length > 0 && failed.length === 0) {
     const tightest = gaps.filter((g) => !g.isMiss).sort((x, y) => x.rel - y.rel)[0];
     if (tightest) {
@@ -374,7 +388,7 @@ export function evaluateBuyBox(criteria: BuyBoxCriteria, metrics: BuyBoxDealMetr
 
   return {
     active: criteria.isActive && checks.length > 0,
-    passes: applicable.length > 0 && failed.length === 0,
+    passes: applicable.length > 0 && failed.length === 0 && unresolved.length === 0,
     checks,
     passedCount: applicable.filter((c) => c.pass === true).length,
     failedCount: failed.length,

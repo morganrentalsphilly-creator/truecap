@@ -38,12 +38,12 @@ const answer = (question: string) => {
 };
 
 describe("trial wording says what is metered (P1-07)", () => {
-  const RERUN = /A rerun with changed inputs counts as a new (?:analysis|one)\./;
+  const RERUN = /Revisions to the same property do not use another trial analysis\./;
 
   it("the homepage Pro card", () => {
     const landing = flat(read("components/marketing/landing-sections.tsx"));
     expect(landing).toContain(
-      '{PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and{" "} {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. A rerun with changed inputs counts as a new analysis.',
+      '{PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and{" "} {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. Revisions to the same property do not use another trial analysis.',
     );
   });
 
@@ -53,15 +53,15 @@ describe("trial wording says what is metered (P1-07)", () => {
     // that said "Pro analyses".
     const landing = read("components/marketing/landing-sections.tsx");
     expect(landing).toContain(
-      "free trial with no card: ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. A rerun with changed inputs counts as a new analysis.",
+      "free trial with no card: ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. Revisions to the same property do not use another trial analysis.",
     );
     expect(landing).toContain(
-      "days, ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. A rerun with changed inputs counts as a new analysis.",
+      "days, ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and ${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. Revisions to the same property do not use another trial analysis.",
     );
     expect(landing).not.toMatch(/Pro deals\b[^\n]*comparison/);
     const investors = flat(read("app/for-investors/page.tsx"));
     expect(investors).toContain(
-      '{PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and{" "} {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card. A rerun with changed inputs counts as a new analysis.',
+      '{PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and{" "} {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card. Revisions to the same property do not use another trial analysis.',
     );
     expect(investors).not.toMatch(/Pro deals\b/);
     expect(investors).not.toMatch(/\b\d+ Pro (?:analyses|deals)\b/);
@@ -89,10 +89,10 @@ describe("trial wording says what is metered (P1-07)", () => {
       "days, ${EVALUATION_FACTS.dealLimit} ${proOfferName} analyses, and ${EVALUATION_FACTS.comparisonLimit} comparison",
     );
     expect(page).toContain(
-      "days, ${EVALUATION_FACTS.dealLimit} Pro analyses and ${EVALUATION_FACTS.comparisonLimit} comparison. A rerun with changed inputs counts as a new analysis.",
+      "days, ${EVALUATION_FACTS.dealLimit} Pro analyses and ${EVALUATION_FACTS.comparisonLimit} comparison. Revisions to the same property do not use another trial analysis.",
     );
     expect(plans).toContain(
-      "{PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. A rerun with changed inputs counts as a new analysis.",
+      "{PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. Revisions to the same property do not use another trial analysis.",
     );
     for (const source of [page, card, plans]) {
       expect(source).not.toMatch(/(?:Pro|proOfferName\}) deals\b[^\n]*comparison/);
@@ -104,7 +104,7 @@ describe("trial wording says what is metered (P1-07)", () => {
   it("llms-full.txt", () => {
     const route = read("app/llms-full.txt/route.ts");
     expect(route).toContain(
-      "covering ${planFacts.evaluationDealLimit} Pro analyses and ${planFacts.evaluationComparisonLimit} comparison. A rerun with changed inputs counts as a new analysis.",
+      "covering ${planFacts.evaluationDealLimit} Pro analyses and ${planFacts.evaluationComparisonLimit} comparison. Revisions to the same property do not use another trial analysis.",
     );
   });
 
@@ -120,7 +120,7 @@ describe("trial wording says what is metered (P1-07)", () => {
     );
     expect(
       answer("What does the free trial include, and do I need a card?"),
-    ).toContain("a rerun with changed inputs counts as a new analysis");
+    ).toContain("revisions to the same property do not use another trial analysis");
   });
 
   it("no number in these sentences is typed by hand", () => {
@@ -134,12 +134,12 @@ describe("trial wording says what is metered (P1-07)", () => {
     }
   });
 
-  it("the metering key is still the whole validated form", () => {
+  it("trial metering uses property identity while exact-result keys remain available", () => {
     // The copy above is true only while this holds. If metering moves to the
     // property, these sentences change with it.
     const key = read("lib/evaluation-resource-key.ts");
     expect(key).toContain(
-      'buildEvaluationResourceKey("deal", JSON.stringify(parsed.data))',
+      'property-v1',
     );
   });
 });

@@ -3,10 +3,21 @@ import {
   buildEvaluationComparisonResourceKey,
   buildEvaluationDealResourceKey,
   buildEvaluationResourceKey,
+  buildEvaluationPropertyResourceKey,
 } from "@/lib/evaluation-resource-key";
 import { UNDERWRITING_V1_GOLDEN_CORPUS } from "@/lib/__tests__/fixtures/underwriting-v1-golden-corpus";
 
 describe("evaluation resource keys", () => {
+  it("meters one property across revisions while preserving apartment identity", () => {
+    const values = { ...UNDERWRITING_V1_GOLDEN_CORPUS[0]!.values, address: "123 Main St., Philadelphia, PA 19103" };
+    const key = buildEvaluationPropertyResourceKey(values);
+    expect(key).toMatch(/^property-v1:[a-f0-9]{64}$/);
+    expect(buildEvaluationPropertyResourceKey({ ...values, purchasePrice: 250001, monthlyRent: 2900, interestRate: 8, address: " 123 MAIN St Philadelphia PA 19103 " })).toBe(key);
+    expect(buildEvaluationPropertyResourceKey({ ...values, address: `${values.address} Unit 2` })).not.toBe(key);
+    expect(buildEvaluationPropertyResourceKey({ ...values, address: "124 Main St Philadelphia PA 19103" })).not.toBe(key);
+    expect(buildEvaluationDealResourceKey(values)).not.toBe(key);
+    expect(buildEvaluationPropertyResourceKey({ ...values, purchasePrice: NaN })).toBeNull();
+  });
   it("is deterministic and accepted by the database resource-key contract", () => {
     const first = buildEvaluationResourceKey("deal", '{"price":250000,"rent":2400}');
     const second = buildEvaluationResourceKey("deal", '{"price":250000,"rent":2400}');

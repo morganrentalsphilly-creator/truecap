@@ -48,6 +48,7 @@ export type CanonicalReportBuildInput = {
    * analysis. Never populate this from a browser request. */
   trustedPresentation?: {
     templateLabel?: string | null;
+    clientScreening?: import("@/lib/client-deal-match-schema").ClientReportContext;
     comps?: ReportData["comps"];
   };
   /** User-selected acquisition criteria. The strict target normalizer inside
@@ -342,6 +343,7 @@ export function buildCanonicalReportData(
     // Saved-deal comps are included only when the server resolved them through
     // an owner-scoped read. Anonymous/browser-supplied comps are discarded.
     comps: input.trustedPresentation?.comps ?? null,
+    ...(input.trustedPresentation?.clientScreening ? { clientScreening: input.trustedPresentation.clientScreening } : {}),
     maxOffer: buildReportMaxOffer({
       values,
       result,
