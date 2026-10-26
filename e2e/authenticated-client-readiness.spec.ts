@@ -62,6 +62,7 @@ test("Agent Pro saves separate client matches, preserves history, exports a PDF,
     await page.goto(`/dashboard/saved-analyses/${dealId}`);
     const screen = page.getByRole("region", { name: "Which clients could this fit?" });
     await screen.getByRole("button", { name: "Screen my clients" }).click();
+    await expect(screen.getByRole("button", { name: "Refresh screening", exact: true })).toBeEnabled();
     await expect(screen.getByText("Client assumption: cash purchase", { exact: true })).toBeVisible();
     await expect(screen.getByRole("button", { name: "Save client match" })).toHaveCount(2);
     await screen.getByRole("button", { name: "Save client match" }).first().click();

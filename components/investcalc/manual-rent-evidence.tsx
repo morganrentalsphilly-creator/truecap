@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import { trackEvent } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,12 @@ export function ManualRentEvidence({ savedDealId }: { savedDealId: string }) {
   const [notice, setNotice] = useState<string | null>(null);
   const [draft, setDraft] = useState(empty);
   const [showArchived, setShowArchived] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, setPending] = useState(false);
+  const start = async (operation: () => Promise<void>) => {
+    if (pending) return;
+    setPending(true);
+    try { await operation(); } finally { setPending(false); }
+  };
   useEffect(() => {
     let cancelled = false;
     listRentEvidenceAction({ savedDealId }).then(result => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { screenSavedDealForClientsAction, type ClientDealScreeningResult } from "@/app/actions/client-deal-screening";
@@ -13,11 +13,18 @@ const STATUS = { meets: "Meets selected criteria", misses: "Misses selected crit
 
 export function ClientDealScreening({ savedDealId, clientId }: { savedDealId: string; clientId: string | null }) {
   const [result, setResult] = useState<ClientDealScreeningResult | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, setPending] = useState(false);
   const [saved, setSaved] = useState<ClientMatchesResult | null>(null);
-  const [saving, startSaving] = useTransition();
+  const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [share, setShare] = useState<{ matchId: string; result: Extract<Awaited<ReturnType<typeof prepareClientMatchShareAction>>, { ok: true }> } | null>(null);
+  // Track the operation itself. A route-wide React transition can outlive
+  // the returned action while unrelated streamed content remains pending.
+  const startSaving = async (operation: () => Promise<void>) => {
+    if (saving) return;
+    setSaving(true);
+    try { await operation(); } finally { setSaving(false); }
+  };
   useEffect(() => {
     let cancelled = false;
     listSavedClientMatchesAction({ savedDealId }).then(next => { if (!cancelled) setSaved(next); })
@@ -52,15 +59,17 @@ export function ClientDealScreening({ savedDealId, clientId }: { savedDealId: st
       setNotice("Ready to share this match's frozen financing and financial targets. Open Client report to choose address visibility and create or revoke links. Client names and private roster notes are excluded; the PDF includes the full client criteria.");
     } catch { setNotice("Couldn't prepare sharing. Your saved match is unchanged."); }
   });
-  const screen = () => start(async () => {
+  const screen = async () => {
+    if (pending) return;
+    setPending(true);
     try {
       const next = await screenSavedDealForClientsAction({ savedDealId });
       setResult(next);
       if (next.ok) trackEvent("client_matches_generated", { source: "saved_deal", count: next.screens.length });
     } catch {
       setResult({ ok: false, message: "Couldn't screen clients. Your saved deal is unchanged. Try again." });
-    }
-  });
+    } finally { setPending(false); }
+  };
   return <section aria-labelledby="client-screening-title" className="rounded-object border border-border bg-card p-5 shadow-rest sm:p-6">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="max-w-prose">

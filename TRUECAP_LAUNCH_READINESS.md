@@ -16,6 +16,10 @@ Existing HUD/FRED results are benchmarks, not verified property rents or investo
 
 This release adds no paid API calls. Manual evidence costs zero provider requests, plus existing hosting/storage costs. Automated marginal cost is uncached requests × contracted rate plus hosting/storage; the actual contract rate is unavailable and must not be invented.
 
+Public provider prices checked October 26: Developer $0/50 requests, $0.20 overage; Foundation $74/1,000, $0.06 overage; Growth $199/5,000, $0.03 overage; Scale $449/25,000, $0.015 overage. These are advertised API rates, not this account's invoice. Two uncached requests beyond Developer quota would cost $0.40; cache hits make no provider request. [RentCast API pricing](https://www.rentcast.io/api). The provider does not enforce hard caps, which makes TrueCap's durable application budget important. [Billing documentation](https://developers.rentcast.io/reference/billing-and-pricing).
+
+Published API terms permit storage and third-party display/distribution subject to restrictions and underlying third-party rights. This supports continued evaluation of the existing integration; it does not establish this account's subscription or compliance with every applicable use restriction. No new agreement was accepted. [RentCast API terms](https://www.rentcast.io/terms-api).
+
 Search Console, PostHog dashboard, Sentry project, provider billing and a live Stripe purchase were not inspected. Instrumentation is retained with new workflow events; actual production ingestion and commercial delivery require separate evidence.
 
 ## Customer validation
@@ -37,4 +41,4 @@ Use existing consent-aware PostHog events for landing → start → activation �
 
 ## Demonstration
 
-Guided sample: https://usetruecap.com/sample-deal. Methodology: https://usetruecap.com/methodology. Agent journey: https://usetruecap.com/for-agents. Smoke-test after deployment. Synthetic QA reports are demonstrations, never customer results or verified property evidence.
+Guided sample: https://usetruecap.com/analyze?sample=1. Representative report: https://usetruecap.com/sample-decision-memo. Methodology: https://usetruecap.com/methodology. Agent journey: https://usetruecap.com/for-agents. Smoke-test after deployment. Synthetic QA reports are demonstrations, never customer results or verified property evidence.

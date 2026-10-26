@@ -18,10 +18,12 @@ Status: release verification in progress. Fixture tests are not customer validat
 | Design | No primary source-detector findings in changed client/financing/evidence UI and pricing |
 | Initial responsive pass | Clients and saved deal HTTP 200 at 375,390,768,1095,1440; no horizontal overflow. Final phase-two images pending |
 | Hosted preflight | Correct TrueCap project authenticated; existing schema verified. New migrations pending |
-| Isolated DB/E2E | Pending CI replay. New Agent Pro test covers two users, two matches/one property, stale-screen rejection, PDF, share/revoke, comparable save/archive/restore and cross-owner denial |
+| Isolated DB/E2E | Clean migration replay passed in CI run 40362070065; browser job installing Chromium. New Agent Pro test covers two users, two matches/one property, stale-screen rejection, PDF, share/revoke, comparable save/archive/restore and cross-owner denial |
 | Deployment / live smoke | Pending |
 
 The read-only loopback fixture drops writes and cannot establish persistence or RLS. CI must replay all migrations and run actual authenticated workflows before production SQL.
+
+CI run 40362070065 passed the full check job (lint, typecheck, unit suite, build), build integrity and Lighthouse job. Browser checks remain pending. Final local captures at all five widths show no horizontal overflow; 390/1440 confirmation also verifies screening returns to a ready button. The fixture lacks document Storage and returns one known Storage 404 per saved-deal capture. Inline text links and existing checkbox icons account for the small-target list. A rendered detector flagged the disabled empty-form Add client button; inactive controls are exempt from WCAG text contrast, so this is not treated as an active-control contrast defect. An unrelated streamed transition held the new screening button busy; operation-local pending state fixes it and E2E now asserts readiness.
 
 Existing tests cover anonymous/free/Pro roles, scenarios, comparisons, Offer Ceiling gates, upload validation, share expiry/revocation, billing ownership, signature-bound webhooks and reconciliation. These tests do not establish live checkout delivery, actual provider licensing or field Core Web Vitals. No real purchase, charge, marketing send or paid data request was performed.
 
