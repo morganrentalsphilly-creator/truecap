@@ -2956,9 +2956,10 @@ function pageDownside(
     cw,
     64,
     "Stressed DSCR",
-    formatDscr(stressed.dscr, financed),
+    financed ? formatDscr(stressed.dscr, true) : "N/A",
     {
       tone: financed && stressed.dscr < 1 ? "danger" : "neutral",
+      sub: financed ? undefined : "No debt service",
       themeColor,
     },
   );

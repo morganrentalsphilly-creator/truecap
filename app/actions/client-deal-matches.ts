@@ -82,6 +82,9 @@ export async function prepareClientMatchShareAction(input: unknown) {
   if (match.snapshot.methodologyVersion !== TRUECAP_UNDERWRITING_STANDARD_VERSION) {
     return { ok: false as const, message: "This historical match uses an older methodology. Screen and save a new match before sharing. The original remains unchanged." };
   }
+  if (match.snapshot.screen.checks.some(check => (check.id === "state" || check.id === "propertyType") && check.pass !== true)) {
+    return { ok: false as const, message: "The property's market or type does not meet verified client criteria. Export the client PDF to show these gaps; a financial-only link would omit them." };
+  }
   const { chooseMaoTargetFromBuyBox } = await import("@/lib/mao-targets");
   const { calculateAnalysis } = await import("@/lib/calc-analysis");
   return { ok: true as const, values: match.snapshot.values,

@@ -197,8 +197,9 @@ export function buildCanonicalReportData(
   const targetBasis = resolvedTarget
     ? describeMaoTarget(resolvedTarget)
     : "No acquisition targets adopted";
+  const clientScreen = input.trustedPresentation?.clientScreening?.screen;
   const clearsSelectedTargets = resolvedTarget
-    ? meetsTarget(result, resolvedTarget, values)
+    ? meetsTarget(result, resolvedTarget, values) && (!clientScreen || clientScreen.status === "meets")
     : false;
   const decisionSourceLabel =
     targetSource === "buy-box"
@@ -317,7 +318,9 @@ export function buildCanonicalReportData(
       afterTaxCF: result.afterTaxCF,
     },
     decision: {
-      label: !targetAdopted
+      label: clientScreen?.status === "needs-verification"
+        ? "Cannot determine"
+        : !targetAdopted
         ? "Preliminary underwriting"
         : clearsSelectedTargets
           ? targetSource === "starter-criteria"
@@ -330,7 +333,9 @@ export function buildCanonicalReportData(
       clearsSelectedTargets,
       targetSource,
       targetBasis,
-      rationale: !targetAdopted
+      rationale: clientScreen && clientScreen.status !== "meets"
+        ? `Selected client criteria are ${clientScreen.status === "misses" ? "not met" : "not verified"}. ${clientScreen.ceilingExplanation} Review every criterion in the client section before proceeding.`
+        : !targetAdopted
         ? "No acquisition targets were adopted for this underwrite. Review the operating results, verify material assumptions, and set at least one target before calculating an Offer Ceiling."
         : clearsSelectedTargets
           ? `The asking price clears ${decisionSourceLabel}, but material inputs remain screening assumptions and must be verified before a user-recorded decision.`
@@ -344,7 +349,7 @@ export function buildCanonicalReportData(
     // an owner-scoped read. Anonymous/browser-supplied comps are discarded.
     comps: input.trustedPresentation?.comps ?? null,
     ...(input.trustedPresentation?.clientScreening ? { clientScreening: input.trustedPresentation.clientScreening } : {}),
-    maxOffer: buildReportMaxOffer({
+    maxOffer: clientScreen && clientScreen.offerCeiling === null ? null : buildReportMaxOffer({
       values,
       result,
       targetInput: input.maxOfferTarget,

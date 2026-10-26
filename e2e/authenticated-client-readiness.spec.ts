@@ -65,9 +65,11 @@ test("Agent Pro saves separate client matches, preserves history, exports a PDF,
     await expect(screen.getByRole("button", { name: "Refresh screening", exact: true })).toBeEnabled();
     await expect(screen.getByText("Client assumption: cash purchase", { exact: true })).toBeVisible();
     await expect(screen.getByRole("button", { name: "Save client match" })).toHaveCount(2);
-    await screen.getByRole("button", { name: "Save client match" }).first().click();
+    const cashScreen = screen.getByRole("listitem").filter({ has: page.getByRole("heading", { name: "Fixture client A · Cash criteria", exact: true }) });
+    const financedScreen = screen.getByRole("listitem").filter({ has: page.getByRole("heading", { name: "Fixture client B · Financed criteria", exact: true }) });
+    await cashScreen.getByRole("button", { name: "Save client match" }).click();
     await expect(screen.getByRole("button", { name: "Export client PDF" })).toHaveCount(1);
-    await screen.getByRole("button", { name: "Save client match" }).last().click();
+    await financedScreen.getByRole("button", { name: "Save client match" }).click();
     await expect(screen.getByRole("button", { name: "Export client PDF" })).toHaveCount(2);
     await expectNoHorizontalOverflow(page);
     const matches = await admin.from("agent_deal_matches").select("*").eq("user_id", userId).order("id");
@@ -75,17 +77,19 @@ test("Agent Pro saves separate client matches, preserves history, exports a PDF,
     expect(new Set(matches.data!.map(match => match.saved_analysis_id)).size).toBe(1);
     expect(JSON.stringify(matches.data)).not.toContain("Private note must never");
     const original = JSON.stringify(matches.data);
-    await admin.from("agent_clients").update({ financing_assumptions: { kind: "amortizing", downPaymentPct: 10, interestRate: 9, loanTermYears: 20, pmiAnnualRatePct: 1 } }).eq("id", clientId);
-    await screen.getByRole("button", { name: "Save client match" }).first().click();
+    const revisedClient = await admin.from("agent_clients").update({ financing_assumptions: { kind: "amortizing", downPaymentPct: 10, interestRate: 9, loanTermYears: 20, pmiAnnualRatePct: 1 } }).eq("id", clientId).select("id").single();
+    expect(revisedClient.error).toBeNull();
+    await cashScreen.getByRole("button", { name: "Save client match" }).click();
     await expect(screen.getByText(/criteria changed/)).toBeVisible();
     const unchanged = await admin.from("agent_deal_matches").select("*").eq("user_id", userId).order("id");
     expect(JSON.stringify(unchanged.data)).toBe(original);
+    const savedCashMatch = screen.getByRole("listitem").filter({ has: page.getByText("Fixture client A · Cash criteria", { exact: true }) }).filter({ has: page.getByRole("button", { name: "Export client PDF" }) });
     const downloadPromise = page.waitForEvent("download");
-    await screen.getByRole("button", { name: "Export client PDF" }).first().click();
+    await savedCashMatch.getByRole("button", { name: "Export client PDF" }).click();
     const download = await downloadPromise;
     const bytes = await readFile((await download.path())!);
     expect(bytes.subarray(0, 4).toString()).toBe("%PDF");
-    await screen.getByRole("button", { name: "Prepare client link" }).first().click();
+    await savedCashMatch.getByRole("button", { name: "Prepare client link" }).click();
     await screen.getByRole("button", { name: "Client report", exact: true }).click();
     const sharing = page.getByRole("dialog");
     await sharing.getByRole("radio", { name: /Hide the exact address/ }).check();
@@ -95,7 +99,7 @@ test("Agent Pro saves separate client matches, preserves history, exports a PDF,
     const shareUrl = await linkInput.inputValue();
     const shareRows = await admin.from("public_shares").select("snapshot").eq("owner_id", userId);
     expect(shareRows.error).toBeNull(); expect(shareRows.data).toHaveLength(1);
-    expect([25, 100]).toContain(shareRows.data![0].snapshot.values.downPaymentPct);
+    expect(shareRows.data![0].snapshot.values.downPaymentPct).toBe(100);
     expect(JSON.stringify(shareRows.data)).not.toMatch(/Private note must never|Fixture client [AB]/);
     const recipient = await page.context().browser()!.newContext();
     try {

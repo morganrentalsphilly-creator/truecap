@@ -43,3 +43,5 @@ Existing $29.99/$300 Pro and $59.99/$590 Agent Pro prices remain. Workspace limi
 2. Roll back new UI/match/evidence code selectively and retain additive schema and snapshots. Never drop tables containing customer records.
 3. **Do not blindly revert property-metering readers.** New/promoted `property-v1:` grants require compatible ledger reading, access and consumption code. Retain these until an explicitly reviewed ledger rollback exists.
 4. Do not reset subscriptions, entitlements, original reports, anonymous exact grants or historical paid-claim recovery.
+
+Client PDFs use the complete frozen criteria result for the main verdict, so unknown/wrong market or property type cannot be hidden by favorable financial metrics. Financial-only links are refused when those scope criteria are unverified or not met; the full PDF remains available. Cash downside DSCR uses a compact N/A label with No debt service below it.
