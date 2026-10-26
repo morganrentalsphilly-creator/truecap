@@ -117,7 +117,7 @@ test("Agent Pro saves separate client matches, preserves history, exports a PDF,
       // Next.js can stream a not-found page with HTTP 200. Assert the actual
       // recipient experience and that the report is no longer rendered.
       await recipientPage.reload();
-      await expect(recipientPage.getByRole("heading", { name: "404 — page not found", exact: true })).toBeVisible();
+      await expect(recipientPage.getByRole("heading", { name: "This share link isn't available", exact: true })).toBeVisible();
       await expect(recipientPage.getByRole("heading", { name: "Rental analysis", exact: true })).toHaveCount(0);
     } finally { await recipient.close(); }
     await page.keyboard.press("Escape");
