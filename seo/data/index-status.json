@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-19T16:37:49.476Z",
+  "generatedAt": "2026-10-26T16:18:23.793Z",
   "site": "sc-domain:usetruecap.com",
   "sitemapReport": [
     {
@@ -12,8 +12,8 @@
     }
   ],
   "quota": {
-    "day": "2026-10-19",
-    "used": 1
+    "day": "2026-10-26",
+    "used": 3
   },
   "summary": {
     "total": 392,
@@ -99,7 +99,7 @@
       "everIndexed": true,
       "indexClass": "indexed",
       "mainHashAtInspect": "c5e2a4120f50c2559c49003c52692c319c1c73ed66883d8399af5bd616fdf640",
-      "wordCount": 2161,
+      "wordCount": 3256,
       "uniqueRatio": null,
       "thin": false,
       "history": [
@@ -144,8 +144,8 @@
         }
       ],
       "removedFromSitemap": null,
-      "mainHash": "c5e2a4120f50c2559c49003c52692c319c1c73ed66883d8399af5bd616fdf640",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "mainHash": "c35d1da26ee89e33cdca872c8c63bf2f971d8c5af2e3d9125bc1a93bc86940bc",
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/about": {
       "inspectedAt": "2026-10-12T19:22:23.454Z",
@@ -219,10 +219,10 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "19effcd1c866aa692465b8bc2bab7bfc07ab6cbcdaa18791c6625db121a97f76",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/analyze": {
-      "inspectedAt": "2026-10-05T18:49:18.058Z",
+      "inspectedAt": "2026-10-26T16:18:23.660Z",
       "source": "api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
@@ -238,6 +238,7 @@
       "family": "other",
       "sitemap": [],
       "referringUrls": [
+        "https://usetruecap.com/vs",
         "https://usetruecap.com/for-agents"
       ],
       "firstSeenInSitemap": "2026-09-27",
@@ -273,11 +274,24 @@
           "googleCanonical": "https://usetruecap.com/analyze",
           "userCanonical": "https://usetruecap.com/analyze",
           "indexed": true
+        },
+        {
+          "inspectedAt": "2026-10-26T16:18:23.660Z",
+          "source": "api",
+          "verdict": "PASS",
+          "coverageState": "Submitted and indexed",
+          "indexingState": "INDEXING_ALLOWED",
+          "robotsTxtState": "ALLOWED",
+          "pageFetchState": "SUCCESSFUL",
+          "lastCrawlTime": "2026-09-28T23:01:50Z",
+          "googleCanonical": "https://usetruecap.com/analyze",
+          "userCanonical": "https://usetruecap.com/analyze",
+          "indexed": true
         }
       ],
       "removedFromSitemap": null,
-      "mainHash": "1951e8d4bd31d5c002071f7e82b03d21b0ace8efd5e8b73039cc11eda296332d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "mainHash": "5d52ff755f432424d54683ab8296337d23de5692e01567a3941d10d0efbd7c52",
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog": {
       "inspectedAt": "2026-10-12T19:25:45.696Z",
@@ -376,7 +390,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "5df40bae2889c1ced750f617fbf864fa2e5eab685910655069fb842e7fe3ae89",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/1-percent-rule-rental-property": {
       "inspectedAt": "2026-10-12T19:25:43.708Z",
@@ -474,7 +488,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "9eb11fea4453e8786664510cd94ada34ecf5c1d22a9a4e048daaa2751fadc076",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/1031-exchange-basics": {
       "inspectedAt": "2026-10-12T19:21:30.890Z",
@@ -559,7 +573,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e8ea44850595099f6ae79d06b36bee2f55b516a180d685bb35146d425ee12a5b",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/2-percent-rule-vs-1-percent-rule": {
       "inspectedAt": "2026-10-12T19:21:31.882Z",
@@ -643,7 +657,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "29b494e4f3b5b4d6a94846adf08102940443d263bf3842b86a84c5bdd6df3fe9",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/50-percent-rule-rentals": {
       "inspectedAt": "2026-10-12T19:21:31.655Z",
@@ -728,7 +742,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "9a811a8d16d7d39a6fc17ccd0e8476ac14848436dcad67e8f17c97ad41de876f",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/70-percent-rule-house-flipping": {
       "inspectedAt": "2026-10-12T19:25:45.364Z",
@@ -825,7 +839,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "d5efcb777352c52c6a25ff45513322a56e3f5c30c9d7b6e47d466552d572e7d2",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/best-dealcheck-alternatives": {
       "inspectedAt": "2026-10-12T19:25:46.904Z",
@@ -923,7 +937,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "ca59b121313f4520a74e7c3848571cf030e2be5d88cf1463440775401b3747ee",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/best-free-rental-property-calculator-2026": {
       "inspectedAt": "2026-10-12T19:25:47.737Z",
@@ -1020,8 +1034,8 @@
         }
       ],
       "removedFromSitemap": null,
-      "mainHash": "6f0e5dc31812b8aaef2cbf32465e6d841bb19545c807af4c992ad6969bdd9fac",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "mainHash": "905c7a9c8c386a6f5e19c6b46b0c3789fb4615dee3b412be2ae1487e2fb1043a",
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/best-rental-analysis-tool-for-house-hackers": {
       "inspectedAt": "2026-10-12T19:25:52.121Z",
@@ -1119,7 +1133,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "317fd9fd304cfe9a0d13b08243ccd90da9e2b03ea592db2d26fd47aa5c933953",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/best-rental-property-calculator-2026": {
       "inspectedAt": "2026-10-12T19:25:52.909Z",
@@ -1216,7 +1230,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "8d6a7afec2a5ad273a7f5bb4c4451a8c6a5ab0c165420b7b897c568bcc2350f1",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/best-rental-property-calculator-for-brrrr": {
       "inspectedAt": "2026-10-12T19:25:52.131Z",
@@ -1314,7 +1328,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "9031287f56801c164de0fd47379370265ef22b741b0b505cc0a5aecb59da0482",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/best-short-term-rental-analysis-tool-2026": {
       "inspectedAt": "2026-10-12T19:25:53.378Z",
@@ -1412,7 +1426,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "3372bafbfa778a2e53ac6b6d1cc8e4c220cc8d92431651b994506c2667e90a60",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/best-states-for-rental-investors-2026": {
       "inspectedAt": "2026-10-12T19:25:58.663Z",
@@ -1510,7 +1524,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "5bccae9aaf3cf846b60826ff47251ab77a408e1f4c2b56248fb4cd17d095f976",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/bonus-depreciation-rental-property-2026": {
       "inspectedAt": "2026-10-12T19:25:54.479Z",
@@ -1608,7 +1622,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "07c3247cbd76b40fe9204dcc10546536e8409e6066861a92acd14ff5420105e1",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/break-even-occupancy-rental-property": {
       "inspectedAt": "2026-10-12T19:21:32.112Z",
@@ -1693,7 +1707,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f990a1418e6e63c777c773f121da44561c6e99f340902f5f741eb74476dbb635",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/brrrr-method-explained": {
       "inspectedAt": "2026-10-12T19:21:37.178Z",
@@ -1778,7 +1792,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "1f6e01f259bce445f11af7d75dff2aae4fbe50ca95acee5ae452a764480286d6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/buying-rental-property-with-tenants": {
       "inspectedAt": "2026-10-12T19:21:33.456Z",
@@ -1860,7 +1874,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "c91464068ee2c432942da863039788a2551649fa1feee811e77838ecd78fe351",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/cap-rate-vs-cash-on-cash-vs-dscr": {
       "inspectedAt": "2026-10-12T19:25:58.434Z",
@@ -1958,7 +1972,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "92cb3a9d37f73d75a336d4381a4df192147040cd941c81d8d0de07bbf4f82ede",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/cap-rate-vs-gross-yield": {
       "inspectedAt": "2026-10-12T19:21:38.180Z",
@@ -2042,7 +2056,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "b3824f87c9cba31792f028f8b589fd9f8cc6243f33470dce844444d67c328d07",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/capex-maintenance-reserves-rental-property": {
       "inspectedAt": "2026-10-12T19:21:37.940Z",
@@ -2127,7 +2141,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f39f5c070014ae4d8b9cb381c3d2822e68e8e1b8f5adf63c7613e1f4d149716f",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/cash-flow-vs-appreciation": {
       "inspectedAt": "2026-10-12T19:25:59.146Z",
@@ -2226,7 +2240,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "41586344516ff2c3bdd669434c9b936afea90db48b162b99e714079e5492b86d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/cash-on-cash-vs-irr": {
       "inspectedAt": "2026-10-12T19:21:38.272Z",
@@ -2311,7 +2325,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "482982b9205f878e6010130cd4643e9d4372b14f6001566534a5487c64bd9317",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/cash-out-refinance-vs-heloc-rental": {
       "inspectedAt": "2026-10-12T19:21:39.759Z",
@@ -2396,7 +2410,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "d505e9c7f475952650662bdda25321a157ae60cd5a075109d34e084b3610c836",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/closing-costs-investment-property": {
       "inspectedAt": "2026-10-12T19:21:43.422Z",
@@ -2481,7 +2495,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "730cdde532e5ebde23e977aacd595b82f85fca0b74b57840c77b715d56524c12",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/dealcheck-vs-biggerpockets-vs-truecap": {
       "inspectedAt": "2026-10-12T19:25:59.613Z",
@@ -2506,8 +2520,8 @@
       "everIndexed": true,
       "indexClass": "indexed",
       "mainHashAtInspect": "ac0119e73fa7fedf7bdeba60708afed05cba6bf0317673582b7befbbdcf4d51a",
-      "wordCount": 1451,
-      "uniqueRatio": 0.9356,
+      "wordCount": 1449,
+      "uniqueRatio": 0.9355,
       "thin": false,
       "history": [
         {
@@ -2577,8 +2591,8 @@
         }
       ],
       "removedFromSitemap": null,
-      "mainHash": "ac0119e73fa7fedf7bdeba60708afed05cba6bf0317673582b7befbbdcf4d51a",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "mainHash": "9c0b24f9645e6ab6f26ad3184e005171b9b161bb88a838c820d60dbfb79ac402",
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/dealcheck-vs-stessa-vs-truecap": {
       "inspectedAt": "2026-10-12T19:26:04.849Z",
@@ -2604,7 +2618,7 @@
       "everIndexed": true,
       "indexClass": "indexed",
       "mainHashAtInspect": "87bc0e20bc1d24296d222913c615e6e104254efa4be11a69f50cc061a60fc7cf",
-      "wordCount": 1820,
+      "wordCount": 1819,
       "uniqueRatio": 0.9521,
       "thin": false,
       "history": [
@@ -2675,8 +2689,8 @@
         }
       ],
       "removedFromSitemap": null,
-      "mainHash": "87bc0e20bc1d24296d222913c615e6e104254efa4be11a69f50cc061a60fc7cf",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "mainHash": "3ea90bb2ce4dbad0a395ec040f71357f83609a9052ef8e0c21140e33c3c41fdc",
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/debt-to-income-ratio-investment-property": {
       "inspectedAt": "2026-10-12T19:21:44.134Z",
@@ -2760,7 +2774,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "56392b0ac6b4f823eb7fc67f4cb7f119d8c1ae90850fe8929c0ee8feacd2f8b2",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/depreciation-recapture-rental-property": {
       "inspectedAt": "2026-10-12T19:21:44.422Z",
@@ -2845,7 +2859,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "8a2bae09791ae31c9f1375b254a0f941b32443d2769bbdfe872f5a76005e120a",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/dscr-loans-explained": {
       "inspectedAt": "2026-09-27T23:04:41.020Z",
@@ -2976,7 +2990,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "ec62a85a189466af4a55281f0c886e04019ce4f0c83a04a92f0ca54f6404c3b7",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/free-biggerpockets-calculator-alternatives": {
       "inspectedAt": "2026-10-12T19:26:04.967Z",
@@ -3074,7 +3088,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "3b9d2ba58469563247ad4941fae977c99aeaee23f18c67dff405ee402c218973",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/gross-rent-multiplier-explained": {
       "inspectedAt": "2026-10-12T19:26:00.867Z",
@@ -3172,7 +3186,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "1ba9854db33683d266fb2b586c4e11d5eef728ec9bbd4e4f445573d2513dbe02",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/hard-money-vs-dscr-loan": {
       "inspectedAt": "2026-10-12T19:21:45.974Z",
@@ -3257,7 +3271,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "038d4a08f958377c7e629a1b04d5b0d4d924c02d3e65646ec68c3d649b57b7bf",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/hostfully-vs-hostaway-vs-guesty": {
       "inspectedAt": "2026-10-12T19:26:05.360Z",
@@ -3355,7 +3369,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "b0d71f0d36076cf970dd12e8bc3c8662462bdbf3869c72f7d29d755a106b9040",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/house-hack-underwriting-guide": {
       "inspectedAt": "2026-10-12T19:21:51.071Z",
@@ -3440,7 +3454,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "632a032a3660caf5bcff17ade7407d9bed4949fdea06d1fca772918ddaebff9b",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/house-hacking-explained": {
       "inspectedAt": "2026-10-12T19:21:50.424Z",
@@ -3525,7 +3539,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "b641b75279990725a260f7d4ce70922363ef8da2560b2897e291c3c5b89fec6e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/how-much-down-payment-investment-property": {
       "inspectedAt": "2026-10-12T19:26:05.814Z",
@@ -3623,7 +3637,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "3253c265bdd64069743f027e7f1d867e7b20c13d29d24c0de64f81e7c105ab24",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/how-much-money-to-buy-a-rental-property": {
       "inspectedAt": "2026-10-12T19:26:11.090Z",
@@ -3718,7 +3732,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "452914a3688380967f1c2b649143560f5fdfcd76f41251e7267fea343b9a4596",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/how-to-calculate-arv": {
       "inspectedAt": "2026-10-12T19:21:50.582Z",
@@ -3803,7 +3817,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "a92c60d0746e836fcf1bdc4a6bfe6cde0d1928ee95e55904a5fb2cb8a7240266",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/how-to-calculate-cap-rate": {
       "inspectedAt": "2026-10-12T19:21:52.171Z",
@@ -3888,7 +3902,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "480c38e0bbfa3fab270d956129d391ce3ebd832ce30cc07ab82c5cacf69104e8",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/how-to-calculate-cash-on-cash-return": {
       "inspectedAt": "2026-10-12T19:21:50.851Z",
@@ -3973,7 +3987,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "3c2c81656dd69cd8d85141d584b5a1c366afd3a78a7658cf6dff7cd04a343818",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/how-to-calculate-dscr": {
       "inspectedAt": "2026-10-12T19:21:56.660Z",
@@ -4058,7 +4072,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "5e56c01600bd5df0fb8eb56dfb6eed082b5599df37d417fd7451cf074757e342",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/how-to-calculate-noi-rental-property": {
       "inspectedAt": "2026-10-12T19:21:56.796Z",
@@ -4143,7 +4157,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "a47abcedd7b57fbe9995010af56cf6365e5d5a673bc502c9703d096de9f30aa0",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/how-to-calculate-rental-property-depreciation": {
       "inspectedAt": "2026-10-12T19:21:57.240Z",
@@ -4228,7 +4242,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "de8bc22aaadd452495af8c08ff11851c398c41cc4ecdeb879ab44ae5d46ee633",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/how-to-estimate-rehab-costs": {
       "inspectedAt": "2026-10-12T19:21:57.451Z",
@@ -4313,7 +4327,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "bab9e708e50d0c697427e5e06eef19b9c19505c5bd714b90f86e4840c84fbcbf",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/how-to-estimate-rent-rental-property": {
       "inspectedAt": "2026-10-12T19:26:07.074Z",
@@ -4411,7 +4425,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "23abfe3e4d3517912a276f14169902e9788569e86c5849767369642b53ffabbf",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/how-to-find-off-market-rental-properties": {
       "inspectedAt": "2026-10-12T19:26:11.342Z",
@@ -4509,7 +4523,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e02ab5c86465b05cf5dfebd90a4e1cb79479931c4fd2feca6894a94b70531689",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/how-to-read-a-rent-roll": {
       "inspectedAt": "2026-10-12T19:21:58.545Z",
@@ -4594,7 +4608,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "47b77f398ed7b77dab448bbb8ab5741cba421057c4a1e18425c9d9d1bb4a35a8",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/how-to-refinance-a-rental-property": {
       "inspectedAt": "2026-10-12T19:22:02.934Z",
@@ -4679,7 +4693,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "211986e19680805edb0de87c8ffb7568fb68d219bf5f556893159936e33cc0ad",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/how-to-underwrite-a-rental-property-in-60-seconds": {
       "inspectedAt": "2026-10-12T19:22:03.180Z",
@@ -4764,7 +4778,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "29e726fd7b52b4855ba7437e788e2923e7e9826702cdce6ab14c664b4c76856f",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/how-truecap-verdict-engine-works": {
       "inspectedAt": "2026-10-12T19:26:11.553Z",
@@ -4862,7 +4876,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "3a195c0fb3ed30b320f31ddd85b5ed4951ef0e17b4519f3764f8d2d668f31aad",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/investment-property-appraisal": {
       "inspectedAt": "2026-10-12T19:22:03.389Z",
@@ -4944,7 +4958,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "182104177f47808389bcf6fddf37a51af45ad2e7ce43f8a3df888ecdf2397e7c",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/is-a-duplex-a-good-investment": {
       "inspectedAt": "2026-10-12T19:26:12.022Z",
@@ -5043,7 +5057,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "63f8677683f8765084921196bbae6f3806c6c99cccd7e2d451a34bca8504d71d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/mortgage-points-investment-property": {
       "inspectedAt": "2026-10-12T19:22:03.891Z",
@@ -5128,7 +5142,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "da9bad82478987dd34344b115b3b3860eddfbb7fd3aaa61a75bba228c914e833",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/negative-leverage-real-estate": {
       "inspectedAt": "2026-10-12T19:22:16.132Z",
@@ -5213,7 +5227,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "b300ead5af3bf9962ca15bcdab84c66f0b8dc4d35b0edc345ce56b2beca595c0",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/operating-expense-ratio-rental-property": {
       "inspectedAt": "2026-10-12T19:22:05.048Z",
@@ -5297,7 +5311,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "56a7f29da7ee0866c64a432f890bc67bc0ee997723e6480cc05353f1016d4b6d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/piti-explained-rental-property": {
       "inspectedAt": "2026-10-12T19:22:09.391Z",
@@ -5382,7 +5396,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e05a9d1695f31f07e8ed4a3834b2aebc84ebc151dd98eb754e8ec72ef1960f34",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/property-management-yes-or-no": {
       "inspectedAt": "2026-10-12T19:22:09.561Z",
@@ -5466,7 +5480,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "dc8f36fd1cb370d1d6adf21f32a2b8b79d012cb7a24c43ff50438cde2b09adab",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/property-tax-reassessment-rental-property": {
       "inspectedAt": "2026-10-12T19:22:09.605Z",
@@ -5551,7 +5565,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "366570bb5ccb96c8b8eae3cda859bb5924c9784db601061299085be9d03db655",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/rental-property-insurance": {
       "inspectedAt": "2026-10-12T19:22:10.415Z",
@@ -5636,7 +5650,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "7691b649e784a7f882439232de1b59bdae85acb0b93faebeec74d322bebf77c9",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/rental-property-llc": {
       "inspectedAt": "2026-10-12T19:22:11.266Z",
@@ -5721,7 +5735,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "09d810d1b480dc5d476babfa70d5cf42013142a5b82c66c6aaee03c323ece3d7",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/rental-property-pro-forma-explained": {
       "inspectedAt": "2026-10-12T19:22:15.771Z",
@@ -5806,7 +5820,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f5071b961a5ea344a6bcef893de99fb987441453d4bd4265f11e4584b6a7ef14",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/rental-property-tax-deductions": {
       "inspectedAt": "2026-10-12T19:22:15.727Z",
@@ -5891,7 +5905,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "3c50c658307a36d432c555842ffbc7b048ddd7f475a90f3a0ebc1a71d0cb489b",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/return-on-equity-rental-property": {
       "inspectedAt": "2026-10-12T19:26:17.345Z",
@@ -5989,7 +6003,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "0cebc67e257704ec91cfeea51aa4925736b4d8a85c5554df2631ec5279a49aaf",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/roofstock-vs-mashvisor-vs-propstream": {
       "inspectedAt": "2026-10-12T19:26:17.531Z",
@@ -6087,7 +6101,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "ea02f7b3dcffb1c3c71363c480c62d8b372734c5593c5e05a3437aef4e36cae4",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/schedule-e-rental-property": {
       "inspectedAt": "2026-10-12T19:22:16.878Z",
@@ -6172,7 +6186,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e1ff019f2377f0277372ac7410ee1ecf6af9a9a09b7bcbb77d277d0051563953",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/section-8-rental-property-investing": {
       "inspectedAt": "2026-10-12T19:26:13.270Z",
@@ -6270,7 +6284,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "197d75add3b4bc729338bba5e6b12381debe51a65c9c98d828ffd3428fbf5696",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/seller-financing-subject-to": {
       "inspectedAt": "2026-10-12T19:22:17.539Z",
@@ -6355,7 +6369,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "ce8230cf17924eb916fa0e630f172f0ade732d61abe08ff221f3faab1d319a3c",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/short-term-rental-underwriting-playbook": {
       "inspectedAt": "2026-10-12T19:26:17.776Z",
@@ -6453,7 +6467,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "9895a94d53b7d571887101586a991e818cda3a9c639dc4e6d602ee4f1b0582e6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/single-family-vs-multi-family-rental": {
       "inspectedAt": "2026-10-12T19:26:18.223Z",
@@ -6551,7 +6565,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e32aa489d74170c8c975f4c168424229c826b4e2addaa9fac76ade592319943e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/spot-bad-rental-in-60-seconds": {
       "inspectedAt": "2026-10-12T19:22:21.941Z",
@@ -6636,7 +6650,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f991e817da8d90c76e38d347afe4f8784c17e2ba8f61059db21f87f7df554e85",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/stessa-vs-avail-vs-baselane": {
       "inspectedAt": "2026-10-12T19:26:23.996Z",
@@ -6734,7 +6748,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "fdb31ca0daa39a06107ab0f97c5f3cf59886fead0e00d6f62bba235d63e97339",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/topics": {
       "inspectedAt": "2026-10-12T19:26:19.434Z",
@@ -6831,7 +6845,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "bed0670745df9d6f823bdc62a1e2b620522414e94d2d023f8e3544b42d9ba561",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/topics/comparisons": {
       "inspectedAt": "2026-10-12T19:22:28.158Z",
@@ -6902,7 +6916,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "699188f4c4a39d2e037d740a1251b1f1a75f14166ecd603bcdfe2e8db525eed6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/topics/deal-analysis": {
       "inspectedAt": "2026-10-12T19:22:28.265Z",
@@ -6974,7 +6988,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "3bbdca58e1cb190103d0a324cd5551037fef8142caab753a8d8c053e6c6fb0f1",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/topics/due-diligence": {
       "inspectedAt": "2026-10-12T19:22:32.754Z",
@@ -7046,7 +7060,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "47809fb975be32a3a21a88beb061399e05e8aee7542d41f2550c023c136d81c2",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/topics/financing": {
       "inspectedAt": "2026-10-12T19:26:24.153Z",
@@ -7144,7 +7158,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "fe23ec7b93e2071e8ec418c886abdd347f29b9d1580b4687e4da86fd7a8d8a2c",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/topics/markets": {
       "inspectedAt": "2026-10-12T19:22:28.815Z",
@@ -7217,7 +7231,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "9df258f8a2fed8d0c548b2df5d0389d2738cb76a2e1925cc65f2fae64002b412",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/topics/strategy": {
       "inspectedAt": "2026-10-12T19:26:23.803Z",
@@ -7315,7 +7329,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f75caf046d98f684972f38a0eff0087952571300a1e83f37048c3a3fb909c929",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/topics/tax": {
       "inspectedAt": "2026-10-12T19:26:24.812Z",
@@ -7413,7 +7427,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "2ba2b8004a9fdadaa337f2cf6de53b810fde314307e849c59f75ddded58347b1",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/topics/underwriting": {
       "inspectedAt": "2026-10-12T19:26:26.041Z",
@@ -7511,7 +7525,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "32c9aa42d608ed9c1ec07450164fb35f5f32802fb7bf2e60926bde04987b3167",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/vacancy-rate-rental-property": {
       "inspectedAt": "2026-10-12T19:22:22.040Z",
@@ -7596,7 +7610,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "88bc56806d4f902eefaa10bf4050c5a56af7bff80373612d05aa1a03dcfc193f",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/what-is-a-good-cap-rate": {
       "inspectedAt": "2026-10-12T19:22:22.421Z",
@@ -7681,7 +7695,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "2c8aa78ab74570e42df0b35b740acd45dcfbe6bf4193fbdfb5a84ea33e9c4171",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/blog/what-is-a-good-dscr": {
       "inspectedAt": "2026-09-27T23:05:50.889Z",
@@ -7797,7 +7811,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "3b37a031ae3f411c4fcf2ca27320def35b884d937d5c8ff00f3cc90e78d608a6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/embed": {
       "inspectedAt": "2026-10-12T19:26:32.261Z",
@@ -7857,7 +7871,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "43211c532ec531f1806f337453c60cbbb8945dd16cbf3424a58b722cfd295db9",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/for-agents": {
       "inspectedAt": "2026-10-12T19:22:34.602Z",
@@ -7884,7 +7898,7 @@
       "everIndexed": true,
       "indexClass": "indexed",
       "mainHashAtInspect": "92c759368d5a530f8ec264c410385a38d9a27f441f986a075b560eb7d8d499e6",
-      "wordCount": 2457,
+      "wordCount": 2456,
       "uniqueRatio": null,
       "thin": false,
       "history": [
@@ -7929,8 +7943,8 @@
         }
       ],
       "removedFromSitemap": null,
-      "mainHash": "92c759368d5a530f8ec264c410385a38d9a27f441f986a075b560eb7d8d499e6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "mainHash": "a5795e41a454d4783d2bd9336a5793a7713120cd389b1522a0521ba36853ff72",
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/for-buy-and-hold": {
       "inspectedAt": "2026-10-12T19:22:34.705Z",
@@ -8002,7 +8016,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e5dd8b909406030f8c2d5a3fafca45dbe6032888bc8fabe55ff33420ecd9e1df",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/for-house-hackers": {
       "inspectedAt": "2026-10-12T19:22:36.429Z",
@@ -8074,10 +8088,10 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "01c9f8dbdeda08dc0d566f42928ead378fe4ef0cb0e58de7dee21652179abbf7",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/for-investors": {
-      "inspectedAt": "2026-10-05T18:49:17.851Z",
+      "inspectedAt": "2026-10-26T16:18:23.009Z",
       "source": "api",
       "verdict": "NEUTRAL",
       "coverageState": "URL is unknown to Google",
@@ -8096,7 +8110,7 @@
       "firstSeenInSitemap": "2026-10-05",
       "everIndexed": false,
       "indexClass": "never_crawled",
-      "mainHashAtInspect": null,
+      "mainHashAtInspect": "71a4637b1e0b959a999e0e62aa1ea52a43c95c1b3e66659cb279a7d91e0d84a4",
       "wordCount": 894,
       "uniqueRatio": null,
       "thin": false,
@@ -8113,11 +8127,24 @@
           "googleCanonical": null,
           "userCanonical": null,
           "indexed": false
+        },
+        {
+          "inspectedAt": "2026-10-26T16:18:23.009Z",
+          "source": "api",
+          "verdict": "NEUTRAL",
+          "coverageState": "URL is unknown to Google",
+          "indexingState": "INDEXING_STATE_UNSPECIFIED",
+          "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
+          "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
+          "lastCrawlTime": null,
+          "googleCanonical": null,
+          "userCanonical": null,
+          "indexed": false
         }
       ],
       "removedFromSitemap": null,
       "mainHash": "71a4637b1e0b959a999e0e62aa1ea52a43c95c1b3e66659cb279a7d91e0d84a4",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary": {
       "inspectedAt": "2026-10-12T19:26:30.199Z",
@@ -8217,7 +8244,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "4751814a1b62da0f23c521b9565c662b088e4ffda3dc664900f201bfc3407253",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/1-percent-rule": {
       "inspectedAt": "2026-10-12T19:22:38.946Z",
@@ -8289,7 +8316,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "815244c80f279e7aa5d586f5b474d038b01fb470ede09e8afc60ec7aac31ebc9",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/1031-exchange": {
       "inspectedAt": "2026-10-12T19:22:35.258Z",
@@ -8360,7 +8387,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "70a2c2ee82e03569a06304633868b7b2269560e7c51b062d8fdabe54126f326f",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/after-tax-cash-flow": {
       "inspectedAt": "2026-10-12T19:22:40.953Z",
@@ -8431,7 +8458,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "bb3d21563fc4c77a915faae91d614270cfe50bb3c1c6bf8b38681945c519d13e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/appreciation-rate": {
       "inspectedAt": "2026-10-12T19:25:40.454Z",
@@ -8516,7 +8543,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "4970f5a8b994eaddd91b6ccae7e2bacee11eb792944608c17d645e0c3fdb08dd",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/arv": {
       "inspectedAt": "2026-10-12T19:26:30.388Z",
@@ -8613,7 +8640,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "38f1a2a6ced68df718866707af1ca4c27f90076a255154111209f2b8470aa18d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/brrrr": {
       "inspectedAt": "2026-10-12T19:22:41.099Z",
@@ -8684,7 +8711,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "d69d0b2c39f9afb652dfa00046d827e6aa5f7efcf893f27f5dbffddb8a005f14",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/building-value": {
       "inspectedAt": "2026-10-12T19:22:41.495Z",
@@ -8755,7 +8782,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "53df82fcf3133cdbab06afd314fbceaf81e7a969203e757c1b60b1229b250b7a",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/cap-rate": {
       "inspectedAt": "2026-10-12T19:26:30.519Z",
@@ -8853,7 +8880,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f333aa8fa1665f71d9a94192607464ff3284bd052a50d5c929186ed05d596574",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/capex": {
       "inspectedAt": "2026-10-12T19:22:45.338Z",
@@ -8924,7 +8951,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f062967c18c30a2987b3e378d6e6b57561791fe43c8319c7501c0e269e0a5666",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/cash-on-cash-return": {
       "inspectedAt": "2026-10-12T19:22:42.857Z",
@@ -8995,7 +9022,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "9b391429a979194c32a62d8f4ef40fd00c14a021b3f3b47d19f6fd745bb646ff",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/closing-costs": {
       "inspectedAt": "2026-10-12T19:22:47.171Z",
@@ -9066,7 +9093,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "1bb28837b160a4291412d045fb4ef23506ce1e9433b8e23149f9b0f1ac5fa491",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/deal-score": {
       "inspectedAt": "2026-10-12T19:22:47.283Z",
@@ -9137,7 +9164,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f9bace1d1a784059f0ae6a76de51372029bdb17b159fa8800ae69d565c4f5ee4",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/debt-to-income": {
       "inspectedAt": "2026-10-12T19:22:47.901Z",
@@ -9208,7 +9235,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "cefc714e6191e80b7f98f93f08edd390c95b50af9dfcf09b83e2818f4b659d0e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/depreciation-period": {
       "inspectedAt": "2026-10-12T19:22:53.650Z",
@@ -9279,7 +9306,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f2a9f5b7c9b6db947e6dc80b95cabdf2e49479d31f0474b86b1bac275b6ae4fc",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/down-payment": {
       "inspectedAt": "2026-10-12T19:22:49.188Z",
@@ -9350,7 +9377,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "7910bdec4f98c66b3f6bb637266a12ad2742fc6ae665d13a6a97d7dedf7ec699",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/dscr": {
       "inspectedAt": "2026-10-12T19:22:51.652Z",
@@ -9421,7 +9448,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "9327d313d0f5aa6d11833799fbfb1fc6611ae43058bdbcb60007fa1e214deb90",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/equity-multiple": {
       "inspectedAt": "2026-10-12T19:22:53.558Z",
@@ -9490,7 +9517,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "fa64baed76998c4175ee0745ccb309e7a5e7d11140656a948cae468d5d52e12e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/expense-growth": {
       "inspectedAt": "2026-10-12T19:22:55.611Z",
@@ -9561,7 +9588,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "950f746e7acaca5e7d7ae582cbb86f9772858d9d7f5516a9ca67669ec772bd50",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/fair-market-rent": {
       "inspectedAt": "2026-10-12T19:22:54.182Z",
@@ -9630,7 +9657,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "21fe43ec9ac0760455226fcf4d66312efe2c5d0c30e475274158bcde9c986a91",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/grm": {
       "inspectedAt": "2026-10-12T19:22:58.037Z",
@@ -9701,7 +9728,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "bde44f73ac96b8d24901d00a203cfac5f1cc9595f0fc972e934e1b4ae8c051eb",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/hoa-fees": {
       "inspectedAt": "2026-10-12T19:22:59.973Z",
@@ -9772,7 +9799,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "c88061d37c8bc3dd913a7904975840036397d9c0125defd27703088218dd5879",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/house-hack": {
       "inspectedAt": "2026-10-12T19:23:00.081Z",
@@ -9844,7 +9871,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "53e48292c152a655cf94e4b4cfd23ea044d76d26ad4c3c4053c2b7681ed36d82",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/insurance": {
       "inspectedAt": "2026-10-12T19:23:00.463Z",
@@ -9916,7 +9943,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "962d2b65e8597a7f5f844400a755ee1d345e5ff121d7045f67f01747375265ea",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/interest-rate": {
       "inspectedAt": "2026-10-12T19:23:04.719Z",
@@ -9987,7 +10014,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "4c01558abe582f18ca2a1aae6ac8f66a09400e8eb7d391deeb0e1b57a00efa73",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/irr": {
       "inspectedAt": "2026-10-12T19:23:01.831Z",
@@ -10059,7 +10086,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "0a0720d4b0a1fd9cbda61ad610b20096e5051d1f70f7aaea9eb25c3aa381a459",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/loan-term": {
       "inspectedAt": "2026-10-12T19:23:06.272Z",
@@ -10130,7 +10157,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "7848f532ecb28c789285edcb66af1406c243fcaa33997b33d7da488c2a992936",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/ltv": {
       "inspectedAt": "2026-10-12T19:23:07.010Z",
@@ -10202,7 +10229,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "838d49650ee8111279c2ad5351541555bcc59400dc84a7b299d548e7ab8dd517",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/maintenance-reserve": {
       "inspectedAt": "2026-10-12T19:23:06.554Z",
@@ -10273,7 +10300,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "0c37e71a3b0a4cf9d4a58a4ffd5399a1ae3bdfd4bad7d225ca3c48536f2f3839",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/management-fee": {
       "inspectedAt": "2026-10-12T19:23:11.200Z",
@@ -10344,7 +10371,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "2eaea774f1c956238cf832309f38a818e85244cb81d65e86f3293415c8a9afcd",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/max-allowable-offer": {
       "inspectedAt": "2026-10-12T19:23:08.515Z",
@@ -10415,7 +10442,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "54b81ccc0ec6aaa09f5903da14cd4a55a4dc752e13c34029c34c39b341046761",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/monthly-cash-flow": {
       "inspectedAt": "2026-10-12T19:23:12.711Z",
@@ -10486,7 +10513,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "7e39400f3e9ef630c4d19624b083d0b940901f643471e04bcb6f302dee24848f",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/negative-leverage": {
       "inspectedAt": "2026-10-12T19:23:12.947Z",
@@ -10555,7 +10582,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "6a34b67e9c20f978322763a92514e095563536473f026f8ceb0deebf05033b49",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/noi": {
       "inspectedAt": "2026-10-12T19:23:13.412Z",
@@ -10627,7 +10654,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "82cfda49f42a3e678d50d9c049a0a3d278359fa9f5021b778cfe262191dabf92",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/operating-expense-ratio": {
       "inspectedAt": "2026-10-12T19:23:14.917Z",
@@ -10696,7 +10723,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "94921ad5cf41f1894b764ba972afb612ab4d7e418267fc3a6c10d2b6ea73cabc",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/owner-paid-utilities": {
       "inspectedAt": "2026-10-12T19:23:17.871Z",
@@ -10765,7 +10792,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f9160bda8eac0cf1dc6b17614b608203e03b1a555d4b9d9f0b3ff066366cf868",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/principal-paydown": {
       "inspectedAt": "2026-10-12T19:23:19.123Z",
@@ -10834,7 +10861,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "71ed46a66fafc8e58e23f8fca113c4a90546474f38dabdf1799695e1503f9463",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/pro-forma": {
       "inspectedAt": "2026-10-12T19:23:21.492Z",
@@ -10903,7 +10930,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "c5bc865b6a5aa9bb78f4803b5680c1de27b8f5154c12342b2ef68eba3ee1d92a",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/property-tax": {
       "inspectedAt": "2026-10-12T19:23:19.188Z",
@@ -10975,7 +11002,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "d523a5cf1dfee3f0bbd7d4f8430adeabb11f3153b3463388215b238d10321e07",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/rehab": {
       "inspectedAt": "2026-10-12T19:23:19.786Z",
@@ -11044,7 +11071,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "acdedb39665ba2571547e1dc0397ded046d650bbad2aa9cb85157b83ae451e01",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/rent-growth": {
       "inspectedAt": "2026-10-12T19:23:24.258Z",
@@ -11115,7 +11142,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "4d0afd81f654f047bed329266216aace00e9f7f920d8dcfa470ac410cabe3301",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/selling-cost": {
       "inspectedAt": "2026-10-12T19:23:26.335Z",
@@ -11186,7 +11213,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "8ce1f736bc3d213e278216dd9da549d3e75536a9b31f8a0c193d5dd97a460d4b",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/tax-savings": {
       "inspectedAt": "2026-10-12T19:23:25.602Z",
@@ -11257,7 +11284,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "b182dc47775d00df5e21a1e62be6906f0ac71955942139bc852f5a7f7757a43d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/ten-year-total-return": {
       "inspectedAt": "2026-10-12T19:26:31.237Z",
@@ -11354,7 +11381,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "b390d5b41c7ae2b4917e923bfc1dddd3ac97da4765818cc92bd425203a9922b3",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/glossary/vacancy": {
       "inspectedAt": "2026-10-12T19:23:27.948Z",
@@ -11423,7 +11450,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "023b092c7e0bf8df079f549eeabebe0fd66f88cc99af73af794bb76a4da95a0f",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets": {
       "inspectedAt": "2026-10-12T19:26:36.572Z",
@@ -11482,7 +11509,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "81b44abe37a3440ceae8a39079d1d67c42a63056d99cf639ed66a9f50f235eff",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/akron": {
       "inspectedAt": "2026-10-12T19:18:20.578Z",
@@ -11579,7 +11606,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "d1d9029355d7fea51d6540993c8be6de1e125b73e791f8d03cd40b6779ba8c5e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/albany": {
       "inspectedAt": "2026-10-12T19:18:20.840Z",
@@ -11674,7 +11701,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "7b7630548e5e1fa452aee88726e0d19b1d0b5c42008736f74ab09552d6e978d2",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/albuquerque": {
       "inspectedAt": "2026-10-12T19:18:20.845Z",
@@ -11769,7 +11796,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "ded38c6908435ff9cc1e2543df1e73be374850ca0ee769b461703743a36b4812",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/allentown": {
       "inspectedAt": "2026-10-12T19:18:21.118Z",
@@ -11866,7 +11893,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f7bfeb697053a9ddeb850d2071e80167c476a6e84070488ef6e70aecd5a28101",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/amarillo": {
       "inspectedAt": "2026-10-12T19:18:21.035Z",
@@ -11961,7 +11988,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "43a0930f123cd6d5240f40e6bb32724ea28ef5a10711c3e3a64dff3ae2080a98",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/anchorage": {
       "inspectedAt": "2026-10-12T19:18:27.062Z",
@@ -12058,7 +12085,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "02543c87d780b8d67255fb41979881c1c6e30b81ef698b2fa547f3ec91137317",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/ann-arbor": {
       "inspectedAt": "2026-10-19T16:37:49.211Z",
@@ -12168,7 +12195,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "a03c65abed06de722ba923d930cefb648e3b8786dfd161f1ec3d44ac1c43d9fc",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/asheville": {
       "inspectedAt": "2026-10-12T19:18:27.182Z",
@@ -12263,7 +12290,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "be10db4dcf41302a1517a43e507dae42833dc08be806d69865c616a0adc053b2",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/athens": {
       "inspectedAt": "2026-10-12T19:18:27.516Z",
@@ -12358,10 +12385,10 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "ab1ba0568c110441b156dc6b8e4239bfc6ed8003607e7478963add26c4fbec30",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/atlanta": {
-      "inspectedAt": "2026-10-12T19:24:42.247Z",
+      "inspectedAt": "2026-10-26T16:18:23.401Z",
       "source": "api",
       "verdict": "PASS",
       "coverageState": "Submitted and indexed",
@@ -12384,9 +12411,9 @@
       "everIndexed": true,
       "indexClass": "indexed",
       "mainHashAtInspect": "46befd30fca17b98144abbca71e50cf8ef5b214065fd3fb07398888705e8bd43",
-      "wordCount": 832,
-      "uniqueRatio": 0.3387,
-      "thin": true,
+      "wordCount": 913,
+      "uniqueRatio": 0.4017,
+      "thin": false,
       "history": [
         {
           "inspectedAt": "2026-09-28T01:17:13.704Z",
@@ -12426,11 +12453,24 @@
           "googleCanonical": "https://usetruecap.com/markets/atlanta",
           "userCanonical": "https://usetruecap.com/markets/atlanta",
           "indexed": true
+        },
+        {
+          "inspectedAt": "2026-10-26T16:18:23.401Z",
+          "source": "api",
+          "verdict": "PASS",
+          "coverageState": "Submitted and indexed",
+          "indexingState": "INDEXING_ALLOWED",
+          "robotsTxtState": "ALLOWED",
+          "pageFetchState": "SUCCESSFUL",
+          "lastCrawlTime": "2026-10-10T16:03:55Z",
+          "googleCanonical": "https://usetruecap.com/markets/atlanta",
+          "userCanonical": "https://usetruecap.com/markets/atlanta",
+          "indexed": true
         }
       ],
       "removedFromSitemap": null,
-      "mainHash": "46befd30fca17b98144abbca71e50cf8ef5b214065fd3fb07398888705e8bd43",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "mainHash": "3c59add4743ce1e2ca4dd2cc8f22bff193c8847584dd3359c2c4e4d019e84f69",
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/augusta": {
       "inspectedAt": "2026-10-12T19:18:27.460Z",
@@ -12525,7 +12565,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "309dcc989c5847daf50f418fad41595c8edac6937d19dbc6d00fb3f593cf1c69",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/austin": {
       "inspectedAt": "2026-10-12T19:18:33.540Z",
@@ -12620,7 +12660,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "5420718f20c30fc656f34dc3108e08d5bfa357a1063ec40e7c13a422fc07280e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/bakersfield": {
       "inspectedAt": "2026-10-12T19:18:33.884Z",
@@ -12717,7 +12757,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e21022fa41088a11c73c30e5007d06008b65ce3d5bea15935042c9a269be437e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/baltimore": {
       "inspectedAt": "2026-10-12T19:18:33.967Z",
@@ -12812,7 +12852,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "544629b7909f7288f6f41e08544bac08aaf68f36267d695c370398d1203f5b45",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/baton-rouge": {
       "inspectedAt": "2026-10-12T19:18:34.175Z",
@@ -12907,7 +12947,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "96e670b6fd00df0c5fe859592308f6fda6d1643e6b053cad512f7d8c9ea99763",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/beaumont": {
       "inspectedAt": "2026-10-12T19:18:33.834Z",
@@ -13004,7 +13044,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "4805b799fcdde9b4da63222fadcdd301e1b216dd3f1bed1794af56a548f1bbb0",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/bellingham": {
       "inspectedAt": "2026-10-12T19:18:40.201Z",
@@ -13099,7 +13139,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "6dad61c94f0603df9ce160623c18b4bcb8bc42bc1ea76b32e021426f696ae32b",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/billings": {
       "inspectedAt": "2026-10-12T19:18:39.761Z",
@@ -13194,7 +13234,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "4bc78c9d687876dfe75a29c57f9637691d8f3298e51b46177f2b605411ac3f86",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/birmingham": {
       "inspectedAt": "2026-10-12T19:18:40.324Z",
@@ -13289,7 +13329,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "1ad1e8827d72e5ac0487732ac048ed793f98f69a3d91949523c876c9ecfab97b",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/boise": {
       "inspectedAt": "2026-10-12T19:18:40.731Z",
@@ -13384,7 +13424,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "690efd2cb8d4ea8d27dcdb2bc53c80b1540c9f1de5058bef2a48875f98e935fa",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/boulder": {
       "inspectedAt": "2026-10-12T19:18:40.401Z",
@@ -13479,7 +13519,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "a78c50c4f76603ce3a30060a6a44f6165cfabd801851b10968ad12b6d13f2a68",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/brownsville": {
       "inspectedAt": "2026-10-12T19:18:45.965Z",
@@ -13574,7 +13614,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "cbe32aa2350f3caa4b5bc1839947230d2cb2181ffc0b25d5d15ae7c8ade79547",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/buffalo": {
       "inspectedAt": "2026-10-12T19:18:46.601Z",
@@ -13669,7 +13709,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "518ea9aa50e1c02a4408aa054bad81a257a067aea6b906198e6e35c0956cbee1",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/canton": {
       "inspectedAt": "2026-10-12T19:18:46.826Z",
@@ -13764,7 +13804,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "0ad88875a459b4e22970c9af5124c1386de309b48eed14ea5d29766f5452afff",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/cedar-rapids": {
       "inspectedAt": "2026-10-12T19:18:46.559Z",
@@ -13861,7 +13901,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "ad84fe378c1024e435574ae776427413993de6fb0577ca51f548a2adba005df3",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/champaign": {
       "inspectedAt": "2026-10-12T19:18:47.185Z",
@@ -13956,7 +13996,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "5e1da84459138566c9356395d3431ef871b4b8b4bc97b29c37faa759bbfd0c15",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/charleston": {
       "inspectedAt": "2026-10-12T19:18:52.198Z",
@@ -14051,7 +14091,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "1cd273796573ab886b7292619efa0c535ebf38a9d2e40b6277ea28fe734ccbed",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/charlotte": {
       "inspectedAt": "2026-10-12T19:24:46.909Z",
@@ -14122,7 +14162,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "4d94bf9b2cfadf98b06e41dd262f56af44a77030818f82b68a46e0b7f34fd541",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/chattanooga": {
       "inspectedAt": "2026-10-12T19:18:52.942Z",
@@ -14217,7 +14257,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e909e86665bbace131ff8e61c72813581ec5eee5ea9adaf7e40a27e99ebcaf2d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/chicago": {
       "inspectedAt": "2026-10-12T19:18:52.809Z",
@@ -14312,7 +14352,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "45729503f81aec04a8e7a770083e63788a9c10edd350a1c120c5a049d563720a",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/cincinnati": {
       "inspectedAt": "2026-10-12T19:18:53.032Z",
@@ -14409,7 +14449,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "dffffcf865b070377005ad1ceadaba82331e458b72c3a02df2e4b1ac7658e30c",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/clarksville": {
       "inspectedAt": "2026-10-12T19:18:53.439Z",
@@ -14507,7 +14547,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "4e64184255ad22fdcbb077cc90068131ef1fb5c8eda01742aee328c3178c1d31",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/cleveland": {
       "inspectedAt": "2026-10-12T19:24:43.647Z",
@@ -14578,7 +14618,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "afa74a54aa21d7f5072debab2b88e131a056a124f176b40c33f0b13c4ba89b54",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/colorado-springs": {
       "inspectedAt": "2026-10-12T19:18:58.644Z",
@@ -14675,7 +14715,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "52fd8b5b44c057b9e1c050790a5763c341457f0d141e92fcf336b4c808b6abb6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/columbia": {
       "inspectedAt": "2026-10-12T19:19:02.137Z",
@@ -14770,7 +14810,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "b0838966bb626e4d25cffcdb339e43314eb14fedf85dd8600bd29233c7dd5bce",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/columbus": {
       "inspectedAt": "2026-10-12T19:18:59.241Z",
@@ -14865,7 +14905,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "528d21ae566dec7d0e4774b4d9a98643a5cf548faae5a7cceb9aa1cdaf9c2999",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/corpus-christi": {
       "inspectedAt": "2026-10-12T19:18:59.440Z",
@@ -14960,7 +15000,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "139477299846d141441429555a345236fadf64cdd226bbf37f53b8b1902c82eb",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/dallas": {
       "inspectedAt": "2026-10-12T19:24:47.219Z",
@@ -15029,7 +15069,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "09ab515fd52ebc7a56352fbd2ba4c47253a431bf5a7a95e4c16f9918bb9cad5f",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/davenport": {
       "inspectedAt": "2026-10-12T19:18:59.955Z",
@@ -15124,7 +15164,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "7627b4b0b5c97c86c240060aef4c32a7f1b3ef32c49ffbe25497e7d590252136",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/dayton": {
       "inspectedAt": "2026-10-12T19:19:05.666Z",
@@ -15219,7 +15259,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "d97b6f96dafb7b55574face064e56220eb7ac5c6f4ba4db1b907ac2c16affada",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/daytona-beach": {
       "inspectedAt": "2026-10-12T19:19:05.066Z",
@@ -15314,7 +15354,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "188b46e790d0b88256559ef6d65654a4de2e16d1d4591b0fa4bd9fa150b75f1d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/denton": {
       "inspectedAt": "2026-10-12T19:19:06.146Z",
@@ -15409,7 +15449,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "a756a9a04996a1bd4c1047dc7e1081a2c87eaf850b7c8b8b954a7755fe4096f4",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/denver": {
       "inspectedAt": "2026-10-12T19:19:05.687Z",
@@ -15506,7 +15546,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "7e7921ee38ddf9e8128ceff32702d349583e4192e8a239876d01515a60e7ee07",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/des-moines": {
       "inspectedAt": "2026-10-12T19:19:08.302Z",
@@ -15601,7 +15641,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "1ebe61907257022e46e0cce982f35519f71e970f40e50ddb992529821b046099",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/detroit": {
       "inspectedAt": "2026-10-12T19:24:47.952Z",
@@ -15672,7 +15712,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "311c0a7bfed04480ea5df58aebf53108da7ba559735360348206fb10ecc7245c",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/durham": {
       "inspectedAt": "2026-10-12T19:19:11.233Z",
@@ -15767,7 +15807,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "efb4a5bf2644b9b8f63c4c6095daa28673ce3917ea9a396c6d82d29bdb1d3352",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/el-paso": {
       "inspectedAt": "2026-10-12T19:19:12.023Z",
@@ -15862,7 +15902,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "b12c71fd54f5bb70bb465959ce3988a8ea47c99a1d145a6e77a87bb41ee9e89e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/erie": {
       "inspectedAt": "2026-10-12T19:19:12.526Z",
@@ -15957,7 +15997,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "160d30ec89b14d91f68d5230089405f9ead71f0a09117d5fa9728d0fc329e8a3",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/eugene": {
       "inspectedAt": "2026-10-12T19:19:12.409Z",
@@ -16052,7 +16092,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "232b5ee50daa10bcda2c09a94e62fd67d8cec5303f33cd3803158b099a32259c",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/evansville": {
       "inspectedAt": "2026-10-12T19:19:14.693Z",
@@ -16149,7 +16189,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "279183e10f333b30e252937d18e0a8ade8af7986fb0cc4ab7453b6bbcba6b4b6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/fargo": {
       "inspectedAt": "2026-10-12T19:19:17.877Z",
@@ -16244,7 +16284,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "27f7c05f1c32f014f6c93fc9857440b93ae6c0afe463290a904c8fc993653210",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/fayetteville": {
       "inspectedAt": "2026-10-12T19:19:18.827Z",
@@ -16339,7 +16379,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "1d808cd631dfde82197b877e605974f42417b9f71879e4fa562e0145ef5ae6dd",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/flint": {
       "inspectedAt": "2026-10-12T19:19:18.177Z",
@@ -16434,7 +16474,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "26e869144035de6dd157eaaac2abc160b42bd327d0083441613830442abacd88",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/fort-collins": {
       "inspectedAt": "2026-10-12T19:19:20.910Z",
@@ -16529,7 +16569,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f30e823114581eb161ac6a12a363c9f1e0e0c6990e3eef4a71610232080c086e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/fort-myers": {
       "inspectedAt": "2026-10-12T19:19:24.863Z",
@@ -16624,7 +16664,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "71331fe2c8ce5a15001c0a345393ce05eb0ff13ef50044f5e1dfe5b1de01421e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/fort-wayne": {
       "inspectedAt": "2026-10-12T19:19:18.992Z",
@@ -16719,7 +16759,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "1da5985c77bc080a8d35f5505cd9c49cbc83638992646a8da76a2dffdaefd35e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/fort-worth": {
       "inspectedAt": "2026-10-12T19:19:24.307Z",
@@ -16816,7 +16856,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "708ebd020a7fb64765fb0b7701aeeb577ab0af7468c6f82e07e1d02e55f5d945",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/fresno": {
       "inspectedAt": "2026-10-12T19:19:25.208Z",
@@ -16911,7 +16951,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "5971f6202058755a17d87c719449e49d8eb7aa9968957020c5eeee97680a5cb6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/gainesville": {
       "inspectedAt": "2026-10-12T19:19:25.371Z",
@@ -17006,7 +17046,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "9467999a20312094af0b4560f12a7e83d1eccadaaf63c2cb087940da08430810",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/grand-rapids": {
       "inspectedAt": "2026-10-12T19:19:27.359Z",
@@ -17101,7 +17141,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "d9d196ef568bd7a26dc4b490796cf5fb625e8f4bc0c2fdf68d3ccb8efb5f6291",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/greeley": {
       "inspectedAt": "2026-10-12T19:19:33.765Z",
@@ -17196,7 +17236,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "a08583166ec612e2aad27634f42843505000b0b55c083a527768995256d24840",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/green-bay": {
       "inspectedAt": "2026-10-12T19:19:30.746Z",
@@ -17293,7 +17333,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "035afbd584149fd9bcd3d12cedcf72eab460b2802d6cafa5194d34604bf66d47",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/greensboro": {
       "inspectedAt": "2026-10-12T19:19:31.143Z",
@@ -17390,7 +17430,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "dd0000f46dfc508c17f1ee578a8dbe63d3398d5c592f8126d8b5ecd1cf89349d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/greenville": {
       "inspectedAt": "2026-10-12T19:19:31.441Z",
@@ -17485,7 +17525,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "02a3d4afb027c4d256ee6a9ebe688d392f6504e6029af1a0ff7bcf59a6b54a99",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/gulfport": {
       "inspectedAt": "2026-10-12T19:19:37.215Z",
@@ -17580,7 +17620,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "b614aebd10d42076181568397ac6b80f0805429c2626c76b1e99aef36c669b90",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/harrisburg": {
       "inspectedAt": "2026-10-12T19:19:31.807Z",
@@ -17675,7 +17715,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "c25a147d22269523258d837d8b04d61337e99e6290cf48dd5110607f1d32ad7a",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/hartford": {
       "inspectedAt": "2026-10-12T19:19:37.730Z",
@@ -17770,7 +17810,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "2dacd68fddb25742e905768db9f08b193682eacb2c2d452a1380d61ce8938fdc",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/houston": {
       "inspectedAt": "2026-10-12T19:24:48.466Z",
@@ -17839,7 +17879,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "8dec123ee94efda5d7165988a29073fdaef7cac11e0b16f72592ccd75423b4c2",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/huntsville": {
       "inspectedAt": "2026-10-12T19:19:37.890Z",
@@ -17934,7 +17974,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "cb23ddc6e83714e0c892362cf7390f6020911dccf1de95870029185e612ac081",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/indianapolis": {
       "inspectedAt": "2026-10-12T19:24:50.014Z",
@@ -18006,7 +18046,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "cd94c8658a01750bd560e768f727e94826f554fb81bf8458b3223c45919955f3",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/jackson": {
       "inspectedAt": "2026-10-12T19:19:38.408Z",
@@ -18101,7 +18141,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "18c85a13db71989c7a76c55bdbc82d13d29115845757759c30ea83df93f3ccc7",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/jacksonville": {
       "inspectedAt": "2026-10-12T19:19:40.212Z",
@@ -18196,7 +18236,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "86390bac11d7b2eccfc5c1e20f9a04a87b6321a4ac98190de6ee5e2f0a07ebe3",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/kalamazoo": {
       "inspectedAt": "2026-10-12T19:19:43.432Z",
@@ -18291,7 +18331,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "b5d922ec8b08b7aae3c1861ca6a412a9331692e20de0972ebffb78d1215bd287",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/kansas-city": {
       "inspectedAt": "2026-10-12T19:24:53.084Z",
@@ -18360,7 +18400,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "8286d52e4117d9bb3af89aec528213c62856d657036ffb59ee4bc090b08218cf",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/killeen": {
       "inspectedAt": "2026-10-12T19:19:44.216Z",
@@ -18455,7 +18495,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "8d29a9ca40cb10133cd8fb451e1d3942777acba5c823b9bdb5551d3f45fd10a4",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/knoxville": {
       "inspectedAt": "2026-10-12T19:19:44.090Z",
@@ -18550,7 +18590,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "bc20e4e15d802726ede6fa8386b2e96a30c60aa76d32bb4ff7a005f39222748e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/lafayette": {
       "inspectedAt": "2026-10-12T19:19:44.870Z",
@@ -18645,7 +18685,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "52e18c3cce6626da65605390a6d57b3e76fb74f2382cb9713bc3a478fc0a6f50",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/lakeland": {
       "inspectedAt": "2026-10-12T19:19:46.420Z",
@@ -18740,7 +18780,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f6085cae3610ff3f1f71aca6696f614e986c38c60b1993f4ac06df0209c4da77",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/lancaster": {
       "inspectedAt": "2026-10-12T19:19:49.872Z",
@@ -18837,7 +18877,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "08453e754bb634d791824011858e2eb3b77ac9f836364b14073323c4fcea6d1e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/lansing": {
       "inspectedAt": "2026-10-12T19:19:50.604Z",
@@ -18932,7 +18972,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "8a8f010232349c9a1d1946f5e07ae6dbc987f519c4dba16e571e698307f6d5b7",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/laredo": {
       "inspectedAt": "2026-10-12T19:19:50.442Z",
@@ -19027,7 +19067,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "d256c5fe1d95706e4818e724f123336f919a2da1fcae862e0955acc7bc2f20c0",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/las-vegas": {
       "inspectedAt": "2026-10-12T19:19:51.062Z",
@@ -19124,7 +19164,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e06b629ce7b3cee88a5ea0ceb43f8c1cd170148389befe20c70682925fc5b955",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/lexington": {
       "inspectedAt": "2026-10-12T19:19:52.637Z",
@@ -19219,7 +19259,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "73c833e949377e3e84f44feccc82859cea3c8d2afdfe2a0e7eb145167b2f9ca8",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/lincoln": {
       "inspectedAt": "2026-10-12T19:19:56.367Z",
@@ -19314,7 +19354,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "c59951078f28ef891f353bbb34064d69b9d6883c55e8167ecb77bc836527fbed",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/little-rock": {
       "inspectedAt": "2026-10-12T19:19:56.798Z",
@@ -19409,7 +19449,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "95b8f3e97bc6d3ead7732f5283e49dd966f29762a450423bc2cb02ad7914ff14",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/louisville": {
       "inspectedAt": "2026-10-12T19:19:57.053Z",
@@ -19504,7 +19544,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "2532bcb3e0c43557966b9df82d42022d51ad2c5904e463c2b7d4864dca9e8032",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/lowell": {
       "inspectedAt": "2026-10-12T19:19:57.423Z",
@@ -19599,7 +19639,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "19d2c3e09054df1e0edddd1b7154c3f8c6b8712d32336190ba21af83599790db",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/lubbock": {
       "inspectedAt": "2026-10-12T19:20:02.578Z",
@@ -19694,7 +19734,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "afe27ed47f00ff3e987c118fd90fca312c1404c0477af4ac9a94bc66a4b6ebb1",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/macon": {
       "inspectedAt": "2026-10-12T19:19:59.100Z",
@@ -19789,7 +19829,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "ee14945542040bc7cac5991a80715a63ffe7febbab97f710eafab85cbfd7c900",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/madison": {
       "inspectedAt": "2026-10-12T19:20:03.255Z",
@@ -19884,7 +19924,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "38895377223079e01516b2f8dc15628f1c3be24c62f7e3ceb3a36cad74e841e7",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/manchester": {
       "inspectedAt": "2026-10-12T19:20:03.448Z",
@@ -19981,7 +20021,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "4ca62a0688b19e00a77bd0ee408998c73f25d64486cdae4dbcd76894627141c0",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/mcallen": {
       "inspectedAt": "2026-10-12T19:20:05.476Z",
@@ -20076,7 +20116,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e79cdd6963f241b722b6ca1f6534a3938947a0ef369853ced3a9811cbe5d5731",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/memphis": {
       "inspectedAt": "2026-10-12T19:24:53.584Z",
@@ -20147,7 +20187,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f2201a3a3877ee6b8f17a67123f295d4c132e5d3a848cf6f65169f6c7f078172",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/mesa": {
       "inspectedAt": "2026-10-12T19:20:03.961Z",
@@ -20242,7 +20282,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "53415f0488d1e02f60864f5850b7b98907e2b26b0a6aa87b9611001e281ea07e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/milwaukee": {
       "inspectedAt": "2026-10-12T19:20:09.114Z",
@@ -20339,7 +20379,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "26aa62751578a73a2d7c1d4310f3c49384acbe25ee617abfe2c89766ccdff59f",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/minneapolis": {
       "inspectedAt": "2026-10-12T19:20:09.551Z",
@@ -20436,7 +20476,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "6f63801d74aaf8f7257de09d4a99662bf57570d6ac8732167f15bc8112ae435c",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/mobile": {
       "inspectedAt": "2026-10-12T19:20:09.632Z",
@@ -20533,7 +20573,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "7384afd95d6647ffb1444b8175f820c33388d4eb1ccd814d6434dab712cd6a8c",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/modesto": {
       "inspectedAt": "2026-10-12T19:20:10.363Z",
@@ -20630,7 +20670,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "157ffd1f85e8595d18c67b7051703be4cf9c47d0058295bf9bb2892268b34b1e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/montgomery": {
       "inspectedAt": "2026-10-12T19:20:11.906Z",
@@ -20725,7 +20765,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "c06a2dc0c14c6491742b3f0d32b99657a5f7e9d907dd32a5fdd7cb9aeeb7db65",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/myrtle-beach": {
       "inspectedAt": "2026-10-12T19:20:15.330Z",
@@ -20820,7 +20860,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "a09c7781d41e4a96864145845ed49167c051f8c7bb384e50fef4f2a4a7c8f926",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/nampa": {
       "inspectedAt": "2026-10-12T19:20:16.069Z",
@@ -20915,7 +20955,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "600ee1e454f34f0575f0cdd17ebc59f1351c23bc8b3c58cacd030307d1e5acbb",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/naples": {
       "inspectedAt": "2026-10-12T19:20:17.032Z",
@@ -21012,7 +21052,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "8ba706a33c60c99ee3ac6813a2dfde05c3c231564f5e15eb05f06f4175b01dd6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/nashville": {
       "inspectedAt": "2026-10-12T19:20:15.908Z",
@@ -21107,7 +21147,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "414dba77348fe05f6c6097dd94d10d2a77070d68b4809d801c1e994fa706db0e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/new-haven": {
       "inspectedAt": "2026-10-12T19:20:18.278Z",
@@ -21202,7 +21242,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "874ae5577d4687c57db57df2aec920836dda1bdd94122b2401a2a8288d019801",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/new-orleans": {
       "inspectedAt": "2026-10-12T19:20:21.696Z",
@@ -21297,7 +21337,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "eef3d47b22635d4f71611d9ca24f6baa0d8c321d231889c669cbba2b0260f278",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/newark": {
       "inspectedAt": "2026-10-12T19:20:22.755Z",
@@ -21394,7 +21434,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "a71e189162355b0431f35560f61a5524c301bc82cd1ff8ed48cc0fedbf70ea4c",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/norfolk": {
       "inspectedAt": "2026-10-12T19:20:22.249Z",
@@ -21491,7 +21531,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "7f2e763cdd27fb97eb0a2178d06243d22c3e9ce8937f66f0bfe635a690df1941",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/ocala": {
       "inspectedAt": "2026-10-12T19:20:23.269Z",
@@ -21586,7 +21626,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "bfb6a35cb0e3e1f1771c7ce2b07e0665af9f0209171301caa52efeebebcb45c6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/ogden": {
       "inspectedAt": "2026-10-12T19:20:24.541Z",
@@ -21681,7 +21721,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "63a4fb66574a80a91c62046cb1593e765cc9e355cdc1c05f171404e932742996",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/oklahoma-city": {
       "inspectedAt": "2026-10-12T19:20:28.208Z",
@@ -21776,7 +21816,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "1c2f95bc0fbc0b20e8efc745fd520089c3e955bdc83546d6c30402a4372b635b",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/olathe": {
       "inspectedAt": "2026-10-12T19:20:28.635Z",
@@ -21871,7 +21911,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "357ad8c53eb19612417c24407431cdd13cdf2f3625ee78555834ce9da2082b80",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/omaha": {
       "inspectedAt": "2026-10-12T19:20:29.051Z",
@@ -21966,7 +22006,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "4adc9837a4c2f90a68cfcee998ffb101192a5076579328c4c5f052182fae9b09",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/orlando": {
       "inspectedAt": "2026-10-12T19:20:29.450Z",
@@ -22061,7 +22101,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e1bbc41f81a9d2a1f7e6c6cac9506b343383d383091da5aead20088daf9438b4",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/paterson": {
       "inspectedAt": "2026-10-12T19:20:30.762Z",
@@ -22156,7 +22196,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "7b79b020c6d65c8a874ec103e2d34de1b5e7a6af445af5330f5fb32200fe4059",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/pensacola": {
       "inspectedAt": "2026-10-12T19:20:34.423Z",
@@ -22251,7 +22291,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "28a395c068a1b2cfb1ab200aa5733869bc6858441d948cd76ca94d9c8c817734",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/peoria": {
       "inspectedAt": "2026-10-12T19:20:34.832Z",
@@ -22346,7 +22386,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f6e2b79bd40fc8850f60105289d719034e3eac5a1e83490dab8034b7563b3821",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/philadelphia": {
       "inspectedAt": "2026-10-12T19:24:54.465Z",
@@ -22418,7 +22458,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "05870097ca0e681358395f4b549550908b1a0513d40dc2387c675b6dfd648084",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/phoenix": {
       "inspectedAt": "2026-10-12T19:24:55.139Z",
@@ -22489,7 +22529,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "271d662d2ab4a897dc076053f497a3d82a54aafd845b8aaa7f72bde05c8970d6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/pittsburgh": {
       "inspectedAt": "2026-10-12T19:20:35.268Z",
@@ -22586,7 +22626,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "aea6a7ddd9660ee3d5912962fd1ba4cf638d2d311283462adb10fbc3625f2715",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/portland": {
       "inspectedAt": "2026-10-12T19:20:35.650Z",
@@ -22683,7 +22723,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "29ae2d73f3d72b3316dc41dd14d8fff176c95794c5fad9d0a0b2176cd090f8bc",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/providence": {
       "inspectedAt": "2026-10-12T19:20:36.976Z",
@@ -22780,7 +22820,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "61f0cdc069ee2d248013413d5f4a84d7f1c92a963b33daa18857280581ab0ed8",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/provo": {
       "inspectedAt": "2026-10-12T19:20:40.610Z",
@@ -22875,7 +22915,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "bca6c7ee97cc1700a79c18e6390cd6a0b0c28852924b6e1d568d81256b1c8a1c",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/pueblo": {
       "inspectedAt": "2026-10-12T19:20:41.574Z",
@@ -22972,7 +23012,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "1e19fd3ab60c435a1af68e098e9925ce45d8b57ede25283b14d19546655fa4a8",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/raleigh": {
       "inspectedAt": "2026-10-12T19:20:41.074Z",
@@ -23067,7 +23107,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "91679b434ea80898d49089ec77c27c226c60055ce6f88fcc6d7a2f2770a15d07",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/reading": {
       "inspectedAt": "2026-10-12T19:20:41.859Z",
@@ -23162,7 +23202,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e2a918b09a39716262c88d2d5b8a622df33387bea9a651ad90edc19099ca6c98",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/reno": {
       "inspectedAt": "2026-10-12T19:20:43.345Z",
@@ -23259,7 +23299,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "2f8644e6692851c10679ae9457beba501b7f14ee0f5df18337217869a1e08d4c",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/richmond": {
       "inspectedAt": "2026-10-12T19:20:46.743Z",
@@ -23354,7 +23394,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "0cf4eac4de81d0280fa612867768660ba328b3360e8c823a53707c719e852e42",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/rochester": {
       "inspectedAt": "2026-10-12T19:20:47.303Z",
@@ -23451,7 +23491,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f3ac93bb037933dfc89efd7163086d8e5ccc7cbfd314ee8828aaec984878c3f2",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/rockford": {
       "inspectedAt": "2026-10-12T19:20:48.030Z",
@@ -23548,7 +23588,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e183a9f81d7037530fc7bcc2b21a296d59fc5c8c1a5ba32015251936ab941c6d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/sacramento": {
       "inspectedAt": "2026-10-12T19:20:47.998Z",
@@ -23643,7 +23683,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "edb0e69d98c9d411ac667b41c952662a8456dcd7ab3b0577d5d4b1ca42c6791a",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/salem": {
       "inspectedAt": "2026-10-12T19:20:49.551Z",
@@ -23740,7 +23780,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "8be8f8ab6030da2463f3c7c602d5eb630f6a6846dcf7a09cc720a62de1dcad45",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/salt-lake-city": {
       "inspectedAt": "2026-10-12T19:20:52.971Z",
@@ -23835,7 +23875,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "5e81b2badd468e17dff52c3d39ce24e1db114bf611651459673548f547fe1246",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/san-antonio": {
       "inspectedAt": "2026-10-12T19:20:54.237Z",
@@ -23930,7 +23970,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "4914633436bc640a4651b1e583d4aef21a384c68df918f27cf3cd8d74fdd1670",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/sarasota": {
       "inspectedAt": "2026-10-12T19:20:55.789Z",
@@ -24027,7 +24067,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "929e20c14f6b42328d789717888477965ca4589cef36e37138af192ecbcec59d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/savannah": {
       "inspectedAt": "2026-10-12T19:20:53.829Z",
@@ -24122,7 +24162,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "909220378e5b82fa82e8418ab308ce5fef937c439e0a68a24c1d6ef18c853a95",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/scranton": {
       "inspectedAt": "2026-10-12T19:20:54.368Z",
@@ -24217,7 +24257,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "4d622b6eb38d027cdfa72f1af032c862143ee606aedbe384b91e651729dcc745",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/shreveport": {
       "inspectedAt": "2026-10-12T19:20:59.384Z",
@@ -24312,7 +24352,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "27557d41c2cb7bb97b6213b6a9b73084f8b12445115e35978984f9378cd27a9d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/sioux-falls": {
       "inspectedAt": "2026-10-12T19:21:00.191Z",
@@ -24407,7 +24447,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "9e4cd63767777548f25b3eb5afaac0be91c73faa7a9eac413db55390ad7aca5a",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/south-bend": {
       "inspectedAt": "2026-10-12T19:21:00.618Z",
@@ -24502,7 +24542,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "8d366675b55d05aa4e3e7903c5e68db6fe323a901ac2f102b5e9f2de3a1eee88",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/spartanburg": {
       "inspectedAt": "2026-10-12T19:21:00.594Z",
@@ -24597,7 +24637,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "ca8f8132bc2b552d059df066fb72548a556c6946bd94ccf6c223c6e6b33003de",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/spokane": {
       "inspectedAt": "2026-10-12T19:21:01.940Z",
@@ -24692,7 +24732,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "fedcf834bc4d65ad8f0acaaee74f8bf980ae16cffd10d0c017226f3097a49a2f",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/st-louis": {
       "inspectedAt": "2026-10-12T19:21:05.781Z",
@@ -24789,7 +24829,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "753b3d1a9dded5b08cb41974d548a143b6d55857fac79b34a5d66a5877bdb357",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/stockton": {
       "inspectedAt": "2026-10-12T19:21:06.555Z",
@@ -24884,7 +24924,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "ceb932f4a9fd91993d66950012d046de4396fb055e5b839105b1a2a900154161",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/syracuse": {
       "inspectedAt": "2026-10-12T19:21:06.808Z",
@@ -24979,7 +25019,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e703112264600692aaed01c3ecb7e17432943ec137dde2592a7cbdaa1083129a",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/tacoma": {
       "inspectedAt": "2026-10-12T19:21:08.442Z",
@@ -25074,7 +25114,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "022045cbeafd0acdc51fff5327c0a376224bae9b96345e0f32dbc5de25c79c88",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/tallahassee": {
       "inspectedAt": "2026-10-12T19:21:07.140Z",
@@ -25169,7 +25209,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e7496afc6f1d0eb20125461437cd87a0489b3c4b19214a0df3240d565c098a16",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/tampa": {
       "inspectedAt": "2026-10-12T19:24:56.390Z",
@@ -25238,7 +25278,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "82aa1825f6abb48d39ef78bda48eba79da6ebd4390d7bda39e292611fc9ed365",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/toledo": {
       "inspectedAt": "2026-10-12T19:21:12.993Z",
@@ -25333,7 +25373,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "48de967cfcdc1b0c15b2eb8615368ed3e1d6ce8c34754bc0896cded1f36c8e39",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/topeka": {
       "inspectedAt": "2026-10-12T19:21:11.936Z",
@@ -25428,7 +25468,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "d30821278cdfdbd3160d8516915010a2fda9dc9571e9383ce7cade768c8827fd",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/trenton": {
       "inspectedAt": "2026-10-12T19:21:13.007Z",
@@ -25525,7 +25565,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "42a5223f0d8e788fc0d37e3048025b780db416aad26fe6d50e0781d0002e77c0",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/tucson": {
       "inspectedAt": "2026-10-12T19:21:14.693Z",
@@ -25620,7 +25660,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "780df4bdb2e7a0dbaa66c65d1d2fe08659498e180b4594194b503d5805f01276",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/tulsa": {
       "inspectedAt": "2026-10-12T19:21:13.329Z",
@@ -25715,7 +25755,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "aea527c41c4ed72085a333b52884604efdf558cad5d655addda5e4cf1e30f4ef",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/tuscaloosa": {
       "inspectedAt": "2026-10-12T19:21:18.207Z",
@@ -25810,7 +25850,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "12e538eab2b9ed08502209200c0417c7451a6fef2d233bafc0b5db1d2e261e8a",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/vancouver": {
       "inspectedAt": "2026-10-12T19:21:19.185Z",
@@ -25905,7 +25945,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "c80d366674313c2cc1a60df48711d5310de56b682e383d5f6ce2551a0d6caeb3",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/virginia-beach": {
       "inspectedAt": "2026-10-12T19:21:19.366Z",
@@ -26000,7 +26040,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "43f77f3bb347d345258fe59cdbc72e4f794204e23e12b262465647235bd18d70",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/waco": {
       "inspectedAt": "2026-10-12T19:21:19.614Z",
@@ -26097,7 +26137,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "cf284a1b1e2343dacba403c1f120752a6d20af99ffb30032af1d3454edc3183f",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/wichita": {
       "inspectedAt": "2026-10-12T19:21:21.002Z",
@@ -26192,7 +26232,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "39aed309cf8ae3398b7fe5e526b6cb583b86959fe8448b860d12c7a52abc39bf",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/wilmington": {
       "inspectedAt": "2026-10-12T19:21:24.493Z",
@@ -26289,7 +26329,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "93ef329123e083e4a2ba550e5c64e1d73fa4f39167e3185830279441bb7012b1",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/winston-salem": {
       "inspectedAt": "2026-10-12T19:21:25.366Z",
@@ -26384,7 +26424,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "bca01c3eb27df3a1be47cf8fff5b2701dd493d8ffe2724d826b2350ccb02b4ac",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/worcester": {
       "inspectedAt": "2026-10-12T19:21:25.540Z",
@@ -26479,7 +26519,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "a4fad6f9750a26bd57bdf41a390d34de9ae5754c38148d983dbe41a8a1f1b420",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/york": {
       "inspectedAt": "2026-10-12T19:21:25.892Z",
@@ -26574,7 +26614,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f33498682820c1f3d52122389f0e97fc6c4511f1ade5740460eb109ee5f4fae6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/markets/youngstown": {
       "inspectedAt": "2026-10-12T19:21:27.223Z",
@@ -26669,7 +26709,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "93d16a6a009b7f07b1198f7385515bc5b926467fe24c034b012526d385c0d513",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/methodology": {
       "inspectedAt": "2026-10-12T19:23:25.631Z",
@@ -26742,7 +26782,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "682ea3b9f42ddbed90ba6ddf56c719c60094ff2081167e89eabe7fdea69d8b88",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/playbook": {
       "inspectedAt": "2026-10-12T19:23:31.976Z",
@@ -26814,7 +26854,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "c56ed987b71d0f3615b49a36a62b747db707f7e14bc4ac409e3d8a9eb3cb6147",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/pricing": {
       "inspectedAt": "2026-10-12T19:23:30.819Z",
@@ -26841,7 +26881,7 @@
       "everIndexed": true,
       "indexClass": "indexed",
       "mainHashAtInspect": "713d0d99447ee468d907b36d5f248aa952ccce32aec4f43178055dc28c0022fa",
-      "wordCount": 1340,
+      "wordCount": 1344,
       "uniqueRatio": null,
       "thin": false,
       "history": [
@@ -26886,8 +26926,8 @@
         }
       ],
       "removedFromSitemap": null,
-      "mainHash": "713d0d99447ee468d907b36d5f248aa952ccce32aec4f43178055dc28c0022fa",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "mainHash": "00011a8e46475965647fbbe434c12e37b9effdc21ff8526b6762f744d5e9cfd4",
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/privacy": {
       "inspectedAt": "2026-10-12T19:26:36.617Z",
@@ -26947,7 +26987,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "c0bc9a40cecb4f35faca7451dbb8ba46151aa405c09d9b93c97b301eff2259a6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/reviews": {
       "inspectedAt": "2026-10-12T19:23:32.580Z",
@@ -27020,7 +27060,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "78b0182c9194705146499f59eba5036dc6e11ce840e2c822e04e32d1c9bf2883",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/sample-decision-memo": {
       "inspectedAt": "2026-10-12T19:23:33.039Z",
@@ -27045,7 +27085,7 @@
       "everIndexed": true,
       "indexClass": "indexed",
       "mainHashAtInspect": "a5e6170e347b653da415152ed217bd52cb0fd9518c4d10abb0a47b611e7e057b",
-      "wordCount": 398,
+      "wordCount": 425,
       "uniqueRatio": null,
       "thin": true,
       "history": [
@@ -27090,8 +27130,8 @@
         }
       ],
       "removedFromSitemap": null,
-      "mainHash": "a5e6170e347b653da415152ed217bd52cb0fd9518c4d10abb0a47b611e7e057b",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "mainHash": "66a00fbea94ba50b8bf25757f81a4217b33b4b826b8192e085cbae8d54637281",
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states": {
       "inspectedAt": "2026-10-12T19:26:37.196Z",
@@ -27150,7 +27190,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "8758eacdf0122900ebffaf853f8cccdffb5697ce94a0c80c8bc6a11b03045739",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/alabama": {
       "inspectedAt": "2026-10-12T19:24:59.235Z",
@@ -27247,7 +27287,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "b7b6ff35cde85676638a0e04cacc107ac168965742cfa216f265ae4d7f50e099",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/arizona": {
       "inspectedAt": "2026-10-12T19:24:59.989Z",
@@ -27344,7 +27384,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e6acdf81c9e4caadc7a60e098d2ecd0ce74d008844cf005e8f0fbd9da683182e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/california": {
       "inspectedAt": "2026-10-12T19:25:00.674Z",
@@ -27441,7 +27481,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "54903a14584ca04bea53016ca503b7f7c0339fadf498ec46acd673bda5940ef9",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/colorado": {
       "inspectedAt": "2026-10-12T19:25:01.651Z",
@@ -27538,7 +27578,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "5c4e7b444caa1287d07187e5a287bd4bf20c26d34d73ec0b457d602602b457df",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/connecticut": {
       "inspectedAt": "2026-10-12T19:25:05.699Z",
@@ -27635,7 +27675,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "429eefdfd344bdcb813bca50807a183fdda90d432f4770e06833593934b526d3",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/florida": {
       "inspectedAt": "2026-10-12T19:25:02.775Z",
@@ -27730,7 +27770,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "b3c3946d954a345c0a72fc415e13ea16986a99d8873666056538bf5d460ad911",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/georgia": {
       "inspectedAt": "2026-10-12T19:25:06.369Z",
@@ -27827,7 +27867,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "4298053eaa55bdaa7cb85d9e1e166a48b566b572df087e40543400c3fe6936cf",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/idaho": {
       "inspectedAt": "2026-10-12T19:25:06.877Z",
@@ -27924,7 +27964,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "872856a5974de7c451b38cf98b654176dfb5dd70e9fd41ff4d4ab9ca783d2385",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/illinois": {
       "inspectedAt": "2026-10-12T19:25:07.813Z",
@@ -28021,7 +28061,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "a6c3b3738ab27fe85f3fe47aa813071e6a89f8ebe04c641fc6926d6c28a7f345",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/indiana": {
       "inspectedAt": "2026-10-12T19:25:11.917Z",
@@ -28120,7 +28160,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "7e796e96afda8a0e092544ba0e722c41d1f0dd3f8836143849f04f16b4fdfe4f",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/iowa": {
       "inspectedAt": "2026-10-12T19:25:09.263Z",
@@ -28217,7 +28257,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "0f46a26852d9dbbdf7394a3c6c77f8720e5678dc77a617f66a20c8e1eacc6bf7",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/kansas": {
       "inspectedAt": "2026-10-12T19:25:12.859Z",
@@ -28314,7 +28354,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "eeb1ba3b1b0ba4f751a80d7c144fb4af1e42b81e585208db9aeeb2a778aecee2",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/kentucky": {
       "inspectedAt": "2026-10-12T19:25:13.323Z",
@@ -28411,7 +28451,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "c9b8b32b2355108329c01a1d0a6d514b84907935725fa9199264a92010f6ea4e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/maryland": {
       "inspectedAt": "2026-10-12T19:25:14.230Z",
@@ -28509,7 +28549,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "798b6542ccde50d69a18475d8b984bb36726fc85ee60986714b46110fe7182d7",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/massachusetts": {
       "inspectedAt": "2026-10-12T19:25:18.344Z",
@@ -28606,7 +28646,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "42c6a9d85e40aaa3f6d414257f0bf2b8b1a7ab45381afab9ed74d0e106e4b1eb",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/michigan": {
       "inspectedAt": "2026-10-12T19:25:15.483Z",
@@ -28703,7 +28743,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "6e44c4abd06c7325f49659d865d0450508c2262e51c3eb188422c24788f16be8",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/minnesota": {
       "inspectedAt": "2026-10-12T19:25:19.075Z",
@@ -28800,7 +28840,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "142f8e95667cf27051fa6cf81780ddd216ab6963d43c6b594af48295b469f512",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/missouri": {
       "inspectedAt": "2026-10-12T19:25:19.550Z",
@@ -28897,7 +28937,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "48c832caf1dc8f948ec8a90e84cf7dbf4a379835a13d100010bbb75b18daae6d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/nevada": {
       "inspectedAt": "2026-10-12T19:25:20.886Z",
@@ -28994,7 +29034,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "dac776017b7eb799d71f7818dfdc32df8518f83d8307fd461de7bb90bdb91211",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/new-jersey": {
       "inspectedAt": "2026-10-12T19:25:21.860Z",
@@ -29091,7 +29131,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "eb8a82e734ebaea5b4f2eb4eb4aa6db394bcc5ea37596f205fd1bd4bcfbd4c68",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/new-york": {
       "inspectedAt": "2026-10-12T19:25:24.818Z",
@@ -29188,7 +29228,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "ce2643fa8b598173af551f36362a5a94e3917ba5301ee636423894ac8ded1995",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/north-carolina": {
       "inspectedAt": "2026-10-12T19:25:25.962Z",
@@ -29286,7 +29326,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "06133653d8bdc874a9a0216731aa9f00a077dfed3b85d0d2a1b6cd13ea2876f4",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/ohio": {
       "inspectedAt": "2026-10-12T19:25:25.531Z",
@@ -29383,7 +29423,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "7018eab41b72ac048ef05fe2a16e7a93cbb167c2a5445c35609f05af62d2e4b8",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/oklahoma": {
       "inspectedAt": "2026-10-12T19:25:27.090Z",
@@ -29481,7 +29521,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "ef738c442f459651138e4d8a75eb87847b234db04903613e7345cfd9c0729342",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/oregon": {
       "inspectedAt": "2026-10-12T19:25:28.534Z",
@@ -29578,7 +29618,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "919f6a10148175d433d95dee475d79cfad2e7c958a76a1f9186abd04ba3070d0",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/pennsylvania": {
       "inspectedAt": "2026-10-12T19:25:31.154Z",
@@ -29676,7 +29716,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "87f7b20430c2d991f8420c57b48d85a8a40d5b1c586d0f901105dfe4fe8d2fb8",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/south-carolina": {
       "inspectedAt": "2026-10-12T19:25:31.978Z",
@@ -29773,7 +29813,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "ead2d8caaaa83969c1a557a8b84f0d97b7c2154553c50c8c51be9307e7e331d2",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/tennessee": {
       "inspectedAt": "2026-10-12T19:25:32.638Z",
@@ -29871,7 +29911,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "88219b51bc3234d3565c4d52041fe5cdfa1bd6db94e3619f56c750a2577edda2",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/texas": {
       "inspectedAt": "2026-10-12T19:25:33.817Z",
@@ -29969,7 +30009,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "2134bb7c6c6cf92d723c212287b3d348a39e8fbb9b500656a35e6873a2b4a9fc",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/utah": {
       "inspectedAt": "2026-10-12T19:25:34.898Z",
@@ -30066,7 +30106,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "d5f72dd5b1695ee66991525bc969de3f43c05e7229b92d54cbc23597cc3e8ce4",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/virginia": {
       "inspectedAt": "2026-10-12T19:25:38.672Z",
@@ -30163,7 +30203,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "8f3af156b92a1b28a9aca418a75bc4cce4cb3d987486f4c3488a409eb0a2597d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/washington": {
       "inspectedAt": "2026-10-12T19:25:37.518Z",
@@ -30260,7 +30300,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "ef425edcf89812dd148616bb3564c496e3dea5d92d8bd5aa90393eb6c45c5750",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/states/wisconsin": {
       "inspectedAt": "2026-10-12T19:25:39.069Z",
@@ -30357,7 +30397,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "a9d09681308127f3d6a9a517b47a8b42ef848f603ff60542273cb4faba5d407d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/terms": {
       "inspectedAt": "2026-10-12T19:26:37.681Z",
@@ -30417,7 +30457,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "4c9457ed2cae96c35afa991b1aa5177b7b6a12e8b66a714686a78cb8aaf5dd20",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/tools": {
       "inspectedAt": "2026-10-12T19:23:34.562Z",
@@ -30490,7 +30530,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "62fa2b0e3a50af5dba4ece459b2aedffd73d0ced39437ff2d809145ba7288712",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/tools/1-percent-rule-calculator": {
       "inspectedAt": "2026-10-12T19:23:37.295Z",
@@ -30562,7 +30602,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "330bc7cc08a3f2d2d31524e0ceb6df9b5a22d069f762fb4a4866ab7ffa94c94c",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/tools/2-percent-rule-calculator": {
       "inspectedAt": "2026-10-12T19:23:39.661Z",
@@ -30633,7 +30673,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "02e51ebddb389ed1f36147e7ea7f77c0e9649b3c2c34d06689c64b59286b1d9c",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/tools/70-percent-rule-calculator": {
       "inspectedAt": "2026-10-12T19:23:38.584Z",
@@ -30705,7 +30745,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "45d40e880f964d3c5614aab8d1f1fa149426357933fcbf3e26feaa576c93d45f",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/tools/arv-calculator": {
       "inspectedAt": "2026-10-12T19:23:41.172Z",
@@ -30777,7 +30817,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "0d01b78461023dc2d91288f1446440aeb2f12974f0a7c72fe33702d117d0efb2",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/tools/break-even-calculator": {
       "inspectedAt": "2026-10-12T19:23:39.014Z",
@@ -30849,7 +30889,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "5e496994d53c2d0a2ef2a3b907ec7bcd51be24d4db7be199246d237185253ec6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/tools/closing-cost-calculator": {
       "inspectedAt": "2026-10-12T19:23:43.938Z",
@@ -30921,7 +30961,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "1a1096b2bb703c3ceff6bb926bc1a6018d8745746e31ee0ef814506e8be4d069",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/tools/gross-rent-multiplier-calculator": {
       "inspectedAt": "2026-10-12T19:23:47.418Z",
@@ -30994,7 +31034,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "9e075c3c399c88f70cf72d30431618740305aea29a6c612c8cdbef55481b01ac",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/tools/mortgage-payment-calculator": {
       "inspectedAt": "2026-10-12T19:23:45.405Z",
@@ -31067,7 +31107,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f19e7967c04fc31b78ea6d2e7ae36731592d4382f3cfa189fc9ec48b17a4d8a8",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/tools/rehab-cost-estimator": {
       "inspectedAt": "2026-10-12T19:23:45.565Z",
@@ -31139,7 +31179,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "679665d1c79ed1162644c260c12158404242526f87eb46654b3f8b76b8547441",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/tools/rental-property-spreadsheet": {
       "inspectedAt": "2026-10-12T19:23:46.385Z",
@@ -31211,7 +31251,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f63390c0008a214f527e93eb84d813a103933942ba8b263738e736d8c15cb606",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/tools/vacancy-rate-calculator": {
       "inspectedAt": "2026-10-12T19:23:50.235Z",
@@ -31283,7 +31323,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "6a1e99f7e33019d9a886e02fdc84407e52b104ccc1e2fd2f47fb04cb47a3da96",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs": {
       "inspectedAt": "2026-10-12T19:23:51.866Z",
@@ -31357,7 +31397,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "8a692ca046d684f3a0967ae5262f5761376d6994a4e83c742570c5413c7ab63a",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/airdna": {
       "inspectedAt": "2026-10-12T19:23:53.885Z",
@@ -31428,7 +31468,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "fa65b3b736407e9084823cf8f2afdd32d627f8ded3d6e38601b1f865b50a7536",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/appfolio": {
       "inspectedAt": "2026-10-12T19:25:41.350Z",
@@ -31513,7 +31553,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "06a173ee74114cb9eebeae7cd31a28321a864c0c4e1b7387d48434f1cc901ed3",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/arrived": {
       "inspectedAt": "2026-10-12T19:23:51.878Z",
@@ -31584,7 +31624,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "489f199fcda453837494787eccc6bfc8ed013f8391ce3470f2c33d1d8b780143",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/avail": {
       "inspectedAt": "2026-10-12T19:23:52.863Z",
@@ -31655,7 +31695,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "918e93ef1cc783fc5a48faace0bdf986545a401f5b039bdff0903c8b1736327d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/baselane": {
       "inspectedAt": "2026-10-12T19:23:56.881Z",
@@ -31726,7 +31766,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "d8bdca47f5ec9ec212a561f435ef68d215347b2bfffd4c632092a76004caea02",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/batchleads": {
       "inspectedAt": "2026-10-12T19:23:58.460Z",
@@ -31797,7 +31837,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "734e78cbe62d8cf401ed48fb9e5c2297555bffc9d51254e109861af706f7ce8b",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/biggerpockets-calculator": {
       "inspectedAt": "2026-10-12T19:23:58.137Z",
@@ -31869,7 +31909,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "731828391f7af9acdc98f2ad0f864afd42ff6cb9d30dc0172c6fa94135fcc3b1",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/biggerpockets-for-house-hacking": {
       "inspectedAt": "2026-10-12T19:23:59.290Z",
@@ -31940,7 +31980,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "ab8814bcad180727e890e895c51154c1c45fb31c36980cd78c715a7b815ac012",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/bricked": {
       "inspectedAt": "2026-10-12T19:24:00.821Z",
@@ -31966,7 +32006,7 @@
       "indexClass": "indexed",
       "mainHashAtInspect": "282217823e57ea1cc16fb387e621c2b9e3e4f8206f02178956978bf042ed8c48",
       "wordCount": 1405,
-      "uniqueRatio": 0.7683,
+      "uniqueRatio": 0.768,
       "thin": false,
       "history": [
         {
@@ -32010,8 +32050,8 @@
         }
       ],
       "removedFromSitemap": null,
-      "mainHash": "282217823e57ea1cc16fb387e621c2b9e3e4f8206f02178956978bf042ed8c48",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "mainHash": "cfc30b3efa8d9484d0ac47e6470dd2c22dc51ae1996af8664e66d3510e3e9823",
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/buildium": {
       "inspectedAt": "2026-10-12T19:24:03.134Z",
@@ -32082,7 +32122,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "3dd3d1d254970d26c6894ea0f623908924c3e2d6ceab685214c9ae4ade30407a",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/cozy": {
       "inspectedAt": "2026-10-12T19:24:04.569Z",
@@ -32154,7 +32194,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "ea1333895359232fb9b2785f337ac3f296a6c3816be8cc0472c4fab0dfc96c18",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/crexi": {
       "inspectedAt": "2026-10-12T19:24:04.926Z",
@@ -32223,7 +32263,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "361a45292a389c8e9a4035eba48144f5a84bee02c84372b78db0ba5bfb48b191",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/dealcheck": {
       "inspectedAt": "2026-10-12T19:24:05.804Z",
@@ -32295,7 +32335,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "540acf31fc1027b8bb25087e9b6d4b1e5ff4f0bf425665d3e99c4832fd553bb6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/dealcheck-for-short-term-rentals": {
       "inspectedAt": "2026-10-12T19:24:07.034Z",
@@ -32364,7 +32404,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "87abeb94e289b43c7fc80d452e1e1041e82cb4b9c873a131995e45d243d6d0e0",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/dealmachine": {
       "inspectedAt": "2026-10-12T19:24:09.576Z",
@@ -32435,7 +32475,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "bab77ff3e96db07640d434eeeab6b11ae2bd35e53e842dbbd5b31eab493306c0",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/excel": {
       "inspectedAt": "2026-10-12T19:24:10.821Z",
@@ -32507,7 +32547,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "8a046451a7b353d838d899abed2ec961d5baaf92ca1e4ac16a45da7d2f609bb6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/fundrise": {
       "inspectedAt": "2026-10-12T19:24:11.493Z",
@@ -32578,7 +32618,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "6a3deb9e0e750fd8af99ca76831f60d025672184e07a057803a47886bc110620",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/guesty": {
       "inspectedAt": "2026-10-12T19:24:12.257Z",
@@ -32649,7 +32689,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "695d193bcd41e870e34d74c52e497447ec6555c383bc9048f4c2efbe969e879e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/hostaway": {
       "inspectedAt": "2026-10-12T19:24:17.706Z",
@@ -32721,7 +32761,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "8e7c288bb436ddb40e2d5e4f521d80cf39df794bb3a9c8e362264dd7c4d8ef30",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/hostfully": {
       "inspectedAt": "2026-10-12T19:24:13.416Z",
@@ -32792,7 +32832,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "88b8ae824c373b01cd063e400a860c7272a0577500b193b70287605d5a62afcd",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/landlord-studio": {
       "inspectedAt": "2026-10-12T19:24:15.843Z",
@@ -32863,7 +32903,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "39cf73ad59c674a4865293b800bad7687b24f856e4e0e9087727c3dea3cb01dd",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/lodgify": {
       "inspectedAt": "2026-10-12T19:24:17.195Z",
@@ -32934,7 +32974,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "3f906c7a41b3511382a90974722636f99a19bd75fd39a05d147a87b79cbcc22c",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/mashvisor": {
       "inspectedAt": "2026-10-12T19:24:18.648Z",
@@ -32960,8 +33000,8 @@
       "everIndexed": true,
       "indexClass": "indexed",
       "mainHashAtInspect": "dc7d138f803e4bc84e05625e4433db84f3d93cdde1c35bd0bc702aaabe3a3ea6",
-      "wordCount": 1420,
-      "uniqueRatio": 0.7702,
+      "wordCount": 1421,
+      "uniqueRatio": 0.7704,
       "thin": false,
       "history": [
         {
@@ -33005,8 +33045,8 @@
         }
       ],
       "removedFromSitemap": null,
-      "mainHash": "dc7d138f803e4bc84e05625e4433db84f3d93cdde1c35bd0bc702aaabe3a3ea6",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "mainHash": "8de28945aa85d557a924ec0c49f4e4df6e1634f62cc8f7ef31aadc3163a0b85d",
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/mashvisor-for-short-term-rentals": {
       "inspectedAt": "2026-10-12T19:24:19.803Z",
@@ -33075,7 +33115,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "84dc25069897378b06c161565392c7dca22eb20bdcd7ed934d8fa191e293433c",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/privy": {
       "inspectedAt": "2026-10-12T19:24:22.030Z",
@@ -33101,8 +33141,8 @@
       "everIndexed": true,
       "indexClass": "indexed",
       "mainHashAtInspect": "f83cbe1e4a45280f9a3cd52048ed033d052afe200fec93baf9bf0759cbb337e5",
-      "wordCount": 1237,
-      "uniqueRatio": 0.6706,
+      "wordCount": 1238,
+      "uniqueRatio": 0.6709,
       "thin": false,
       "history": [
         {
@@ -33146,8 +33186,8 @@
         }
       ],
       "removedFromSitemap": null,
-      "mainHash": "f83cbe1e4a45280f9a3cd52048ed033d052afe200fec93baf9bf0759cbb337e5",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "mainHash": "b42f0b0f560e2ea5c15d04ebc2f761803b17f6ddb4f03062cbde967525b0efc6",
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/propstream": {
       "inspectedAt": "2026-10-12T19:24:23.539Z",
@@ -33218,7 +33258,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "fa0f5d8549a9d412dea3927bdefefb9c101f8a9e742b69c40dd08ce3f436d742",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/quickbooks-rental": {
       "inspectedAt": "2026-10-12T19:24:24.143Z",
@@ -33287,7 +33327,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "7ca34a20c29b5b3560df27c7243cdf494f827cd0e9f90a2f0ab163a53d47722d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/rentcast": {
       "inspectedAt": "2026-10-12T19:24:25.117Z",
@@ -33355,8 +33395,8 @@
         }
       ],
       "removedFromSitemap": null,
-      "mainHash": "b7038384d24e8159438fea9a4fa4b019d8f696ebd5449f3c99ad37e87b96799b",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "mainHash": "7bf410685a3c292d80c72e89c7f5fe21cb60f874e4e398a07b1c71160ca57520",
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/rentec-direct": {
       "inspectedAt": "2026-10-12T19:24:26.009Z",
@@ -33427,7 +33467,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "4091b4c9010d586802c6097ed1468bf843d8e56f3893c89119ef1e7d035f8043",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/rentometer": {
       "inspectedAt": "2026-10-12T19:24:28.317Z",
@@ -33450,8 +33490,8 @@
       "everIndexed": true,
       "indexClass": "indexed",
       "mainHashAtInspect": "b5a2ecf62a4ef828f6f4f8345196c62867bad9e19989633bdef7844de065a80b",
-      "wordCount": 1246,
-      "uniqueRatio": 0.763,
+      "wordCount": 1247,
+      "uniqueRatio": 0.764,
       "thin": false,
       "history": [
         {
@@ -33495,8 +33535,8 @@
         }
       ],
       "removedFromSitemap": null,
-      "mainHash": "b5a2ecf62a4ef828f6f4f8345196c62867bad9e19989633bdef7844de065a80b",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "mainHash": "af3564cb542d2e507c43e588f014d7f2760fcb4b859adc57e99ec0294ccadd49",
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/rentredi": {
       "inspectedAt": "2026-10-12T19:24:35.741Z",
@@ -33567,7 +33607,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "f7a24474aa8070df248237b7d138b00345f7d2cf1284f52daf15602c05f1312e",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/rentspree": {
       "inspectedAt": "2026-10-12T19:24:30.379Z",
@@ -33638,7 +33678,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "6d1de1a8369b43777ca4f9f8a7ccab7d0659927e8ba50a46ef95152eb245991d",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/reonomy": {
       "inspectedAt": "2026-10-12T19:24:34.307Z",
@@ -33707,7 +33747,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "3337b9fd89823f48c134a132aa4e2fcfb4dc0af083889abc70d8e055546f2f7f",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/roofstock": {
       "inspectedAt": "2026-10-12T19:24:35.222Z",
@@ -33778,7 +33818,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "5ab8bd33c9e67a6d14ef228a81ec9999efcc400aa0697a3a7ce913608ae2b4ae",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/stessa": {
       "inspectedAt": "2026-10-12T19:24:34.652Z",
@@ -33847,7 +33887,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "53d1fe86853f9247e30c34603358be331fef82a46c3dd86a0b9cffd0d0d1bceb",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/turbotenant": {
       "inspectedAt": "2026-10-12T19:24:37.165Z",
@@ -33918,7 +33958,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "01ddb2488d62e74dfd43a6ae9bf42f9e8964f4f0242a1e847f16fb5ce98c5814",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/yardi-breeze": {
       "inspectedAt": "2026-10-12T19:24:40.765Z",
@@ -33989,7 +34029,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "311567a3ce55a6ac57326c11a01fb07095444b44c4ed957803280128e3283964",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/vs/zillow-rent-estimate": {
       "inspectedAt": "2026-10-12T19:24:41.003Z",
@@ -34058,7 +34098,7 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "93da2a786b4052e2cef248b03c224a705f9dcc955f0abd8b1b9c9dab58edd759",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     },
     "https://usetruecap.com/why-truecap": {
       "inspectedAt": "2026-10-12T19:24:41.712Z",
@@ -34131,15 +34171,15 @@
       ],
       "removedFromSitemap": null,
       "mainHash": "e0e79dc33412d7465e69e0e7dcb2212de30284bcd892ac1e1faccc6d161047b4",
-      "crawledAt": "2026-10-19T16:38:12.512Z"
+      "crawledAt": "2026-10-26T16:18:48.292Z"
     }
   },
   "run": {
-    "date": "2026-10-19",
+    "date": "2026-10-26",
     "mode": "inspect",
-    "due": 1,
-    "planned": 1,
-    "inspected": 1,
+    "due": 3,
+    "planned": 3,
+    "inspected": 3,
     "errors": [],
     "quotaExhausted": false,
     "skipped": [],
