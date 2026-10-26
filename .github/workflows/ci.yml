@@ -965,7 +965,24 @@ jobs:
         run: npm run build
 
       - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The hosted runner's Azure Ubuntu mirror stalled twice on the same
+          # font package. Bound that attempt, then retry through Ubuntu itself.
+          # Keep all Playwright dependencies and fail if the retry cannot install.
+          if timeout --kill-after=15s 180s npx playwright install --with-deps chromium; then
+            exit 0
+          fi
+          echo "::warning::Chromium installation stalled or failed; retrying with Ubuntu's official archive."
+          for source in /etc/apt/apt-mirrors.txt /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+            if [ -f "$source" ]; then
+              sudo sed -i 's|http://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g; s|https://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' "$source"
+            fi
+          done
+          printf 'Acquire::Retries "2";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' | sudo tee /etc/apt/apt.conf.d/99truecap-ci-retry >/dev/null
+          timeout --kill-after=15s 360s npx playwright install --with-deps chromium
 
       - name: Browser regressions
         run: npm run test:e2e
