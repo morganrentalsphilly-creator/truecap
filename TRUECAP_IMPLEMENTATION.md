@@ -45,3 +45,12 @@ Existing $29.99/$300 Pro and $59.99/$590 Agent Pro prices remain. Workspace limi
 4. Do not reset subscriptions, entitlements, original reports, anonymous exact grants or historical paid-claim recovery.
 
 Client PDFs use the complete frozen criteria result for the main verdict, so unknown/wrong market or property type cannot be hidden by favorable financial metrics. Financial-only links are refused when those scope criteria are unverified or not met; the full PDF remains available. Cash downside DSCR uses a compact N/A label with No debt service below it.
+
+
+## October 26 mobile and analytics follow-up
+
+PR #197 (`1af7888c`) preserves unchanged numbers as formatted text until they actually change, retaining first-change animation, reduced motion, accessible text and dimensions. Initial logo/privacy-link prefetch is removed and the investor hero link prefetches on intent. Local three-run mobile medians showed 9–11% less total transfer across home/analyze/pricing; homepage DOM nodes fell 36%. Simulated LCP and the 250 KiB homepage JavaScript target remain unmet.
+
+Successful client-match generation/save/report export and rental-evidence save now reach Vercel using fixed source/count properties. The server adapter uses fixed paths and trusted origins so OAuth callback URLs, queries, cookies and authorization headers are excluded. Canonical claims survive successful Vercel delivery when PostHog is intentionally absent. Partial delivery can still duplicate events on retry; HTTP acceptance does not prove ingestion.
+
+The security follow-up updates the four affected runtime dependencies and introduces `boundedArray` at 18 already bounded schema fields. It preserves existing limits and valid data contracts while rejecting oversized arrays before element validation. The build-integrity manifest update is isolated from dependency changes. No financial formulas, customer records, provider quotas or monitoring settings change. Do not roll back to vulnerable dependency versions as a performance workaround; any rollback needs an equivalent patched framework and retained data compatibility.

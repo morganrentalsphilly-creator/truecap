@@ -44,3 +44,14 @@ Use existing consent-aware PostHog events for landing → start → activation �
 Guided sample: https://usetruecap.com/analyze?sample=1. Representative report: https://usetruecap.com/sample-decision-memo. Methodology: https://usetruecap.com/methodology. Agent journey: https://usetruecap.com/for-agents. Smoke-test after deployment. Synthetic QA reports are demonstrations, never customer results or verified property evidence.
 
 Synthetic local compute benchmark (three runs, 100 clients): 12 boxes 25–39ms; proposed 100 boxes 157–189ms, including an IRR-target variant. No allowances changed. This excludes database/network/rendering and does not establish production latency.
+
+
+## Current status after the October 26 releases
+
+The earlier CI/schema/deployment gates above are complete for PR #196 and PR #197. Production runs PR #197 (`1af7888c`) at the time of this follow-up record. The security update requires its own full CI and production verification before release.
+
+Vercel is the verified primary analytics stream: the authenticated Production dashboard contains real recorded pageviews and nine existing event types. Use Vercel for funnel observation while PostHog is intentionally on hold; this supersedes the earlier recommendation to use PostHog now. Newly added workflow/server event ingestion still needs observation. Recorded traffic is not proof of prospective-customer activity or market validation.
+
+Owner access remains needed to verify Sentry runtime delivery and Google Tag Manager. Sentry release creation is missing its auth token in production build logs. Speed Insights has no events, so field CWV is unavailable. Mobile transfer and DOM work improved, while 90+ lab performance, sub-2.5s simulated LCP and homepage JavaScript goals are not fully met. Existing customer-validation, provider-contract, legal-review and paid-allowance decisions remain as described above.
+
+The bounded security update removes the three critical package-audit findings, but the audit is not clean. Zod early-array guards mitigate identified bounded-array work; broader payload budgets and remaining dependency advisories require separate review. No synthetic production conversion, purchase or error was generated for analytics verification.

@@ -33,3 +33,12 @@ Source baseline `f1d8e418` on `main`; production inspected at https://usetruecap
 ## Verification still required
 
 The eight financial references pass, with client financing, multi-client snapshots/PDFs, manual rent evidence and property-based trial metering implemented. Current test outcomes and remaining isolated E2E/deployment gates are in TRUECAP_QA.md. Provider contract/costs, actual analytics delivery and customer validation remain external evidence gaps. Unknowns are not classified as absent capabilities. No prices, subscriptions or email audiences are changed by this release.
+
+
+## October 26 follow-up: mobile, analytics and runtime security
+
+PR #196 is deployed as `fcc87e8e` after 9,296 passing unit tests, 76 browser tests, 13 production schema checks and 13 live-route checks. PR #197 is deployed as `1af7888c` after 9,352 passing unit tests, 79 browser tests and 13 live-route checks. These completed results supersede the earlier candidate-stage deployment gates above.
+
+The authenticated Vercel Production dashboard showed 131 visitors and 251 pageviews for Last 7 Days at 19:51 UTC, with nine existing event types observed. PostHog is intentionally on hold. Sentry runtime instrumentation is configured, but production build logs show no auth token for release creation; its dashboard and Google Tag Manager require owner authentication. New event ingestion and field Core Web Vitals remain unverified.
+
+Production-build review found vulnerable dependencies. The follow-up patches Next to 16.4.1, Sentry to 10.75.2, Sharp to 0.35.5 and DOMPurify to 3.4.17. The Next Server Actions CPU-exhaustion prerequisites apply to this codebase; the full Sentry/DOMPurify exploit prerequisites were not established. The package audit falls from 19 to 15 findings (13 to 9 production-classified), with zero critical findings remaining. The Zod 3 package advisory remains: existing array length limits now reject before element parsing, but unbounded record widths and a full Zod migration are not covered.
