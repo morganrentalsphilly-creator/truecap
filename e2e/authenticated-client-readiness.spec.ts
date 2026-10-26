@@ -103,11 +103,22 @@ test("Agent Pro saves separate client matches, preserves history, exports a PDF,
     expect(JSON.stringify(shareRows.data)).not.toMatch(/Private note must never|Fixture client [AB]/);
     const recipient = await page.context().browser()!.newContext();
     try {
-      expect((await recipient.request.get(shareUrl)).status()).toBe(200);
+      const recipientPage = await recipient.newPage();
+      await recipientPage.goto(shareUrl);
+      await expect(recipientPage.getByRole("heading", { name: "Rental analysis", exact: true })).toBeVisible();
       await sharing.getByRole("button", { name: "Revoke this link", exact: true }).click();
       await sharing.getByRole("button", { name: "Yes, revoke link", exact: true }).first().click();
+      // The first revoke button disappears when confirmation opens, before
+      // the mutation finishes. Wait for the confirmed result, not that button.
+      await expect(page.getByText("Link revoked", { exact: true })).toBeVisible();
       await expect(sharing.getByRole("button", { name: "Revoke this link", exact: true })).toHaveCount(0);
-      expect((await recipient.request.get(shareUrl)).status()).toBe(404);
+      const revoked = await admin.from("public_shares").select("revoked_at").eq("owner_id", userId).single();
+      expect(revoked.error).toBeNull(); expect(revoked.data!.revoked_at).not.toBeNull();
+      // Next.js can stream a not-found page with HTTP 200. Assert the actual
+      // recipient experience and that the report is no longer rendered.
+      await recipientPage.reload();
+      await expect(recipientPage.getByRole("heading", { name: "404 — page not found", exact: true })).toBeVisible();
+      await expect(recipientPage.getByRole("heading", { name: "Rental analysis", exact: true })).toHaveCount(0);
     } finally { await recipient.close(); }
     await page.keyboard.press("Escape");
     const evidence = page.getByRole("region", { name: "Review rental comparables" });
