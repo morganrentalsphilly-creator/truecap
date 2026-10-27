@@ -497,9 +497,11 @@ export function InputConfidenceCard({
                     }}
                     aria-pressed={isVerified}
                     aria-label={
+                      // Starts with the visible text (WCAG 2.5.3, label in
+                      // name); aria-pressed carries the state.
                       isVerified
-                        ? `Mark ${item.label} as unverified`
-                        : `Confirm ${item.label} as verified`
+                        ? `Verified: ${item.label}`
+                        : `Mark verified: ${item.label}`
                     }
                     className={cn(VERIFY_TOGGLE_CLASS, verifyToggleTone(isVerified))}
                   >
@@ -571,7 +573,7 @@ export function InputConfidenceCard({
                       aria-pressed={verified.has(item.key)}
                       aria-label={
                         verified.has(item.key)
-                          ? `Mark ${item.label} as unverified`
+                          ? `Confirmed: ${item.label}`
                           : `Confirm ${item.label} as verified`
                       }
                       onClick={() =>
@@ -650,7 +652,7 @@ export function InputConfidenceCard({
                           aria-pressed={verified.has(item.key)}
                           aria-label={
                             verified.has(item.key)
-                              ? `Mark ${item.label} as unverified`
+                              ? `Confirmed: ${item.label}`
                               : `Confirm ${item.label} as verified`
                           }
                           onClick={() =>
