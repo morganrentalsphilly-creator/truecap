@@ -3,11 +3,13 @@
  *
  * FormControl (components/ui/form.tsx) hands its child an aria-describedby
  * that lists the field's description and, when there is one, its error. It
- * passes that through a Slot, and a Slot lets the child's own props win: an
- * input with a hand-set aria-describedby keeps only its own value, so the
- * error drops out of the description. The sign-up password field did that
- * (aria-describedby="password-policy"), and a rejected password was announced
- * once by role="alert" and then never read again with the field.
+ * passes that through a Slot. Up to @radix-ui/react-slot 1.2.x the child's own
+ * props won: an input with a hand-set aria-describedby kept only its own value,
+ * so the error dropped out of the description. The sign-up password field did
+ * that (aria-describedby="password-policy"), and a rejected password was
+ * announced once by role="alert" and then never read again with the field.
+ * Since react-slot 1.5 the Slot merges the two lists, so the error's id stays.
+ * The sign-up form still leaves both ids to FormControl (the guard below).
  *
  * Rendered on the server, where layout effects do not run: the description's
  * id joins the list after hydration (FormDescription registers itself in a
@@ -85,11 +87,11 @@ describe("FormControl describes a field by its error (P2-73)", () => {
     expect(field.describedBy).toContain(field.messageId);
   });
 
-  it("loses the error when the input sets aria-describedby by hand: the defect", () => {
+  it("keeps the error when the input also sets aria-describedby by hand (react-slot 1.5+ merges)", () => {
     const field = rendered(true);
     expect(field.messageId).toBeTruthy();
-    expect(field.describedBy).toEqual(["password-policy"]);
-    expect(field.describedBy).not.toContain(field.messageId);
+    expect(field.describedBy).toContain("password-policy");
+    expect(field.describedBy).toContain(field.messageId);
   });
 
   it("the sign-up password field leaves both ids to FormControl", () => {
