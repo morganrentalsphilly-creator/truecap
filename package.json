@@ -71,7 +71,7 @@
     "react": "^19",
     "react-dom": "^19",
     "react-easy-crop": "^5.5.7",
-    "react-hook-form": "7.76.1",
+    "react-hook-form": "^7.90.0",
     "recharts": "2.15.0",
     "server-only": "^0.0.1",
     "stripe": "^22.0.1",
