@@ -1,6 +1,7 @@
 "use client";
 
 import { Analytics, type BeforeSendEvent } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import {
@@ -23,6 +24,18 @@ export function sanitizeVercelAnalyticsEvent<T extends BeforeSendEvent>(
   event: T,
 ): T {
   return { ...event, url: stripAdClickIds(sanitizeSensitiveUrl(event.url)) };
+}
+
+/** Speed Insights receives the same redacted URL as Web Analytics. Its SDK
+ * also runs only in documents where the cookieless telemetry gate is open. */
+export function sanitizeVercelSpeedEvent<T extends { url: string; route?: string }>(
+  event: T,
+): T {
+  return {
+    ...event,
+    url: stripAdClickIds(sanitizeSensitiveUrl(event.url)),
+    ...(event.route ? { route: sanitizeSensitiveUrl(event.route) } : {}),
+  };
 }
 
 /**
@@ -64,7 +77,12 @@ function TrueCapVercelAnalyticsInner() {
     if (mounted) markThirdPartyTelemetryMounted();
   }, [mounted]);
   if (!mounted) return null;
-  return <Analytics beforeSend={sanitizeVercelAnalyticsEvent} />;
+  return (
+    <>
+      <Analytics beforeSend={sanitizeVercelAnalyticsEvent} />
+      <SpeedInsights beforeSend={sanitizeVercelSpeedEvent} />
+    </>
+  );
 }
 
 export function TrueCapVercelAnalytics() {
