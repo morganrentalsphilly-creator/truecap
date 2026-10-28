@@ -88,14 +88,10 @@ describe("offer trust language", () => {
     expect(actions).toContain("const MAX_CLIENTS = COMMERCIAL_WORKSPACE_LIMITS.agentClients");
   });
 
-  it("states the 12-Buy-Box account cap wherever Agent Pro ties a Buy Box to each client", () => {
-    // An account holds 12 Buy Boxes, client-scoped ones included, while the
-    // roster holds 100 clients. The homepage card ("A Buy Box per client /
-    // Up to 100 clients"), /pricing's value stack ("Up to 100 clients, each
-    // with a Buy Box") and the catalog label ("buy boxes per buyer") promised
-    // more than the product holds.
+  it("states Agent Pro's approved 100-Buy-Box allowance across its offers", () => {
     expect(read("lib/commercial-limits.ts")).toContain("MAX_BUY_BOXES = 12");
-    expect(read("app/actions/user-buy-boxes.ts")).toContain("const MAX_BUY_BOXES = COMMERCIAL_WORKSPACE_LIMITS.buyBoxes");
+    expect(read("lib/commercial-limits.ts")).toContain("MAX_AGENT_BUY_BOXES = 100");
+    expect(read("app/actions/user-buy-boxes.ts")).toContain("existing.boxes.length >= auth.buyBoxLimit");
 
     const home = read("components/marketing/landing-sections.tsx");
     // The homepage Agent Pro PlanCard: its data attribute to its action, and
@@ -109,28 +105,28 @@ describe("offer trust language", () => {
     expect(home.slice(agentCardAt, agentActionAt)).toContain("agentProPlanAnswers()");
     const answers = read("components/marketing/plan-answers.ts");
     const agentCard = answers.slice(answers.indexOf("export function agentProPlanAnswers"));
-    expect(agentCard).toContain("up to 12 Buy Boxes per account");
+    expect(agentCard).toContain("up to 100 Buy Boxes per account");
     expect(agentCard).not.toContain("A Buy Box per client");
     // Every row sells something only Agent Pro has: co-branding is in Pro too.
     expect(agentCard).not.toContain('term: "A co-branded memo"');
     expect(agentCard).toContain('term: "Client-report share links"');
 
     const stack = read("components/marketing/pricing-value-stack.tsx");
-    expect(stack).toContain("(up to 12 per account)");
+    expect(stack).toContain("(up to 100 per account)");
     expect(stack).not.toMatch(/each with a Buy Box/i);
 
     const catalog = read("lib/entitlements-catalog.ts");
-    expect(catalog).toContain("Buy Boxes assigned to clients (up to 12 per account)");
+    expect(catalog).toContain("Buy Boxes assigned to clients (up to 100 per account)");
     expect(catalog).not.toMatch(/buy boxes per buyer/i);
 
     const agentPage = read("app/for-agents/page.tsx");
-    expect(agentPage).toContain("An account keeps up to 12 Buy Boxes in total");
+    expect(agentPage).toContain("Agent Pro includes up to 100 Buy Boxes in total");
 
     // /vs/dealcheck's "Investor clients (agents)" row said "a client roster
     // with a Buy Box per client" and stated neither limit anywhere on the page.
     const vsDealcheck = read("app/vs/dealcheck/page.tsx");
     expect(vsDealcheck).toContain("(up to 100 clients)");
-    expect(vsDealcheck).toContain("(up to 12 per account)");
+    expect(vsDealcheck).toContain("(up to 100 per account)");
     expect(vsDealcheck).not.toMatch(/a Buy Box per client/i);
   });
 

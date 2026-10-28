@@ -2,6 +2,28 @@
 
 Recruit 10–15 consenting participants: investor-focused agents who regularly screen rentals and rental investors with a recent acquisition search. Recruitment/sending requires explicit authorization. Do not invent participants or results.
 
+## October 28 release study
+
+Start with five investor-focused agents, then five more agents or rental investors after the first round's blocking issues are corrected. The current study tests the shorter mobile entry, the two-client example, the released saved-client workflow, and Agent Pro's 100-client / 100-Buy-Box allowance. Pro retains 12 Buy Boxes.
+
+Run scripted or artificial scenarios in an isolated research environment. Do not create fake production subscriptions or generate production analytics events just to populate dashboards. A participant using TrueCap for genuine work may use their real account and their own authorized property information.
+
+Before showing the example, give the participant five seconds on the homepage, then ask: “Who is this for, what does it help you do, and what would you do next?” Record their words. After the session, show the two-client example and ask them to explain why its Offer Ceilings differ. Count explanation failures separately from UI failures.
+
+For the agent task, time these stages separately: first useful analysis, client setup, correct client match, and correct report delivery. Record when help was required. Do not describe completion as “unassisted” after any coaching.
+
+### Invitation draft — not sent
+
+Hi [first name], I’m testing TrueCap, a tool for screening rental listings against investor clients’ criteria and preparing a report. Would you be willing to spend 30 minutes trying it with a listing you’re allowed to use? I’m looking for candid feedback, including anything confusing or unnecessary. No purchase, testimonial, or preparation is required. You can stop at any time. [Scheduling details]
+
+### Decision after the first five agents
+
+- Fix any inability to complete analysis, save the correct client match, or send the correct report before inviting the next round.
+- If two or more agents misunderstand the audience or next action, revise the first screen and repeat that check.
+- If two or more confuse assumptions with verified facts, revise the result labels before promotion.
+- Treat willingness to pay as a stated preference. Require observed repeat use and actual purchase evidence before claiming demand.
+- Record participant count, role, failures, assistance, and seven-day returns. An empty scorecard is an untested hypothesis, not a positive result.
+
 ## Session, 25–35 minutes
 
 Explain recording/notes, voluntary participation and deletion choice. Use participant-owned or authorized real listing information. Do not collect payment cards, bank records, credit reports or unnecessary client identities. Use client aliases.

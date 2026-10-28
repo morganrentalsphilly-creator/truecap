@@ -148,7 +148,7 @@ test("mobile hero leads with the decision outcome and keeps empty submissions at
   await expect(
     hero.getByRole("heading", {
       level: 1,
-      name: "Stop forwarding listings. Start sending deals that already pencil.",
+      name: "Send clients rentals that fit.",
     }),
   ).toBeVisible();
 
@@ -192,6 +192,34 @@ test("mobile hero leads with the decision outcome and keeps empty submissions at
 
   await expectNoHorizontalOverflow(page);
   await expectNoSeriousAccessibilityViolations(page);
+});
+
+test("agent hero shows client-specific results without overflow", async ({ page }) => {
+  const hydrationErrors: string[] = [];
+  page.on("console", message => {
+    if (message.type() === "error" && /hydrat/i.test(message.text())) hydrationErrors.push(message.text());
+  });
+  await page.goto("/for-agents", { waitUntil: "domcontentloaded" });
+  const configured = new URL(page.url()).pathname === "/for-agents";
+  test.skip(!configured && !process.env.CI, "Agent Pro is not configured locally");
+  expect(configured).toBe(true);
+  const preview = page.getByRole("complementary", { name: "Same rental. Different client fit." });
+  for (const width of [195, 375, 390, 768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect(preview).toBeVisible();
+    await expect(preview).toContainText("Meets selected criteria at asking");
+    await expect(preview).toContainText("Misses selected criteria at asking");
+    await expectContainedInViewport(page, preview, 100);
+    const previewBox = await preview.boundingBox();
+    for (const figure of await preview.locator("strong").all()) {
+      const figureBox = await figure.boundingBox();
+      expect(figureBox!.x + figureBox!.width).toBeLessThanOrEqual(previewBox!.x + previewBox!.width);
+    }
+    await expectNoHorizontalOverflow(page);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expectNoSeriousAccessibilityViolations(page);
+  expect(hydrationErrors).toEqual([]);
 });
 
 test("homepage hero keeps its reading order at zoom-sensitive widths", async ({

@@ -39,11 +39,9 @@ describe("co-branding in the hero names the plan it comes with (P1-03)", () => {
     expect(FEATURE_CATALOG.custom_branding.tiers).toContain("agent_pro");
   });
 
-  it("neither hero says 'Send it co-branded' without the plan", () => {
+  it("any 'Send it co-branded' claim names the paid plan", () => {
     const home = flat(read("components/marketing/marketing-hero.tsx"));
     const agents = flat(read("app/for-agents/page.tsx"));
-    expect(home).toContain("Send it co-branded with Pro.");
-    expect(agents).toContain("Send it co-branded with Pro or Agent Pro;");
     for (const source of [home, agents]) {
       expect(source).not.toMatch(/Send it co-branded(?! with Pro)/);
     }

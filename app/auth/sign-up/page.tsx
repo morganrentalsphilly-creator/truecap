@@ -34,9 +34,9 @@ function SignUpFallback() {
  * sources). It says nothing about what the trial includes: the form below
  * prints that, with the sentence that the roster is not part of it.
  */
-const AGENT_HEADING = "Send your investor clients deals that already pencil.";
+const AGENT_HEADING = "One listing. Each client's numbers.";
 const AGENT_LEDE =
-  "Creating an account never asks for a card. Agent Pro is a separate plan for client workflows; checkout shows the exact charge before you confirm.";
+  "Creating an account never asks for a card. Client workspaces require Agent Pro; checkout shows the exact charge before you confirm.";
 
 type SignUpPageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

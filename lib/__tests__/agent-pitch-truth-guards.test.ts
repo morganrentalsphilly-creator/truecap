@@ -121,9 +121,8 @@ describe("what the agent pitch says the client receives", () => {
         expect(text, file).toContain("sample decision memo page");
       }
     }
-    for (const file of ["app/for-agents/page.tsx", "app/pricing/page.tsx"]) {
-      expect(copy(file), file).toContain("MEMO_SHOT");
-    }
+    expect(copy("app/pricing/page.tsx")).toContain("MEMO_SHOT");
+    expect(copy("app/for-agents/page.tsx")).toContain("<SampleClientPreview />");
     expect(copy("app/sample-decision-memo/page.tsx")).not.toMatch(
       /exactly what a real deal\s+produces/,
     );
@@ -213,14 +212,22 @@ describe("TrueCap's own product on the money and persona pages", () => {
   it("states the Buy Box cap as the action that enforces it does", () => {
     // Check the centralized value and its enforcement binding; copy still
     // fails if the approved allowance changes without matching disclosure.
-    expect(read("lib/commercial-limits.ts")).toContain("MAX_BUY_BOXES = 12");
-    expect(read("app/actions/user-buy-boxes.ts")).toContain("const MAX_BUY_BOXES = COMMERCIAL_WORKSPACE_LIMITS.buyBoxes");
+    expect(read("lib/commercial-limits.ts")).toContain("MAX_AGENT_BUY_BOXES = 100");
+    expect(read("app/actions/user-buy-boxes.ts")).toContain("existing.boxes.length >= auth.buyBoxLimit");
     expect(copy("app/pricing/page.tsx")).toContain(
-      "assign Buy Boxes to clients (up to 12 per account)",
+      "assign Buy Boxes to clients (up to 100 per account)",
     );
     expect(copy("components/marketing/landing-sections.tsx")).toContain(
-      "Buy Boxes you assign to clients (up to 12 per account)",
+      "Buy Boxes you assign to clients (up to 100 per account)",
     );
+  });
+
+  it("describes the released multi-client screening workflow", () => {
+    const answer = AGENT_FAQS.find(faq => faq.q === "Can I run one listing against several clients at once?")?.a;
+    expect(answer).toContain("Screen my clients");
+    expect(answer).toContain("financing");
+    expect(answer).not.toContain("Not yet");
+    expect(copy("app/for-agents/page.tsx")).not.toContain("One client per deal, today");
   });
 
   it("does not promise one-click cancellation", () => {

@@ -43,14 +43,16 @@ describe("/for-agents design pass", () => {
     expect(page).not.toMatch(/disclaimer=\{false\}/);
   });
 
-  it("shows the memo as a document, not inside a browser frame", () => {
-    expect(page).toMatch(/<ProductShot\s+shot=\{MEMO_SHOT\}\s+frame="document"/);
+  it("shows calculated client results in the hero and the actual PDF cover below", () => {
+    expect(page).toContain("aside={<SampleClientPreview />}");
+    expect(page).toContain("<ClientPdfCover");
   });
 
   it("builds the page from the shared parts", () => {
-    for (const part of ["<PageHero", "<RuledList", "<StepList", "<CloseSection"]) {
+    for (const part of ["<PageHero", "<RuledList", "<SampleClientWorkflow", "<CloseSection"]) {
       expect(page, part).toContain(part);
     }
+    expect(read("components/marketing/sample-client-workflow.tsx")).toContain("<ol");
   });
 
   it("kept: one FaqSection, emitting the page's FAQPage", () => {

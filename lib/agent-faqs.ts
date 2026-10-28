@@ -21,11 +21,11 @@
  *     (lib/agent-share.ts, shared-deal-shell.tsx, lib/pdf-generator.ts);
  *     `custom_branding` is a Pro AND Agent Pro feature (entitlements-catalog)
  *   - rosters cap at 100 clients (app/actions/agent-clients.ts MAX_CLIENTS);
- *     an account keeps at most 12 Buy Boxes, client-scoped ones included
+ *     an account keeps at most 100 Buy Boxes on Agent Pro, client-scoped ones included
  *     (app/actions/user-buy-boxes.ts MAX_BUY_BOXES)
- *   - a saved deal is assigned to ONE client and screened against that
- *     client's Buy Box (lib/buy-box.ts); multi-client matching is not released
- *     (lib/feature-flags.ts agent_client_matching)
+ *   - Agent Pro screens one saved property against active client Buy Boxes
+ *     and financing preferences, then preserves selected matches separately
+ *     (app/actions/client-deal-screening.ts, client-deal-matches.ts)
  *   - the no-card trial grants Pro deal analyses and a comparison, never
  *     co-branding or the client roster (lib/entitlements.ts
  *     evaluationFeatures, lib/product-access)
@@ -65,11 +65,11 @@ export const AGENT_FAQS: readonly MarketingFaq[] = [
   },
   {
     q: "Can I keep different criteria for different investor clients?",
-    a: "Yes. Your roster holds up to 100 clients, and a Buy Box can be assigned to one client so that client's deals are screened against their targets, not yours. An account keeps up to 12 Buy Boxes in total, your own and your clients' combined.",
+    a: "Yes. Your roster holds up to 100 clients, and a Buy Box can be assigned to one client so that client's deals are screened against their targets, not yours. Agent Pro includes up to 100 Buy Boxes in total, your own and your clients' combined.",
   },
   {
     q: "Can I run one listing against several clients at once?",
-    a: "Not yet. A saved deal is assigned to one client and screened against that client's Buy Box; to check the same listing for another client, reassign it or save it again. Each client's roster card shows how many of their assigned deals meet their criteria.",
+    a: "Yes, with Agent Pro. Open a saved property and select Screen my clients. TrueCap checks each active client's Buy Box using their saved financing preferences, or the deal's financing when no preference is set. Save the matches you want to pursue; each keeps its own criteria, financing, Offer Ceiling, and report. Clients without criteria or with unverified financing are flagged for review.",
   },
   {
     q: "Where do the starting numbers come from?",

@@ -8,7 +8,7 @@
  * (the single source of truth for what each tier includes) and any limit in
  * it is the catalog's own qualifier, never typed here. The Agent Pro rows
  * state the caps the code enforces: 100 clients
- * (app/actions/agent-clients.ts MAX_CLIENTS) and 12 Buy Boxes per account
+ * (app/actions/agent-clients.ts MAX_CLIENTS) and 100 Buy Boxes per Agent Pro account
  * (app/actions/user-buy-boxes.ts MAX_BUY_BOXES); lib/__tests__ pins both to
  * the constants. No price lives here: amounts come from lib/public-pricing.ts
  * and Stripe through the cadence toggle.
@@ -51,7 +51,7 @@ export function freePlanAnswers(): PlanCardAnswer[] {
 export function proPlanAnswers(): PlanCardAnswer[] {
   const compares = proCell("compare_deals");
   return [
-    ...(proCell("buy_box") === true ? [{ term: "Does it meet my criteria?", detail: "Buy Box fit on every deal." }] : []),
+    ...(proCell("buy_box") === true ? [{ term: "Does it meet my criteria?", detail: "Buy Box fit on every deal, with up to 12 Buy Boxes for your strategies and markets." }] : []),
     ...(proCell("mao") === true
       ? [{ term: "What is my Offer Ceiling?", detail: "The highest price that still meets your targets, on every deal." }]
       : []),
@@ -85,10 +85,10 @@ export function agentProPlanAnswers(): PlanCardAnswer[] {
     .filter((f) => !AGENT_PRO_WORKFLOW_FEATURES.has(f.key))
     .map((f) => ({ term: f.label }));
   return [
-    { term: "Client Buy Boxes", detail: "Up to 100 clients on your roster; up to 12 Buy Boxes per account." },
+    { term: "Client Buy Boxes", detail: "Up to 100 clients on your roster; up to 100 Buy Boxes per account." },
     {
       term: "Deals screened to their targets",
-      detail: "Assign a deal to a client and it is screened against their Buy Box, not yours.",
+      detail: "Screen one saved property against your active clients' targets and financing; save each match separately.",
     },
     { term: "Client-report share links", detail: "Open without an account; the address stays hidden unless you include it." },
     ...catalogRows,

@@ -115,7 +115,7 @@ const MATRIX: Row[] = [
   {
     workflow: "Investor clients (agents)",
     truecap:
-      "Agent Pro adds a client roster (up to 100 clients) and Buy Boxes you assign to clients (up to 12 per account), deal assignment, and client-report share links that open without an account; co-branded share pages and PDFs are in Pro and Agent Pro, with TrueCap's name kept.",
+      "Agent Pro adds a client roster (up to 100 clients) and Buy Boxes you assign to clients (up to 100 per account), deal assignment, and client-report share links that open without an account; co-branded share pages and PDFs are in Pro and Agent Pro, with TrueCap's name kept.",
     dealcheck:
       "Every DealCheck plan exports a PDF report; putting your own name and logo on it needs DealCheck Pro. Check its site for how client criteria and sharing work.",
   },

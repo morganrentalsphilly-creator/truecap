@@ -33,7 +33,7 @@ describe("sign-up heading for an agent", () => {
     const lede = constant("AGENT_LEDE");
     const faqText = AGENT_FAQS.map((faq) => faq.a).join("\n");
     const forAgents = read("app/for-agents/page.tsx");
-    const parts = ["Creating an account never asks for a card.", "Agent Pro is a separate plan for client workflows", "checkout shows the exact charge before you confirm."];
+    const parts = ["Creating an account never asks for a card.", "Client workspaces require Agent Pro", "checkout shows the exact charge before you confirm."];
     expect(lede).toBe(`${parts[0]} ${parts[1]}; ${parts[2]}`);
     expect(faqText).toContain(parts[0]);
     expect(forAgents).toContain(parts[1]);

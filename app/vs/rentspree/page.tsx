@@ -130,7 +130,7 @@ const MATRIX: Row[] = [
   {
     feature: "Agent / brokerage workflow",
     truecap:
-      "Agent Pro adds a client roster and Buy Boxes you assign to clients (up to 12 per account)",
+      "Agent Pro adds a client roster and Buy Boxes you assign to clients (up to 100 per account)",
     rentspree:
       "RentSpree PRO is sold for real estate agents: profile page, reviews and reference checks",
     winner: "tie",

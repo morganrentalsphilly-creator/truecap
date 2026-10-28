@@ -24,7 +24,7 @@ import {
  * og:image and twitter:image at this URL.
  */
 
-const HEADLINE = "Send your investor clients deals that already pencil.";
+const HEADLINE = "One listing. Each client's numbers.";
 const SUBHEAD =
   "Screen a listing against each client's Buy Box, show their Offer Ceiling, and send a co-branded decision memo.";
 const URL_TEXT = "usetruecap.com/for-agents";

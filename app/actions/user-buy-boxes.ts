@@ -23,7 +23,7 @@ import { toServerErrorResult } from "@/lib/db-error";
 
 import { z } from "zod";
 import { boundedArray } from "@/lib/bounded-array";
-import { COMMERCIAL_WORKSPACE_LIMITS } from "@/lib/commercial-limits";
+import { buyBoxLimitForFeatures } from "@/lib/commercial-limits";
 import {
   US_STATE_OPTIONS,
   buyBoxHasCriteria,
@@ -60,7 +60,6 @@ import { getBuyBoxAuthorizedDealIds } from "@/lib/buy-box-access-server";
 import { activeMeteredEvaluationDealGrantsAccess } from "@/lib/evaluation-access-server";
 
 const KNOWN_STATE_ABBRS = new Set(US_STATE_OPTIONS.map((s) => s.abbr));
-const MAX_BUY_BOXES = COMMERCIAL_WORKSPACE_LIMITS.buyBoxes;
 /** Sane cap on the save-feedback evaluation query (active deals only). */
 const FIT_FEEDBACK_DEALS_LIMIT = 200;
 
@@ -117,6 +116,7 @@ export type BuyBoxesActionResult =
       ok: true;
       boxes: NamedBuyBox[];
       canUse: boolean;
+      buyBoxLimit?: number;
       /** False while the IRR/cash-target migration is unapplied: the editor
        *  disables those two inputs instead of letting a doomed save be
        *  composed and then rejected. */
@@ -151,7 +151,7 @@ function isMissingTable(error: { code?: string; message?: string }): boolean {
 async function requireProUser(
   supabase: SupabaseClient
 ): Promise<
-  | { ok: true; userId: string; hasPaidAccess: boolean }
+  | { ok: true; userId: string; hasPaidAccess: boolean; buyBoxLimit: number }
   | { ok: false; result: BuyBoxesActionResult }
 > {
   const {
@@ -176,7 +176,7 @@ async function requireProUser(
       },
     };
   }
-  return { ok: true, userId: user.id, hasPaidAccess };
+  return { ok: true, userId: user.id, hasPaidAccess, buyBoxLimit: buyBoxLimitForFeatures(entitlements.features) };
 }
 
 /** Read + map all of a user's boxes, default-first then by sort order. */
@@ -380,6 +380,7 @@ export async function listBuyBoxesAction(): Promise<BuyBoxesActionResult> {
     ok: true,
     boxes: fetched.boxes,
     canUse,
+    buyBoxLimit: buyBoxLimitForFeatures(entitlements.features),
     supportsOfferTargets: fetched.supportsOfferTargets,
   };
 }
@@ -425,6 +426,7 @@ export async function listBuyBoxesForDealAction(
     ok: true,
     boxes: fetched.boxes,
     canUse,
+    buyBoxLimit: buyBoxLimitForFeatures(entitlements.features),
     supportsOfferTargets: fetched.supportsOfferTargets,
   };
 }
@@ -477,11 +479,11 @@ export async function upsertBuyBoxAction(input: unknown): Promise<BuyBoxesAction
   }
 
   const isCreate = !parsed.data.id;
-  if (isCreate && existing.boxes.length >= MAX_BUY_BOXES) {
+  if (isCreate && existing.boxes.length >= auth.buyBoxLimit) {
     return {
       ok: false,
       code: "LIMIT_REACHED",
-      message: `You can keep up to ${MAX_BUY_BOXES} buy boxes.`,
+      message: `Your plan includes up to ${auth.buyBoxLimit} Buy Boxes. Edit an existing box or remove one to add another.`,
     };
   }
 

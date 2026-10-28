@@ -54,12 +54,15 @@ describe("product screenshots are real and wired", () => {
       "app/pricing/page.tsx",
       "app/for-buy-and-hold/page.tsx",
       "app/for-house-hackers/page.tsx",
-      "app/for-agents/page.tsx",
       "app/blog/page.tsx",
       "app/vs/page.tsx",
     ]) {
       expect(read(path), path).toContain("<ProductShot");
     }
+    // The agent hero uses calculated client results; its report section
+    // retains the actual sample PDF cover.
+    expect(read("app/for-agents/page.tsx")).toContain("<SampleClientPreview");
+    expect(read("app/for-agents/page.tsx")).toContain("<ClientPdfCover");
   });
 
   it("renders no founder card; /about carries no Person node or personal name", () => {
