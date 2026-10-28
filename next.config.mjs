@@ -1,4 +1,4 @@
-import { withSentryConfig } from "@sentry/nextjs";
+import { withSentryConfig } from "@sentry/nextjs/config";
 import bundleAnalyzer from "@next/bundle-analyzer";
 
 // `npm run analyze` (ANALYZE=true) writes an interactive treemap of every
@@ -420,8 +420,16 @@ export default withSentryConfig(withBundleAnalyzer(nextConfig), {
 
   project: "javascript-nextjs",
 
-  // Only print logs for uploading source maps in CI
-  silent: !process.env.CI,
+  // Keep token-backed uploads visible in Vercel build logs even when the
+  // build host does not set CI. Local builds without a token stay quiet.
+  silent: !process.env.CI && !process.env.SENTRY_AUTH_TOKEN,
+
+  // The installed bundler plugin logs some upload/release failures and
+  // continues by default. A token-backed release must not silently ship
+  // without the source maps needed to diagnose its errors.
+  errorHandler(error) {
+    throw error;
+  },
 
   // Sentry's own build-plugin telemetry (a network call to sentry.io that
   // only engages in CI-like environments). 2026-07-14: every GitHub CI
@@ -443,6 +451,9 @@ export default withSentryConfig(withBundleAnalyzer(nextConfig), {
   //   - production: set SENTRY_AUTH_TOKEN in Vercel env vars → sourceMaps upload, prettier stack traces in Sentry
   sourcemaps: {
     disable: !process.env.SENTRY_AUTH_TOKEN,
+    // Upload privately, then remove maps from public static assets. Keep
+    // this explicit rather than relying on the SDK's webpack default.
+    deleteSourcemapsAfterUpload: true,
   },
   // Suppress the release-creation step too when there's no token —
   // creating a release without an auth token also produces the

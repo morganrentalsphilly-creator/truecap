@@ -62,13 +62,14 @@ type GtmWindow = {
   dataLayer?: Array<Record<string, unknown>>;
   gtag?: (...args: unknown[]) => void;
   google_tag_manager?: Record<string, unknown>;
+  localStorage: { getItem: () => string | null };
 };
 
 describe("trackConversionBeforeLeaving", () => {
   let win: GtmWindow;
   beforeEach(() => {
     vi.useFakeTimers();
-    win = {};
+    win = { localStorage: { getItem: () => "granted" } };
     (globalThis as unknown as { window: GtmWindow }).window = win;
   });
   afterEach(() => {
@@ -109,6 +110,16 @@ describe("trackConversionBeforeLeaving", () => {
     expect(resolved).toBe(false);
     await vi.advanceTimersByTimeAsync(1);
     expect(resolved).toBe(true);
+  });
+
+  it("does not queue a conversion or wait for GTM after consent withdrawal", async () => {
+    win.google_tag_manager = {};
+    win.localStorage.getItem = () => "denied";
+    let resolved = false;
+    void trackConversionBeforeLeaving("deal_saved").then(() => (resolved = true));
+    await vi.advanceTimersByTimeAsync(0);
+    expect(resolved).toBe(true);
+    expect(win.dataLayer).toBeUndefined();
   });
 });
 
