@@ -43,8 +43,9 @@ describe("/for-agents design pass", () => {
     expect(page).not.toMatch(/disclaimer=\{false\}/);
   });
 
-  it("shows the memo as a document, not inside a browser frame", () => {
-    expect(page).toMatch(/<ProductShot\s+shot=\{MEMO_SHOT\}\s+frame="document"/);
+  it("shows calculated client results in the hero and the actual PDF cover below", () => {
+    expect(page).toContain("aside={<SampleClientPreview />}");
+    expect(page).toContain("<ClientPdfCover");
   });
 
   it("builds the page from the shared parts", () => {

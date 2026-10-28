@@ -121,9 +121,8 @@ describe("what the agent pitch says the client receives", () => {
         expect(text, file).toContain("sample decision memo page");
       }
     }
-    for (const file of ["app/for-agents/page.tsx", "app/pricing/page.tsx"]) {
-      expect(copy(file), file).toContain("MEMO_SHOT");
-    }
+    expect(copy("app/pricing/page.tsx")).toContain("MEMO_SHOT");
+    expect(copy("app/for-agents/page.tsx")).toContain("<SampleClientPreview />");
     expect(copy("app/sample-decision-memo/page.tsx")).not.toMatch(
       /exactly what a real deal\s+produces/,
     );

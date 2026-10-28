@@ -6,6 +6,23 @@ import { formatLedgerDollars } from "@/lib/sample-deal-ledger";
 
 const STEP_TITLE = "font-display text-h3-sm";
 
+export function SampleClientPreview() {
+  const screens = buildSampleClientWorkflow();
+  return <aside aria-labelledby="client-preview-title" className="rounded-object border border-border bg-card p-5 shadow-rest sm:p-6">
+    <h2 id="client-preview-title" className="font-display text-h3-sm">Same rental. Different client fit.</h2>
+    <p className="mt-2 text-sm text-muted-foreground">{formatLedgerDollars(SAMPLE_DEAL_VALUES.purchasePrice)} asking · illustrative clients · calculated sample</p>
+    <dl className="mt-4 divide-y divide-border">
+      {screens.map((screen, index) => <div key={screen.clientId} className="py-4">
+        <dt className="font-semibold">{screen.clientName}</dt>
+        <dd className="mt-1 text-sm text-muted-foreground">Target: at least {formatLedgerDollars(SAMPLE_WORKFLOW_BOXES[index].minCashFlowMonthly ?? 0)}/mo cash flow</dd>
+        <dd className={`mt-2 text-sm font-semibold ${screen.status === "meets" ? "text-positive" : "text-highlight-text"}`}>{screen.status === "meets" ? "Meets selected criteria at asking" : screen.status === "misses" ? "Misses selected criteria at asking" : "Needs verification"}</dd>
+        <dd className="mt-3 flex flex-wrap items-baseline justify-between gap-3"><span className="text-sm">Offer Ceiling</span><strong className="font-display text-key-sm tabular-nums">{screen.offerCeiling == null ? "Unavailable" : formatLedgerDollars(screen.offerCeiling)}</strong></dd>
+      </div>)}
+    </dl>
+    <IntentPrefetchLink href="#sample-client-workflow" className="tc-link mt-2 inline-flex min-h-11 items-center">Follow the client workflow</IntentPrefetchLink>
+  </aside>;
+}
+
 /** Server-rendered walkthrough: real engine outputs, clearly illustrative inputs. */
 export function SampleClientWorkflow() {
   const screens = buildSampleClientWorkflow();

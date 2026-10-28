@@ -9,6 +9,7 @@ describe("public client workflow example", () => {
   it("shows different client ceilings that satisfy their stated cash-flow targets", () => {
     const rows = buildSampleClientWorkflow();
     expect(rows).toHaveLength(2);
+    expect(rows.map(row => row.status)).toEqual(["meets", "misses"]);
     expect(rows[0].offerCeiling).toBeGreaterThan(rows[1].offerCeiling!);
     rows.forEach((row, index) => {
       expect(row.offerCeiling).not.toBeNull();

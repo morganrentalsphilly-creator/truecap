@@ -37,7 +37,7 @@ import { LedgerFigure } from "@/components/ledger/ledger-parts";
 // /auth/ hrefs that way, so the jump scrolls every time it is used and Back
 // from sign-up returns to the close); /analyze never prefetches.
 // Guarded by lib/__tests__/intent-prefetch-landing.test.ts.
-import { SampleClientWorkflow } from "@/components/marketing/sample-client-workflow";
+import { SampleClientPreview, SampleClientWorkflow } from "@/components/marketing/sample-client-workflow";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { FaqSection } from "@/components/marketing/landing-sections";
@@ -48,7 +48,6 @@ import {
   RuledList,
 } from "@/components/marketing/page-parts";
 import { ClientPdfCover } from "@/components/marketing/client-pdf-cover";
-import { MEMO_SHOT, ProductShot } from "@/components/marketing/product-shot";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -193,13 +192,7 @@ export default async function ForAgentsPage() {
       <Header initialUser={null} initialEntitlements={null} />
       <AgentProPageTracker />
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
-        {/* Hero: the agent's outcome in the headline, the product in the
-            lede, the free analyzer's address form as the primary action,
-            Agent Pro as the secondary. The aside is a capture of the /sample-decision-memo
-            page (public/product/manifest.json), shown as a printed document
-            and captioned as the sample page it is: it is NOT the share page
-            or the PDF an agent's client receives, and the caption must not
-            say so until a real co-branded capture replaces it. */}
+        {/* Lead with the free entry and computed client results. */}
         <PageHero
           title="One listing. Each client's numbers."
           lede={
@@ -211,7 +204,7 @@ export default async function ForAgentsPage() {
               </p>
               {/* Each term keeps its separator and never splits ("Buy Box" /
                   "fit"), so the line only breaks after a "·". */}
-              <p className="mt-2 text-pretty text-sm font-medium text-muted-foreground">
+              <p className="mt-2 hidden text-pretty text-sm font-medium text-muted-foreground sm:block">
                 {HERO_TERMS.map((term, index) => (
                   <Fragment key={term}>
                     {index > 0 ? " " : null}
@@ -231,12 +224,11 @@ export default async function ForAgentsPage() {
                   the actions slot's. */}
               <HeroAddressForm className="mt-0 sm:mt-0" />
               <ActionRow className="mt-3">
-                <IntentPrefetchLink href="#sample-client-workflow" className="tc-link inline-flex min-h-11 items-center">See the client workflow</IntentPrefetchLink>
                 <TrackedMarketingLink
                   href="#pricing"
                   event="agent_pro_cta_clicked"
                   properties={{ placement: "agent_hero" }}
-                  className={buttonVariants({ size: "cta", variant: "outline" })}
+                  className="tc-link inline-flex min-h-11 items-center"
                 >
                   See Agent Pro pricing
                 </TrackedMarketingLink>
@@ -245,58 +237,11 @@ export default async function ForAgentsPage() {
           }
           note={
             agentProConfigured
-              ? "Screen deals free with no card. Agent Pro is a separate plan for client workflows; cancel anytime."
+              ? "First decision free, no account or card. Client workspaces require Agent Pro."
               : "Screen deals free with no card. Sending a waitlist request does not start a trial or subscription."
           }
-          aside={
-            <ProductShot
-              shot={MEMO_SHOT}
-              frame="document"
-              priority
-              sizes="(min-width: 1280px) 660px, (min-width: 1024px) 52vw, 100vw"
-              alt="TrueCap's sample decision memo page for the sample deal: the decision at asking, the Offer Ceiling with its targets, cash flow, cap rate, cash-on-cash and DSCR, what could break the decision, and what to verify next"
-              caption={
-                <>
-                  The sample decision memo page, computed from the free sample deal. The share link and PDF your client receives are laid out differently.{" "}
-                  <IntentPrefetchLink href="/sample-decision-memo" className="tc-link -my-3 inline-block py-3 font-medium">
-                    Read the full sample memo
-                  </IntentPrefetchLink>
-                </>
-              }
-            />
-          }
-        >
-          {/* The price strip on a soft rule, the homepage investor cue's
-              form: labels in the text face, amounts in the figure face. A grid at
-              every width: the two prices side by side (packed left from
-              640px), the roster on its own row. */}
-          <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-rule-soft pt-2.5 text-base sm:grid-cols-[auto_auto] sm:justify-start sm:gap-x-8">
-            <div>
-              <dt className="text-sm font-semibold text-muted-foreground">Agent Pro</dt>
-              <dd>
-                {agentProConfigured ? (
-                  <>
-                    <LedgerFigure className="font-medium">{annualFigure}</LedgerFigure>
-                    {annualPeriod}{" "}
-                    <span className="whitespace-nowrap">billed annually</span>
-                  </>
-                ) : (
-                  "Waitlist open"
-                )}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-sm font-semibold text-muted-foreground">Or month to month</dt>
-              <dd>
-                <LedgerFigure className="font-medium">{monthlyLabel}</LedgerFigure>/month
-              </dd>
-            </div>
-            <div className="col-span-2">
-              <dt className="text-sm font-semibold text-muted-foreground">Roster</dt>
-              <dd>Client roster included · up to 100 clients</dd>
-            </div>
-          </dl>
-        </PageHero>
+          aside={<SampleClientPreview />}
+        />
 
         <SampleClientWorkflow />
 
@@ -306,8 +251,8 @@ export default async function ForAgentsPage() {
 
         {/* What your client receives: the list is shared with the homepage
             (lib/client-receives.ts), and so is the picture beside it, page 1
-            of the real PDF report (ClientPdfCover). The hero's aside is the
-            sample memo page, not the client's share page. */}
+            of the real PDF report (ClientPdfCover). The hero's aside shows calculated
+            sample client results. */}
         <Section id="what-your-client-receives" aria-labelledby="client-receives">
           <div className="grid gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
             <div className="min-w-0">
