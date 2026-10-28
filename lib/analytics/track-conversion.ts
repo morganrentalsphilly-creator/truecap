@@ -19,17 +19,19 @@
  *
  * SAFE TO CALL AT ANY TIME:
  *   - SSR: window is undefined, the helper no-ops
- *   - Local dev: gtag not loaded, the helper no-ops
+ *   - Without current cookie consent: nothing is queued or sent
  *   - Ad blocker active: catches the error silently
  */
+
+import { readStoredAnalyticsConsent } from "@/lib/analytics/site-events";
 
 const GOOGLE_ADS_ID = "AW-8236119484";
 
 /** Map your application-level event name → Google Ads conversion label.
  *
  * Replace the placeholders with the real labels from the Google Ads
- * Conversions screen. Until then the helper silently no-ops, which is
- * the right behavior (no spurious events fired). */
+ * Conversions screen. Without a label, a consented event is queued only
+ * in dataLayer for an explicitly configured GTM mapping. */
 const LABELS: Record<ConversionKey, string | null> = {
   calc_completed: null, // e.g. "AbC_DeFgHi-jKlM_NoP"
   // No label yet. When one is set: the only caller is the email sign-up form,
@@ -73,9 +75,10 @@ declare global {
 }
 
 /**
- * Returns true once the event has actually left the page (gtag call made, or
- * dataLayer push for an unlabeled event) and false when `window.gtag` is not
- * defined yet. The Google loader is consent-gated AND `lazyOnload`
+ * Returns true once the event is handed to gtag or queued in dataLayer for an
+ * unlabeled event; this is not proof of network delivery. Returns false without
+ * current consent or when the handoff is unavailable. The Google loader is
+ * consent-gated AND `lazyOnload`
  * (components/analytics/google-measurement.tsx), so a caller that must fire
  * exactly once — BillingConversionTracker — retries on `false` instead of
  * burning its dedup key on a transiently missing gtag.
@@ -84,12 +87,13 @@ export function trackConversion(
   event: ConversionKey,
   options: ConversionOptions = {},
 ): boolean {
-  if (typeof window === "undefined") return false;
+  // GTM replays its pre-load queue. Never record a pre-consent conversion for
+  // a later grant, and never trust an already-loaded gtag after withdrawal.
+  if (readStoredAnalyticsConsent() !== "granted") return false;
   const label = LABELS[event];
   if (!label) {
     // Still log the event to dataLayer so GA4 / GTM can pick it up.
-    pushDataLayerEvent(event, options);
-    return true;
+    return pushDataLayerEvent(event, options);
   }
   try {
     const gtag = window.gtag;
@@ -108,7 +112,7 @@ export function trackConversion(
   }
 }
 
-function pushDataLayerEvent(event: ConversionKey, options: ConversionOptions) {
+function pushDataLayerEvent(event: ConversionKey, options: ConversionOptions): boolean {
   try {
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
@@ -117,8 +121,9 @@ function pushDataLayerEvent(event: ConversionKey, options: ConversionOptions) {
       currency: options.currency ?? "USD",
       ...(options.onDelivered ? { eventCallback: options.onDelivered } : {}),
     });
+    return true;
   } catch {
-    // ignore
+    return false;
   }
 }
 

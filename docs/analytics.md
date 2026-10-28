@@ -71,6 +71,8 @@ Sign-up and login URLs that carry `next` are the one exception to the sensitive-
 
 `cookie_consent_choice` is how the consent rate is read: granted divided by granted plus denied, over the same seven days. A visitor who never answers the banner sends neither, and an answer given on one of the pages above is not counted.
 
+The legacy `trackConversion()` helper uses the same current-consent check as the site-event and scroll helpers. It returns false before a grant, after withdrawal, or when consent storage cannot be read, without calling gtag or appending to dataLayer. A later grant does not replay those blocked calls. Its `tc_calc_completed`, `tc_signup`, `tc_pdf_exported` and `tc_deal_saved` events queue only after consent; `tc_paid_subscribed` accompanies the existing direct Ads purchase call. The helper's true result means a local handoff, not verified network delivery. GTM mappings must not count a legacy name and its corresponding site event as separate conversions or duplicate the direct Ads purchase action.
+
 ## Ad URLs
 
 Every ad's landing URL should carry `utm_medium`, written exactly as below. Add it through the ad platform's URL-parameter setting (in Google Ads, the campaign's Final URL suffix), not inside the Final URL itself, which stays free of parameters:

@@ -39,7 +39,9 @@ describe("checkout return cookie transport", () => {
 
 describe("purchase measurement handoff", () => {
   it("can retry when the consent-gated loader arrives, without sending the session identifier", () => {
-    const fakeWindow: { gtag?: ReturnType<typeof vi.fn>; dataLayer?: unknown[] } = {};
+    const fakeWindow: { gtag?: ReturnType<typeof vi.fn>; dataLayer?: unknown[]; localStorage: { getItem: () => string } } = {
+      localStorage: { getItem: () => "granted" },
+    };
     vi.stubGlobal("window", fakeWindow);
     const details = { value: 29.99, currency: "USD", transactionId: "cs_test_private123" };
     expect(trackConversion("paid_subscribed", details)).toBe(false);
@@ -53,7 +55,10 @@ describe("purchase measurement handoff", () => {
   });
 
   it("does not report successful delivery when the tag throws", () => {
-    vi.stubGlobal("window", { gtag: vi.fn(() => { throw new Error("blocked"); }) });
+    vi.stubGlobal("window", {
+      localStorage: { getItem: () => "granted" },
+      gtag: vi.fn(() => { throw new Error("blocked"); }),
+    });
     expect(trackConversion("paid_subscribed")).toBe(false);
   });
 });

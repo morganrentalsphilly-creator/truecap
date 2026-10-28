@@ -760,6 +760,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
+      SENTRY_DISABLED: "1"
+      NEXT_PUBLIC_SENTRY_DISABLED: "1"
       NEXT_PUBLIC_SITE_URL: https://ci.invalid
       NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
@@ -1003,6 +1005,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
+      SENTRY_DISABLED: "1"
+      NEXT_PUBLIC_SENTRY_DISABLED: "1"
       NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3100
       NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
       NEXT_PUBLIC_SUPABASE_ANON_KEY: lighthouse-placeholder-anon-key
