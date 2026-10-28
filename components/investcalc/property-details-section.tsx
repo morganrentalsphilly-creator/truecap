@@ -189,10 +189,9 @@ export function PropertyDetailsSection({
               className="mt-1.5 max-w-prose text-2xs leading-snug text-muted-foreground"
             >
               {autofillRequiresAccount
-                ? "Optional. A free account is required to look up available property facts and estimates."
-                : "Optional. Look up available property facts and estimates."}{" "}
-              You&apos;ll review any changes; values you entered will not be
-              replaced silently.
+                ? "Optional lookup · Free account required."
+                : "Optional lookup of property facts and estimates."}{" "}
+              Review imported estimates before applying them. Your edits stay protected.
             </p>
           )}
         </div>

@@ -43,6 +43,7 @@ const EXIT_SCENARIOS_RELEASED = isFeatureReleased("exit_scenarios");
 interface OperatingExpensesSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
   purchasePrice: number;
+  renderFields?: boolean;
   /** Optional controlled state for the inner expense-details disclosure. */
   detailsOpen?: boolean;
   onDetailsOpenChange?: (open: boolean) => void;
@@ -177,6 +178,7 @@ function DollarIcon() {
 export function OperatingExpensesSection({
   form,
   purchasePrice,
+  renderFields = true,
   detailsOpen,
   onDetailsOpenChange,
 }: OperatingExpensesSectionProps) {
@@ -290,6 +292,10 @@ export function OperatingExpensesSection({
     insuranceInputMode === "monthly"
       ? Math.round(insuranceMonthly ?? insuranceDefault)
       : insuranceDefault;
+
+  // The form owns values even before their inputs mount. Keep the component's
+  // subscriptions alive, but avoid initializing a closed editor's controls.
+  if (!renderFields) return null;
 
   return (
     // Card chrome unified with the other input sections - `bg-card` +

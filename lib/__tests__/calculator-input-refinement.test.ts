@@ -29,10 +29,10 @@ describe("calculator input refinement", () => {
     expect(property).toContain(': "Look up property details"');
     expect(property).not.toContain("Create a free account to autofill");
     expect(property).toContain(
-      "Optional. A free account is required to look up available property facts and estimates.",
+      "Optional lookup · Free account required.",
     );
     expect(property).toContain(
-      "Optional. Look up available property facts and estimates.",
+      "Optional lookup of property facts and estimates.",
     );
   });
 });
