@@ -76,7 +76,7 @@ import { PreRunCriteriaEditor } from "./pre-run-criteria-editor";
 import { FinancingSection } from "./financing-section";
 import { OperatingExpensesSection } from "./operating-expenses-section";
 import { BuyAndHoldAssumptionsSection } from "./buy-and-hold-assumptions-section";
-import { isDetailedAssumptionField } from "@/lib/detailed-assumption-fields";
+import { isDeferredAssumptionField } from "@/lib/detailed-assumption-fields";
 import { SaveAsDefaultsChip } from "./save-as-defaults-chip";
 import {
   DEFAULT_STRATEGY_KEY,
@@ -6289,7 +6289,7 @@ export function InvestCalcPage({
     const inCollapsedAdvanced =
       !advancedOpen &&
       ((!!el && el.closest("#advanced-options") !== null) ||
-        isDetailedAssumptionField(path));
+        isDeferredAssumptionField(path));
     if (!inCollapsedAdvanced && !inCollapsedExpenseDetails) {
       focusPath();
       findEl()?.scrollIntoView({
@@ -10923,6 +10923,7 @@ export function InvestCalcPage({
                 >
                   <FinancingSection
                     form={form}
+                    renderFields={hasOpenedAdvanced}
                     appliedProfile={appliedFinancingProfile}
                     onAppliedProfileChange={handleAppliedFinancingProfileChange}
                   />
@@ -10934,6 +10935,7 @@ export function InvestCalcPage({
                 >
                   <OperatingExpensesSection
                     form={form}
+                    renderFields={hasOpenedAdvanced}
                     purchasePrice={purchasePrice}
                     detailsOpen={expenseDetailsOpen}
                     onDetailsOpenChange={setExpenseDetailsOpen}

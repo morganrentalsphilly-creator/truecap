@@ -29,7 +29,15 @@ export const DETAILED_ASSUMPTION_FIELDS = [
 ] as const satisfies readonly (keyof InvestmentFormValues)[];
 
 const detailedFields = new Set<string>(DETAILED_ASSUMPTION_FIELDS);
+const financingFields = new Set<string>([
+  "downPaymentPct", "interestRate", "loanTermYears", "closingCostsInputMode",
+  "closingCostsPct", "closingCostsFixed", "rehabBudget", "pmiAnnualRatePct", "pmiNoCancel",
+]);
 
 export function isDetailedAssumptionField(path: string): boolean {
   return detailedFields.has(path) || /^units\.\d+\.stabilizedMonthlyRent$/.test(path);
+}
+
+export function isDeferredAssumptionField(path: string): boolean {
+  return financingFields.has(path) || isDetailedAssumptionField(path);
 }

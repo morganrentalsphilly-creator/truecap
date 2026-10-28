@@ -87,3 +87,14 @@ test("validation opens an unmounted detailed field and focuses it", async ({ pag
   await form.locator('button[data-inform-submit="true"]').click();
   await expect(page.locator("section[aria-labelledby='decision-summary-title']")).toBeVisible({ timeout: 30_000 });
 });
+
+for (const field of ["interestRate", "propertyTaxPct"] as const) {
+  test(`validation reveals the deferred ${field} control`, async ({ page }) => {
+    const form = await openDraft(page, { ...draft, [field]: -1 });
+    await expect(form.locator(`[name="${field}"]`)).toHaveCount(0);
+    await form.locator('button[data-inform-submit="true"]').click();
+    const input = form.locator(`[name="${field}"]`);
+    await expect(input).toBeVisible();
+    await expect(input).toBeFocused();
+  });
+}

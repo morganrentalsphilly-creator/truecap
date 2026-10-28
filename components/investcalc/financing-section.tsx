@@ -20,12 +20,15 @@ import { CurrencyInput } from "@/components/ui/currency-input";
 
 interface FinancingSectionProps {
   form: UseFormReturn<InvestmentFormValues>;
+  /** Keep validation/profile effects live while deferring closed controls. */
+  renderFields?: boolean;
   appliedProfile?: FinancingProfileSnapshot | null;
   onAppliedProfileChange?: (profile: FinancingProfileSnapshot | null) => void;
 }
 
 export function FinancingSection({
   form,
+  renderFields = true,
   appliedProfile = null,
   onAppliedProfileChange,
 }: FinancingSectionProps) {
@@ -94,6 +97,7 @@ export function FinancingSection({
         />
       ) : null}
 
+      {renderFields ? <>
       {/* One container-width step: 2-up once the CARD clears 36rem. Never
         4-up — four columns needed ~14rem each before the uppercase headers
         stopped wrapping mid-word, and the form pane rarely affords it. A
@@ -473,6 +477,7 @@ export function FinancingSection({
           </div>
         </div>
       ) : null}
+      </> : null}
     </div>
   );
 }
