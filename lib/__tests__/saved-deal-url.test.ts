@@ -143,8 +143,13 @@ describe("first save in a telemetry document", () => {
     ]) {
       expect(read(file)).toContain("markThirdPartyTelemetryMounted()");
     }
-    expect(read("components/analytics/posthog-provider.tsx")).toContain(
-      "documentMayHaveThirdPartyTelemetry()",
+    // The safety-net reload keys on PostHog's own strict gate. Vercel may
+    // mount on a counted `next` sign-in URL that gate calls sensitive, so a
+    // reload keyed on the shared flag looped on /auth/login?next=/dashboard/new.
+    const provider = read("components/analytics/posthog-provider.tsx");
+    expect(provider).not.toContain("documentMayHaveThirdPartyTelemetry");
+    expect(provider).toMatch(
+      /if \(documentMayHaveTelemetry\.current && typeof window !== "undefined"\) \{\s*documentMayHaveTelemetry\.current = false;\s*window\.location\.reload\(\);/,
     );
   });
 });
