@@ -83,7 +83,9 @@ export function GlossaryTip({
               }
             }}
           >
-            {children}
+            {/* Own element so the visible term is still matched on its own
+                (getByText "Model DSCR"), next to the hidden hint. */}
+            <span>{children}</span>
             {/* Named by its visible text plus this hint, not an aria-label:
                 an aria-label replaced the visible words, so speech input
                 could not target it (WCAG 2.5.3, label in name). */}
