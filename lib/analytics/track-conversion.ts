@@ -57,6 +57,10 @@ export interface ConversionOptions {
   currency?: string;
   /** Local-only deduplication key. Never forwarded to Google or dataLayer. */
   transactionId?: string;
+  /** Called once Google's tags have run for this event: gtag's
+   *  `event_callback` for a labeled conversion, GTM's `eventCallback` for the
+   *  dataLayer push otherwise. Never called when no Google tag is running. */
+  onDelivered?: () => void;
 }
 
 type GtagFn = (...args: unknown[]) => void;
@@ -94,8 +98,9 @@ export function trackConversion(
       send_to: `${GOOGLE_ADS_ID}/${label}`,
       value: options.value ?? 0,
       currency: options.currency ?? "USD",
+      ...(options.onDelivered ? { event_callback: options.onDelivered } : {}),
     });
-    pushDataLayerEvent(event, options);
+    pushDataLayerEvent(event, { ...options, onDelivered: undefined });
     return true;
   } catch {
     // never let analytics break the user flow
@@ -110,8 +115,54 @@ function pushDataLayerEvent(event: ConversionKey, options: ConversionOptions) {
       event: `tc_${event}`,
       value: options.value ?? 0,
       currency: options.currency ?? "USD",
+      ...(options.onDelivered ? { eventCallback: options.onDelivered } : {}),
     });
   } catch {
     // ignore
   }
+}
+
+/** gtag.js and gtm.js both define `google_tag_manager` once they run. Before
+ *  that (no consent, the lazyOnload loader not run yet, dev) nothing pushed
+ *  from this document will be sent by Google, so there is nothing to wait for. */
+function googleTagsRunning(): boolean {
+  return (
+    typeof (window as { google_tag_manager?: unknown }).google_tag_manager ===
+    "object"
+  );
+}
+
+/**
+ * `trackConversion` for a caller about to leave the document (the analyzer's
+ * first save opens the saved deal in a new one). Resolves once Google reports
+ * the event's tags ran, after `timeoutMs` at the latest, and at once when no
+ * Google tag is running here.
+ */
+export function trackConversionBeforeLeaving(
+  event: ConversionKey,
+  options: Omit<ConversionOptions, "onDelivered"> = {},
+  timeoutMs = 1500,
+): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  return new Promise((resolve) => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let settled = false;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      if (timer !== null) clearTimeout(timer);
+      resolve();
+    };
+    const waitForGoogle = googleTagsRunning();
+    // GTM calls eventCallback once per container; `done` is idempotent.
+    const sent = trackConversion(event, {
+      ...options,
+      ...(waitForGoogle ? { onDelivered: done } : {}),
+    });
+    if (!waitForGoogle || !sent) {
+      done();
+      return;
+    }
+    timer = setTimeout(done, timeoutMs);
+  });
 }

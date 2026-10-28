@@ -40,6 +40,10 @@ import {
   trackEvent,
   trackPageview,
 } from "@/lib/analytics";
+import {
+  documentMayHaveThirdPartyTelemetry,
+  markThirdPartyTelemetryMounted,
+} from "@/lib/analytics/telemetry-document";
 import { shouldKeepThirdPartyTelemetryDisabled } from "@/lib/sensitive-url";
 
 function routeCategory(pathname: string): string {
@@ -128,19 +132,26 @@ function PostHogTracker() {
   );
   // A third-party script that was already present can observe history changes
   // before React can unmount it. Entering a sensitive URL from a clean SPA
-  // document therefore becomes a hard reload. On the new document this ref is
-  // false from the first render and every telemetry provider stays unmounted.
-  const documentMayHaveTelemetry = useRef(!telemetryDisabledForDocument);
+  // document therefore becomes a hard reload. On the new document the flag
+  // (lib/analytics/telemetry-document.ts) is false from the first render and
+  // every telemetry provider stays unmounted. The flag is shared so the
+  // Vercel and Google mounts count too, and so the analyzer can open a saved
+  // deal in a new document itself instead of tripping this reload.
+  const reloadRequested = useRef(false);
 
   useLayoutEffect(() => {
     if (!telemetryDisabledForDocument) {
-      documentMayHaveTelemetry.current = true;
+      markThirdPartyTelemetryMounted();
       return;
     }
     disableAnalyticsForDocument();
     if (!sensitiveLocationSeen) setSensitiveLocationSeen(true);
-    if (documentMayHaveTelemetry.current && typeof window !== "undefined") {
-      documentMayHaveTelemetry.current = false;
+    if (
+      documentMayHaveThirdPartyTelemetry() &&
+      !reloadRequested.current &&
+      typeof window !== "undefined"
+    ) {
+      reloadRequested.current = true;
       window.location.reload();
     }
   }, [telemetryDisabledForDocument, sensitiveLocationSeen]);

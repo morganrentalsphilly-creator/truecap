@@ -3,7 +3,7 @@
 /* eslint-disable react-hooks/refs, react-hooks/immutability, react-hooks/preserve-manual-memoization -- This legacy, hook-dense calculator intentionally uses refs as async workflow guards. React Compiler is not enabled for the app; keep rules-of-hooks and exhaustive-deps active while the component is incrementally decomposed. */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { track } from "@/lib/analytics/site-events";
+import { track, whenSiteEventsHandedOff } from "@/lib/analytics/site-events";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FieldErrors, useForm } from "react-hook-form";
@@ -336,8 +336,17 @@ import {
   type ExitScenarioInput,
   type ExitScenarioYear,
 } from "@/lib/exit-scenarios";
-import { trackConversion } from "@/lib/analytics/track-conversion";
+import {
+  trackConversion,
+  trackConversionBeforeLeaving,
+} from "@/lib/analytics/track-conversion";
 import { trackEvent } from "@/lib/analytics";
+import { documentMayHaveThirdPartyTelemetry } from "@/lib/analytics/telemetry-document";
+import {
+  SAVED_DEAL_NOTICE_KEY,
+  savedDealPath,
+  savedDealUrlTransition,
+} from "@/lib/saved-deal-url";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import {
   isAdoptedOfferCeilingTargetSource,
@@ -563,13 +572,10 @@ function consumeSavedDealHandoffPayload(
 function replaceSavedDealUrl(savedDealId: string | null): void {
   if (typeof window === "undefined") return;
   try {
-    const url = new URL(window.location.href);
-    if (savedDealId) url.searchParams.set("savedDeal", savedDealId);
-    else url.searchParams.delete("savedDeal");
     window.history.replaceState(
       null,
       "",
-      `${url.pathname}${url.search}${url.hash}`,
+      savedDealPath(window.location.href, savedDealId),
     );
   } catch {
     // URL durability is best-effort; the in-memory analysis remains usable.
@@ -1404,6 +1410,11 @@ export function InvestCalcPage({
    */
   const [restoredAddress, setRestoredAddress] = useState<string | null>(null);
   const [isSavingDeal, setIsSavingDeal] = useState(false);
+  // A save from a document that may be running a third-party telemetry
+  // script ends by opening the saved deal in a new document (see
+  // performSaveDeal). The analyzer is inert from the click until then, so
+  // nothing typed in between is thrown away by that navigation.
+  const [inputPausedForSave, setInputPausedForSave] = useState(false);
   const [isAutoSaveResuming, setIsAutoSaveResuming] = useState(false);
   // Duplicate-address collision from the save flow. Non-null opens the
   // chooser dialog with the user's own colliding saved deal so they can
@@ -6967,6 +6978,72 @@ export function InvestCalcPage({
     });
   };
 
+  const showDealSavedToast = (
+    mode: "inserted" | "updated",
+    dealId: string,
+  ) => {
+    toast({
+      title: mode === "updated" ? "Deal updated" : "Deal saved",
+      description:
+        mode === "updated"
+          ? "Your saved analysis was updated with the latest inputs."
+          : "Saved — checklist, docs and notes now live in its workspace.",
+      variant: "success",
+      // First save is the moment a user can learn the workspace
+      // (checklist / docs / notes / scenarios) exists — don't dead-end
+      // it. Use the product's same-tab navigation convention so a phone
+      // investor does not accumulate hidden analyzer/workspace tabs.
+      action:
+        mode === "inserted" ? (
+          <ToastAction
+            altText="Open this deal's workspace"
+            onClick={() => {
+              router.push(`/dashboard/saved-analyses/${dealId}`);
+            }}
+          >
+            Open deal workspace
+          </ToastAction>
+        ) : undefined,
+    });
+  };
+
+  /** Load the saved deal as a new document once this one's sends are out.
+   *  A plain reload would do the same, but at whatever moment the sensitive
+   *  URL was noticed; this runs at the end of the save, after the events,
+   *  while the analyzer is still inert. `location.replace` keeps Back on the
+   *  page before the analyzer, as the in-place URL rewrite did. */
+  const openSavedDealDocument = async (
+    path: string,
+    conversionSent: Promise<void>,
+  ) => {
+    const startedOn = window.location.pathname;
+    await Promise.all([conversionSent, whenSiteEventsHandedOff()]);
+    // A header link (outside the inert analyzer) may have left meanwhile.
+    if (window.location.pathname !== startedOn) return;
+    window.location.replace(path);
+  };
+
+  // A first save from a document that may run telemetry opened this one
+  // (openSavedDealDocument); show the confirmation it handed over. One-shot.
+  useEffect(() => {
+    if (!initialSavedDeal?.ok) return;
+    let notice: { id?: unknown; mode?: unknown } | null = null;
+    try {
+      const raw = window.sessionStorage.getItem(SAVED_DEAL_NOTICE_KEY);
+      if (raw === null) return;
+      window.sessionStorage.removeItem(SAVED_DEAL_NOTICE_KEY);
+      notice = JSON.parse(raw) as { id?: unknown; mode?: unknown };
+    } catch {
+      return;
+    }
+    if (notice?.id !== initialSavedDeal.id) return;
+    showDealSavedToast(
+      notice.mode === "updated" ? "updated" : "inserted",
+      initialSavedDeal.id,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   /** Core save. `existingIdOverride` / `saveAsNewScenario` come from the
    *  duplicate-address dialog choices; `forceInsert` / `allowAddressChange`
    *  come from the address-changed dialog (save as new deal vs. move the
@@ -6992,6 +7069,11 @@ export function InvestCalcPage({
        * exists only inside the child dashboard until the user edits it. */
       maxOfferTargetOverride?: MaoTarget;
       maxOfferTargetSourceOverride?: OfferCeilingTargetSource;
+      /** The caller leaves the analyzer itself right after the save (Compare
+       *  pushes /dashboard/compare), so never open the saved deal in a new
+       *  document. In a document that may run telemetry the id then stays
+       *  attached in memory only; the next save writes it to the URL. */
+      keepDocument?: boolean;
     } = {},
   ) => {
     // Snapshot the fork generation: if "Analyze another like this" fires
@@ -7020,7 +7102,17 @@ export function InvestCalcPage({
     saveInFlightRef.current = true;
 
     let awaitingResolution = false;
+    // Set when the save ends by loading the saved deal as a new document; the
+    // finally below then keeps the analyzer busy and inert until it unloads.
+    let leavingForSavedDeal = false;
     setIsSavingDeal(true);
+    // ?savedDeal= may not enter the URL of a document that may be running a
+    // third-party telemetry script (lib/saved-deal-url.ts), so such a save
+    // ends in a navigation. Pause input from the click, not from the
+    // response: an edit made while the save is in flight would be lost too.
+    if (documentMayHaveThirdPartyTelemetry() && !options.keepDocument) {
+      setInputPausedForSave(true);
+    }
     try {
       const currentValues = form.getValues();
       const confidenceContext = resolveLiveInputConfidenceContext(
@@ -7223,7 +7315,20 @@ export function InvestCalcPage({
         savedDealIdRef.current = result.id;
         lastCompletedSaveDealIdRef.current = result.id;
         savedUnderwritingRevisionRef.current = result.underwritingRevision;
-        replaceSavedDealUrl(result.id);
+        const urlTransition = savedDealUrlTransition(
+          window.location.href,
+          result.id,
+          documentMayHaveThirdPartyTelemetry(),
+        );
+        if (urlTransition.kind === "replace-state") {
+          replaceSavedDealUrl(result.id);
+        } else if (
+          urlTransition.kind === "new-document" &&
+          !options.keepDocument
+        ) {
+          leavingForSavedDeal = true;
+        }
+        let conversionSent: Promise<void> = Promise.resolve();
         if (result.mode === "inserted") setLoadedPipelineStage(null);
         // Deal is now persisted server-side - the local anonymous
         // auto-save draft is no longer needed. If we leave it, the
@@ -7255,11 +7360,14 @@ export function InvestCalcPage({
           // on subsequent updates of an existing deal. Otherwise a
           // power-user editing a saved deal 5 times would emit 5
           // 'deal_saved' events and skew the optimizer.
-          trackConversion("deal_saved");
+          // All three send from this document, whose URL does not carry the
+          // deal id. The conversion goes last so its delivery callback comes
+          // after the other two pushes.
           trackEvent("deal_saved", {
             property_type: currentValues.propertyType,
           });
           track("deal_saved", { property_type: currentValues.propertyType });
+          conversionSent = trackConversionBeforeLeaving("deal_saved");
         }
         // The persisted baseline is the payload the server actually stored
         // (currentValues) — never a fresh form.getValues(): recording
@@ -7319,29 +7427,21 @@ export function InvestCalcPage({
         // roundtrip was in flight, the divergence re-arms the "Unsaved
         // changes" badge (and the beforeunload guard) for one more Save.
         syncFormDirtyVersusPersisted();
-        toast({
-          title: result.mode === "updated" ? "Deal updated" : "Deal saved",
-          description:
-            result.mode === "updated"
-              ? "Your saved analysis was updated with the latest inputs."
-              : "Saved — checklist, docs and notes now live in its workspace.",
-          variant: "success",
-          // First save is the moment a user can learn the workspace
-          // (checklist / docs / notes / scenarios) exists — don't dead-end
-          // it. Use the product's same-tab navigation convention so a phone
-          // investor does not accumulate hidden analyzer/workspace tabs.
-          action:
-            result.mode === "inserted" ? (
-              <ToastAction
-                altText="Open this deal's workspace"
-                onClick={() => {
-                  router.push(`/dashboard/saved-analyses/${result.id}`);
-                }}
-              >
-                Open deal workspace
-              </ToastAction>
-            ) : undefined,
-        });
+        if (leavingForSavedDeal && urlTransition.kind === "new-document") {
+          // The confirmation goes to the new document; shown here it would
+          // vanish with this one.
+          try {
+            window.sessionStorage.setItem(
+              SAVED_DEAL_NOTICE_KEY,
+              JSON.stringify({ id: result.id, mode: result.mode }),
+            );
+          } catch {
+            // Storage blocked: the reopened deal's "Saved" state still shows.
+          }
+          void openSavedDealDocument(urlTransition.path, conversionSent);
+          return true;
+        }
+        showDealSavedToast(result.mode, result.id);
         return true;
       }
       if (result.code === "SIGN_IN_REQUIRED") {
@@ -7581,8 +7681,11 @@ export function InvestCalcPage({
         variant: "destructive",
       });
     } finally {
-      saveInFlightRef.current = false;
-      setIsSavingDeal(false);
+      if (!leavingForSavedDeal) {
+        saveInFlightRef.current = false;
+        setIsSavingDeal(false);
+        setInputPausedForSave(false);
+      }
       if (
         options.autoAfterAuth &&
         !awaitingResolution &&
@@ -7597,6 +7700,7 @@ export function InvestCalcPage({
   const handleSaveDeal = async (
     maoTarget?: MaoTarget,
     source?: OfferCeilingTargetSource,
+    saveOptions: { keepDocument?: boolean } = {},
   ) => {
     if (hasUnappliedTargetDraft) {
       toast({
@@ -7648,6 +7752,7 @@ export function InvestCalcPage({
       syncFormDirtyVersusPersisted();
     }
     return performSaveDeal({
+      ...saveOptions,
       ...(adoptedTarget
         ? {
             maxOfferTargetOverride: adoptedTarget,
@@ -8793,7 +8898,11 @@ export function InvestCalcPage({
         // never authorize Compare after the current save opened a conflict or
         // duplicate-address chooser instead of completing.
         lastCompletedSaveDealIdRef.current = null;
-        const saved = await handleSaveDeal(maoTarget, source);
+        // Compare leaves for /dashboard/compare on its own; opening the saved
+        // deal in a new document first would cut this flow off.
+        const saved = await handleSaveDeal(maoTarget, source, {
+          keepDocument: true,
+        });
         if (saved !== true) return;
         dealIdForCompare = lastCompletedSaveDealIdRef.current;
         if (!dealIdForCompare) {
@@ -9974,7 +10083,12 @@ export function InvestCalcPage({
     form.formState.dirtyFields as Record<string, unknown>,
   );
   return (
-    <div data-analyzer-root="" className="min-h-screen bg-background">
+    <div
+      data-analyzer-root=""
+      className="min-h-screen bg-background"
+      inert={inputPausedForSave ? true : undefined}
+      aria-busy={inputPausedForSave ? true : undefined}
+    >
       {deletedDealRecoveryActive ? (
         <div
           role="alert"

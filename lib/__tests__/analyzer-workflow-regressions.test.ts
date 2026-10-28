@@ -190,14 +190,18 @@ describe("atomic Save & compare", () => {
 
     expect(flow).toContain("if (compareInFlightRef.current) return");
     expect(flow).toContain("lastCompletedSaveDealIdRef.current = null");
-    expect(flow).toContain("await handleSaveDeal(maoTarget, source)");
+    // Compare leaves for /dashboard/compare itself, so its save must not open
+    // the saved deal in a new document first.
+    expect(flow).toContain(
+      "await handleSaveDeal(maoTarget, source, {\n          keepDocument: true,\n        })",
+    );
     expect(flow).toContain("if (saved !== true) return");
     expect(flow).toContain(
       "dealIdForCompare = lastCompletedSaveDealIdRef.current",
     );
     expect(flow).toContain("await addDealToCompareAction(dealIdForCompare)");
     expect(
-      flow.indexOf("await handleSaveDeal(maoTarget, source)"),
+      flow.indexOf("await handleSaveDeal(maoTarget, source, {"),
     ).toBeLessThan(
       flow.indexOf("await addDealToCompareAction(dealIdForCompare)"),
     );

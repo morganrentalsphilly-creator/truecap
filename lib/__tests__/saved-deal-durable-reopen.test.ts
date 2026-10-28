@@ -31,8 +31,13 @@ describe("durable saved-deal reopen", () => {
     expect(dashboardAnalyzer).toContain("initialSavedDeal={initialSavedDeal}");
     expect(analyzer).toContain("initialSavedDeal = null");
     expect(analyzer).toContain("initialSavedDeal.ok");
-    expect(analyzer).toContain('url.searchParams.set("savedDeal", savedDealId)');
-    expect(analyzer).toContain('url.searchParams.delete("savedDeal")');
+    // The URL write moved to lib/saved-deal-url.ts, which the analyzer's
+    // replaceSavedDealUrl and the new-document path both use.
+    const savedDealUrl = read("lib/saved-deal-url.ts");
+    expect(analyzer).toContain("savedDealPath(window.location.href, savedDealId)");
+    expect(savedDealUrl).toContain('export const SAVED_DEAL_PARAM = "savedDeal"');
+    expect(savedDealUrl).toContain("url.searchParams.set(SAVED_DEAL_PARAM, savedDealId)");
+    expect(savedDealUrl).toContain("url.searchParams.delete(SAVED_DEAL_PARAM)");
   });
 
   it("uses same-tab links for primary saved-deal opens while keeping duplication isolated", () => {
