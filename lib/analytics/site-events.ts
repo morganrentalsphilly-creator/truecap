@@ -195,6 +195,17 @@ export function track<E extends SiteEvent>(event: E, props: SiteEventProps[E]): 
 }
 
 /**
+ * Resolves once every `track()` call made so far has been handed to Vercel's
+ * queue (or dropped because the module failed to load). The hand-off waits on
+ * the same promise, and reactions run in order, so awaiting it is enough.
+ * For a caller about to leave the document.
+ */
+export async function whenSiteEventsHandedOff(): Promise<void> {
+  if (typeof window === "undefined" || !vercelTrackPromise) return;
+  await vercelTrackPromise;
+}
+
+/**
  * Count the banner's decision, read back from storage after the banner wrote
  * it. Cookieless: Vercel always, `dataLayer` only when the decision is
  * "granted" (the rule every `track()` call follows). Returns the choice it

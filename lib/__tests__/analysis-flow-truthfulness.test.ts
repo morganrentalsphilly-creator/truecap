@@ -69,8 +69,15 @@ describe("analysis-flow truthfulness", () => {
       "} finally {\n      isCalculatingRef.current = false",
     );
 
-    expect(completion).toContain("if (autoSavedAfterAuth)");
-    expect(completion).toContain('title: "Deal saved automatically"');
+    expect(completion).toContain("if (autoSavedAfterAuth) showAutoSavedToast();");
+    // The copy lives in the helper so the saved deal's new document can show
+    // the same toast when the save opened it (lib/saved-deal-url.ts).
+    const autoSavedToast = section(
+      calculator,
+      "const showAutoSavedToast = () => {",
+      "};",
+    );
+    expect(autoSavedToast).toContain('title: "Deal saved automatically"');
     expect(completion).not.toContain('title: "Analysis Complete"');
     expect(calculator).not.toContain('title: "Sample rental loaded"');
     expect(calculator).toContain(
