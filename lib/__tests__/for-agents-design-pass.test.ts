@@ -48,9 +48,10 @@ describe("/for-agents design pass", () => {
   });
 
   it("builds the page from the shared parts", () => {
-    for (const part of ["<PageHero", "<RuledList", "<StepList", "<CloseSection"]) {
+    for (const part of ["<PageHero", "<RuledList", "<SampleClientWorkflow", "<CloseSection"]) {
       expect(page, part).toContain(part);
     }
+    expect(read("components/marketing/sample-client-workflow.tsx")).toContain("<ol");
   });
 
   it("kept: one FaqSection, emitting the page's FAQPage", () => {

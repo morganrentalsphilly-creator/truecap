@@ -20,7 +20,7 @@
  *
  * Set on the design system's page parts (DESIGN.md, 2026-09 design pass): the
  * hero on PageHero with the memo as a document, lists on rules instead of
- * cards, the workflow as a StepList, the FAQ through FaqSection, and the
+ * cards, the workflow as a calculated example, the FAQ through FaqSection, and the
  * pricing as the page's close on the heavy rule.
  */
 
