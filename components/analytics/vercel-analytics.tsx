@@ -10,6 +10,7 @@ import {
 import { stripAdClickIds } from "@/lib/analytics/ad-click-ids";
 import { recordCookieConsentChoice } from "@/lib/analytics/site-events";
 import { COOKIE_CONSENT_EVENT } from "@/lib/use-cookie-banner";
+import { markThirdPartyTelemetryMounted } from "@/lib/analytics/telemetry-document";
 
 /**
  * Two steps, in this order: credentials and deal inputs out
@@ -58,7 +59,11 @@ function TrueCapVercelAnalyticsInner() {
     window.addEventListener(COOKIE_CONSENT_EVENT, onChoice);
     return () => window.removeEventListener(COOKIE_CONSENT_EVENT, onChoice);
   }, [disabledForDocument]);
-  if (!pathname || disabledForDocument) return null;
+  const mounted = Boolean(pathname) && !disabledForDocument;
+  useEffect(() => {
+    if (mounted) markThirdPartyTelemetryMounted();
+  }, [mounted]);
+  if (!mounted) return null;
   return <Analytics beforeSend={sanitizeVercelAnalyticsEvent} />;
 }
 

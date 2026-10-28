@@ -6,6 +6,7 @@ import { Suspense, useEffect, useState } from "react";
 import { shouldKeepThirdPartyTelemetryDisabled } from "@/lib/sensitive-url";
 import { readStoredAnalyticsConsent } from "@/lib/analytics/site-events";
 import { COOKIE_CONSENT_EVENT } from "@/lib/use-cookie-banner";
+import { markThirdPartyTelemetryMounted } from "@/lib/analytics/telemetry-document";
 
 const GOOGLE_ADS_ID = "AW-8236119484";
 const GTM_ID = "GTM-TCBNRMBG";
@@ -50,12 +51,16 @@ function GoogleMeasurementInner() {
     return () => window.removeEventListener(COOKIE_CONSENT_EVENT, sync);
   }, []);
 
-  if (
+  const blocked =
     process.env.NODE_ENV !== "production" ||
     !pathname ||
     disabledForDocument ||
-    !consentGranted
-  ) {
+    !consentGranted;
+  useEffect(() => {
+    if (!blocked) markThirdPartyTelemetryMounted();
+  }, [blocked]);
+
+  if (blocked) {
     return null;
   }
 

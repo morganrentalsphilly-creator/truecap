@@ -40,6 +40,7 @@ import {
   trackEvent,
   trackPageview,
 } from "@/lib/analytics";
+import { markThirdPartyTelemetryMounted } from "@/lib/analytics/telemetry-document";
 import { shouldKeepThirdPartyTelemetryDisabled } from "@/lib/sensitive-url";
 
 function routeCategory(pathname: string): string {
@@ -130,11 +131,19 @@ function PostHogTracker() {
   // before React can unmount it. Entering a sensitive URL from a clean SPA
   // document therefore becomes a hard reload. On the new document this ref is
   // false from the first render and every telemetry provider stays unmounted.
+  //
+  // The reload keys on this tracker's own strict gate, not on the shared flag
+  // (lib/analytics/telemetry-document.ts): Vercel may mount on a counted
+  // `next` sign-in URL, which this gate treats as sensitive, and keying on
+  // the shared flag reloaded that page forever. The shared flag is marked
+  // here too, for the analyzer's save, which opens the saved deal in a new
+  // document itself instead of tripping this reload.
   const documentMayHaveTelemetry = useRef(!telemetryDisabledForDocument);
 
   useLayoutEffect(() => {
     if (!telemetryDisabledForDocument) {
       documentMayHaveTelemetry.current = true;
+      markThirdPartyTelemetryMounted();
       return;
     }
     disableAnalyticsForDocument();
