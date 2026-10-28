@@ -65,7 +65,6 @@ export function GlossaryTip({
           <span
             role="button"
             tabIndex={0}
-            aria-label={`${entry.term} - what's this?`}
             className={cn(
               "inline-flex min-h-11 min-w-11 items-center justify-center gap-1 cursor-help rounded-sm underline decoration-dotted decoration-muted-foreground/40 underline-offset-2",
               className,
@@ -84,8 +83,14 @@ export function GlossaryTip({
               }
             }}
           >
-            {children}
-            {showIcon && <HelpCircle className="h-3 w-3 text-foreground" />}
+            {/* Own element so the visible term is still matched on its own
+                (getByText "Model DSCR"), next to the hidden hint. */}
+            <span>{children}</span>
+            {/* Named by its visible text plus this hint, not an aria-label:
+                an aria-label replaced the visible words, so speech input
+                could not target it (WCAG 2.5.3, label in name). */}
+            <span className="sr-only"> - what&apos;s this?</span>
+            {showIcon && <HelpCircle aria-hidden className="h-3 w-3 text-foreground" />}
           </span>
         </TooltipTrigger>
         {/* The surface, rule, shadow, float radius, 14px text and pretty

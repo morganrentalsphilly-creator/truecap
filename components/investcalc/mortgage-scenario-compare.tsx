@@ -109,7 +109,8 @@ export function MortgageScenarioCompare({
           ref={triggerRef}
           type="button"
           onClick={() => changeOpen(true)}
-          aria-label="Open the compare financing scenarios panel"
+          // No aria-label: the visible title names the button, so speech
+          // input users can say what they see (WCAG 2.5.3, label in name).
           className="group flex min-h-11 w-full cursor-pointer items-center gap-2.5 rounded-md text-left transition-colors duration-150 hover:bg-band focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           <ChevronRight
