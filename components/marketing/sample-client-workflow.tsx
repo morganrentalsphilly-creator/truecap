@@ -16,7 +16,7 @@ export function SampleClientPreview() {
         <dt className="font-semibold">{screen.clientName}</dt>
         <dd className="mt-1 text-sm text-muted-foreground">Target: at least {formatLedgerDollars(SAMPLE_WORKFLOW_BOXES[index].minCashFlowMonthly ?? 0)}/mo cash flow</dd>
         <dd className={`mt-2 text-sm font-semibold ${screen.status === "meets" ? "text-positive" : "text-highlight-text"}`}>{screen.status === "meets" ? "Meets selected criteria at asking" : screen.status === "misses" ? "Misses selected criteria at asking" : "Needs verification"}</dd>
-        <dd className="mt-3 flex flex-wrap items-baseline justify-between gap-3"><span className="text-sm">Offer Ceiling</span><strong className="font-display text-key-sm tabular-nums">{screen.offerCeiling == null ? "Unavailable" : formatLedgerDollars(screen.offerCeiling)}</strong></dd>
+        <dd className="mt-3 flex flex-wrap items-baseline justify-between gap-3"><span className="text-sm">Offer Ceiling</span><strong className="break-words font-display text-2xl tabular-nums sm:text-key-sm">{screen.offerCeiling == null ? "Unavailable" : formatLedgerDollars(screen.offerCeiling)}</strong></dd>
       </div>)}
     </dl>
     <IntentPrefetchLink href="#sample-client-workflow" className="tc-link mt-2 inline-flex min-h-11 items-center">Follow the client workflow</IntentPrefetchLink>

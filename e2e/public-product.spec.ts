@@ -210,6 +210,11 @@ test("agent hero shows client-specific results without overflow", async ({ page 
     await expect(preview).toContainText("Meets selected criteria at asking");
     await expect(preview).toContainText("Misses selected criteria at asking");
     await expectContainedInViewport(page, preview, 100);
+    const previewBox = await preview.boundingBox();
+    for (const figure of await preview.locator("strong").all()) {
+      const figureBox = await figure.boundingBox();
+      expect(figureBox!.x + figureBox!.width).toBeLessThanOrEqual(previewBox!.x + previewBox!.width);
+    }
     await expectNoHorizontalOverflow(page);
   }
   await page.setViewportSize({ width: 390, height: 844 });
