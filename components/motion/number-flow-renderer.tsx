@@ -3,7 +3,10 @@
 import NumberFlow from "@number-flow/react";
 import { useLayoutEffect, useState, type ComponentProps } from "react";
 
-type Props = ComponentProps<typeof NumberFlow> & { initialValue: number };
+type Props = Omit<ComponentProps<typeof NumberFlow>, "value"> & {
+  value: number;
+  initialValue: number;
+};
 
 /** Initialize the animation host at the old value even if its chunk arrives
  * after the parent has received a new value. Advance before the next paint,
