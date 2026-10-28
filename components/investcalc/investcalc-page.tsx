@@ -6800,13 +6800,7 @@ export function InvestCalcPage({
       // "Analysis Complete" toast duplicated the same metrics, competed with
       // the result handoff, and could cover mobile actions. Keep a toast only
       // when authentication also completed a distinct background save.
-      if (autoSavedAfterAuth) {
-        toast({
-          title: "Deal saved automatically",
-          description: "Your underwriting is now available from any device.",
-          variant: "success",
-        });
-      }
+      if (autoSavedAfterAuth) showAutoSavedToast();
     } catch (error) {
       // This block used to be try/finally with no catch. A throw anywhere above
       // — an offline fetch, a 5xx from a server action — became an unhandled
@@ -7007,6 +7001,14 @@ export function InvestCalcPage({
     });
   };
 
+  const showAutoSavedToast = () => {
+    toast({
+      title: "Deal saved automatically",
+      description: "Your underwriting is now available from any device.",
+      variant: "success",
+    });
+  };
+
   /** Load the saved deal as a new document once this one's sends are out.
    *  A plain reload would do the same, but at whatever moment the sensitive
    *  URL was noticed; this runs at the end of the save, after the events,
@@ -7027,16 +7029,23 @@ export function InvestCalcPage({
   // (openSavedDealDocument); show the confirmation it handed over. One-shot.
   useEffect(() => {
     if (!initialSavedDeal?.ok) return;
-    let notice: { id?: unknown; mode?: unknown } | null = null;
+    type SavedDealNotice = { id?: unknown; mode?: unknown; auto?: unknown };
+    let notice: SavedDealNotice | null = null;
     try {
       const raw = window.sessionStorage.getItem(SAVED_DEAL_NOTICE_KEY);
       if (raw === null) return;
       window.sessionStorage.removeItem(SAVED_DEAL_NOTICE_KEY);
-      notice = JSON.parse(raw) as { id?: unknown; mode?: unknown };
+      notice = JSON.parse(raw) as SavedDealNotice;
     } catch {
       return;
     }
     if (notice?.id !== initialSavedDeal.id) return;
+    // The post-sign-in save: the old document showed this toast last, so the
+    // new one shows it alone.
+    if (notice.auto === true) {
+      showAutoSavedToast();
+      return;
+    }
     showDealSavedToast(
       notice.mode === "updated" ? "updated" : "inserted",
       initialSavedDeal.id,
@@ -7433,7 +7442,11 @@ export function InvestCalcPage({
           try {
             window.sessionStorage.setItem(
               SAVED_DEAL_NOTICE_KEY,
-              JSON.stringify({ id: result.id, mode: result.mode }),
+              JSON.stringify({
+                id: result.id,
+                mode: result.mode,
+                auto: options.autoAfterAuth === true,
+              }),
             );
           } catch {
             // Storage blocked: the reopened deal's "Saved" state still shows.

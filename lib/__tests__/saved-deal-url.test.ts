@@ -130,6 +130,10 @@ describe("first save in a telemetry document", () => {
     );
     expect(page).toContain("await Promise.all([conversionSent, whenSiteEventsHandedOff()]);");
     expect(page).toContain("window.location.replace(path);");
+    // The confirmation travels with the navigation, including the
+    // post-sign-in "Deal saved automatically" (e2e/authenticated-product.spec.ts).
+    expect(success).toContain("auto: options.autoAfterAuth === true");
+    expect(page).toMatch(/if \(notice\.auto === true\) \{\s*showAutoSavedToast\(\);/);
     // Input stays paused from the click until the document unloads.
     expect(save).toContain("setInputPausedForSave(true);");
     expect(page).toContain("inert={inputPausedForSave ? true : undefined}");
