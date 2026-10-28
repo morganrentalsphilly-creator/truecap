@@ -76,6 +76,7 @@ import { PreRunCriteriaEditor } from "./pre-run-criteria-editor";
 import { FinancingSection } from "./financing-section";
 import { OperatingExpensesSection } from "./operating-expenses-section";
 import { BuyAndHoldAssumptionsSection } from "./buy-and-hold-assumptions-section";
+import { isDetailedAssumptionField } from "@/lib/detailed-assumption-fields";
 import { SaveAsDefaultsChip } from "./save-as-defaults-chip";
 import {
   DEFAULT_STRATEGY_KEY,
@@ -1371,9 +1372,15 @@ export function InvestCalcPage({
   // Cold visitors start with just the basics (property type, address,
   // price, beds/rent); financing + operating expenses collapse behind a
   // toggle backed by smart defaults, so the first answer comes fast. The
-  // sections stay MOUNTED (hidden via CSS) so address auto-fill still
-  // writes into them and their values submit normally.
-  const [advancedOpen, setAdvancedOpen] = useState(false);
+  // Financing and expenses stay mounted for their field effects. The pure
+  // detailed editor waits until first use; RHF owns its values independently
+  // of its inputs, and keeps them when the disclosure closes again.
+  const [advancedOpen, setAdvancedOpenState] = useState(false);
+  const [hasOpenedAdvanced, setHasOpenedAdvanced] = useState(false);
+  const setAdvancedOpen = useCallback((open: boolean) => {
+    if (open) setHasOpenedAdvanced(true);
+    setAdvancedOpenState(open);
+  }, []);
   // Operating expenses has a second disclosure inside the broader accuracy
   // region. Keep it controlled here so assumption chips and validation can
   // reveal the exact field instead of landing on another collapsed panel.
@@ -1859,6 +1866,9 @@ export function InvestCalcPage({
       userAnalysisDefaults,
     ),
     mode: "onChange",
+    // Optional editors need not exist for their defaults, restored values,
+    // programmatic updates, and errors to remain part of the same form.
+    shouldUnregister: false,
   });
   const liveStrategyInputs: StrategyInputs = {
     rehabBudget: form.watch("rehabBudget"),
@@ -3393,7 +3403,7 @@ export function InvestCalcPage({
         }, 70);
       });
     },
-    [scrollToAnalysisResults],
+    [scrollToAnalysisResults, setAdvancedOpen],
   );
 
   /**
@@ -3446,7 +3456,7 @@ export function InvestCalcPage({
       }
       handleStepNavigate(target);
     },
-    [handleStepNavigate],
+    [handleStepNavigate, setAdvancedOpen],
   );
 
   // Deep link: ?step=financing (income / expenses / decision / property)
@@ -4523,6 +4533,7 @@ export function InvestCalcPage({
       pointDashboardAt,
       toast,
       invalidateDecisionCriteriaForScopeChange,
+      setAdvancedOpen,
     ],
   );
 
@@ -6175,7 +6186,7 @@ export function InvestCalcPage({
     } catch {
       /* private mode / disabled storage - keep the default (collapsed) */
     }
-  }, []);
+  }, [setAdvancedOpen]);
 
   // (The one-time auto-open-advanced-after-first-result nudge was removed —
   // see the advancedOpen declaration comment. The assumptions strip's chips
@@ -6276,7 +6287,9 @@ export function InvestCalcPage({
     const inCollapsedExpenseDetails =
       !expenseDetailsOpen && OPERATING_EXPENSE_FIELD_PATHS.has(rootField);
     const inCollapsedAdvanced =
-      !advancedOpen && !!el && el.closest("#advanced-options") !== null;
+      !advancedOpen &&
+      ((!!el && el.closest("#advanced-options") !== null) ||
+        isDetailedAssumptionField(path));
     if (!inCollapsedAdvanced && !inCollapsedExpenseDetails) {
       focusPath();
       findEl()?.scrollIntoView({
@@ -9574,7 +9587,7 @@ export function InvestCalcPage({
       if (field?.editTarget === "expenses") setExpenseDetailsOpen(true);
       setPendingVerificationFocusKey(key);
     },
-    [currentInputConfidence],
+    [currentInputConfidence, setAdvancedOpen],
   );
 
   const handleToggleInputVerified = useCallback(
@@ -10154,8 +10167,7 @@ export function InvestCalcPage({
                 and value fields can still be estimates. Every imported value
                 remains labeled and editable before calculation. */}
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-              Confirm the property, price, income, and assumptions. TrueCap then
-              shows whether the deal works and why.
+              Check cash flow and the price that meets your targets.
               {!isAuthenticated
                 ? anonymousDecisionUsed
                   ? ANONYMOUS_DECISION_USED_INTRO
@@ -10179,14 +10191,15 @@ export function InvestCalcPage({
               // contain the visible text (WCAG 2.5.3).
               // The secondary control (audit A11): 8px, the graphite-2 line,
               // the band on hover, no float shadow and no lift.
-              className="group inline-flex min-h-11 shrink-0 flex-col items-start gap-0.5 self-start rounded-md border border-muted-foreground bg-transparent px-5 py-3 text-left transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-band sm:self-end"
+              className="group inline-flex min-h-11 shrink-0 flex-row items-center gap-2 self-start rounded-md border border-muted-foreground bg-transparent px-3 py-2 text-left transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-band sm:flex-col sm:items-start sm:gap-0.5 sm:self-end sm:px-5 sm:py-3"
             >
               <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground">
                 Try a sample rental
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="sr-only text-xs text-muted-foreground sm:not-sr-only">
                 Preview a sample Pro report
               </span>
+              <ArrowUpRight aria-hidden="true" className="size-4 text-muted-foreground sm:hidden" />
             </button>
           )}
         </div>
@@ -10928,7 +10941,7 @@ export function InvestCalcPage({
                   {/* SaveAsDefaultsChip moved to the assumptions-strip footer
                     (Phase 3) — same component, same props, new mount. */}
                 </div>
-                <BuyAndHoldAssumptionsSection form={form} />
+                {hasOpenedAdvanced ? <BuyAndHoldAssumptionsSection form={form} /> : null}
                 {/* Optional single-family details (year built + bathrooms +
                   square feet) — kept mounted so values persist + submit even
                   while hidden. Rendered LAST inside the accuracy block:

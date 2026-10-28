@@ -24,10 +24,14 @@
  * sign, "integer".
  */
 
-import NumberFlow from "@number-flow/react";
-import { useEffect, useState, type ComponentProps, type CSSProperties } from "react";
+import type NumberFlow from "@number-flow/react";
+import { lazy, Suspense, useEffect, useState, type ComponentProps, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { isSamplePrerenderShown } from "@/lib/sample-prerender";
+
+// Most first-paint figures never animate. Keep the animation library out of
+// their startup path, and show the exact formatted value while it loads.
+const LazyNumberFlow = lazy(() => import("@number-flow/react"));
 
 type NumberKind = "usd" | "usdSigned" | "usdCents" | "usdPerMonth" | "ratio" | "percent" | "integer";
 type Format = NonNullable<ComponentProps<typeof NumberFlow>["format"]>;
@@ -106,11 +110,17 @@ export function AnimatedNumber({
   // as an image (audit A24). The figure reaches it as text instead: an sr-only
   // twin in the same format, with the animated host hidden from it.
   const text = `${new Intl.NumberFormat("en-US", FORMAT[kind]).format(shown)}${suffix ?? ""}`;
+  const staticNumber = (
+    <span aria-hidden data-static-number="" className={cn("font-figure", className)} style={STATIC_NUMBER_STYLE}>
+      {text}
+    </span>
+  );
   return (
     <>
       <span className="sr-only">{text}</span>
       {animated ? (
-        <NumberFlow
+        <Suspense fallback={staticNumber}>
+        <LazyNumberFlow
           aria-hidden
           value={shown}
           format={FORMAT[kind]}
@@ -120,10 +130,9 @@ export function AnimatedNumber({
           className={cn("font-figure", className)}
           willChange
         />
+        </Suspense>
       ) : (
-        <span aria-hidden data-static-number="" className={cn("font-figure", className)} style={STATIC_NUMBER_STYLE}>
-          {text}
-        </span>
+        staticNumber
       )}
     </>
   );

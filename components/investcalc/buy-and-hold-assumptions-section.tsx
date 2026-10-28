@@ -220,7 +220,7 @@ export function BuyAndHoldAssumptionsSection({
     <section
       id="buy-and-hold-assumptions"
       aria-labelledby="buy-and-hold-assumptions-title"
-      className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6"
+      className="@container rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6"
     >
       <div className="mb-5">
         <h3
@@ -272,7 +272,7 @@ export function BuyAndHoldAssumptionsSection({
             ))}
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 @sm:grid-cols-2 @4xl:grid-cols-4">
             {propertyType === "single-family" ? (
               <MoneyField
                 form={form}
@@ -386,7 +386,7 @@ export function BuyAndHoldAssumptionsSection({
             />
           }
         >
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 @sm:grid-cols-2 @4xl:grid-cols-4">
             <MoneyField
               form={form}
               name="recurringOtherExpenseMonthly"
@@ -431,7 +431,7 @@ export function BuyAndHoldAssumptionsSection({
           }
         >
           {hasLoan ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 @sm:grid-cols-2 @4xl:grid-cols-4">
               <NumberField
                 form={form}
                 name="loanPointsPct"
@@ -491,7 +491,7 @@ export function BuyAndHoldAssumptionsSection({
               applied.
             </p>
           )}
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-4 grid grid-cols-1 gap-4 @sm:grid-cols-2 @4xl:grid-cols-4">
             <MoneyField
               form={form}
               name="acquisitionCredits"
@@ -508,7 +508,7 @@ export function BuyAndHoldAssumptionsSection({
             <CalendarClock aria-hidden="true" className="size-4 text-primary" />
           }
         >
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 @sm:grid-cols-2 @4xl:grid-cols-4">
             <NumberField
               form={form}
               name="renovationStartMonth"
