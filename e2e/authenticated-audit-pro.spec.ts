@@ -61,17 +61,8 @@ test("Pro is never gated: projections and stress test open, then save â†’ edit â
     // Save, then edit and save again.
     const save = summary.getByRole("button", { name: "Save", exact: true });
     await expect(save).toBeEnabled({ timeout: 20_000 });
-    // The first save writes ?savedDeal=<id> into a document that opened on a
-    // clean URL. PostHogTracker (components/analytics/posthog-provider.tsx)
-    // then hard-reloads the page so no telemetry script that may have loaded
-    // can observe the deal id, and the reloaded page reopens the saved deal.
-    // That reload lands a render or two after the URL changes, so editing
-    // before it finishes is wiped (CI trace: the rent field was hidden, then
-    // re-mounted at the saved 2,600). Wait for the reloaded document first.
-    const privacyReload = page.waitForEvent("load", { timeout: 30_000 });
     await save.click();
     await expect(page).toHaveURL(/[?&]savedDeal=[0-9a-f-]{36}(?:&|$)/i, { timeout: 30_000 });
-    await privacyReload;
     const dealId = new URL(page.url()).searchParams.get("savedDeal")!;
     await expect(summary.getByRole("button", { name: "Saved", exact: true })).toBeVisible({ timeout: 30_000 });
 
