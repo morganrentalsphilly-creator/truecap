@@ -82,6 +82,10 @@ gtag('consent', 'update', {
   ad_user_data: 'granted',
   ad_personalization: 'granted'
 });
+// GA4 pageviews need an explicit, sanitized public-route decision. The
+// GTM container forwards only approved dataLayer events; never let its
+// automatically added Google tag send the current URL on boot.
+gtag('set', { send_page_view: false });
 (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.referrerPolicy='no-referrer';j.src=
