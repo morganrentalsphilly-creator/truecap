@@ -53,6 +53,7 @@ describe("telemetry privacy contract", () => {
     expect(layout).toContain("<GoogleMeasurement />");
     expect(layout).not.toContain("googletagmanager.com/gtm.js");
     expect(vercel).toContain("beforeSend={sanitizeVercelAnalyticsEvent}");
+    expect(vercel).toContain("<DeferredSpeedInsights />");
     expect(vercel).toContain("<SpeedInsights beforeSend={sanitizeVercelSpeedEvent} />");
     expect(vercel).toContain("sanitizeSensitiveUrl(event.url)");
     // Vercel's mount uses the cookieless gate: the strict gate plus an exact

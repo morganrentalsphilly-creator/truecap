@@ -1,7 +1,7 @@
 "use client";
 
 import { Analytics, type BeforeSendEvent } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import dynamic from "next/dynamic";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import {
@@ -12,6 +12,34 @@ import { stripAdClickIds } from "@/lib/analytics/ad-click-ids";
 import { recordCookieConsentChoice } from "@/lib/analytics/site-events";
 import { COOKIE_CONSENT_EVENT } from "@/lib/use-cookie-banner";
 import { markThirdPartyTelemetryMounted } from "@/lib/analytics/telemetry-document";
+
+const SpeedInsights = dynamic(
+  () => import("@vercel/speed-insights/next").then((module) => module.SpeedInsights),
+  { ssr: false },
+);
+
+function DeferredSpeedInsights() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    let idleId: number | undefined;
+    let timerId: ReturnType<typeof setTimeout> | undefined;
+    const schedule = () => {
+      if ("requestIdleCallback" in window) {
+        idleId = window.requestIdleCallback(() => setReady(true), { timeout: 2000 });
+      } else {
+        timerId = setTimeout(() => setReady(true), 0);
+      }
+    };
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
+    return () => {
+      window.removeEventListener("load", schedule);
+      if (idleId !== undefined) window.cancelIdleCallback(idleId);
+      if (timerId !== undefined) clearTimeout(timerId);
+    };
+  }, []);
+  return ready ? <SpeedInsights beforeSend={sanitizeVercelSpeedEvent} /> : null;
+}
 
 /**
  * Two steps, in this order: credentials and deal inputs out
@@ -80,7 +108,7 @@ function TrueCapVercelAnalyticsInner() {
   return (
     <>
       <Analytics beforeSend={sanitizeVercelAnalyticsEvent} />
-      <SpeedInsights beforeSend={sanitizeVercelSpeedEvent} />
+      <DeferredSpeedInsights />
     </>
   );
 }
