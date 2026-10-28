@@ -31,7 +31,7 @@ import { isSamplePrerenderShown } from "@/lib/sample-prerender";
 
 // Most first-paint figures never animate. Keep the animation library out of
 // their startup path, and show the exact formatted value while it loads.
-const LazyNumberFlow = lazy(() => import("@number-flow/react"));
+const LazyNumberFlow = lazy(() => import("./number-flow-renderer"));
 
 type NumberKind = "usd" | "usdSigned" | "usdCents" | "usdPerMonth" | "ratio" | "percent" | "integer";
 type Format = NonNullable<ComponentProps<typeof NumberFlow>["format"]>;
@@ -88,6 +88,7 @@ export function AnimatedNumber({
   const [shown, setShown] = useState(() =>
     rollIn && !skipRoll && !prefersReducedMotion() ? 0 : value,
   );
+  const [initialValue] = useState(shown);
   const [rolled, setRolled] = useState(!rollIn || skipRoll);
   const [animated, setAnimated] = useState(rollIn && !skipRoll);
   // Promote before the effect updates `shown`, so NumberFlow receives the
@@ -122,6 +123,7 @@ export function AnimatedNumber({
         <Suspense fallback={staticNumber}>
         <LazyNumberFlow
           aria-hidden
+          initialValue={initialValue}
           value={shown}
           format={FORMAT[kind]}
           locales="en-US"

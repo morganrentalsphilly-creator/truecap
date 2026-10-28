@@ -98,3 +98,25 @@ for (const field of ["interestRate", "propertyTaxPct"] as const) {
     await expect(input).toBeFocused();
   });
 }
+
+test("starting another deal does not steal focus from an active price edit", async ({ page }) => {
+  // Widen the deferred-focus window to reproduce a busy mobile main thread.
+  await page.addInitScript(() => {
+    const schedule = window.setTimeout.bind(window);
+    window.setTimeout = ((handler: TimerHandler, delay?: number, ...args: unknown[]) =>
+      schedule(handler, delay === 100 ? 800 : delay, ...args)) as typeof window.setTimeout;
+  });
+  const form = await openDraft(page, draft);
+  await form.locator('button[data-inform-submit="true"]').click();
+  const summary = page.locator("section[aria-labelledby='decision-summary-title']");
+  await expect(summary).toBeVisible({ timeout: 30_000 });
+  await summary.getByRole("button", { name: "Next deal · keep assumptions", exact: true }).click();
+  await page.getByRole("dialog", { name: "Analyze another property?" })
+    .getByRole("button", { name: "Analyze another", exact: true }).click();
+  const price = form.getByLabel("Price to analyze", { exact: true });
+  await price.fill("260000");
+  await page.waitForTimeout(1000);
+  await expect(price).toBeFocused();
+  await expect(price).toHaveValue(/260,?000/);
+  await expect(form.getByLabel("Property Address", { exact: true })).toHaveValue("");
+});

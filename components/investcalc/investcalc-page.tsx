@@ -8748,6 +8748,11 @@ export function InvestCalcPage({
     // beat so the results section has unmounted and the input phase is the
     // scroll target — same timing as the results-scroll effect above.
     setTimeout(() => {
+      // A fast user may already be typing in the next field by the time this
+      // callback runs. Never move that focus (and their keystrokes) back to
+      // the address. Only restore focus while the page itself is unfocused.
+      const focused = document.activeElement;
+      if (focused && focused !== document.body && focused !== document.documentElement) return;
       form.setFocus("address");
       (document.getElementById("address") ?? undefined)?.scrollIntoView({
         behavior: scrollBehavior(),
