@@ -7,6 +7,7 @@ import { shouldKeepThirdPartyTelemetryDisabled } from "@/lib/sensitive-url";
 import { readStoredAnalyticsConsent } from "@/lib/analytics/site-events";
 import { COOKIE_CONSENT_EVENT } from "@/lib/use-cookie-banner";
 import { markThirdPartyTelemetryMounted } from "@/lib/analytics/telemetry-document";
+import { isProductionGoogleHost } from "@/lib/analytics/google-host";
 
 const GOOGLE_ADS_ID = "AW-8236119484";
 const GTM_ID = "GTM-TCBNRMBG";
@@ -17,6 +18,10 @@ const GTM_ID = "GTM-TCBNRMBG";
  * path contains an encoded analysis snapshot or bearer token.
  */
 function GoogleMeasurementInner() {
+  const [productionHost, setProductionHost] = useState(false);
+  useEffect(() => {
+    setProductionHost(isProductionGoogleHost(window.location.hostname));
+  }, []);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const location = `${pathname}${searchParams?.size ? `?${searchParams.toString()}` : ""}`;
@@ -53,6 +58,7 @@ function GoogleMeasurementInner() {
 
   const blocked =
     process.env.NODE_ENV !== "production" ||
+    !productionHost ||
     !pathname ||
     disabledForDocument ||
     !consentGranted;

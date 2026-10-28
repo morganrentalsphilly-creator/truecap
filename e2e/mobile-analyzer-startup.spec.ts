@@ -30,6 +30,19 @@ async function openDraft(page: Page, values: Record<string, unknown>) {
 
 test.use({ viewport: { width: 390, height: 844 } });
 
+test("local verification never loads production Google tags after consent", async ({ page }) => {
+  const googleRequests: string[] = [];
+  await page.route(/https:\/\/(?:[^/]*\.)?(?:googletagmanager\.com|google-analytics\.com|googleadservices\.com)\//, route => {
+    googleRequests.push(route.request().url());
+    return route.abort();
+  });
+  await page.goto("/analyze");
+  await page.getByRole("button", { name: /^accept$/i }).click();
+  await page.waitForTimeout(1500);
+  await expect(page.locator('script[src*="googletagmanager.com"]')).toHaveCount(0);
+  expect(googleRequests).toEqual([]);
+});
+
 test("a closed detailed editor preserves restored values in the actual calculation", async ({ page }) => {
   const form = await openDraft(page, draft);
   await expect(page.locator("#buy-and-hold-assumptions")).toHaveCount(0);
