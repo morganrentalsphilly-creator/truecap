@@ -20,7 +20,10 @@ import {
   scrubSentryRequestUrl,
   scrubSentrySpanUrl,
 } from "@/lib/sentry-url-scrubber";
-import { sanitizeVercelAnalyticsEvent } from "@/components/analytics/vercel-analytics";
+import {
+  sanitizeVercelAnalyticsEvent,
+  sanitizeVercelSpeedEvent,
+} from "@/components/analytics/vercel-analytics";
 import { CHECKOUT_PLAN_SLUGS } from "@/lib/pricing-checkout-resume";
 
 describe("sensitive URL scrubbing", () => {
@@ -483,7 +486,23 @@ describe("sign-up and login URLs with an allowlisted next stay counted (P1-49)",
         );
         expect(sent.url).not.toMatch(/next|dashboard|pricing|checkout/);
       }
+      const vital = sanitizeVercelSpeedEvent({ type: "vital", url });
+      expect(vital.url).toBe(
+        "https://usetruecap.com/auth/sign-up?plan=pro&utm_medium=cpc",
+      );
     }
+  });
+
+  it("redacts bearer paths and ad click IDs from Speed Insights vitals", () => {
+    const vital = sanitizeVercelSpeedEvent({
+      type: "vital",
+      url: "https://usetruecap.com/s/private-bearer?gclid=ad-click&utm_source=share",
+      route: "/s/private-bearer",
+    });
+    expect(vital.url).toBe(
+      "https://usetruecap.com/s/[token]?utm_source=share",
+    );
+    expect(vital.route).toBe("/s/[token]");
   });
 
   it("switches telemetry off for every other next value", () => {

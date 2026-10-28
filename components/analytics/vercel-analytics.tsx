@@ -1,6 +1,7 @@
 "use client";
 
 import { Analytics, type BeforeSendEvent } from "@vercel/analytics/next";
+import dynamic from "next/dynamic";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import {
@@ -11,6 +12,34 @@ import { stripAdClickIds } from "@/lib/analytics/ad-click-ids";
 import { recordCookieConsentChoice } from "@/lib/analytics/site-events";
 import { COOKIE_CONSENT_EVENT } from "@/lib/use-cookie-banner";
 import { markThirdPartyTelemetryMounted } from "@/lib/analytics/telemetry-document";
+
+const SpeedInsights = dynamic(
+  () => import("@vercel/speed-insights/next").then((module) => module.SpeedInsights),
+  { ssr: false },
+);
+
+function DeferredSpeedInsights() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    let idleId: number | undefined;
+    let timerId: ReturnType<typeof setTimeout> | undefined;
+    const schedule = () => {
+      if ("requestIdleCallback" in window) {
+        idleId = window.requestIdleCallback(() => setReady(true), { timeout: 2000 });
+      } else {
+        timerId = setTimeout(() => setReady(true), 0);
+      }
+    };
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
+    return () => {
+      window.removeEventListener("load", schedule);
+      if (idleId !== undefined) window.cancelIdleCallback(idleId);
+      if (timerId !== undefined) clearTimeout(timerId);
+    };
+  }, []);
+  return ready ? <SpeedInsights beforeSend={sanitizeVercelSpeedEvent} /> : null;
+}
 
 /**
  * Two steps, in this order: credentials and deal inputs out
@@ -23,6 +52,18 @@ export function sanitizeVercelAnalyticsEvent<T extends BeforeSendEvent>(
   event: T,
 ): T {
   return { ...event, url: stripAdClickIds(sanitizeSensitiveUrl(event.url)) };
+}
+
+/** Speed Insights receives the same redacted URL as Web Analytics. Its SDK
+ * also runs only in documents where the cookieless telemetry gate is open. */
+export function sanitizeVercelSpeedEvent<T extends { url: string; route?: string }>(
+  event: T,
+): T {
+  return {
+    ...event,
+    url: stripAdClickIds(sanitizeSensitiveUrl(event.url)),
+    ...(event.route ? { route: sanitizeSensitiveUrl(event.route) } : {}),
+  };
 }
 
 /**
@@ -64,7 +105,12 @@ function TrueCapVercelAnalyticsInner() {
     if (mounted) markThirdPartyTelemetryMounted();
   }, [mounted]);
   if (!mounted) return null;
-  return <Analytics beforeSend={sanitizeVercelAnalyticsEvent} />;
+  return (
+    <>
+      <Analytics beforeSend={sanitizeVercelAnalyticsEvent} />
+      <DeferredSpeedInsights />
+    </>
+  );
 }
 
 export function TrueCapVercelAnalytics() {
