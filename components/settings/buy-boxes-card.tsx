@@ -37,6 +37,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { MAX_BUY_BOXES } from "@/lib/commercial-limits";
 
 const RETURN_FIELDS = [
   { key: "minCapRatePct", label: "Min cap rate", suffix: "%", step: "0.1", placeholder: "6" },
@@ -141,6 +142,7 @@ export function BuyBoxesCard() {
   const { toast } = useToast();
   const [loaded, setLoaded] = useState(false);
   const [canUse, setCanUse] = useState(false);
+  const [buyBoxLimit, setBuyBoxLimit] = useState(MAX_BUY_BOXES);
   // False while the offer-target columns are missing server-side; the two
   // inputs render disabled with a hint instead of composing a doomed save.
   const [supportsOfferTargets, setSupportsOfferTargets] = useState(true);
@@ -200,6 +202,7 @@ export function BuyBoxesCard() {
     if (result.ok) {
       setBoxes(result.boxes);
       setCanUse(result.canUse);
+      if (result.buyBoxLimit != null) setBuyBoxLimit(result.buyBoxLimit);
       if (result.supportsOfferTargets != null) {
         setSupportsOfferTargets(result.supportsOfferTargets);
       }
@@ -237,6 +240,7 @@ export function BuyBoxesCard() {
         if (result.ok) {
           setBoxes(result.boxes);
           setCanUse(result.canUse);
+          if (result.buyBoxLimit != null) setBuyBoxLimit(result.buyBoxLimit);
           setSupportsOfferTargets(result.supportsOfferTargets ?? true);
         } else if (result.code === "MIGRATION_PENDING") {
           setMigrationPending(true);
@@ -427,6 +431,7 @@ export function BuyBoxesCard() {
       </p>
 
       {/* Box list */}
+      <p className="mb-4 text-sm text-muted-foreground">{boxes.length} of {buyBoxLimit} Buy Boxes used. {clients ? "Keep a separate set of targets for each investor client." : "Keep separate targets for each strategy or market."}</p>
       {boxes.length > 0 ? (
         <ul className="mb-4 space-y-2">
           {boxes.map((box) => (
@@ -573,6 +578,7 @@ export function BuyBoxesCard() {
         <Button
           type="button"
           variant="outline"
+          disabled={boxes.length >= buyBoxLimit}
           onClick={() => {
             setSaveFit(null);
             setEditor(emptyEditor(boxes.length === 0));

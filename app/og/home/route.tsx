@@ -29,7 +29,7 @@ import { formatDscr } from "@/lib/financial-presentation";
  * would override the per-page OG images the tools, blog, and /vs pages set.
  */
 
-const HEADLINE = "Stop forwarding listings. Start sending deals that already pencil.";
+const HEADLINE = "Send clients rentals that fit.";
 const URL_TEXT = "usetruecap.com";
 
 export async function GET() {

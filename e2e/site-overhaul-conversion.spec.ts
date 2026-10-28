@@ -197,7 +197,7 @@ for (const size of [
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
     const cue = page.locator('[data-hero-investor-cue=""]');
-    await expect(cue).toContainText("Buying for your own portfolio? Same analyzer, your own Buy Box.");
+    await expect(cue).toContainText("Buying for yourself?");
     await expect(cue.getByRole("link", { name: "For investors", exact: true })).toHaveAttribute(
       "href",
       "/for-investors",

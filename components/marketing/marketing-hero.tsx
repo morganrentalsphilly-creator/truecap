@@ -62,7 +62,7 @@ export function MarketingHero() {
           </h1>
           <p className="mt-4 max-w-[46ch] text-pretty text-lg leading-normal text-muted-foreground sm:mt-5">
             {newHomepagePositioningEnabled
-              ? "Paste the rental listing. See whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded with Pro."
+              ? "Screen the listing, check your client's targets, and see the highest price that meets them."
               : "Enter an address, the asking price and a bedroom count for a first-pass screen with labeled, editable assumptions. Pro adds the Offer Ceiling: the highest price that still meets your targets."}
           </p>
           {/* The math supports the decision; it is not the headline. */}
@@ -87,7 +87,7 @@ export function MarketingHero() {
               rule and 12px margins, so at 375x629 the primary button still
               ends above the banner. */}
           <p data-hero-investor-cue="" className="mt-3 text-base">
-            Buying for your own portfolio? Same analyzer, your own Buy Box.{" "}
+            Buying for yourself?{" "}
             {/* A 44px tap target from padding that the negative margin takes
                 back out of the line box, so the cue keeps its body leading. */}
             <IntentPrefetchLink href="/for-investors" className="tc-link -my-3 inline-block py-3">

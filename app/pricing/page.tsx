@@ -111,7 +111,7 @@ const FAQS: { q: string; a: string }[] = [
     // Agent-first (2026-09): the audience question leads, and its answer
     // leads with the agent workflow. Facts per lib/agent-faqs.ts.
     q: "Is this for agents, investors, or both?",
-    a: "Both, and the analyzer is the same. Agents with investor clients use Agent Pro to assign Buy Boxes to clients (up to 12 per account), screen each listing against the client's Buy Box, and send a co-branded decision memo the client can open without an account and rerun with their own assumptions. Investors use the same analyzer, with Pro, for deals they are buying themselves.",
+    a: "Both, and the analyzer is the same. Agents with investor clients use Agent Pro to assign Buy Boxes to clients (up to 100 per account), screen each listing against the client's Buy Box, and send a co-branded decision memo the client can open without an account and rerun with their own assumptions. Investors use the same analyzer, with Pro, for deals they are buying themselves.",
   },
   {
     q: "Is TrueCap really free?",

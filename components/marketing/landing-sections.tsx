@@ -342,6 +342,7 @@ export function HowTrueCapWorks() {
           Analyze a deal free
         </AnalyzeCtaLink>
         <p className="text-sm text-muted-foreground">Free · no card · no signup</p>
+        <IntentPrefetchLink href="/for-agents#sample-client-workflow" className="tc-link inline-flex min-h-11 items-center">See one listing screened for two clients</IntentPrefetchLink>
       </div>
     </Section>
   );
@@ -633,7 +634,7 @@ export function VsCompetitors() {
               </li>
               <li className="border-b border-rule-soft py-2.5">
                 Screening for investor clients: Buy Boxes you assign to
-                clients (up to 12 per account), client-report links that open
+                clients (up to 100 per account), client-report links that open
                 without an account, and a co-branded decision memo.
               </li>
             </ul>
@@ -1077,7 +1078,7 @@ export async function PdfProUpsell() {
                 audience: "Win investor clients.",
                 prices: prices.agentPro,
                 // Only what Agent Pro adds, with the caps the code enforces
-                // (plan-answers.ts: 100 clients, 12 Buy Boxes per account).
+                // (plan-answers.ts: 100 clients, 100 Buy Boxes per Agent Pro account).
                 // Co-branding is Pro too, so it is the note, not a row.
                 answers: agentProPlanAnswers(),
                 note: (

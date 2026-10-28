@@ -11,25 +11,21 @@ describe("public funnel and trust guards", () => {
     const hero = read("components/marketing/marketing-hero.tsx");
     const form = read("components/marketing/hero-address-form.tsx");
 
-    // 2026-09-29 agent-first pass: the headline is the agent's outcome, the
-    // subhead keeps the product's topical nouns (rental, Buy Box, Offer
-    // Ceiling). 2026-10-03 rulings: the subhead carries no speed figure
-    // (P2-19), co-branding is qualified "with Pro" (P1-03), and the investor
-    // cue sits ABOVE the primary action (P1-01).
+    // Short agent-focused lead; keep the investor route and free-entry terms.
     expect(config).toContain(
-      'decision_system: "Stop forwarding listings. Start sending deals that already pencil."',
+      'decision_system: "Send clients rentals that fit."',
     );
     expect(hero).toContain(
-      "Paste the rental listing. See whether it clears your client's Buy Box, the highest price that still does (the Offer Ceiling), and what could break the deal. Send it co-branded with Pro.",
+      "Screen the listing, check your client's targets, and see the highest price that meets them.",
     );
     expect(hero).not.toContain('Send it co-branded."');
     expect(hero).not.toMatch(/\b\d+ seconds|about a minute/);
     expect(hero).toContain('href="/for-investors"');
     expect(hero).toContain("data-hero-investor-cue");
-    // The cue's words and link are unchanged, and it comes before the form
+    // The investor cue comes before the form
     // and the risk line in the source (so in the DOM and on screen).
     expect(hero.replace(/\s+/g, " ")).toContain(
-      "Buying for your own portfolio? Same analyzer, your own Buy Box.",
+      "Buying for yourself?",
     );
     const cueAt = hero.indexOf('data-hero-investor-cue=""');
     const formAt = hero.indexOf("<HeroAddressForm className");

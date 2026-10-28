@@ -53,7 +53,7 @@ type ProofMomentSource = "pdf_export" | "third_save";
 export type TestimonialTrigger = ProofMomentSource | "email_link";
 
 const QUESTION =
-  "One sentence — what did TrueCap change about how you evaluate deals?";
+  "What worked well, and what should we improve?";
 const CONSENT_LABEL =
   "TrueCap may publish this with my first name, role, and market.";
 const THANKS =

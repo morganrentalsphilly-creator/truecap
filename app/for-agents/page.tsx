@@ -8,8 +8,8 @@
  * lib/agent-faqs.ts for the per-claim sources. In short: a share link needs
  * no account and is read-only; co-branding (Pro and Agent Pro) renders logo,
  * brand color, "Shared by" and a "Prepared by" block, with TrueCap's name
- * kept; the roster caps at 100 clients and an account at 12 Buy Boxes; a deal
- * is screened against ONE client's Buy Box; the no-card trial never includes
+ * kept; the roster caps at 100 clients and Agent Pro at 100 Buy Boxes; a deal
+ * can be screened against each active client's Buy Box; the no-card trial never includes
  * the roster. Nothing here implies leads, listings, or closings.
  *
  * Shared chrome: the same Header + SiteFooter as every marketing page (the
@@ -37,6 +37,7 @@ import { LedgerFigure } from "@/components/ledger/ledger-parts";
 // /auth/ hrefs that way, so the jump scrolls every time it is used and Back
 // from sign-up returns to the close); /analyze never prefetches.
 // Guarded by lib/__tests__/intent-prefetch-landing.test.ts.
+import { SampleClientWorkflow } from "@/components/marketing/sample-client-workflow";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { FaqSection } from "@/components/marketing/landing-sections";
@@ -45,7 +46,6 @@ import {
   CloseSection,
   PageHero,
   RuledList,
-  StepList,
 } from "@/components/marketing/page-parts";
 import { ClientPdfCover } from "@/components/marketing/client-pdf-cover";
 import { MEMO_SHOT, ProductShot } from "@/components/marketing/product-shot";
@@ -118,49 +118,25 @@ const AGENT_PRO_SIGNUP_HREF = `/auth/sign-up?plan=agent-pro&billing=annual&next=
 /** The hero's capability line, one term per unbreakable run. */
 const HERO_TERMS = ["Cash flow", "Cap rate", "Cash-on-cash", "DSCR", "Buy Box fit", "Offer Ceiling"] as const;
 
-/** NAR's order of what agents buy software for: time, client experience, closings. */
-const PROMISES: { title: string; body: string }[] = [
-  {
-    title: "Save time",
-    body: "First-pass numbers from the address, the asking price and a bedroom count, at the showing, on your phone. HUD rent and a FRED rate benchmark fill in as labeled starting values; you enter the property tax bill and the client's financing.",
-  },
-  {
-    title: "Improve the client experience",
-    body: "Send deals that already clear the client's Buy Box, with the math attached and your name on it, instead of a stack of listings. When one doesn't fit, say so with the specific criterion it missed.",
-  },
-  {
-    title: "Get to the offer sooner",
-    body: "A client who already knows the highest price that still meets their targets has one less reason to wait. The decision memo travels with the numbers and the reasoning together.",
-  },
-];
-
 /** How the client roster works: what Agent Pro enforces today. */
 const ROSTER: [title: string, body: string][] = [
   [
     "A Buy Box per client",
-    "Add a client to your roster (up to 100 clients) and assign a Buy Box to them: their cash-flow, cash-on-cash, DSCR, cap-rate, and price targets. An account keeps up to 12 Buy Boxes in total, yours and your clients' combined.",
+    "Add a client to your roster (up to 100 clients) and assign a Buy Box to them: their cash-flow, cash-on-cash, DSCR, cap-rate, and price targets. Agent Pro includes up to 100 Buy Boxes in total, yours and your clients' combined.",
   ],
   [
-    "Deal assignment",
-    "Assign any saved deal to a client. From then on it is screened against that client's Buy Box, not yours. Share it as a client report: the link hides the address unless you include it.",
+    "Screen all active clients",
+    "Save the property once, then select Screen my clients. Each active client's targets and saved financing assumptions produce a separate result and Offer Ceiling.",
   ],
   [
     "“Doesn't fit, and here's why”",
     "A miss names the criterion: “Biggest gap — Cap rate: 5.2% vs 6.5%.” A pass shows the tightest margin. The roster card shows how many of each client's assigned deals meet their criteria.",
   ],
   [
-    "One client per deal, today",
-    "A deal is screened against one client's Buy Box at a time. To check the same listing for another client, reassign it or save it again. Screening one listing against the whole roster at once is not offered yet.",
+    "Keep each client's result",
+    "Save the client matches you want to pursue. Each match preserves the criteria and financing used for that result, with its own PDF or client link. Later edits do not silently change a saved match.",
   ],
 ];
-
-const WORKFLOW_STEPS = [
-  "Open TrueCap on your phone or laptop at the showing.",
-  "Paste the listing address. A HUD rent benchmark and the FRED 30-year benchmark fill in as editable starting values; enter the local property-tax bill or a reviewed rate yourself.",
-  "Switch to the client's financing: their down payment, their lender's rate, a DSCR loan if that is what they use.",
-  "Assign the deal to the client. It is screened against that client's Buy Box, and the Offer Ceiling shows the highest price that still meets their targets.",
-  "Send the co-branded share link or PDF. If it misses, the memo names the criterion it missed and by how much.",
-] as const;
 
 /** Proof you can check — no counts, no logos, no quotes we can't source. */
 const PROOF_LINKS: [href: string, title: string, body: string][] = [
@@ -225,14 +201,13 @@ export default async function ForAgentsPage() {
             or the PDF an agent's client receives, and the caption must not
             say so until a real co-branded capture replaces it. */}
         <PageHero
-          title="Send your investor clients deals that already pencil."
+          title="One listing. Each client's numbers."
           lede={
             <>
               <p>
-                Paste the listing. See whether it clears your client&apos;s
-                Buy Box, the highest price that still does (the Offer
-                Ceiling), and what could break it. Send it co-branded with Pro
-                or Agent Pro; your client can rerun it with their own numbers.
+                Screen a saved rental against your clients&apos; targets and
+                financing. See who it fits, their Offer Ceiling, and the
+                assumptions to verify before sending the report.
               </p>
               {/* Each term keeps its separator and never splits ("Buy Box" /
                   "fit"), so the line only breaks after a "·". */}
@@ -256,6 +231,7 @@ export default async function ForAgentsPage() {
                   the actions slot's. */}
               <HeroAddressForm className="mt-0 sm:mt-0" />
               <ActionRow className="mt-3">
+                <IntentPrefetchLink href="#sample-client-workflow" className="tc-link inline-flex min-h-11 items-center">See the client workflow</IntentPrefetchLink>
                 <TrackedMarketingLink
                   href="#pricing"
                   event="agent_pro_cta_clicked"
@@ -322,18 +298,7 @@ export default async function ForAgentsPage() {
           </dl>
         </PageHero>
 
-        {/* The three things agents buy software for, in NAR's order. The
-            heading sits over its list, as the homepage stacks every section
-            but the FAQ (the 5/7 split is kept for a left column with content). */}
-        <Section aria-labelledby="agent-promises">
-          <SectionHeading id="agent-promises">
-            Investors answer the agent who already did the math.
-          </SectionHeading>
-          <RuledList
-            className="mt-8 max-w-[68ch]"
-            items={PROMISES.map(({ title, body }) => ({ key: title, term: title, detail: body }))}
-          />
-        </Section>
+        <SampleClientWorkflow />
 
         {/* Verified agent proof — self-hides until records pass the
             lib/proof-records.ts gate (first consumer of VERIFIED_AGENT_PROOF). */}
@@ -378,18 +343,6 @@ export default async function ForAgentsPage() {
               See Agent Pro pricing
             </IntentPrefetchLink>
           </ActionRow>
-        </Section>
-
-        {/* The agent workflow: a real sequence, showing to send. */}
-        <Section aria-labelledby="workflow-heading">
-          <SectionHeading id="workflow-heading">The agent workflow</SectionHeading>
-          <StepList className="mt-8" steps={WORKFLOW_STEPS} />
-          <p className="mt-5 max-w-[68ch] text-pretty text-base leading-relaxed text-muted-foreground">
-            The decision memo is to an investment purchase what a CMA is to a
-            listing appointment: the document that shows the client what you
-            did and why. It is a screening model, not an appraisal or an
-            opinion of value.
-          </p>
         </Section>
 
         {/* Proof you can check — no counts, no logos, no quotes we can't source. */}

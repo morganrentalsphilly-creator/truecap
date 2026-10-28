@@ -40,7 +40,7 @@ export function ClientDealScreening({ savedDealId, clientId }: { savedDealId: st
         trackEvent("client_match_saved", { source: "saved_deal" });
         track("client_match_saved", { source: "saved_deal" });
         setSaved(next);
-        setNotice("Client match saved with its current assumptions and criteria.");
+        setNotice("Client match saved with its current assumptions and criteria. Export the client PDF or prepare its link below.");
       }
       else setNotice(next.message);
     } catch { setNotice("Couldn't save this match. Your property and existing matches are unchanged."); }
@@ -85,6 +85,7 @@ export function ClientDealScreening({ savedDealId, clientId }: { savedDealId: st
       <div className="max-w-prose">
         <h2 id="client-screening-title" className="font-display text-h3-sm">Which clients could this fit?</h2>
         <p className="mt-2 text-sm text-muted-foreground">Screen this saved property against each active client Buy Box. Uses saved client financing preferences when supplied; otherwise uses the deal&apos;s financing. Confirm terms with each client and lender.</p>
+        <p className="mt-3 text-sm"><Link href="/dashboard/clients" className="tc-link inline-flex min-h-11 items-center">Set up clients and financing</Link>{" · "}<Link href="/settings#buy-boxes" className="tc-link inline-flex min-h-11 items-center">Set Buy Box targets</Link></p>
       </div>
       <Button type="button" disabled={pending} onClick={screen}>{pending ? "Screening clients…" : result?.ok ? "Refresh screening" : "Screen my clients"}</Button>
     </div>
