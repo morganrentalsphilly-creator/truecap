@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { createElement, type FunctionComponent, type ReactElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -115,6 +115,9 @@ vi.mock("@/lib/stripe/display-prices", async (importOriginal) => ({
 }));
 
 import { PricingValueStack } from "@/components/marketing/pricing-value-stack";
+import { HeroSheet } from "@/components/home/hero-sheet";
+import { buildSampleDealLedger } from "@/lib/sample-deal-ledger";
+import { buildSampleDealSweep } from "@/lib/sample-deal-sweep";
 
 const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
 
@@ -576,6 +579,37 @@ describe("paid landing pages: intent-only prefetch (rendered)", () => {
         ),
       ).toEqual([{ href, prefetch: "default" }]);
     }
+  });
+
+  it("the homepage hero's walkthrough jump is a plain anchor; the sign-in shell's is a route", () => {
+    // A next/link to "#how-it-works" prefetched the homepage itself (~24 KB at
+    // 390px, live 2026-10-29) when it scrolled into view, and a second tap
+    // did not scroll (fragment-href.ts). The sign-in shell links the same
+    // section from another route, so that one stays next/link.
+    const ledger = buildSampleDealLedger()!;
+    const sweep = buildSampleDealSweep()!;
+    const walkthrough = (href: string) =>
+      anchors(
+        renderToStaticMarkup(createElement(HeroSheet, { ledger, sweep, walkthroughHref: href })),
+      ).filter((a) => a.href === href);
+    expect(walkthrough("#how-it-works")).toEqual([{ href: "#how-it-works", prefetch: "(external)" }]);
+    expect(walkthrough("/#how-it-works")).toEqual([{ href: "/#how-it-works", prefetch: "default" }]);
+  });
+
+  it("no next/link in app/ or components/ is written with a same-page fragment href", () => {
+    const walk = (dir: string, out: string[] = []): string[] => {
+      for (const entry of readdirSync(dir)) {
+        if (entry === "node_modules" || entry === ".next" || entry === "__tests__") continue;
+        const full = join(dir, entry);
+        if (statSync(full).isDirectory()) walk(full, out);
+        else if (/\.tsx?$/.test(full)) out.push(full);
+      }
+      return out;
+    };
+    const offenders = [...walk("app"), ...walk("components")].filter((file) =>
+      /<Link\b[^>]*\bhref=(?:"#|\{["`]#)/.test(readFileSync(file, "utf8").replace(/\s+/g, " ")),
+    );
+    expect(offenders, "a same-page jump is a plain <a> (components/marketing/fragment-href.ts)").toEqual([]);
   });
 
   it("/pricing's value stack links /for-agents on intent", () => {

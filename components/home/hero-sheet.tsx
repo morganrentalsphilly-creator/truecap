@@ -13,6 +13,7 @@
  */
 
 import Link from "next/link";
+import { isFragmentHref } from "@/components/marketing/fragment-href";
 import { PriceScrubber, type ScrubberSource } from "@/components/home/price-scrubber";
 import { LedgerTotal } from "@/components/ledger/ledger-parts";
 import { formatDscr } from "@/lib/financial-presentation";
@@ -38,6 +39,11 @@ export function HeroSheet({
   /** Where the walkthrough link goes: the story on the same page. */
   walkthroughHref?: string;
 }) {
+  // The homepage passes "#how-it-works", a same-page fragment: a plain <a>
+  // (fragment-href.ts). As a next/link it prefetched the whole homepage again
+  // (~24 KB on a phone) when it scrolled into view, and a second tap did not
+  // scroll. The sign-in shell passes "/#how-it-works", a route: it stays a Link.
+  const WalkthroughLink = isFragmentHref(walkthroughHref) ? "a" : Link;
   const { analysis } = calculateSampleDealOutcome();
   const values = SAMPLE_DEAL_FIXTURE.values;
   const rent = `${formatLedgerDollars(values.monthlyRent ?? 0)}/mo`;
@@ -130,9 +136,9 @@ export function HeroSheet({
 
       {walkthroughHref ? (
         <p className="mt-2 text-base">
-          <Link href={walkthroughHref} className="tc-link inline-flex min-h-11 items-center">
+          <WalkthroughLink href={walkthroughHref} className="tc-link inline-flex min-h-11 items-center">
             See where every figure comes from
-          </Link>
+          </WalkthroughLink>
         </p>
       ) : null}
     </figure>

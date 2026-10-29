@@ -11,8 +11,10 @@
  * the fragment). The browser's own fragment navigation scrolls every time and
  * honors the same scroll padding and scroll margins.
  *
- * Shared by TrackedMarketingLink and IntentPrefetchLink; /pricing's hero
- * writes its fragment links as <a> directly. Guarded by
+ * Shared by TrackedMarketingLink, IntentPrefetchLink and the homepage's
+ * HeroSheet (whose walkthrough link was a next/link to "#how-it-works" and
+ * also prefetched the homepage itself on scroll); /pricing's hero writes its
+ * fragment links as <a> directly. Guarded by
  * lib/__tests__/intent-prefetch-landing.test.ts.
  */
 export function isFragmentHref(href: unknown): href is string {
