@@ -126,7 +126,7 @@ jobs:
 
       - name: Update the BEHIND loop PR (Claude App)
         if: steps.plan.outputs.update_pr != ''
-        uses: anthropics/claude-code-action@16f9f71ab9c490faf367f94dd294897edc25be33
+        uses: anthropics/claude-code-action@d70510b174a1244958df0b03166a54912811f3e6
         env:
           PR_NUMBER: ${{ steps.plan.outputs.update_pr }}
         with:
@@ -141,7 +141,7 @@ jobs:
 
       - name: Open the revert PR (Claude App)
         if: steps.plan.outputs.revert_pr != ''
-        uses: anthropics/claude-code-action@16f9f71ab9c490faf367f94dd294897edc25be33
+        uses: anthropics/claude-code-action@d70510b174a1244958df0b03166a54912811f3e6
         env:
           REVERT_BRANCH: seo/revert-${{ steps.plan.outputs.revert_pr }}
           REVERT_TITLE: "seo-revert: loop PR ${{ steps.plan.outputs.revert_pr }}"
