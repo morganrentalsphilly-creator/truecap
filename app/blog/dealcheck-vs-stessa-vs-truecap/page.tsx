@@ -276,8 +276,14 @@ export default function DealCheckVsStessaVsTrueCapPost() {
               <strong>TrueCap free</strong> gives you the full underwriting
               engine — cap rate, CoC, DSCR, NCF, monthly cash flow — on every
               analysis, with no monthly limit and no signup wall. Address
-              auto-fill starts with a HUD rent benchmark and a FRED
-              owner-occupied 30-year rate benchmark. Property tax remains a
+              auto-fill starts with a HUD rent benchmark and a{" "}
+              <a
+                href="https://fred.stlouisfed.org/series/MORTGAGE30US"
+                className="tc-link"
+              >
+                FRED 30-year fixed-rate mortgage average
+              </a>
+              . Property tax remains a
               manual local input; if left blank, the screen discloses a generic
               1.1% purchase-price fallback rather than a state or parcel
               estimate.
@@ -630,6 +636,10 @@ export default function DealCheckVsStessaVsTrueCapPost() {
             {
               title: "Stessa, Rental Returns and Income Tax Calculator",
               url: "https://www.stessa.com/rental-returns-and-income-tax-calculator/",
+            },
+            {
+              title: "FRED, 30-Year Fixed Rate Mortgage Average in the United States (MORTGAGE30US)",
+              url: "https://fred.stlouisfed.org/series/MORTGAGE30US",
             },
           ]}
         />
