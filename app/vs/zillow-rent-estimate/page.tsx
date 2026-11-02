@@ -56,7 +56,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 export const metadata: Metadata = {
   title: "Zillow Rent Estimate vs TrueCap (2026): Accuracy",
   description:
-    "Compare Zillow's property-specific Rent Zestimate with TrueCap's editable HUD rent benchmark and full rental underwriting workflow.",
+    "Zillow's Rent Zestimate may not reflect special features or market conditions. See how it compares with TrueCap's editable HUD rent benchmark and full underwriting.",
   keywords: [
     "zillow rent estimate accuracy",
     "zillow rent vs market",
