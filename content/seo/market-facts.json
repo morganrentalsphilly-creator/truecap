@@ -101,6 +101,54 @@
           ]
         }
       ]
+    },
+    "stockton": {
+      "countyEffectiveTaxRate": null,
+      "rentalLicensing": {
+        "required": true,
+        "summary": "Stockton requires residential rental units to register for inspection in the city's current active inspection area, and the city inspects registered units at least once every five years under Stockton Municipal Code 8.32.",
+        "source": {
+          "url": "https://www.stocktonca.gov/services/code_enforcement/residential_rental_inspection_program.php",
+          "title": "Residential Rental Inspection Program",
+          "publisher": "City of Stockton",
+          "retrievedAt": "2026-11-09"
+        }
+      },
+      "faq": [
+        {
+          "q": "Does Stockton require an inspection for residential rental units?",
+          "a": "Yes. The city inspects residential rental units at least once every five years under Stockton Municipal Code 8.32, and owners register online for properties in the current active inspection area.",
+          "sources": [
+            {
+              "url": "https://www.stocktonca.gov/services/code_enforcement/residential_rental_inspection_program.php",
+              "title": "Residential Rental Inspection Program",
+              "retrievedAt": "2026-11-09"
+            }
+          ]
+        },
+        {
+          "q": "Does Stockton require a business license for a rental property?",
+          "a": "Yes, for an owner with three or more rental units or properties, under Stockton Municipal Code 5.08.030(22).",
+          "sources": [
+            {
+              "url": "https://www.stocktonca.gov/services/code_enforcement/residential_rental_inspection_program.php",
+              "title": "Residential Rental Inspection Program",
+              "retrievedAt": "2026-11-09"
+            }
+          ]
+        },
+        {
+          "q": "What rental properties are exempt from Stockton's inspection program?",
+          "a": "Hotels, motels and bed and breakfasts are exempt, as are newly built multi-family buildings of four or more units for five years after their building permit is finalized, and subsidized units that pass an annual government inspection.",
+          "sources": [
+            {
+              "url": "https://www.stocktonca.gov/services/code_enforcement/residential_rental_inspection_program.php",
+              "title": "Residential Rental Inspection Program",
+              "retrievedAt": "2026-11-09"
+            }
+          ]
+        }
+      ]
     }
   }
 }
