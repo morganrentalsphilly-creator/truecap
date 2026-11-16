@@ -196,7 +196,7 @@ export default function ThreeWayComparisonPost() {
             <p>This is the closest match. Both do bookkeeping; the main difference is where your rental banking lives.</p>
             <ul>
               <li><strong>Stessa</strong> <a href="https://www.stessa.com/pricing/">connects your existing bank account(s)</a> — you keep banking wherever you already are (a credit union, your current business checking, etc.), though <a href="https://www.stessa.com/">Stessa also offers its own per-property bank accounts</a>. Transactions auto-categorize into rental-property buckets. Strong reporting + multi-property dashboards.</li>
-              <li><strong>Baselane</strong> bundles a dedicated business checking account per property, with banking services provided by Thread Bank, Member FDIC. <a href="https://www.baselane.com/pricing">Because your rental banking and bookkeeping sit in the same Baselane account, transactions don&apos;t need a separate bank feed to reach the ledger.</a> You&apos;d be moving your rental banking to Baselane.</li>
+              <li><strong>Baselane</strong> bundles a dedicated business checking account per property, with banking services provided by Thread Bank, <a href="https://www.fdic.gov/resources/deposit-insurance/">Member FDIC</a> (the FDIC says deposits are automatically insured to at least $250,000 at each insured bank). <a href="https://www.baselane.com/pricing">Because your rental banking and bookkeeping sit in the same Baselane account, transactions don&apos;t need a separate bank feed to reach the ledger.</a> You&apos;d be moving your rental banking to Baselane.</li>
             </ul>
             <p>If you have rentals across multiple LLCs or already have business banking set up the way you like, Stessa is the less disruptive choice. If you&apos;re starting fresh or willing to switch banks, Baselane&apos;s integrated approach is genuinely faster + simpler.</p>
 
@@ -210,7 +210,7 @@ export default function ThreeWayComparisonPost() {
 
             <h2>Free tier comparison</h2>
             <ul>
-              <li><strong>Stessa Essentials</strong> — <a href="https://www.stessa.com/pricing/">Stessa publishes a free entry plan</a> that lists bank feeds, tenant screening, online rent collection, and maintenance tracking, while Schedule E and other features are plan-dependent. Verify the current plan matrix.</li>
+              <li><strong>Stessa Essentials</strong> — <a href="https://www.stessa.com/pricing/">Stessa publishes a free entry plan</a> that lists bank feeds, tenant screening, online rent collection, and maintenance tracking, while <a href="https://www.irs.gov/forms-pubs/about-schedule-e-form-1040">Schedule E</a> and other features are plan-dependent. Verify the current plan matrix.</li>
               <li><strong>Avail free</strong> (&quot;Unlimited&quot;) — <a href="https://www.avail.com/pricing">listings on up to 19 sites, applications, lease signing, online rent collection (tenants pay $2.50 per bank transfer on this plan)</a>. Screening costs vary by state, and the landlord chooses whether the applicant or the landlord pays.</li>
               <li><strong>Baselane free</strong> — business checking (banking services provided by Thread Bank, Member FDIC), ACH rent collection, basic bookkeeping. <a href="https://www.baselane.com/pricing">Baselane lists no monthly maintenance, minimum-balance, or account-opening fees on its Core plan.</a></li>
             </ul>
@@ -327,6 +327,14 @@ export default function ThreeWayComparisonPost() {
             {
               title: "Baselane Help Center, Is my Baselane account FDIC insured?",
               url: "https://support.baselane.com/hc/en-us/articles/25483539080603-Is-my-Baselane-account-FDIC-insured",
+            },
+            {
+              title: "FDIC, Deposit Insurance",
+              url: "https://www.fdic.gov/resources/deposit-insurance/",
+            },
+            {
+              title: "IRS, About Schedule E (Form 1040)",
+              url: "https://www.irs.gov/forms-pubs/about-schedule-e-form-1040",
             },
           ]}
         />

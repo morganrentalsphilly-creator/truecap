@@ -142,7 +142,13 @@ const TOOLS: Tool[] = [
     freeGates: [
       "Sensitivity grid stress-tests STR revenue ±10% (first decision free, then Pro)",
       "Seasonal months require separate saved scenarios",
-      "No tax-specific module; use a qualified professional for STR eligibility and taxpayer-specific treatment",
+      <>
+        No tax-specific module; a tax professional should assess{" "}
+        <a href="https://www.irs.gov/publications/p925" className={SOURCE_LINK}>
+          material participation and real estate professional status
+        </a>{" "}
+        for your own return
+      </>,
     ],
     pickIf:
       "You have AirDNA's revenue projection and need to turn it into a buy/no-buy decision.",
@@ -513,6 +519,10 @@ export default function BestShortTermRentalAnalysisTool2026Post() {
             {
               title: "Hostaway, Vacation rental software (home page)",
               url: "https://www.hostaway.com/",
+            },
+            {
+              title: "IRS, Publication 925 (Passive Activity and At-Risk Rules)",
+              url: "https://www.irs.gov/publications/p925",
             },
           ]}
         />
