@@ -50,6 +50,19 @@ interface SingleFamilyUnitSectionProps {
    * the assumptions-strip chip that targets it.
    */
   extraFields?: ReactNode;
+  /**
+   * The HUD rent benchmark for the selected address and bedroom count (audit
+   * B2). Shown under the rent field as a reference with a "Use" action
+   * whenever it differs from the rent in the field, so a rent typed before
+   * the bedrooms still gets its benchmark and is never overwritten by it.
+   */
+  rentBenchmark?: { amount: number; label: string } | null;
+  /** A lookup that had a bedroom count came back with no rent. Only then
+   *  does the field say there is no estimate. */
+  rentLookupEmpty?: boolean;
+  /** The lookup is in flight: say nothing yet rather than "no estimate". */
+  rentLookupPending?: boolean;
+  onUseRentBenchmark?: () => void;
 }
 
 const currency0 = new Intl.NumberFormat("en-US", {
@@ -68,6 +81,10 @@ export function SingleFamilyUnitSection({
   strMode = false,
   chrome = "card",
   extraFields,
+  rentBenchmark = null,
+  rentLookupEmpty = false,
+  rentLookupPending = false,
+  onUseRentBenchmark,
 }: SingleFamilyUnitSectionProps) {
   const bare = chrome === "bare";
   const {
@@ -115,7 +132,27 @@ export function SingleFamilyUnitSection({
   const rentVal = form.watch("monthlyRent");
   const rentEmpty = rentVal == null || Number.isNaN(rentVal);
   const bedsEmpty = beds == null || Number.isNaN(beds);
-  const showRentNudge = showBeds && showRent && rentEmpty;
+  // The benchmark is a reference, not a nag: it shows while the field holds
+  // a different rent (or none), and steps aside once the field holds it.
+  const showRentBenchmark =
+    showBeds &&
+    showRent &&
+    rentBenchmark != null &&
+    (rentEmpty || Math.round(Number(rentVal)) !== Math.round(rentBenchmark.amount));
+  // Without a benchmark, an empty rent gets one of two hints: add bedrooms
+  // (the lookup needs them), or, only once a lookup with bedrooms has come
+  // back empty, that there is no estimate for this address (audit B2: the
+  // "no estimate" line used to show whenever bedrooms were filled, lookup or
+  // not).
+  const rentHint =
+    showBeds && showRent && rentEmpty && !showRentBenchmark
+      ? bedsEmpty
+        ? "Add bedrooms to auto-estimate rent (HUD area data)."
+        : rentLookupEmpty && !rentLookupPending
+          ? "No rent estimate for this address. Type your expected monthly rent; Zillow or Rentometer's estimate for the ZIP is a good start."
+          : null
+      : null;
+  const showRentNudge = showRentBenchmark || rentHint !== null;
   const monthlyRentDescribedBy =
     [
       showRentNudge ? "monthlyRent-help" : null,
@@ -227,14 +264,37 @@ export function SingleFamilyUnitSection({
               id="monthlyRent-error"
               message={errors.monthlyRent?.message}
             />
-            {showRentNudge ? (
+            {showRentBenchmark && rentBenchmark ? (
               <p
                 id="monthlyRent-help"
-                className="mt-1 text-2xs text-muted-foreground"
+                data-rent-benchmark=""
+                className="mt-1 flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground"
               >
-                {bedsEmpty
-                  ? "Add bedrooms to auto-estimate rent (HUD area data)."
-                  : "No rent estimate for this address? Type your expected monthly rent — Zillow/Rentometer's estimate for the ZIP is a good start."}
+                <span>
+                  {rentBenchmark.label}:{" "}
+                  <span className="font-figure font-semibold text-foreground">
+                    {currency0.format(rentBenchmark.amount)}/mo
+                  </span>
+                  {bedsEmpty ? null : ` for ${beds} bed${Number(beds) === 1 ? "" : "s"}`}
+                  . A reference, not a comp.
+                </span>
+                {onUseRentBenchmark ? (
+                  <button
+                    type="button"
+                    onClick={onUseRentBenchmark}
+                    aria-label={`Use the ${rentBenchmark.label} benchmark, ${currency0.format(rentBenchmark.amount)} a month, as the rent`}
+                    className="tc-link inline-flex min-h-11 items-center text-sm font-semibold"
+                  >
+                    Use
+                  </button>
+                ) : null}
+              </p>
+            ) : rentHint ? (
+              <p
+                id="monthlyRent-help"
+                className="mt-1 text-sm text-muted-foreground"
+              >
+                {rentHint}
               </p>
             ) : null}
           </div>

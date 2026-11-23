@@ -293,7 +293,14 @@ describe("input-phase traps and mislabels", () => {
   it("a statewide-average HUD fallback never wears the local FMR label", () => {
     const action = read("app/actions/enrich-property.ts");
     expect(action).toContain("stateAverage: true,");
-    expect(calculator).toContain('"(HUD statewide average)"');
+    // Re-anchored (2026-11 audit A3): the autofill toast is gone; the inline
+    // receipt names the fill and carries the same disclosure. The statewide
+    // branch is checked before the area label is ever built.
+    expect(calculator).toContain("if (stateAverage) {");
+    expect(calculator).toContain("enrichmentRentSourceLabel(source, false)} is HUD's 40th-percentile gross rent");
+    expect(read("components/investcalc/enrichment-receipt.tsx")).toContain(
+      'return "HUD statewide average";',
+    );
     expect(calculator).toContain("so this is a statewide HUD average");
     // The multi-family per-unit fill discloses the same fallback.
     expect(calculator).toContain("so these are statewide HUD averages");

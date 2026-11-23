@@ -454,29 +454,47 @@ type AutofillConflict = {
   currency?: boolean;
 };
 
-/** The lookup's rate swap under a preview that was already showing (audit A5). */
-type LookupRateChange = {
-  place: SelectedAddress;
-  from: number;
-  fromDefault: boolean;
-  to: number;
-  /** FRED's observation date, "2026-10-15". */
-  asOf?: string;
+/**
+ * One value an auto-fill wrote, kept so the inline receipt can undo it
+ * (audit A3). `label` is the receipt's word for a lookup fact ("baths");
+ * rent has none because the receipt derives its rent line from the capture.
+ */
+type AutofillUndoEntry = {
+  field: AutofillField | `units.${number}.monthlyRent`;
+  label: string | null;
+  previous: unknown;
+  written: number;
+};
+type AutofillNotice = {
+  entries: AutofillUndoEntry[];
+  /** The disclosure the removed toast carried, shown beside the receipt. */
+  note: string | null;
 };
 
-/** "Rate updated to FRED 7.40% (Oct 15) from the 6.75% default". */
-function describeLookupRateChange(change: LookupRateChange): string {
-  const date = change.asOf
-    ? new Date(`${change.asOf}T12:00:00Z`).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        timeZone: "UTC",
-      })
-    : null;
-  const from = `${Number(change.from.toFixed(3))}%`;
-  return `Rate updated to FRED ${change.to.toFixed(2)}%${
-    date && date !== "Invalid Date" ? ` (${date})` : ""
-  } from ${change.fromDefault ? `the ${from} default` : from}`;
+/** The HUD rent benchmark for the selected address and bedroom count. It is
+ * recorded whether or not it was written into the rent field (audit B2). */
+type RentBenchmark = {
+  amount: number;
+  source: "hud-fmr" | "hud-safmr";
+  detail?: string;
+  fetchedAt?: string;
+  stateAverage: boolean;
+  /** The property it was fetched for (lastEnrichedAddressRef's key). */
+  placeKey: string;
+};
+
+/** The disclosure that used to ride in the autofill toast. */
+function hudRentFillNote(
+  source: "hud-fmr" | "hud-safmr",
+  stateAverage: boolean,
+  perUnit = false,
+): string {
+  if (stateAverage) {
+    return perUnit
+      ? "No local HUD figure matched this address, so these are statewide HUD averages; local rents vary widely, so adjust to comps."
+      : "No local HUD figure matched this address, so this is a statewide HUD average; local rents vary widely, so adjust to comps.";
+  }
+  return `${enrichmentRentSourceLabel(source, false)} is HUD's 40th-percentile gross rent for the area, not a comp; replace it with local comps.`;
 }
 
 /** Every field rendered inside OperatingExpensesSection's nested disclosure.
@@ -861,12 +879,32 @@ function buildStrategyAppliedSnapshot(
   };
 }
 
+/**
+ * The mortgage-rate benchmark the server read for this render, when it is a
+ * usable number (audit A2). Anything else is treated as "no benchmark" and
+ * the form falls back to the product starting rate, labeled as a fallback.
+ */
+function usableMortgageRateBenchmark(
+  benchmark: MortgageRateBenchmarkInput | null | undefined,
+): MortgageRateBenchmarkInput | null {
+  if (!benchmark) return null;
+  const rate = Number(benchmark.rate);
+  if (!Number.isFinite(rate) || rate <= 0 || rate > 25) return null;
+  return { rate, asOf: benchmark.asOf };
+}
+
 function buildNewAnalysisDefaults(
   propertyType: InvestmentFormValues["propertyType"],
   userDefaults?: Record<string, number> | null,
+  /** The current FRED benchmark: a new analysis starts on it. The schema's
+   *  6.75% remains only as the fallback when the server had none. */
+  benchmarkRate?: number | null,
 ): Partial<InvestmentFormValues> {
   return {
     ...defaultValues,
+    ...(typeof benchmarkRate === "number" && Number.isFinite(benchmarkRate)
+      ? { interestRate: benchmarkRate }
+      : {}),
     propertyType,
     templateId: undefined,
     purchasePrice: undefined,
@@ -936,6 +974,9 @@ const RELEASED_INPUT_TABS = INPUT_TABS.filter(
 );
 const SAVED_ANALYSIS_AUTO_EXPORT_PDF_KEY =
   "truecap_saved_analysis_auto_export_pdf";
+
+/** The server-read FRED benchmark handed to the form (audit A2). */
+type MortgageRateBenchmarkInput = { rate: number; asOf?: string };
 
 /** What enrich-property filled, captured so we can attribute data confidence
  *  at save time (and live on the result screen). */
@@ -1059,6 +1100,7 @@ export function InvestCalcPage({
   advocacyContractEligible = false,
   memoCaptureEnabled = false,
   initialSavedDeal = null,
+  initialMortgageRate = null,
 }: {
   canSaveDeals?: boolean;
   canCompareDeals?: boolean;
@@ -1093,6 +1135,12 @@ export function InvestCalcPage({
   /** Owner-scoped saved row resolved by the authenticated server route from
    * /?savedDeal=<id>. Keeping the ID in the URL makes reopen refresh-safe. */
   initialSavedDeal?: GetSavedDealForEditingResult | null;
+  /** The current 30-year benchmark (FRED MORTGAGE30US), read and cached on
+   * the server so a new analysis opens on it (audit A2). Null when the read
+   * failed: the form then starts on the product fallback and says so. An
+   * account-level rate default still wins, and a typed rate, a restored draft
+   * or a saved deal is never rewritten by it. */
+  initialMortgageRate?: MortgageRateBenchmarkInput | null;
 }) {
   const router = useRouter();
   const { confirmDialog } = useActionConfirm();
@@ -1219,6 +1267,22 @@ export function InvestCalcPage({
   // adopted RentCast estimate. Set and cleared beside marketRentEstimate.
   const [marketRentSource, setMarketRentSource] =
     useState<MarketRentSource | null>(null);
+  // The HUD benchmark itself, kept beside the estimate above so the rent
+  // field can offer it with its source name and a "Use" action even when the
+  // visitor typed their own rent first (audit B2). Set and cleared with it.
+  const [rentBenchmark, setRentBenchmark] = useState<RentBenchmark | null>(
+    null,
+  );
+  // True only when a lookup that had a bedroom count returned no rent.
+  const [rentLookupEmpty, setRentLookupEmpty] = useState(false);
+  // What the most recent auto-fill wrote, for the inline receipt's Undo
+  // (audit A3: the receipt is the single notice; the toasts are gone).
+  const [autofillNotice, setAutofillNotice] = useState<AutofillNotice | null>(
+    null,
+  );
+  // The property whose auto-filled rent the visitor undid: later lookups for
+  // it (the bedrooms watcher re-fires them) offer the benchmark, never write it.
+  const rentAutofillDeclinedRef = useRef<string | null>(null);
   // Multi-family sibling of marketRentEstimate: HUD FMR keyed by bedroom
   // count, for the per-unit rent reality-check in the units section. Same
   // rules: captured on enrichment, never blocks analysis, cleared on a new
@@ -1236,14 +1300,6 @@ export function InvestCalcPage({
   const [livePreview, setLivePreview] = useState<LivePreviewSnapshot | null>(
     null,
   );
-  // A lookup that changed an input the preview already uses is explained at
-  // the figure it moves, with an undo, not in a corner toast (audit A5). It
-  // stays until dismissed, undone, or a different property is looked up.
-  const [lookupRateChange, setLookupRateChange] =
-    useState<LookupRateChange | null>(null);
-  // The property whose looked-up rate the visitor undid: its later lookups
-  // (the bedrooms watcher re-fires them) leave the rate alone.
-  const rateLookupUndoneRef = useRef<SelectedAddress | null>(null);
   // One concise, debounced screen-reader announcement for the live preview,
   // written into a persistent sr-only region (the visible card is NOT a live
   // region). Debounced past the form watcher so fast typing doesn't flood the
@@ -1858,11 +1914,22 @@ export function InvestCalcPage({
     }
   };
 
+  // The starting mortgage rate (audit A2). The server-read FRED benchmark is
+  // the default from the first render; the schema's 6.75% is used only when
+  // that read failed. An account-level rate default outranks both.
+  const startingRateBenchmark = useMemo(
+    () => usableMortgageRateBenchmark(initialMortgageRate),
+    [initialMortgageRate],
+  );
+  const hasUserRateDefault =
+    typeof userAnalysisDefaults?.interestRatePct === "number" &&
+    Number.isFinite(userAnalysisDefaults.interestRatePct);
   const form = useForm<InvestmentFormValues>({
     resolver: zodResolver(releasedInvestmentFormSchema),
     defaultValues: buildNewAnalysisDefaults(
       "single-family",
       userAnalysisDefaults,
+      startingRateBenchmark?.rate,
     ),
     mode: "onChange",
     // Optional editors need not exist for their defaults, restored values,
@@ -2106,6 +2173,7 @@ export function InvestCalcPage({
       const defaults = buildNewAnalysisDefaults(
         nextPropertyType,
         userAnalysisDefaults,
+        startingRateBenchmark?.rate,
       );
       // Clear any DOM-sticky values on uncontrolled inputs before syncing RHF state.
       formElementRef.current?.reset();
@@ -2178,6 +2246,9 @@ export function InvestCalcPage({
       });
       enrichmentCaptureRef.current = {};
       setMarketRentEstimate(null);
+      setRentBenchmark(null);
+      setRentLookupEmpty(false);
+      setAutofillNotice(null);
       setMarketRentSource(null);
       // Same rules as marketRentEstimate: a fresh session must never judge
       // its units against the PREVIOUS deal's market benchmark.
@@ -2236,7 +2307,7 @@ export function InvestCalcPage({
         isProgrammaticResetRef.current = false;
       });
     },
-    [form, clearAnalysisOutputs, userAnalysisDefaults],
+    [form, clearAnalysisOutputs, userAnalysisDefaults, startingRateBenchmark],
   );
 
   const propertyType = form.watch("propertyType");
@@ -2324,6 +2395,35 @@ export function InvestCalcPage({
    */
   const lastSelectedAddressRef = useRef<SelectedAddress | null>(null);
   const enrichmentCaptureRef = useRef<EnrichmentCapture>({});
+  /**
+   * The capture every reader uses. The starting rate's provenance is not a
+   * write this session made, so it is not stored in the ref (three reset
+   * paths clear that): it is derived here from the server-read benchmark.
+   * Value-bound like every other capture: buildProvenanceInput marks it
+   * overridden the moment the form's rate differs, so a typed rate, a
+   * template's rate or a restored draft's rate is never labeled FRED. A saved
+   * deal carries its own recorded provenance, and an account-level rate
+   * default is the user's number, so neither borrows today's benchmark.
+   */
+  const readEnrichmentCapture = useCallback((): EnrichmentCapture => {
+    const capture = enrichmentCaptureRef.current;
+    if (
+      capture.interestRate ||
+      !startingRateBenchmark ||
+      hasUserRateDefault ||
+      savedDealIdRef.current
+    ) {
+      return capture;
+    }
+    return {
+      ...capture,
+      interestRate: {
+        source: "fred",
+        fetchedAt: startingRateBenchmark.asOf,
+        value: startingRateBenchmark.rate,
+      },
+    };
+  }, [hasUserRateDefault, startingRateBenchmark]);
   // Dedup key for the multi-family FMR benchmark fetch: metro + the sorted
   // distinct bedroom counts already looked up. Cleared on a new address.
   const unitFmrKeyRef = useRef<string | null>(null);
@@ -2480,10 +2580,7 @@ export function InvestCalcPage({
       return mergeInputConfidenceSourceContext({
         persistedSourceContext,
         values,
-        liveProvenance: buildProvenanceInput(
-          enrichmentCaptureRef.current,
-          values,
-        ),
+        liveProvenance: buildProvenanceInput(readEnrichmentCapture(), values),
         liveTouchedFields,
         liveStartingAssumptionOrigins: startingAssumptionOrigins,
         // `undefined` lets a still-matching restored/draft estimate survive
@@ -2494,7 +2591,7 @@ export function InvestCalcPage({
         livePurchasePriceSource,
       });
     },
-    [priceEstimated, templateOptions, userAnalysisDefaults],
+    [priceEstimated, readEnrichmentCapture, templateOptions, userAnalysisDefaults],
   );
 
   const buildLiveInputConfidenceSourceContext = useCallback(
@@ -2518,6 +2615,108 @@ export function InvestCalcPage({
     [resolveLiveInputConfidenceContext],
   );
 
+  /** Write the HUD benchmark into the rent field and bind its provenance.
+   * Shared by the automatic fill (empty rent) and the rent field's "Use"
+   * action; either way the receipt can undo it. */
+  const writeRentBenchmark = useCallback(
+    (benchmark: RentBenchmark, previous: unknown) => {
+      form.setValue("monthlyRent", benchmark.amount, {
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: false,
+      });
+      enrichmentCaptureRef.current.monthlyRent = {
+        source: benchmark.source,
+        detail: benchmark.detail,
+        fetchedAt: benchmark.fetchedAt,
+        value: benchmark.amount,
+        rentFingerprint: unitRentRollFingerprint(form.getValues()),
+        ...(benchmark.stateAverage ? { stateAverage: true } : {}),
+      };
+      setAutofillNotice({
+        entries: [
+          {
+            field: "monthlyRent",
+            label: null,
+            previous,
+            written: benchmark.amount,
+          },
+        ],
+        note: hudRentFillNote(benchmark.source, benchmark.stateAverage),
+      });
+    },
+    [form],
+  );
+
+  /** The rent field's "Use" action on the benchmark shown under it. */
+  const handleUseRentBenchmark = useCallback(() => {
+    if (!rentBenchmark) return;
+    rentAutofillDeclinedRef.current = null;
+    writeRentBenchmark(rentBenchmark, form.getValues("monthlyRent"));
+    void form.trigger("monthlyRent");
+    trackEvent("analyzer_autofill_completed", {
+      property_type: form.getValues("propertyType"),
+      fields_filled: 1,
+    });
+  }, [form, rentBenchmark, writeRentBenchmark]);
+
+  /** Undo the most recent auto-fill from the inline receipt. Each value goes
+   * back to what it replaced, but only while it is still the value the fill
+   * wrote: a field the visitor has edited since is theirs and stays. */
+  const handleUndoAutofill = useCallback(() => {
+    const notice = autofillNotice;
+    if (!notice) return;
+    const opts = {
+      shouldDirty: false,
+      shouldTouch: false,
+      shouldValidate: false,
+    } as const;
+    let firstRestored: string | null = null;
+    for (const entry of notice.entries) {
+      if (Number(form.getValues(entry.field)) !== entry.written) continue;
+      const previous =
+        typeof entry.previous === "number" && Number.isFinite(entry.previous)
+          ? entry.previous
+          : undefined;
+      form.setValue(entry.field, previous as never, opts);
+      firstRestored ??= entry.field;
+      if (entry.field === "monthlyRent") {
+        const wasRentCast =
+          enrichmentCaptureRef.current.monthlyRent?.source ===
+          "rentcast-estimate";
+        delete enrichmentCaptureRef.current.monthlyRent;
+        // The HUD benchmark stays on offer under the field; it is just not
+        // written again for this property.
+        rentAutofillDeclinedRef.current = lastEnrichedAddressRef.current;
+        if (wasRentCast) {
+          setMarketRentEstimate(null);
+          setMarketRentSource(null);
+        }
+      } else if (entry.field === "purchasePrice") {
+        detachPersistedPurchasePriceSource();
+        setPurchasePriceSourceLabel(null);
+        setPriceEstimated(false);
+        setEstimatedPriceValue(null);
+        setPriceEstimateBasis(null);
+        purchasePriceSourceRef.current = null;
+        purchasePriceProvenanceAddressRef.current = null;
+        purchasePriceProvenanceValueRef.current = null;
+      } else if (entry.field !== "bedrooms" && entry.field !== "bathrooms" && entry.field !== "sqft") {
+        // A per-unit rent: the roll no longer matches the captured HUD fill.
+        delete enrichmentCaptureRef.current.monthlyRent;
+      }
+    }
+    setAutofillNotice(null);
+    // The Undo button unmounts with the receipt: hand focus to the first
+    // field it restored instead of dropping it on <body>.
+    if (firstRestored) {
+      const target = firstRestored;
+      requestAnimationFrame(() => {
+        document.getElementById(target)?.focus();
+      });
+    }
+  }, [autofillNotice, detachPersistedPurchasePriceSource, form]);
+
   /**
    * Run the released enrichment lookups (FRED mortgage rate and HUD Fair
    * Market Rent) and pre-fill the form. Property tax intentionally remains a
@@ -2534,9 +2733,6 @@ export function InvestCalcPage({
       // identity compare after the roundtrip detects a newer selection.
       const enrichGeneration = forkGenerationRef.current;
       failedEnrichmentPlaceRef.current = null;
-      setLookupRateChange((current) =>
-        current && current.place !== place ? null : current,
-      );
       // New address → clear the previous address's captured provenance + market
       // rent BEFORE repopulating, so the confidence badge can't attribute the
       // old "from <addr>" sourcing to this deal (every enrichment path, incl.
@@ -2571,6 +2767,9 @@ export function InvestCalcPage({
         if (!sameProperty) {
           enrichmentCaptureRef.current = {};
           setMarketRentEstimate(null);
+      setRentBenchmark(null);
+      setRentLookupEmpty(false);
+      setAutofillNotice(null);
           setMarketRentSource(null);
           setUnitFmrByBedrooms(null);
           setUnitFmrIsStatewide(false);
@@ -2685,179 +2884,77 @@ export function InvestCalcPage({
         return;
       }
 
-      const setOpts = {
-        shouldDirty: false,
-        shouldTouch: false,
-        shouldValidate: false,
-      };
-      const filled: string[] = [];
+      let filledCount = 0;
 
-      /** Address benchmarks may replace only the untouched product starting
-       * value on a genuinely new analysis. A populated draft, saved deal,
-       * template, strategy, user default, or user edit owns its value even
-       * though RHF may report it as non-dirty after reset(). Equal protected
-       * values are left alone too, so a coincidental match is not relabeled
-       * as if FRED/the state supplied it during this session. */
-      const mayAdoptStartingBenchmark = (
-        field: "interestRate",
-        proposedValue: number,
-        productStartingValue: number,
-        extraProtection = false,
-      ) => {
-        const currentValue = form.getValues(field);
-        const currentNumber = Number(currentValue);
-        const currentIsProductStart =
-          Number.isFinite(currentNumber) &&
-          currentNumber === productStartingValue;
-        const strategyOwnsField = Boolean(
-          strategyAppliedRef.current &&
-          Object.prototype.hasOwnProperty.call(
-            strategyAppliedRef.current.fields,
-            field,
-          ),
-        );
-        const isReplaceableProductDefault =
-          currentIsProductStart &&
-          autoApplyEligibleRef.current &&
-          !savedDealIdRef.current &&
-          !form.getValues("templateId") &&
-          !form.formState.dirtyFields[field] &&
-          !strategyOwnsField &&
-          !extraProtection;
-        const decision = decideAutofillFieldWrite({
-          currentValue,
-          proposedValue,
-          replaceableDefault: isReplaceableProductDefault,
-        });
-        return (
-          decision.action === "write" &&
-          (decision.reason !== "same-value" || isReplaceableProductDefault)
-        );
-      };
-
-      // Interest rate — same ownership rule. An account-level lender/default
-      // rate is intentional even when it equals TrueCap's starting number.
-      if (enrichment.interestRate !== undefined) {
-        const userRateDefault = userAnalysisDefaults?.interestRatePct;
-        const hasUserRateDefault =
-          typeof userRateDefault === "number" &&
-          Number.isFinite(userRateDefault);
-        const productStartingRate = Number(defaultValues.interestRate ?? 6.75);
-        if (
-          mayAdoptStartingBenchmark(
-            "interestRate",
-            enrichment.interestRate,
-            productStartingRate,
-            hasUserRateDefault || rateLookupUndoneRef.current === place,
-          )
-        ) {
-          const previousRate = Number(form.getValues("interestRate"));
-          // The preview already shows a figure when price and rent are in:
-          // then the rate swap moves a number the visitor is reading, and the
-          // explanation belongs beside that number (audit A5). A fill into a
-          // preview that is not showing yet stays in the toast.
-          const previewUsesRate =
-            Number(form.getValues("purchasePrice")) > 0 &&
-            Number(form.getValues("monthlyRent")) > 0;
-          form.setValue("interestRate", enrichment.interestRate, setOpts);
-          enrichmentCaptureRef.current.interestRate = {
-            source: "fred",
-            fetchedAt: enrichment.meta.mortgageRate?.asOf,
-            value: enrichment.interestRate,
-          };
-          if (
-            previewUsesRate &&
-            Number.isFinite(previousRate) &&
-            previousRate !== enrichment.interestRate
-          ) {
-            setLookupRateChange({
-              place,
-              from: previousRate,
-              fromDefault: previousRate === productStartingRate,
-              to: enrichment.interestRate,
-              asOf: enrichment.meta.mortgageRate?.asOf,
-            });
-          } else {
-            filled.push(
-              `Interest rate ${enrichment.interestRate.toFixed(2)}% (current avg)`,
-            );
-          }
-        }
-      }
+      // The mortgage rate is NOT written here any more (audit A2). The form
+      // opens on the server-read FRED benchmark, so picking an address has no
+      // rate to bring: the figure a visitor was already reading never moves
+      // under them, and a typed rate, a template's rate or a restored draft's
+      // rate cannot be replaced by a lookup. `enrichment.interestRate` is
+      // still returned by the action and deliberately ignored.
 
       // Monthly rent - single-family only at this entry point. Multi-family
       // rents are filled per-unit by a separate effect below. `valueAsNumber:
       // true` means an empty input reads as NaN, so we must treat NaN as
       // empty too.
-      let rentFilledFromHud = false;
-      let rentIsStateAverage = false;
+      if (isSingleFamily) {
+        // "No estimate" is a statement about a lookup that ran with a bedroom
+        // count and came back empty, never about one that has not run (audit
+        // B2): only then does the rent field say so.
+        setRentLookupEmpty(
+          bedrooms !== undefined &&
+            bedrooms > 0 &&
+            enrichment.monthlyRent === undefined,
+        );
+      }
       if (isSingleFamily && enrichment.monthlyRent !== undefined) {
-        // Always record the HUD benchmark for the rent reality-check, even if
-        // the user already typed their own rent (so we can compare the two).
+        // Always record the HUD benchmark, even if the user already typed
+        // their own rent: the rent reality-check compares the two, and the
+        // rent field offers it as a reference with a "Use" action (audit B2).
         setMarketRentEstimate(enrichment.monthlyRent);
         setMarketRentSource(
           enrichment.meta.rent?.stateAverage ? "hud-statewide" : "hud-area",
         );
+        const benchmark: RentBenchmark = {
+          amount: enrichment.monthlyRent,
+          source: enrichment.meta.rent?.source ?? "hud-fmr",
+          detail: enrichment.meta.rent?.county,
+          fetchedAt: enrichment.meta.rent
+            ? String(enrichment.meta.rent.year)
+            : undefined,
+          stateAverage: Boolean(enrichment.meta.rent?.stateAverage),
+          placeKey,
+        };
+        setRentBenchmark(benchmark);
         const current = form.getValues("monthlyRent") as
           | number
           | undefined
           | null;
         // A typed 0 is an answer: "empty" comes from the dirty state, not
-        // the value (audit A6; lib/autofill-field-ownership.ts).
-        const isEmpty = isRentAutofillable({
-          value: current,
-          dirty: Boolean(form.formState.dirtyFields.monthlyRent),
-        });
+        // the value (audit A6; lib/autofill-field-ownership.ts). A benchmark
+        // the visitor undid for this property is not written a second time;
+        // it stays on offer under the field.
+        const isEmpty =
+          isRentAutofillable({
+            value: current,
+            dirty: Boolean(form.formState.dirtyFields.monthlyRent),
+          }) && rentAutofillDeclinedRef.current !== placeKey;
         if (isEmpty) {
-          form.setValue("monthlyRent", enrichment.monthlyRent, {
-            shouldDirty: false,
-            shouldTouch: false,
-            shouldValidate: false,
-          });
-          enrichmentCaptureRef.current.monthlyRent = {
-            source: enrichment.meta.rent?.source ?? "hud-fmr",
-            detail: enrichment.meta.rent?.county,
-            fetchedAt: enrichment.meta.rent
-              ? String(enrichment.meta.rent.year)
-              : undefined,
-            value: enrichment.monthlyRent,
-            rentFingerprint: unitRentRollFingerprint(form.getValues()),
-            ...(enrichment.meta.rent?.stateAverage
-              ? { stateAverage: true }
-              : {}),
-          };
-          filled.push(
-            `Rent ~$${Math.round(enrichment.monthlyRent).toLocaleString()}/mo ${
-              enrichment.meta.rent?.stateAverage
-                ? "(HUD statewide average)"
-                : "(HUD FMR)"
-            }`,
-          );
-          rentFilledFromHud = true;
-          rentIsStateAverage = Boolean(enrichment.meta.rent?.stateAverage);
+          writeRentBenchmark(benchmark, current);
+          filledCount += 1;
         }
       }
 
-      if (filled.length > 0 && !opts?.silent) {
-        toast({
-          title: "Auto-filled from address",
-          description: rentFilledFromHud
-            ? `${filled.join("  ·  ")} - ${
-                rentIsStateAverage
-                  ? "No local HUD figure matched this address, so this is a statewide HUD average; local rents vary widely, so adjust to comps."
-                  : "HUD FMR is HUD's 40th-percentile gross rent for the area, not a comp; replace it with local comps."
-              }`
-            : filled.join("  ·  "),
-        });
-      }
-      if (filled.length > 0) {
+      // No toast (audit A3): the inline receipt under the hero fields is the
+      // one notice for a fill, and it carries the Undo.
+      if (filledCount > 0) {
         trackEvent("analyzer_autofill_completed", {
           property_type: currentPropertyType,
-          fields_filled: filled.length,
+          fields_filled: filledCount,
         });
       }
     },
-    [form, toast, userAnalysisDefaults],
+    [form, toast, writeRentBenchmark],
   );
 
   const runTrackedPropertyEnrichment = useCallback(
@@ -2874,22 +2971,6 @@ export function InvestCalcPage({
     },
     [runPropertyEnrichment],
   );
-
-  /** Undo the lookup's rate swap: the starting rate returns, keeps its own
-   * label (no FRED provenance, not marked as typed), and later lookups for
-   * this property leave it alone. */
-  const handleUndoLookupRateChange = useCallback(() => {
-    const change = lookupRateChange;
-    if (!change) return;
-    rateLookupUndoneRef.current = change.place;
-    delete enrichmentCaptureRef.current.interestRate;
-    form.setValue("interestRate", change.from, {
-      shouldDirty: false,
-      shouldTouch: false,
-      shouldValidate: false,
-    });
-    setLookupRateChange(null);
-  }, [form, lookupRateChange]);
 
   /**
    * Confirm a real property swap before any address entry point can combine
@@ -3099,6 +3180,9 @@ export function InvestCalcPage({
       purchasePriceProvenanceAddressRef.current = null;
       purchasePriceProvenanceValueRef.current = null;
       setMarketRentEstimate(null);
+      setRentBenchmark(null);
+      setRentLookupEmpty(false);
+      setAutofillNotice(null);
       setMarketRentSource(null);
       setUnitFmrByBedrooms(null);
       setUnitFmrIsStatewide(false);
@@ -3136,7 +3220,7 @@ export function InvestCalcPage({
   /**
    * After an address has been picked, if the user later fills in the
    * bedroom count, re-fire the lookup so the HUD rent estimate has the
-   * data it needs. Skipped silently if monthly rent is already filled.
+   * data it needs.
    */
   useEffect(() => {
     const place = lastSelectedAddressRef.current;
@@ -3146,10 +3230,10 @@ export function InvestCalcPage({
     // strings transiently before valueAsNumber kicks in).
     const beds = Number(watchedBedrooms);
     if (!Number.isFinite(beds) || beds <= 0) return;
-    // Treat NaN / 0 / empty string the same as "field has no value".
-    if (!isEmptyNumber(form.getValues("monthlyRent"))) return;
-    // Non-silent so the user gets explicit confirmation that the rent
-    // estimate populated.
+    // No "rent already filled" early-out (audit B2): whenever the address
+    // and the bedroom count are known the benchmark is fetched, so a rent
+    // typed first still gets its HUD reference under the field. The fill
+    // itself never overwrites a typed rent (isRentAutofillable).
     //
     // .catch is mandatory - this useEffect can't await, so a thrown
     // error inside runPropertyEnrichment would otherwise surface as
@@ -3566,6 +3650,7 @@ export function InvestCalcPage({
             priorRentCapture.rentFingerprint !== rentFingerprintBeforeFill),
         );
         const filledLines: string[] = [];
+        const unitUndoEntries: AutofillUndoEntry[] = [];
         let filledRentSource: "hud-fmr" | "hud-safmr" | null = null;
         let filledRentDetail: string | undefined;
         let filledRentFetchedAt: string | undefined;
@@ -3585,6 +3670,12 @@ export function InvestCalcPage({
             filledLines.push(
               `Unit ${idx + 1}: $${Math.round(result.monthlyRent).toLocaleString()}/mo`,
             );
+            unitUndoEntries.push({
+              field: `units.${idx}.monthlyRent`,
+              label: null,
+              previous: undefined,
+              written: result.monthlyRent,
+            });
             if (result.meta.rent?.stateAverage === true) {
               filledRentStateAverage = true;
             }
@@ -3625,13 +3716,15 @@ export function InvestCalcPage({
           const anyStateAverage = results.some(
             (r) => r?.meta?.rent?.stateAverage === true,
           );
-          toast({
-            title: "Auto-filled per-unit rent",
-            description: `${filledLines.join("  ·  ")} - ${
-              anyStateAverage
-                ? "No local HUD figure matched this address, so these are statewide HUD averages; local rents vary widely, so adjust to comps."
-                : "HUD FMR is HUD's 40th-percentile gross rent for the area, not a comp; replace it with local comps."
-            }`,
+          // No toast (audit A3): the inline receipt names the per-unit fill
+          // and carries the same disclosure and the Undo.
+          setAutofillNotice({
+            entries: unitUndoEntries,
+            note: hudRentFillNote(
+              filledRentSource ?? "hud-fmr",
+              anyStateAverage,
+              true,
+            ),
           });
         }
       } catch (err) {
@@ -3762,6 +3855,20 @@ export function InvestCalcPage({
       const f = e.facts;
       const adopted = selectUnderwritingEnrichment(e);
       const filled: string[] = [];
+      // What this lookup overwrote, so the inline receipt can undo it.
+      const undoEntries: AutofillUndoEntry[] = [];
+      const noteUndo = (
+        field: AutofillField,
+        written: number,
+        label: string | null,
+      ) => {
+        undoEntries.push({
+          field,
+          label,
+          previous: form.getValues(field),
+          written,
+        });
+      };
       const mayWrite = (field: AutofillField, proposed: number) => {
         const decision = decideAutofillFieldWrite({
           currentValue: form.getValues(field),
@@ -3778,14 +3885,17 @@ export function InvestCalcPage({
         shouldValidate: true,
       };
       if (f?.bedrooms != null && mayWrite("bedrooms", f.bedrooms)) {
+        noteUndo("bedrooms", f.bedrooms, "beds");
         form.setValue("bedrooms", f.bedrooms, opts);
         filled.push("beds");
       }
       if (f?.bathrooms != null && mayWrite("bathrooms", f.bathrooms)) {
+        noteUndo("bathrooms", f.bathrooms, "baths");
         form.setValue("bathrooms", f.bathrooms, opts);
         filled.push("baths");
       }
       if (f?.squareFootage != null && mayWrite("sqft", f.squareFootage)) {
+        noteUndo("sqft", f.squareFootage, "size");
         form.setValue("sqft", f.squareFootage, opts);
         filled.push("size");
       }
@@ -3798,6 +3908,7 @@ export function InvestCalcPage({
         adopted.purchasePrice != null &&
         mayWrite("purchasePrice", adopted.purchasePrice)
       ) {
+        noteUndo("purchasePrice", adopted.purchasePrice, "asking price");
         form.setValue("purchasePrice", adopted.purchasePrice, opts);
         filled.push("asking price");
         wroteAskingPrice = priceIsAsking;
@@ -3837,6 +3948,7 @@ export function InvestCalcPage({
         isEmptyNumber(form.getValues("purchasePrice"))
       ) {
         const rounded = Math.round(avmEstimate);
+        noteUndo("purchasePrice", rounded, "estimated value");
         form.setValue("purchasePrice", rounded, opts);
         setEstimatedPriceValue(rounded);
         setPriceEstimateBasis("RentCast's value estimate for this address");
@@ -3859,6 +3971,7 @@ export function InvestCalcPage({
         (pt === "single-family" || pt === "owner-occupant") &&
         mayWrite("monthlyRent", adopted.monthlyRent)
       ) {
+        noteUndo("monthlyRent", adopted.monthlyRent, null);
         form.setValue("monthlyRent", adopted.monthlyRent, opts);
         setMarketRentEstimate(adopted.monthlyRent);
         setMarketRentSource("rentcast");
@@ -3871,19 +3984,21 @@ export function InvestCalcPage({
         filled.push("estimated market rent");
       }
       if (filled.length > 0) {
-        toast({
-          title: "Auto-filled from address",
-          description: `Filled ${filled.join(", ")} from RentCast.${
+        // No toast (audit A3): the inline receipt under the hero fields names
+        // what the lookup filled, carries this disclosure, and can undo it.
+        setAutofillNotice({
+          entries: undoEntries,
+          note: `${
             wroteAskingPrice
-              ? " Price is the active listing's asking price."
+              ? "Price is the active listing's asking price. "
               : priceIsAvmEstimate
-                ? " Price is RentCast's value estimate — replace it with the real asking price."
+                ? "Price is RentCast's value estimate; replace it with the real asking price. "
                 : ""
-          } Every value stays editable.`,
+          }Every value stays editable.`,
         });
       }
     },
-    [bindPurchasePriceProviderSource, form, toast],
+    [bindPurchasePriceProviderSource, form],
   );
 
   const findAutofillConflicts = useCallback(
@@ -4207,8 +4322,9 @@ export function InvestCalcPage({
     for (const key of Object.keys(dirty)) {
       if (dirty[key]) skipFields.add(key as keyof InvestmentFormValues);
     }
-    if (enrichmentCaptureRef.current.interestRate)
-      skipFields.add("interestRate");
+    // (The rate is no longer skipped here: the FRED benchmark is only the
+    // form's starting value now, so a default template's own rate applies
+    // over it like any other template field — audit A2.)
     const patch = buildTemplateFormPatch(tpl, { skipFields });
     if (patch.length === 0) return;
     // Snapshot exactly what we're about to overwrite (+ templateId) so
@@ -5186,6 +5302,9 @@ export function InvestCalcPage({
           enrichmentCaptureRef.current = {};
           setSavedTemplateFallback(null);
           setMarketRentEstimate(null);
+      setRentBenchmark(null);
+      setRentLookupEmpty(false);
+      setAutofillNotice(null);
           setMarketRentSource(null);
           setUnitFmrByBedrooms(null);
           setUnitFmrIsStatewide(false);
@@ -8631,6 +8750,7 @@ export function InvestCalcPage({
       const startingValues = buildNewAnalysisDefaults(
         sourceValues.propertyType,
         userAnalysisDefaults,
+        startingRateBenchmark?.rate,
       );
       forkedValues.downPaymentPct = startingValues.downPaymentPct;
       forkedValues.interestRate = startingValues.interestRate;
@@ -8691,6 +8811,9 @@ export function InvestCalcPage({
     setInputVerification({});
     inputVerificationAddressRef.current = null;
     setMarketRentEstimate(null);
+      setRentBenchmark(null);
+      setRentLookupEmpty(false);
+      setAutofillNotice(null);
     setMarketRentSource(null);
     setUnitFmrByBedrooms(null);
     setUnitFmrIsStatewide(false);
@@ -8737,8 +8860,9 @@ export function InvestCalcPage({
     // restoring pre-apply values now would stomp the fork.
     //
     // Leaving the sample is the exception: none of its values are the
-    // visitor's own, and the address lookup adopts the live rate only on a
-    // session that is still eligible (mayAdoptStartingBenchmark).
+    // visitor's own, so the session counts as new again. (Financing was
+    // already returned to the starting values above, which now include the
+    // current rate benchmark.)
     autoApplyEligibleRef.current = leavingSample;
     autoApplyUndoRef.current = null;
     // Overwrite the anon draft so a reload restores this partial fork instead
@@ -10753,6 +10877,20 @@ export function InvestCalcPage({
                         hideBedrooms={activeStrategy?.incomeMode === "str"}
                         rentLabel={activeStrategy?.rentLabel}
                         strMode={activeStrategy?.incomeMode === "str"}
+                        rentBenchmark={
+                          rentBenchmark
+                            ? {
+                                amount: rentBenchmark.amount,
+                                label: enrichmentRentSourceLabel(
+                                  rentBenchmark.source,
+                                  rentBenchmark.stateAverage,
+                                ),
+                              }
+                            : null
+                        }
+                        rentLookupEmpty={rentLookupEmpty}
+                        rentLookupPending={isAddressEnrichmentPending}
+                        onUseRentBenchmark={handleUseRentBenchmark}
                       />
                     )}
                     {(propertyType === "multi-family" ||
@@ -10804,15 +10942,6 @@ export function InvestCalcPage({
                     }
                     assumptionBasis={livePreviewAssumptionBasis}
                     runTargets={visibleDecisionTarget ? decisionTargetLabel : null}
-                    inputChange={
-                      lookupRateChange
-                        ? {
-                            text: describeLookupRateChange(lookupRateChange),
-                            onUndo: handleUndoLookupRateChange,
-                            onDismiss: () => setLookupRateChange(null),
-                          }
-                        : null
-                    }
                     desktopAction={
                       <div>
                         <Button
@@ -10854,6 +10983,8 @@ export function InvestCalcPage({
                   form={form}
                   active={!showResults && !analysisResult && !isCalculating}
                   getCapture={getEnrichmentCapture}
+                  notice={autofillNotice}
+                  onUndo={handleUndoAutofill}
                 />
               </div>
 
@@ -10887,6 +11018,7 @@ export function InvestCalcPage({
                   }
                   templateOptions={templateOptions}
                   savedTemplateFallback={savedTemplateFallback}
+                  rateIsFallback={!startingRateBenchmark && !hasUserRateDefault}
                   footer={
                     <SaveAsDefaultsChip
                       form={form}

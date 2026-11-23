@@ -9,7 +9,10 @@
  * "Monthly Rent" fields.
  *
  * Sources:
- *   - Mortgage rate: FRED API (MORTGAGE30US series, cached 24h).
+ *   - Mortgage rate: FRED API (MORTGAGE30US series, cached 24h), through
+ *     lib/property-enrichment/mortgage-rate.ts. The analyzer no longer writes
+ *     this into the form on address selection: the pages pass the same
+ *     benchmark as the form's starting rate (audit A2).
  *   - Monthly rent: HUD Fair Market Rent API. ZIP-level Small Area FMR
  *     when the matched county/metro is a SAFMR region (most large
  *     metros), falling back to the county/metro figure otherwise —
@@ -30,6 +33,7 @@
 import { z } from "zod";
 import { boundedArray } from "@/lib/bounded-array";
 import { isSmallAreaEntity, pickZipSafmrRent } from "@/lib/property-enrichment/hud-safmr";
+import { fetchMortgageRateBenchmark } from "@/lib/property-enrichment/mortgage-rate";
 
 export type EnrichPropertyInput = {
   state?: string;       // e.g., "PA"
@@ -136,7 +140,7 @@ export async function enrichPropertyAction(
   const validated = parsed.data;
 
   const [rate, rent, unitFmrs] = await Promise.all([
-    fetchCurrentMortgageRate(),
+    fetchMortgageRateBenchmark(),
     maybeFetchHudRent(validated),
     maybeFetchUnitFmrs(validated),
   ]);
@@ -245,67 +249,9 @@ function providerBaseUrl(envName: "FRED_API_BASE_URL" | "HUD_API_BASE_URL", fall
   return fallback;
 }
 
-// In-memory cache: serverless instances stay warm for a while, so even
-// a simple module-level cache cuts FRED traffic by 100x.
-type CachedRate = { rate: number; asOf: string; fetchedAt: number };
-let mortgageRateCache: CachedRate | null = null;
-const RATE_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
-
-async function fetchCurrentMortgageRate(): Promise<{ rate: number; asOf: string } | null> {
-  const apiKey = process.env.FRED_API_KEY;
-  if (!apiKey) {
-    console.warn("[enrichProperty] FRED_API_KEY not set in environment");
-    return null;
-  }
-
-  if (mortgageRateCache && Date.now() - mortgageRateCache.fetchedAt < RATE_CACHE_TTL_MS) {
-    return { rate: mortgageRateCache.rate, asOf: mortgageRateCache.asOf };
-  }
-
-  const url = new URL(`${providerBaseUrl("FRED_API_BASE_URL", "https://api.stlouisfed.org")}/fred/series/observations`);
-  url.searchParams.set("series_id", "MORTGAGE30US");
-  url.searchParams.set("api_key", apiKey);
-  url.searchParams.set("file_type", "json");
-  url.searchParams.set("sort_order", "desc");
-  url.searchParams.set("limit", "1");
-
-  try {
-    const res = await fetchWithTimeout(url.toString(), { cache: "no-store" });
-    if (!res) return null; // timed out
-    if (!res.ok) {
-      console.warn(
-        "[enrichProperty] FRED request failed",
-        { provider: "fred", endpoint: "series-observations", status: res.status }
-      );
-      return null;
-    }
-    const json = (await res.json()) as {
-      observations?: Array<{ value: string; date: string }>;
-    };
-    const latest = json.observations?.[0];
-    if (!latest || latest.value === "." || isNaN(Number(latest.value))) {
-      console.warn("[enrichProperty] FRED returned no valid observation", {
-        provider: "fred",
-        endpoint: "series-observations",
-        errorClass: "invalid-observation",
-      });
-      return null;
-    }
-    const rate = Number(latest.value);
-    console.log("[enrichProperty] FRED mortgage-rate observation refreshed", {
-      provider: "fred",
-      asOf: latest.date,
-    });
-    mortgageRateCache = { rate, asOf: latest.date, fetchedAt: Date.now() };
-    return { rate, asOf: latest.date };
-  } catch (err) {
-    console.warn("[enrichProperty] FRED processing failed", {
-      provider: "fred",
-      errorClass: (err as Error | undefined)?.name ?? "processing-error",
-    });
-    return null;
-  }
-}
+// The FRED fetch itself lives in lib/property-enrichment/mortgage-rate.ts:
+// the analyzer's pages read the same benchmark at render so a new analysis
+// starts on it (audit A2), and one implementation keeps the two in step.
 
 // -------- HUD Fair Market Rent --------
 

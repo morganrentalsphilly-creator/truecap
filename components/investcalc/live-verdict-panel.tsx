@@ -16,7 +16,6 @@ import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 import { GlossaryTip } from "./glossary-tip";
 import { useEffect, useState, type ReactNode } from "react";
 import { AnimatedNumber } from "@/components/motion/animated-number";
-import { X } from "lucide-react";
 
 /** The lightweight pre-run verdict snapshot computed by the form watcher. */
 export type LivePreviewSnapshot = {
@@ -52,11 +51,15 @@ type Props = {
   /** Desktop cockpit action placed directly beneath the live preview. */
   desktopAction?: ReactNode;
   /**
-   * A looked-up value that replaced one the preview was already using, said
-   * at the figure it moves (audit A5): "Rate updated to FRED 7.40% (Oct 15)
-   * from the 6.75% default". Stays until dismissed or undone.
+   * False for a signed-in account whose plan does not include the Offer
+   * Ceiling. The footer then says what the full analysis adds on this plan
+   * and names the Pro outputs as Pro, instead of promising them (audit A4).
+   * Everyone else keeps the original line.
    */
-  inputChange?: { text: string; onUndo: () => void; onDismiss: () => void } | null;
+  proOutputsIncluded?: boolean;
+  /** Price or rent is filled but invalid: the empty state says to fix the
+   * highlighted field rather than asking for values already typed (A9). */
+  hasInvalidInput?: boolean;
   /** The targets the full run will test, in the run's words ("break-even
    * cash flow · DSCR ≥ 1.25"), so the preview names them (audit A15). */
   runTargets?: string | null;
@@ -126,7 +129,8 @@ export function LiveVerdictPanel({
   livePreviewMsg,
   assumptionBasis,
   desktopAction,
-  inputChange,
+  proOutputsIncluded = true,
+  hasInvalidInput = false,
   runTargets,
 }: Props) {
   return (
@@ -260,32 +264,6 @@ export function LiveVerdictPanel({
               </div>
             </div>
           </div>
-          {inputChange ? (
-            <div
-              data-lookup-change=""
-              className="mt-2 flex items-center gap-x-3 border-t border-rule-soft pt-1 text-xs text-foreground"
-            >
-              {/* role=status: the figure above just rolled; this says why. */}
-              <p role="status" className="min-w-0 flex-1 py-2 leading-snug">
-                {inputChange.text}
-              </p>
-              <button
-                type="button"
-                onClick={inputChange.onUndo}
-                className="tc-link inline-flex min-h-11 shrink-0 items-center text-xs font-semibold"
-              >
-                Undo
-              </button>
-              <button
-                type="button"
-                onClick={inputChange.onDismiss}
-                aria-label="Dismiss the rate update note"
-                className="-mr-2 inline-flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors duration-[var(--duration-fast)] hover:bg-muted hover:text-foreground"
-              >
-                <X className="size-4" aria-hidden />
-              </button>
-            </div>
-          ) : null}
           {/* Path out of a negative first number: most cold visitors' first
               address won't cash-flow at asking price, and "Negative · 0/100"
               with no next move invites a bounce. The break-even price turns

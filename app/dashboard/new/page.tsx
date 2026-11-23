@@ -39,6 +39,7 @@ import { getRequestUser, getRequestEntitlements } from "@/lib/request-auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { isAdvocacyInternalUser } from "@/lib/advocacy-rollout";
 import { getSavedDealForEditingAction } from "@/app/actions/saved-analyses";
+import { fetchMortgageRateBenchmark } from "@/lib/property-enrichment/mortgage-rate";
 
 export const metadata: Metadata = {
   title: "New analysis",
@@ -109,7 +110,7 @@ export default async function NewAnalysisPage({
     ? await getSavedDealForEditingAction(requestedSavedDealId)
     : null;
 
-  const [capabilities, { data: profile }, isPremium, evaluationAccess] =
+  const [capabilities, { data: profile }, isPremium, evaluationAccess, initialMortgageRate] =
     await Promise.all([
       getAnalyzerCapabilities(supabase, user),
       supabase
@@ -119,6 +120,12 @@ export default async function NewAnalysisPage({
         .maybeSingle(),
       hasPaidPlanSubscription(supabase, user.id),
       getProductEvaluationAccessForUser(supabase, user.id),
+      // The form's starting mortgage rate (audit A2): the current FRED
+      // benchmark, cached (it prints weekly), so a new analysis opens on it
+      // instead of waiting for an address. Null on any failure; the form then
+      // uses the product fallback and labels it as one. Capped at 2.5s so a
+      // slow provider cannot hold the page.
+      fetchMortgageRateBenchmark({ cache: "page", timeoutMs: 2_500 }),
     ]);
 
   const displayName = getDisplayName((profile as ProfileRow | null) ?? null, user.email);
@@ -169,6 +176,7 @@ export default async function NewAnalysisPage({
           userAnalysisDefaults={capabilities.userAnalysisDefaults}
           advocacyContractEligible={isAdvocacyInternalUser(user.email)}
           initialSavedDeal={initialSavedDeal}
+          initialMortgageRate={initialMortgageRate}
         />
       </div>
     </div>

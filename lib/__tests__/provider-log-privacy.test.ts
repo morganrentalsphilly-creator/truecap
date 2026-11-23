@@ -107,7 +107,14 @@ describe("provider logging privacy", () => {
   });
 
   it("logs only controlled provider and error classifications", () => {
-    expect(enrichmentSource).toContain('provider: "fred"');
+    // Re-anchored (2026-11 audit A2): the FRED fetch moved to its own
+    // module so the analyzer's pages can read the same benchmark.
+    expect(
+      readFileSync(
+        join(process.cwd(), "lib/property-enrichment/mortgage-rate.ts"),
+        "utf8",
+      ),
+    ).toContain('provider: "fred"');
     expect(enrichmentSource).toContain('provider: "hud"');
     expect(enrichmentSource).toContain('errorClass: "timeout"');
     expect(enrichmentSource).toContain("status: res.status");

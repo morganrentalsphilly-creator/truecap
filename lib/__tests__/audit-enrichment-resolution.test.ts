@@ -280,8 +280,12 @@ describe("audit: enrichPropertyAction", () => {
 
   it("the analyzer carries the statewide flag from the lookup to every label", () => {
     const analyzer = read("components/investcalc/investcalc-page.tsx");
-    // Single-family capture, straight from the action's meta.
-    expect(analyzer).toContain("...(enrichment.meta.rent?.stateAverage ? { stateAverage: true } : {}),");
+    // Single-family capture, straight from the action's meta. Re-anchored
+    // (2026-11 audit A3/B2): the meta is recorded once as the rent benchmark,
+    // and the one writer (auto-fill and the rent field's "Use") copies the
+    // flag from it into the capture.
+    expect(analyzer).toContain("stateAverage: Boolean(enrichment.meta.rent?.stateAverage),");
+    expect(analyzer).toContain("...(benchmark.stateAverage ? { stateAverage: true } : {}),");
     // Multi-family per-unit capture.
     expect(analyzer).toContain("if (result.meta.rent?.stateAverage === true) { filledRentStateAverage = true; }");
     // Capture to provenance payload (strip, confidence labels, drafts, save).

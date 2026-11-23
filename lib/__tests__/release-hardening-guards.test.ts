@@ -38,11 +38,16 @@ describe("release hardening guards", () => {
 
   it("protects restored/template rate and tax values from address benchmarks", () => {
     const source = read("components/investcalc/investcalc-page.tsx");
-    expect(source).toContain("mayAdoptStartingBenchmark");
+    // Re-anchored (2026-11 audit A2): the protection is now absolute. The
+    // address lookup no longer writes the rate under any condition (the form
+    // opens on the server-read benchmark instead), so there is no
+    // "replaceable default" exception left to guard.
+    expect(source).not.toContain("mayAdoptStartingBenchmark");
+    expect(source).not.toMatch(/form\.setValue\(\s*"interestRate",\s*enrichment\.interestRate/);
+    expect(source).toContain("startingRateBenchmark?.rate");
     expect(source).toContain("autoApplyEligibleRef.current");
-    expect(source).toContain('!form.getValues("templateId")');
-    expect(source).toContain("!savedDealIdRef.current");
-    expect(source).toContain("replaceableDefault: isReplaceableProductDefault");
+    // The benchmark's provenance is never lent to a saved deal.
+    expect(source).toContain("savedDealIdRef.current");
   });
 
   it("does not turn aggregate query failure into a zero-value portfolio", () => {

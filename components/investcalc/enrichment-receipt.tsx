@@ -2,22 +2,28 @@
 
 /**
  * Enrichment receipt — the durable, in-flow one-liner under the hero fields
- * (calculator redesign Phase 3, blueprint §1 item 3): "Filled rate (6.9%
- * FRED) and rent (~$1,850 HUD) for you."
+ * (calculator redesign Phase 3, blueprint §1 item 3): "Filled rent (~$1,850
+ * /mo HUD SAFMR) for you."
  *
- * Toasts are RETAINED — this complements them as the persistent record so
- * the smart defaults get visible credit after the toast evicts.
+ * THE single notice for an auto-fill (audit A3). It used to complement a
+ * corner toast and a note under the preview, so one fill was announced three
+ * ways and the rent source was named two ways. The toasts and the note are
+ * gone: this line names what was filled, carries the disclosure the toast
+ * used to carry, and offers the Undo. It is a polite status region now,
+ * because nothing else announces the fill any more.
+ *
+ * The mortgage rate is not listed. The form opens on the server-read FRED
+ * benchmark (audit A2), so nothing "fills" it when an address is picked; its
+ * source is on the financing chip.
  *
  * Derivation is data-only: the parent's live enrichment capture (what
- * enrich-property actually wrote this session). Template provenance belongs
- * exclusively in the assumptions strip, where it is checked field-by-field;
- * duplicating it here previously produced contradictory "template applied"
- * and "default" claims. The capture is session-scoped by design — it clears
- * on reset / new address — so restored deals show no false receipt.
- *
- * Deliberately NOT an aria-live region: the enrichment toast already
- * announces the same fill to screen readers; a second live region would
- * double-speak every autofill.
+ * enrich-property actually wrote this session) plus the lookup facts the last
+ * fill wrote, each shown only while the field still holds the written value.
+ * Template provenance belongs exclusively in the assumptions strip, where it
+ * is checked field-by-field; duplicating it here previously produced
+ * contradictory "template applied" and "default" claims. The capture is
+ * session-scoped by design — it clears on reset / new address — so restored
+ * deals show no false receipt.
  */
 
 import type { UseFormReturn } from "react-hook-form";
@@ -39,6 +45,19 @@ export type EnrichmentReceiptCapture = {
   interestRate?: { value: number };
 };
 
+/** What the most recent auto-fill wrote (investcalc-page's AutofillNotice). */
+export type EnrichmentReceiptNotice = {
+  entries: ReadonlyArray<{
+    field: string;
+    /** The receipt's word for a looked-up fact ("baths"); null for rent,
+     *  which the capture already describes. */
+    label: string | null;
+    written: number;
+  }>;
+  /** The disclosure that goes with the fill. */
+  note: string | null;
+};
+
 type Props = {
   form: UseFormReturn<InvestmentFormValues>;
   /** Same input-phase gate as LiveVerdictPanel — once results render, the
@@ -46,9 +65,11 @@ type Props = {
   active: boolean;
   /** Read fresh each render (the parent passes its enrichmentCaptureRef). */
   getCapture: () => EnrichmentReceiptCapture;
+  /** The last fill, for the looked-up facts, the disclosure and the Undo. */
+  notice?: EnrichmentReceiptNotice | null;
+  /** Restores what the last fill replaced. */
+  onUndo?: () => void;
 };
-
-const fmtPct = (n: number) => String(Number(n.toFixed(2)));
 
 /**
  * `stateAverage` marks the HUD statewide fallback (the unweighted mean of
@@ -74,24 +95,23 @@ function joinNatural(parts: string[]): string {
   return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
 }
 
-export function EnrichmentReceipt({ form, active, getCapture }: Props) {
+export function EnrichmentReceipt({
+  form,
+  active,
+  getCapture,
+  notice = null,
+  onUndo,
+}: Props) {
   // Capture is ref-backed, so subscribe to form writes to repaint when a
   // lookup fills rate, tax, or rent without introducing duplicate state.
   form.watch();
   if (!active) return null;
 
   const capture = getCapture();
-  const currentRate = Number(form.getValues("interestRate"));
   const currentRent = Number(form.getValues("monthlyRent"));
   const sameNumber = (current: number, captured: number) =>
     Number.isFinite(current) && Math.abs(current - captured) < 1e-9;
   const parts: string[] = [];
-  if (
-    capture.interestRate &&
-    sameNumber(currentRate, capture.interestRate.value)
-  ) {
-    parts.push(`rate (${fmtPct(capture.interestRate.value)}% FRED benchmark)`);
-  }
   if (
     capture.monthlyRent?.value != null &&
     sameNumber(currentRent, capture.monthlyRent.value)
@@ -112,20 +132,54 @@ export function EnrichmentReceipt({ form, active, getCapture }: Props) {
     );
   }
 
+  // Looked-up facts (beds, baths, size, price): named only while the field
+  // still holds what the lookup wrote, like every other line here.
+  const values = form.getValues() as unknown as Record<string, unknown>;
+  const liveEntries = (notice?.entries ?? []).filter((entry) => {
+    const current = entry.field.startsWith("units.")
+      ? Number(form.getValues(entry.field as "units.0.monthlyRent"))
+      : Number(values[entry.field]);
+    return sameNumber(current, entry.written);
+  });
+  const lookupLabels = liveEntries
+    .map((entry) => entry.label)
+    .filter((label): label is string => Boolean(label));
+  if (lookupLabels.length > 0) {
+    parts.push(`${joinNatural(lookupLabels)} (RentCast)`);
+  }
+
   if (parts.length === 0) return null;
 
+  // Undo is offered while at least one value the last fill wrote is still in
+  // its field; a fill the visitor has already edited away has nothing to undo.
+  const canUndo = Boolean(onUndo) && liveEntries.length > 0;
+
   return (
-    <p className="flex items-start gap-2 rounded-xl border border-border bg-card/60 px-3 py-2 text-xs leading-relaxed text-muted-foreground shadow-sm">
+    <div
+      data-enrichment-receipt=""
+      className="flex items-start gap-2 rounded-lg border border-border bg-card/60 px-3 py-1 text-sm leading-snug text-muted-foreground shadow-sm"
+    >
       <Check
-        className="mt-0.5 size-3.5 shrink-0 text-[var(--metric-positive)]"
+        className="mt-3.5 size-3.5 shrink-0 text-[var(--metric-positive)]"
         aria-hidden
       />
-      <span className="min-w-0">
+      {/* role=status: this line is the only announcement of the fill. */}
+      <p role="status" className="min-w-0 flex-1 py-2.5">
         <span className="font-semibold text-foreground">
-          Filled {joinNatural(parts)} for you
+          Filled {joinNatural(parts)} for you.
         </span>
-        {" — tap a chip below to change anything."}
-      </span>
-    </p>
+        {canUndo && notice?.note ? ` ${notice.note}` : null}
+      </p>
+      {canUndo ? (
+        <button
+          type="button"
+          onClick={onUndo}
+          aria-label="Undo the auto-fill"
+          className="tc-link inline-flex min-h-11 shrink-0 items-center px-1 text-sm font-semibold"
+        >
+          Undo
+        </button>
+      ) : null}
+    </div>
   );
 }

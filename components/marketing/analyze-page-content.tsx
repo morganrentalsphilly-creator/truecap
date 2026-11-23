@@ -2,6 +2,7 @@ import type { ComponentProps } from "react";
 import { InvestCalcPage } from "@/components/investcalc/investcalc-page";
 import { isFunnelFlagOn } from "@/lib/funnel-flags";
 import { AnalyzeEntryFromQuery } from "@/components/marketing/analyze-entry-from-query";
+import { fetchMortgageRateBenchmark } from "@/lib/property-enrichment/mortgage-rate";
 
 export type AnalyzerProps = ComponentProps<typeof InvestCalcPage>;
 
@@ -47,11 +48,21 @@ export const ANON_ANALYZER_PROPS: AnalyzerProps = {
  * decision is free" promise for anonymous visitors (2026-09 audit — the
  * first phone screen used to show two intros before the address field).
  */
-export function AnalyzePageContent({ analyzerProps }: { analyzerProps: AnalyzerProps }) {
+export async function AnalyzePageContent({ analyzerProps }: { analyzerProps: AnalyzerProps }) {
+  // The form's starting mortgage rate (audit A2): the current FRED benchmark,
+  // read on the server and cached, so the rate is right from the first render
+  // instead of arriving when an address is picked. It reads no cookie or
+  // header, so the static /analyze shell stays static (its hourly ISR
+  // refreshes the figure); null means the form opens on the labeled product
+  // fallback.
+  const initialMortgageRate = await fetchMortgageRateBenchmark({
+    cache: "page",
+    timeoutMs: 2_500,
+  });
   return (
     <>
       <AnalyzeEntryFromQuery />
-      <InvestCalcPage {...analyzerProps} />
+      <InvestCalcPage {...analyzerProps} initialMortgageRate={initialMortgageRate} />
     </>
   );
 }
