@@ -90,6 +90,14 @@ const FAQ_ITEMS = [
     a: "Guesty spans sizes — Lite for 1–3 listings, Pro for 4–199, Enterprise for 200+ — and its Pro plan adds an owners portal for managers running multiple owners. Hostaway quotes by listing count, advertises 300+ integrations and lists an owner portal and owner statements. Guesty's owners portal lets you set custom permissions per owner. If you manage STRs for other owners, compare the two portals.",
   },
   {
+    q: "Hostfully vs Guesty — which one?",
+    a: "Hostfully pitches its plans from 1 listing up, offers digital guidebooks (the first one free) and a branded direct-booking site, and advertises 150+ integrations by its own count. Guesty runs three tiers instead of scaling by property count alone — Lite (1-3 listings, from $9/month plus 1% per reservation, 14-day free trial), Pro (4-199 listings), and Enterprise (200+) — with an owners portal from Pro up for managers running other owners' properties. Guesty's tiers span solo hosts through enterprise portfolios; compare both pricing pages against your listing count.",
+  },
+  {
+    q: "What about Hospitable, OwnerRez, or iGMS instead of these three?",
+    a: "This comparison covers Hostfully, Hostaway, and Guesty specifically, plus Lodgify and Smoobu for 1-3 listings. Hospitable, OwnerRez, and iGMS are other short-term rental property-management platforms; compare their own pricing and feature pages before choosing one.",
+  },
+  {
     q: "Do any of these underwrite STR deals?",
     a: "All three sell property management software for STRs you operate (channels, pricing, guest messaging, cleaning). For pre-purchase underwriting (cap rate, DSCR, cash flow on a property you're considering buying as an STR), use TrueCap, DealCheck, or a spreadsheet. AirDNA's Rentalizer provides an STR revenue projection you can enter in TrueCap's rent field.",
   },

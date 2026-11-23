@@ -113,7 +113,13 @@ const TOOLS: Tool[] = [
       "Full disclosure: TrueCap is our tool. We put it first because the free tier runs unlimited preliminary rental screens with no account. The side-by-side comparison shows where BiggerPockets still wins.",
     freeCovers: [
       "Cap rate, cash-on-cash, DSCR, NCF, monthly cash flow — unlimited, no signup",
-      "Editable HUD rent + FRED mortgage-rate benchmarks; manual local property tax",
+      <>
+        Editable HUD rent +{" "}
+        <a href="https://fred.stlouisfed.org/series/MORTGAGE30US" className={SOURCE_LINK}>
+          FRED mortgage-rate
+        </a>{" "}
+        benchmarks; manual local property tax
+      </>,
       "Buy Box fit, with a Deal score",
       <>
         Every operating expense category{" "}
@@ -637,6 +643,10 @@ export default function FreeBiggerPocketsCalculatorAlternativesPost() {
             {
               title: "BiggerPockets, Rental Property Calculator",
               url: "https://www.biggerpockets.com/rental-property-calculator",
+            },
+            {
+              title: "FRED, 30-Year Fixed Rate Mortgage Average in the United States (MORTGAGE30US)",
+              url: "https://fred.stlouisfed.org/series/MORTGAGE30US",
             },
             {
               title: "Stessa, Rental Property Returns and Income Tax Calculator",
