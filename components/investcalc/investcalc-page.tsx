@@ -1274,6 +1274,11 @@ export function InvestCalcPage({
     useState<FinancingProfileSnapshot | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  // Set when the visitor asks for a result: a run, or "Done editing". Only
+  // such a result gets its own history entry (audit A8). A result that was
+  // simply there when the page loaded (a saved deal opened from My Deals) is
+  // not something to go Back from: Back must leave the page as it always did.
+  const resultViewRequestedRef = useRef(false);
   const [isEditingAssumptions, setIsEditingAssumptions] = useState(false);
   const [pendingVerificationFocusKey, setPendingVerificationFocusKey] =
     useState<InputConfidenceFieldKey | null>(null);
@@ -1845,6 +1850,7 @@ export function InvestCalcPage({
   const [resultRunId, setResultRunId] = useState(0);
 
   const handleBackToResult = useCallback(() => {
+    resultViewRequestedRef.current = true;
     // Editing is non-destructive: flush the final valid change in case the
     // investor closes the editor inside the watcher's 100 ms debounce.
     // Incomplete fields retain the last complete result behind a clear
@@ -6521,6 +6527,7 @@ export function InvestCalcPage({
   };
 
   const onSubmit = async (validated: InvestmentFormValues) => {
+    resultViewRequestedRef.current = true;
     // Enter in a field submits the form without passing through the primary
     // action's own address check, so the same rule is enforced here: a bare
     // city never reaches the run (or the no-signup decision claim below).
@@ -10329,32 +10336,31 @@ export function InvestCalcPage({
   // same state "Edit assumptions" opens) and Forward returns to the result.
   // The URL is the only source of truth: nothing is stored in history.state,
   // which the Next router owns.
-  /** The first run of the sync effect below, after the mount bootstrap. */
-  const resultViewSettledRef = useRef(false);
   /** True while the result's history entry sits directly on top of a form
    *  entry this session created, so leaving the result can go Back to it. */
   const resultEntryOverFormRef = useRef(false);
   const resultViewWasActiveRef = useRef(false);
   useEffect(() => {
     if (!isCalculatorReady) return;
-    const firstSettle = !resultViewSettledRef.current;
-    resultViewSettledRef.current = true;
     const wasActive = resultViewWasActiveRef.current;
     resultViewWasActiveRef.current = postAnalysisMode;
     try {
       const here = window.location.href;
       const inUrl = hasResultView(here);
       if (postAnalysisMode) {
+        const requested = resultViewRequestedRef.current;
+        resultViewRequestedRef.current = false;
         if (inUrl) return;
         const path = resultViewPath(here, true);
-        if (firstSettle) {
-          // A result that was already there when the page loaded (a saved
-          // deal opened from My Deals): mark the view, but add no entry.
-          // There is no form state beneath it to go back to.
-          window.history.replaceState(null, "", path);
-        } else {
+        if (requested) {
           window.history.pushState(null, "", path);
           resultEntryOverFormRef.current = true;
+        } else {
+          // A result the page restored by itself (a saved deal opened from
+          // My Deals, which arrives a moment after the page settles): mark
+          // the view, but add no entry. There is no form state beneath it
+          // that the visitor ever saw.
+          window.history.replaceState(null, "", path);
         }
         return;
       }
@@ -10377,50 +10383,59 @@ export function InvestCalcPage({
     }
   }, [isCalculatorReady, isCalculating, postAnalysisMode]);
 
-  useEffect(() => {
-    const onPopState = () => {
-      let inUrl = false;
-      try {
-        inUrl = hasResultView(window.location.href);
-      } catch {
-        return;
-      }
-      if (inUrl) {
-        if (analysisResult && showResults) {
-          // Forward, onto the result's entry. The form entry is beneath it.
-          resultEntryOverFormRef.current = true;
-          if (isEditingAssumptions) handleBackToResult();
-        } else {
-          try {
-            window.history.replaceState(
-              null,
-              "",
-              resultViewPath(window.location.href, false),
-            );
-          } catch {
-            /* best-effort */
-          }
+  // The listener is attached ONCE and reads the current state through a ref.
+  // Re-subscribing after every render (the pattern the shell's New Analysis
+  // event uses) does not survive a real Back: the router's own popstate
+  // listener schedules a render, the browser runs that render between two
+  // listeners of the same event, and the effect cleanup removes this
+  // listener before the browser reaches it. A listener added during a
+  // dispatch is not called for that event either, so nothing ran.
+  const onResultPopStateRef = useRef<() => void>(() => {});
+  onResultPopStateRef.current = () => {
+    let inUrl = false;
+    try {
+      inUrl = hasResultView(window.location.href);
+    } catch {
+      return;
+    }
+    if (inUrl) {
+      if (analysisResult && showResults) {
+        // Forward, onto the result's entry. The form entry is beneath it.
+        resultEntryOverFormRef.current = true;
+        if (isEditingAssumptions) handleBackToResult();
+      } else {
+        try {
+          window.history.replaceState(
+            null,
+            "",
+            resultViewPath(window.location.href, false),
+          );
+        } catch {
+          /* best-effort */
         }
-        return;
       }
-      if (!postAnalysisMode) return;
-      // Back, from the result to the form: the inputs are intact, and the
-      // result is one "Done editing" (or Forward) away.
-      resultEntryOverFormRef.current = false;
-      setIsEditingAssumptions(true);
-      setAdvancedOpen(false);
-      requestAnimationFrame(() => {
-        document
-          .querySelector('[data-calc-form="true"]')
-          ?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
-        document
-          .querySelector<HTMLElement>('[data-editing-assumptions-banner="true"]')
-          ?.focus({ preventScroll: true });
-      });
-    };
+      return;
+    }
+    if (!postAnalysisMode) return;
+    // Back, from the result to the form: the inputs are intact, and the
+    // result is one "Done editing" (or Forward) away.
+    resultEntryOverFormRef.current = false;
+    setIsEditingAssumptions(true);
+    setAdvancedOpen(false);
+    requestAnimationFrame(() => {
+      document
+        .querySelector('[data-calc-form="true"]')
+        ?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
+      document
+        .querySelector<HTMLElement>('[data-editing-assumptions-banner="true"]')
+        ?.focus({ preventScroll: true });
+    });
+  };
+  useEffect(() => {
+    const onPopState = () => onResultPopStateRef.current();
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  });
+  }, []);
 
   // The title names the result while it is on screen and goes back to the
   // page's own title with the form. Runs after every render on purpose: the
