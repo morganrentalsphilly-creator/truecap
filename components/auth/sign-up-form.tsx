@@ -5,15 +5,15 @@ import { track } from "@/lib/analytics/site-events";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useForm, useWatch } from "react-hook-form";
+import { Check, ChevronDown, Circle, Eye, EyeOff, Loader2 } from "lucide-react";
 import { resendConfirmationAction, signUpAction } from "@/app/actions/auth";
 import { trackConversion } from "@/lib/analytics/track-conversion";
 import { trackEvent } from "@/lib/analytics";
 import {
   internalNextPathOrNull,
   safeInternalNextPath,
-  PASSWORD_POLICY_TEXT,
+  PASSWORD_RULES,
   signUpSchema,
   type SignUpInput,
 } from "@/lib/auth-schema";
@@ -48,6 +48,17 @@ import {
   PUBLIC_PRO_ANNUAL_USD,
   PUBLIC_PRO_MONTHLY_USD,
 } from "@/lib/public-pricing";
+import { cn } from "@/lib/utils";
+
+/**
+ * What the form says when Create account is pressed before the human check
+ * has a token (2026-11 ads pass, B4). The button is never greyed out waiting
+ * for it: a disabled button with no reason reads as a broken page.
+ */
+const HUMAN_CHECK_PENDING_MESSAGE =
+  "We're still checking that you're human. It takes a few seconds. Try again.";
+const HUMAN_CHECK_INTERACTIVE_MESSAGE =
+  "Complete the human check above, then create your account.";
 
 interface SignUpFormProps {
   agentProConfigured?: boolean;
@@ -60,8 +71,9 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   // A Turnstile token works once. Every server call below that carries it is
-  // followed by captchaRef.current?.reset(), which clears the token (submit
-  // and resend are disabled) and asks the mounted widget for a new one. The
+  // followed by captchaRef.current?.reset(), which clears the token (a submit
+  // without one is answered with a message, resend is disabled) and asks the
+  // mounted widget for a new one. The
   // form and the confirmation panel each mount a widget on this ref; only one
   // of the two is on screen at a time.
   const captchaRef = useRef<CaptchaWidgetHandle>(null);
@@ -70,8 +82,15 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
   // still enforces server-side, so this only changes the failure MODE from a
   // dead button to a real error message.
   const [captchaUnavailable, setCaptchaUnavailable] = useState(false);
+  // Turnstile is showing a challenge the visitor has to answer (the widget is
+  // otherwise invisible: components/auth/captcha-widget.tsx).
+  const [captchaInteractive, setCaptchaInteractive] = useState(false);
+  // Set when Create account was pressed without a token; cleared when one
+  // arrives.
+  const [humanCheckMessage, setHumanCheckMessage] = useState<string | null>(
+    null,
+  );
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [hasPendingDeal, setHasPendingDeal] = useState(false);
   // Inline, announced failure state (2026-09 audit: a rejected sign-up used
   // to be a single toast that TOAST_LIMIT could drop, with the fields never
@@ -94,10 +113,15 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
     defaultValues: {
       email: "",
       password: "",
-      confirmPassword: "",
     },
     mode: "onTouched",
   });
+  // The live checklist under the password field reads the field as typed.
+  const passwordValue = useWatch({ control: form.control, name: "password" }) ?? "";
+  // The token arrived: the "still checking" message has nothing left to say.
+  useEffect(() => {
+    if (captchaToken) setHumanCheckMessage(null);
+  }, [captchaToken]);
 
   // Thread ?next through the "Sign in" cross-link so a gated action's return
   // address (e.g. the calculator's pending save) survives the sign-up → login
@@ -125,6 +149,21 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
   const selectedPriceSuffix = selectedBilling === "annual" ? "/year" : "/month";
 
   async function onSubmit(values: SignUpInput) {
+    // The fields are valid (the resolver ran). Without a token the request
+    // would only be rejected by Supabase's captcha check, so say what is
+    // missing here, next to the button, and send nothing. If Turnstile could
+    // not run at all (captchaUnavailable) the request goes out as before and
+    // the server's own message is shown.
+    if (captchaEnabled && !captchaUnavailable && !captchaToken) {
+      setSubmitError(null);
+      setHumanCheckMessage(
+        captchaInteractive
+          ? HUMAN_CHECK_INTERACTIVE_MESSAGE
+          : HUMAN_CHECK_PENDING_MESSAGE,
+      );
+      return;
+    }
+    setHumanCheckMessage(null);
     trackEvent("signup_started", { method: "email" });
     track("signup_started", { method: "email" });
     setIsSubmitting(true);
@@ -297,74 +336,6 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
 
   return (
     <div className="space-y-5">
-      <section
-        aria-labelledby="evaluation-summary-title"
-        className="border-y border-border py-4"
-      >
-        <h2
-          id="evaluation-summary-title"
-          className="text-lg font-semibold text-foreground"
-        >
-          Your {PRODUCT_EVALUATION_DAYS}-day free trial
-        </h2>
-        <p className="mt-1 text-sm text-foreground">$0 today · no card</p>
-        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-          {/* What the trial counts (lib/evaluation-resource-key.ts): one
-              analysis per distinct set of inputs. Running the same inputs
-              again reuses its ledger row; any changed input is a new row. */}
-          Complete {PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and{" "}
-          {PRODUCT_EVALUATION_COMPARISON_LIMIT} full comparison. Revisions to the same property do not use another trial analysis.{" "}
-          {/* An agent who arrives from an Agent Pro CTA is told, before the
-              account exists, what the trial leaves out: the same sentence
-              /for-agents puts beside that CTA (lib/entitlements.ts: the
-              trial never grants custom_branding or client_buy_box). */}
-          {selectedPlan === "agent-pro"
-            ? "Co-branding, the client roster and client Buy Boxes are part of the Agent Pro subscription, not the trial. "
-            : null}
-          {
-            "Nothing auto-renews and no subscription starts when you create the account."
-          }
-        </p>
-        {reviewedPlanFromQuery ? (
-          <dl className="mt-3 grid grid-cols-2 gap-x-6 border-t border-rule-soft pt-3 text-sm">
-            <div>
-              <dt className="text-muted-foreground">Plan you reviewed</dt>
-              <dd className="mt-0.5 font-semibold text-foreground">
-                {selectedPlanName} · {selectedBilling}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground">
-                Only if you subscribe later
-              </dt>
-              <dd className="mt-0.5 font-semibold text-foreground">
-                {formatPublicUsd(selectedPrice)}
-                {selectedPriceSuffix}
-              </dd>
-            </div>
-          </dl>
-        ) : (
-          <p className="mt-3 text-sm text-muted-foreground">
-            Pro is {formatPublicUsd(PUBLIC_PRO_MONTHLY_USD)}/month or{" "}
-            {formatPublicUsd(PUBLIC_PRO_ANNUAL_USD)}/year — only if you
-            subscribe after the trial.
-          </p>
-        )}
-      </section>
-      {hasPendingDeal ? (
-        <div
-          role="status"
-          className="bg-band px-4 py-3 text-sm text-foreground"
-        >
-          <p className="font-semibold">
-            Your underwriting is waiting on this device.
-          </p>
-          <p className="mt-1 text-muted-foreground">
-            Finish creating your account and we&apos;ll save that exact deal
-            automatically.
-          </p>
-        </div>
-      ) : null}
       {/* Google OAuth — the highest-leverage friction-reducer for cold
           paid traffic. One tap, no password to invent, no confirmation
           email round-trip. Email/password stays below as the fallback. */}
@@ -451,50 +422,39 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
                     one, the error under it. A hand-set aria-describedby on
                     the input replaced that list, so a rejected password was
                     never part of the field's description. */}
-                <FormDescription>
-                  {PASSWORD_POLICY_TEXT}
+                {/* The policy as a checklist that ticks as the visitor types
+                    (the rows are lib/auth-schema.ts PASSWORD_RULES, the ones
+                    the schema enforces). A <p> of rows, so FormControl still
+                    names it as the field's description. */}
+                <FormDescription className="grid gap-1" data-password-checklist="">
+                  {PASSWORD_RULES.map((rule) => {
+                    const met = rule.test(passwordValue);
+                    return (
+                      <span
+                        key={rule.key}
+                        data-met={met ? "true" : "false"}
+                        // Ink, not green: the Sign Rule keeps green for a
+                        // number's sign. The mark and the weight carry it.
+                        className={cn(
+                          "flex items-center gap-2",
+                          met ? "font-medium text-foreground" : "text-muted-foreground",
+                        )}
+                      >
+                        {met ? (
+                          <Check className="size-4 shrink-0" aria-hidden />
+                        ) : (
+                          <Circle className="size-4 shrink-0 scale-[0.4]" aria-hidden />
+                        )}
+                        <span>
+                          {rule.label}
+                          <span className="sr-only">
+                            {met ? " (met)" : " (not met yet)"}
+                          </span>
+                        </span>
+                      </span>
+                    );
+                  })}
                 </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirm password</FormLabel>
-                <div className="relative">
-                  <FormControl>
-                    <Input
-                      type={showConfirmPassword ? "text" : "password"}
-                      autoComplete="new-password"
-                      required
-                      aria-required="true"
-                      placeholder="Confirm your password"
-                      disabled={isSubmitting}
-                      className="h-12 pl-4 pr-12 text-base lg:text-base"
-                      {...field}
-                    />
-                  </FormControl>
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword((value) => !value)}
-                    className="absolute right-0.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                    aria-label={
-                      showConfirmPassword
-                        ? "Hide confirmation password"
-                        : "Show confirmation password"
-                    }
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="size-4" />
-                    ) : (
-                      <Eye className="size-4" />
-                    )}
-                  </button>
-                </div>
                 <FormMessage />
               </FormItem>
             )}
@@ -522,11 +482,22 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
             </div>
           ) : null}
 
+          {/* Invisible unless a challenge needs the visitor (B5). */}
           <CaptchaWidget
             ref={captchaRef}
             onToken={setCaptchaToken}
             onUnavailable={() => setCaptchaUnavailable(true)}
+            onInteractiveChange={setCaptchaInteractive}
           />
+          {humanCheckMessage ? (
+            <p
+              role="alert"
+              data-human-check-message=""
+              className="rounded-md border border-destructive px-4 py-3 text-sm leading-relaxed text-foreground"
+            >
+              {humanCheckMessage}
+            </p>
+          ) : null}
 
           <p className="text-sm leading-relaxed text-muted-foreground">
             By creating an account, you agree to the{" "}
@@ -546,14 +517,14 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
             . No card is requested and no subscription starts today.
           </p>
 
+          {/* Never greyed out for a missing field or token (B4): pressing it
+              shows what is missing, next to the field or just above. Only an
+              in-flight request disables it. */}
           <Button
             type="submit"
             size="cta"
             className="w-full"
-            disabled={
-              isSubmitting ||
-              (captchaEnabled && !captchaUnavailable && !captchaToken)
-            }
+            disabled={isSubmitting}
           >
             {isSubmitting ? (
               <>
@@ -566,6 +537,16 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
               "Create account — $0 today"
             )}
           </Button>
+
+          {hasPendingDeal ? (
+            <p role="status" className="text-sm leading-relaxed text-muted-foreground">
+              <span className="font-semibold text-foreground">
+                Your underwriting is waiting on this device.
+              </span>{" "}
+              Finish creating your account and we&apos;ll save that exact deal
+              automatically.
+            </p>
+          ) : null}
 
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
@@ -582,6 +563,63 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
           </p>
         </form>
       </Form>
+
+      {/* The trial's terms, one tap away (B1): they used to sit above the
+          buttons and pushed Google to 674px on a phone. */}
+      <details
+        data-trial-details=""
+        className="tc-accordion group border-y border-border"
+      >
+        <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 py-2 text-base font-semibold text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
+          <span id="evaluation-summary-title">What the trial includes</span>
+          <ChevronDown
+            aria-hidden
+            className="size-4 shrink-0 transition-transform group-open:rotate-180"
+          />
+        </summary>
+        <div className="pb-4">
+          <p className="text-sm font-semibold text-foreground">
+            Your {PRODUCT_EVALUATION_DAYS}-day free trial
+          </p>
+          <p className="mt-1 text-sm text-foreground">$0 today · no card</p>
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+            {/* What the trial counts (lib/evaluation-resource-key.ts): one
+                analysis per distinct set of inputs. Running the same inputs
+                again reuses its ledger row; any changed input is a new row. */}
+            Complete {PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and{" "}
+            {PRODUCT_EVALUATION_COMPARISON_LIMIT} full comparison. Revisions to the same property do not use another trial analysis.{" "}
+            {/* An agent who arrives from an Agent Pro CTA is told, before the
+                account exists, what the trial leaves out: the same sentence
+                /for-agents puts beside that CTA (lib/entitlements.ts: the
+                trial never grants custom_branding or client_buy_box). */}
+            {selectedPlan === "agent-pro"
+              ? "Co-branding, the client roster and client Buy Boxes are part of the Agent Pro subscription, not the trial. "
+              : null}
+            {
+              "Nothing auto-renews and no subscription starts when you create the account."
+            }
+          </p>
+          {reviewedPlanFromQuery ? (
+            <dl className="mt-3 grid grid-cols-2 gap-x-6 border-t border-rule-soft pt-3 text-sm">
+              <div>
+                <dt className="text-muted-foreground">Plan you reviewed</dt>
+                <dd className="mt-0.5 font-semibold text-foreground">
+                  {selectedPlanName} · {selectedBilling}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-muted-foreground">
+                  Only if you subscribe later
+                </dt>
+                <dd className="mt-0.5 font-semibold text-foreground">
+                  {formatPublicUsd(selectedPrice)}
+                  {selectedPriceSuffix}
+                </dd>
+              </div>
+            </dl>
+          ) : null}
+        </div>
+      </details>
     </div>
   );
 }

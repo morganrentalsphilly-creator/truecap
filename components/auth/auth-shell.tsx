@@ -7,7 +7,9 @@ import { buildSampleDealSweep } from "@/lib/sample-deal-sweep";
 import { cn } from "@/lib/utils";
 
 type AuthShellProps = {
-  title: string;
+  /** A string, or a node that renders one (the sign-up page's headline
+   *  depends on what the visitor was doing). */
+  title: React.ReactNode;
   description?: string;
   children: React.ReactNode;
   footer?: React.ReactNode;

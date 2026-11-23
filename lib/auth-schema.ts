@@ -17,26 +17,37 @@ export const loginSchema = z.object({
  */
 export const PASSWORD_POLICY_TEXT =
   "At least 12 characters, with an uppercase letter, a lowercase letter, and a number.";
+/**
+ * The same policy, one requirement per row, for the sign-up form's live
+ * checklist. passwordSchema below is built from these rows, so the checklist
+ * can never tick a password the schema (or the server) rejects.
+ */
+export const PASSWORD_RULES = [
+  { key: "length", label: "At least 12 characters", test: (value: string) => value.length >= 12 },
+  { key: "uppercase", label: "An uppercase letter", test: (value: string) => /[A-Z]/.test(value) },
+  { key: "lowercase", label: "A lowercase letter", test: (value: string) => /[a-z]/.test(value) },
+  { key: "number", label: "A number", test: (value: string) => /\d/.test(value) },
+] as const;
+const CHARACTER_RULES = PASSWORD_RULES.filter((rule) => rule.key !== "length");
 const passwordSchema = z
   .string()
   .min(12, "Password must be at least 12 characters")
   .max(72, "Password is too long")
   .refine(
-    (value) => /[a-z]/.test(value) && /[A-Z]/.test(value) && /\d/.test(value),
+    (value) => CHARACTER_RULES.every((rule) => rule.test(value)),
     "Password needs an uppercase letter, a lowercase letter, and a number",
   );
 
-export const signUpSchema = z
-  .object({
-    email: z.string().min(1, "Enter your email").email("Enter a valid email"),
-    password: passwordSchema,
-    confirmPassword: z.string().min(1, "Confirm your password"),
-    captchaToken: z.string().max(4096).optional(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+/**
+ * One password field (2026-11 ads pass, B3): the form has a show/hide toggle,
+ * so a second "confirm" field only added a way to fail. Changing a password
+ * (updatePasswordSchema) still asks twice; a typo there locks the account.
+ */
+export const signUpSchema = z.object({
+  email: z.string().min(1, "Enter your email").email("Enter a valid email"),
+  password: passwordSchema,
+  captchaToken: z.string().max(4096).optional(),
+});
 
 export const forgotPasswordSchema = z.object({
   email: z.string().min(1, "Enter your email").email("Enter a valid email"),

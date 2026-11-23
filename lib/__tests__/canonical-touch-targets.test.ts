@@ -23,12 +23,11 @@ describe("canonical touch targets", () => {
     expect(login).not.toContain("flex size-9");
     expect(signup).not.toContain("flex size-9");
     expect(login).toContain("min-h-11");
-    expect(signup.match(/flex size-11/g)).toHaveLength(2);
+    // Sign-up has one password field and one toggle (2026-11 ads pass, B3).
+    expect(signup.match(/flex size-11/g)).toHaveLength(1);
     expect(update.match(/flex size-11/g)).toHaveLength(2);
     expect(login).toContain('aria-label={showPassword ? "Hide password" : "Show password"}');
-    expect(signup).toMatch(
-      /showConfirmPassword\s*\?\s*"Hide confirmation password"\s*:\s*"Show confirmation password"/,
-    );
+    expect(signup).toMatch(/showPassword\s*\?\s*"Hide password"\s*:\s*"Show password"/);
     expect(update).toMatch(
       /showConfirmPassword\s*\?\s*"Hide confirmation password"\s*:\s*"Show confirmation password"/,
     );

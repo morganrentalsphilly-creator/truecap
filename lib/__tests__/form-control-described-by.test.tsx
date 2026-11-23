@@ -100,8 +100,9 @@ describe("FormControl describes a field by its error (P2-73)", () => {
     expect(form).not.toMatch(/<Input\b[^>]*\baria-describedby=/);
     // The rule is still a description under the field, with FormControl's
     // own id (a hand-set id would leave the list pointing at nothing).
+    // (Since the 2026-11 ads pass the description is the rule as a checklist.)
     expect(form).toMatch(
-      /<FormDescription>\s*\{PASSWORD_POLICY_TEXT\}\s*<\/FormDescription>\s*<FormMessage \/>/,
+      /<FormDescription className="grid gap-1" data-password-checklist="">[\s\S]*?<\/FormDescription>\s*<FormMessage \/>/,
     );
     expect(form).not.toMatch(/<FormDescription\s+id=/);
   });

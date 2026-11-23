@@ -111,8 +111,10 @@ describe("Max Offer entitlement and Wholesale target safety", () => {
   it("keeps every supported PDF export on the same explicitly adopted target", () => {
     expect(dashboard).toContain("const adoptedMaoTarget = targetAdopted");
     expect(dashboard).toContain("const adoptedMaoTargetSource = targetAdopted");
+    // The export call itself carries the adopted pair. (This used to match
+    // the Save hand-off's argument list, which is now one line.)
     expect(dashboard).toContain(
-      "adoptedMaoTarget,\n      adoptedMaoTargetSource",
+      "void onExportPdf(mode, adoptedMaoTarget, adoptedMaoTargetSource)",
     );
     expect(dashboard).not.toContain("activeMaoTarget ?? undefined,");
     expect(dashboard).toContain("onClick={() => handleExportPdf()}");

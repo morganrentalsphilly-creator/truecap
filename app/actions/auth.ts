@@ -138,7 +138,6 @@ export async function signUpAction(
     const msg =
       first.email?.[0] ??
       first.password?.[0] ??
-      first.confirmPassword?.[0] ??
       "Please check the form and try again.";
     return { ok: false, message: msg };
   }

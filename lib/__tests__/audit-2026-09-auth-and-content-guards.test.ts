@@ -33,10 +33,12 @@ describe("sign-up with email confirmation holds a sent state", () => {
     // kept a rejected password out of the field's description (audit row
     // P2-73). FormControl now lists both; form-control-described-by.test.tsx
     // holds that.
-    expect(form).toMatch(/<FormDescription>\s*\{PASSWORD_POLICY_TEXT\}\s*<\/FormDescription>/);
-    expect(form).toContain("{PASSWORD_POLICY_TEXT}");
+    // 2026-11 ads pass, B3: the same rule, one requirement per row, ticking
+    // as the visitor types. The rows are the schema's own (PASSWORD_RULES).
+    expect(form).toMatch(/<FormDescription className="grid gap-1" data-password-checklist="">\s*\{PASSWORD_RULES\.map\(/);
     const schema = read("lib/auth-schema.ts");
     expect(schema).toContain('.min(12, "Password must be at least 12 characters")');
+    expect(schema).toContain("CHARACTER_RULES.every((rule) => rule.test(value))");
     expect(schema.match(/password: passwordSchema/g)).toHaveLength(2);
     expect(form).toContain('form.setError("password", { message: result.message })');
   });

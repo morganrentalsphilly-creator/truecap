@@ -56,7 +56,18 @@ describe("sign-up heading for an agent", () => {
     expect(page).not.toMatch(/redirect\(|"use server"|cookies\(|headers\(/);
   });
 
-  it("keeps the investor heading for everyone else", () => {
-    expect(page).toContain(`: "You're one step away from your full deal decision."`);
+  it("keeps the investor headings for everyone else", () => {
+    // 2026-11 ads pass, B2: the trial headline for a Pro plan link, the plain
+    // one otherwise, and the save headline once the browser shows a pending
+    // analysis (components/auth/sign-up-heading.tsx).
+    expect(page).toContain("const TRIAL_HEADING = `Start your ${PRODUCT_EVALUATION_DAYS}-day free trial`;");
+    expect(page).toContain('const DEFAULT_HEADING = "Create your free account";');
+    expect(page.replace(/\s+/g, " ")).toContain(
+      "agentIntent ? AGENT_HEADING : arrivedFromPlan ? TRIAL_HEADING : DEFAULT_HEADING",
+    );
+    expect(page).not.toContain("unlock your Offer Ceiling");
+    const heading = read("components/auth/sign-up-heading.tsx");
+    expect(heading).toContain("`Save ${street} to a free account`");
+    expect(heading).toContain('"Save your analysis to a free account"');
   });
 });

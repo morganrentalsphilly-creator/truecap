@@ -50,7 +50,7 @@ describe("the trial's numbers are read from lib/product-access (P2-14)", () => {
     expect(evaluation).not.toMatch(/\b\d+-day free trial\b/);
 
     const signUp = read("app/auth/sign-up/page.tsx");
-    expect(signUp).toContain("${PRODUCT_EVALUATION_DAYS}-day free Pro evaluation");
+    expect(signUp).toContain("${PRODUCT_EVALUATION_DAYS}-day free trial");
     expect(signUp).not.toMatch(/\b\d+-day free\b/);
   });
 
