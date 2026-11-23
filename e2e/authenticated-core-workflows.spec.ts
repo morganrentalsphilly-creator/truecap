@@ -45,8 +45,10 @@ test("mobile investor can set criteria, calculate once, and start a fresh analys
   // Establish debt financing explicitly so this regression is independent of
   // the test account's saved defaults (an all-cash default correctly disables
   // DSCR as a criterion).
+  // The financing chip opens its own small editor now (2026-11 audit B1);
+  // the full section's fields are behind "Show all assumptions".
   await page
-    .getByRole("button", { name: /down.*interest/i })
+    .getByRole("button", { name: "Show all assumptions", exact: true })
     .click();
   await form.getByLabel("Down Payment %", { exact: true }).fill("20");
   await form.getByLabel("Interest Rate %", { exact: true }).fill("6.5");
@@ -179,8 +181,11 @@ test("mobile investor can set criteria, calculate once, and start a fresh analys
     .fill("2400");
   await expect
     .poll(() =>
-      page.evaluate(() =>
-        window.localStorage.getItem("truecap_calc_form_draft_v1"),
+      page.evaluate(
+        () =>
+          Object.keys(window.localStorage)
+            .filter((key) => key.startsWith("truecap_calc_form_draft_v1"))
+            .map((key) => window.localStorage.getItem(key))[0] ?? null,
       ),
     )
     .not.toBeNull();
@@ -205,8 +210,11 @@ test("mobile investor can set criteria, calculate once, and start a fresh analys
   ).toHaveValue("");
   await expect
     .poll(() =>
-      page.evaluate(() =>
-        window.localStorage.getItem("truecap_calc_form_draft_v1"),
+      page.evaluate(
+        () =>
+          Object.keys(window.localStorage)
+            .filter((key) => key.startsWith("truecap_calc_form_draft_v1"))
+            .map((key) => window.localStorage.getItem(key))[0] ?? null,
       ),
     )
     .toBeNull();

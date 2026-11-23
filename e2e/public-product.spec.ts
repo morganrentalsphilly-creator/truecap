@@ -533,16 +533,24 @@ test("a hidden expense validation error reopens both panels and focuses the fiel
     .getByLabel("Expected gross monthly rent", { exact: true })
     .fill("1550");
 
+  // The vacancy chip opens its own editor now (2026-11 audit B1); this
+  // regression is about the FULL section's hidden field, so open that.
   await page
-    .getByRole("button", { name: /Vacancy 5% of rent TrueCap default/i })
+    .getByRole("button", { name: "Show all assumptions", exact: true })
+    .click();
+  await page
+    .locator("#step-expenses")
+    .getByRole("button", { name: "More expense options", exact: true })
     .click();
   const vacancyInput = page.getByLabel("Vacancy %", { exact: true });
   await vacancyInput.fill("51");
   await page
     .locator("#step-expenses")
-    .getByRole("button", { name: "Hide advanced options", exact: true })
+    .getByRole("button", { name: "Fewer expense options", exact: true })
     .click();
-  await page.getByRole("button", { name: "Hide details", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Hide all assumptions", exact: true })
+    .click();
   await expect(vacancyInput).toBeHidden();
 
   await page.locator("form[data-calc-form='true']").evaluate((form) => {
@@ -715,12 +723,19 @@ test("released operating tax and insurance modes cannot strand an invalid hidden
   await page.goto("/analyze", { waitUntil: "domcontentloaded" });
   await waitForCalculatorReady(page);
 
-  await page
-    .getByRole("button", {
-      // Property tax is labeled a TrueCap default with a "replace with your
-      // local number" badge — TrueCap never auto-fills a parcel bill.
+  // Property tax is labeled a TrueCap default with a "replace with your
+  // local number" badge — TrueCap never auto-fills a parcel bill.
+  await expect(
+    page.getByRole("button", {
       name: /Taxes 1\.1% default replace with your local number/i,
-    })
+    }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Show all assumptions", exact: true })
+    .click();
+  await page
+    .locator("#step-expenses")
+    .getByRole("button", { name: "More expense options", exact: true })
     .click();
 
   const taxModes = page.getByRole("group", { name: "Property tax input mode" });
@@ -734,20 +749,22 @@ test("released operating tax and insurance modes cannot strand an invalid hidden
   const insuranceModes = page.getByRole("group", {
     name: "Insurance input mode",
   });
+  // Insurance is typed per year and stored per month (2026-11 audit B6), so
+  // the out-of-range amount is twelve times the monthly ceiling plus one.
   await insuranceModes
-    .getByRole("button", { name: "Monthly $", exact: true })
+    .getByRole("button", { name: "Annual $", exact: true })
     .click();
-  const monthlyInsurance = page.getByLabel("Insurance (Monthly $)", {
+  const annualInsurance = page.getByLabel("Insurance (Annual $)", {
     exact: true,
   });
-  await monthlyInsurance.fill("1000001");
+  await annualInsurance.fill("12000012");
   await insuranceModes
     .getByRole("button", { name: "Annual %", exact: true })
     .click();
   await insuranceModes
-    .getByRole("button", { name: "Monthly $", exact: true })
+    .getByRole("button", { name: "Annual $", exact: true })
     .click();
-  await expect(monthlyInsurance).toHaveValue("");
+  await expect(annualInsurance).toHaveValue("");
 
   // Property tax and insurance remain released operating-expense inputs. The
   // separate income-tax deduction model is dark-launched, so this regression
