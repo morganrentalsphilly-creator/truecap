@@ -196,7 +196,9 @@ describe("buildAssumptionChips (input-side assumptions strip)", () => {
     expect(byId(chips, "taxes").label).toBe("Taxes $3,204/yr");
   });
 
-  it("shows the monthly insurance override when that input mode is active", () => {
+  // Re-anchored (2026-11 audit B6): the dollar input asks for the annual
+  // premium, so the chip states it per year. The stored value is unchanged.
+  it("shows the dollar insurance override per year when that input mode is active", () => {
     const chips = buildAssumptionChips(
       {
         ...defaultValues,
@@ -206,7 +208,8 @@ describe("buildAssumptionChips (input-side assumptions strip)", () => {
       {},
       NO_OPTS,
     );
-    expect(byId(chips, "insurance").label).toBe("Insurance $92/mo");
+    expect(byId(chips, "insurance").label).toBe("Insurance $1,104/yr");
+    expect(byId(chips, "insurance").basis).toBe("insurance $1,104/yr");
   });
 
   it("renders the template chip with the resolved name and a template pulse key", () => {

@@ -84,7 +84,12 @@ describe("calculator control accessibility guards", () => {
       expect(controlWindow(id === "rehabBudget" ? financing : expenses, id)).toContain("<CurrencyInput");
       expectErrorConnection(id === "rehabBudget" ? financing : expenses, id);
     }
-    expect(expenses.match(/max=\{1_000_000\}/g)?.length).toBeGreaterThanOrEqual(4);
+    // Re-anchored (2026-11 audit B6): insurance is typed per year and stored
+    // per month, so its input's ceiling is twelve times the monthly one.
+    expect(expenses.match(/max=\{1_000_000\}/g)?.length).toBeGreaterThanOrEqual(3);
+    expect(expenses).toContain("max={12_000_000}");
+    expect(expenses).toContain("value={insuranceAnnualFromMonthly(field.value)}");
+    expect(expenses).toContain("field.onChange(insuranceMonthlyFromAnnual(annual))");
   });
 
   it("keeps the interest-deduction help and switch accessible", () => {

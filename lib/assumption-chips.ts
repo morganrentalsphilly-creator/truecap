@@ -381,11 +381,13 @@ export function buildAssumptionChips(
     id: "insurance",
     label:
       values.insuranceInputMode === "monthly" && insMo != null
-        ? `Insurance $${fmtMoney(insMo)}/mo`
+        ? // Shown per year, the period the input asks for (audit B6). The
+          // stored value is still the monthly amount.
+          `Insurance $${fmtMoney(insMo * 12)}/yr`
         : `Insurance ${fmtPct(num(values.insurancePct) ?? 0.5)}% of price/year`,
     basis:
       values.insuranceInputMode === "monthly" && insMo != null
-        ? `insurance $${fmtMoney(insMo)}/mo`
+        ? `insurance $${fmtMoney(insMo * 12)}/yr`
         : `insurance ${fmtPct(num(values.insurancePct) ?? 0.5)}%`,
     badge: templateOwnsActiveInsurance
       ? templateBadge

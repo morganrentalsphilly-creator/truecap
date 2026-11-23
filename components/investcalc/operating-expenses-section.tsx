@@ -36,6 +36,10 @@ import {
 import { useTapTooltip } from "@/components/investcalc/use-tap-tooltip";
 import { GLOSSARY } from "@/lib/glossary";
 import { isFeatureReleased } from "@/lib/entitlements-catalog";
+import {
+  insuranceAnnualFromMonthly,
+  insuranceMonthlyFromAnnual,
+} from "@/lib/insurance-input";
 
 const TAX_STRATEGY_RELEASED = isFeatureReleased("tax_strategy");
 const EXIT_SCENARIOS_RELEASED = isFeatureReleased("exit_scenarios");
@@ -75,7 +79,7 @@ function FieldHelpTooltip({ label, term, tooltip }: FieldHelpTooltipProps) {
   const content =
     tooltip ??
     (glossaryEntry ? (
-      <div className="space-y-1 text-xs leading-snug">
+      <div className="space-y-1 leading-snug">
         <p className="font-semibold text-foreground">{glossaryEntry.term}</p>
         <p className="text-muted-foreground">{glossaryEntry.definition}</p>
         {glossaryEntry.benchmark ? (
@@ -136,7 +140,7 @@ function FieldLabel({
       ) : null}
       <Label
         htmlFor={htmlFor}
-        className="min-w-0 flex-1 py-3 text-xs font-medium text-muted-foreground [overflow-wrap:anywhere]"
+        className="min-w-0 flex-1 py-3 text-sm font-medium text-muted-foreground [overflow-wrap:anywhere]"
       >
         {label}
       </Label>
@@ -147,7 +151,7 @@ function FieldLabel({
 
 function FieldHint({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-2 min-h-[32px] text-2xs leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
+    <p className="mt-2 text-sm leading-snug text-muted-foreground [overflow-wrap:anywhere]">
       {children}
     </p>
   );
@@ -317,7 +321,7 @@ export function OperatingExpensesSection({
             <h3 className="text-sm font-bold text-foreground">
               Operating Expenses
             </h3>
-            <p className="mt-1 text-xs text-muted-foreground [overflow-wrap:anywhere]">
+            <p className="mt-1 text-sm text-muted-foreground [overflow-wrap:anywhere]">
               Estimate and manage your ongoing property expenses.
             </p>
           </div>
@@ -327,19 +331,19 @@ export function OperatingExpensesSection({
           variant="outline"
           size="sm"
           onClick={() => setDetailsOpen(!showAdvanced)}
-          className="h-auto min-h-11 w-full max-w-full whitespace-normal rounded-full border-input bg-background px-3 py-2 text-xs font-medium text-foreground shadow-sm hover:bg-background min-[480px]:w-auto"
+          className="h-auto min-h-11 w-full max-w-full whitespace-normal rounded-full border-input bg-background px-3 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-background min-[480px]:w-auto"
           aria-expanded={showAdvanced}
           aria-controls={OPERATING_EXPENSES_DETAILS_ID}
         >
           {showAdvanced ? (
             <>
               <ChevronUp className="mr-1.5 size-3.5" />
-              Hide advanced options
+              Fewer expense options
             </>
           ) : (
             <>
               <ChevronDown className="mr-1.5 size-3.5" />
-              Show advanced options
+              More expense options
             </>
           )}
         </Button>
@@ -431,8 +435,8 @@ export function OperatingExpensesSection({
               (all % of rent)
             </span>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Click &quot;Show advanced options&quot; to review any value. Type 0
+          <p className="text-sm text-muted-foreground">
+            Open &quot;More expense options&quot; to review any value. Type 0
             explicitly when you intend to exclude a material expense.
           </p>
         </div>
@@ -441,11 +445,11 @@ export function OperatingExpensesSection({
       {!hasExplicitPropertyTax ? (
         <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-caution/30 bg-caution-light px-3.5 py-2.5">
           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-caution-text" />
-          <p className="text-xs leading-relaxed text-caution-text">
+          <p className="text-sm leading-snug text-caution-text">
             <span className="font-semibold">Property tax is not verified.</span>{" "}
-            The preliminary result uses a generic 1.1% of purchase price
-            fallback. Enter the local annual bill or a reviewed local rate
-            before relying on NOI, cash flow, cap rate, DSCR, or Offer Ceiling.
+            The preliminary result uses a generic 1.1% of purchase price.
+            Enter the local annual bill or a reviewed local rate before
+            relying on NOI, cash flow, cap rate, DSCR, or Offer Ceiling.
           </p>
         </div>
       ) : null}
@@ -460,10 +464,10 @@ export function OperatingExpensesSection({
       {propertyType === "multi-family" && !((utilitiesMonthly ?? 0) > 0) ? (
         <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-caution/30 bg-caution-light px-3.5 py-2.5">
           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-caution-text" />
-          <div className="min-w-0 text-xs leading-relaxed text-caution-text">
+          <div className="min-w-0 text-sm leading-snug text-caution-text">
             <span className="font-semibold">Owner-paid utilities are $0.</span>{" "}
             Most multi-family owners cover water, sewer, trash, or common-area
-            electric — a $0 assumption usually overstates cash flow.{" "}
+            electric, so $0 usually overstates cash flow.{" "}
             <button
               type="button"
               onClick={() => {
@@ -489,7 +493,7 @@ export function OperatingExpensesSection({
           className="mb-4 flex items-start gap-2.5 rounded-xl border border-caution/30 bg-caution-light px-3.5 py-2.5"
         >
           <AlertTriangle className="mt-0.5 size-4 shrink-0 text-caution-text" />
-          <div className="min-w-0 text-xs leading-relaxed text-caution-text">
+          <div className="min-w-0 text-sm leading-snug text-caution-text">
             <span className="font-semibold">HOA dues are $0.</span> This
             address has a unit number. If the building charges condo or HOA
             dues, add the monthly amount.{" "}
@@ -518,10 +522,14 @@ export function OperatingExpensesSection({
         className={cn("space-y-4", !showAdvanced && "hidden")}
       >
         <div className="overflow-hidden rounded-xl border border-[var(--brand-orange)]/10 bg-card/50">
-          {/* Three cells (Property Tax / Insurance / HOA) since the
-              insurance mode toggle moved inline into its value cell —
-              xl shows all three in one row. */}
-          <div className="grid grid-cols-1 divide-y divide-[var(--brand-orange)]/10 md:grid-cols-2 md:divide-x md:divide-y-0 xl:grid-cols-3">
+          {/* Two cells, Property Tax and Insurance (audit B6). They are the
+              two fields with a mode toggle, a unit and a long hint, and as
+              three viewport-keyed columns (with HOA) each was about 165px
+              wide in the 525px input pane: labels and hints wrapped to four
+              lines. HOA is a single value and now sits with the other
+              single-value fields below. Columns key off THIS card's width
+              (@container), not the viewport. */}
+          <div className="grid grid-cols-1 divide-y divide-[var(--brand-orange)]/10 @md:grid-cols-2 @md:divide-x @md:divide-y-0">
             <SectionField>
               <FieldLabel
                 htmlFor="propertyTaxAmount"
@@ -565,7 +573,7 @@ export function OperatingExpensesSection({
                         }}
                         aria-pressed={field.value === option.value}
                         className={cn(
-                          "min-h-11 w-full rounded-md px-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset",
+                          "min-h-11 w-full rounded-md px-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset",
                           field.value === option.value
                             ? "bg-primary text-primary-foreground"
                             : "text-muted-foreground hover:text-foreground",
@@ -638,8 +646,8 @@ export function OperatingExpensesSection({
               </div>
               <FieldHint>
                 {propertyTaxInputMode === "annual"
-                  ? "Enter a local annual bill. Blank falls back to an entered rate, or otherwise the disclosed generic 1.1% preliminary assumption."
-                  : "Enter a reviewed local annual rate on purchase price. Blank uses the disclosed generic 1.1% preliminary assumption."}
+                  ? "The local annual bill. Blank falls back to an entered rate, or else the generic 1.1% preliminary assumption."
+                  : "A reviewed local annual rate on the purchase price. Blank uses the generic 1.1% preliminary assumption."}
               </FieldHint>
               <FieldError
                 id="propertyTaxAmount-error"
@@ -657,7 +665,7 @@ export function OperatingExpensesSection({
                 htmlFor="insuranceAmount"
                 label={
                   insuranceInputMode === "monthly"
-                    ? "Insurance (Monthly $)"
+                    ? "Insurance (Annual $)"
                     : "Insurance % (Annual)"
                 }
                 term="insurance"
@@ -665,7 +673,12 @@ export function OperatingExpensesSection({
               {/* % ⇄ $ mode toggle, inline above the value input so
                   Insurance reads as ONE field — mirrors the Property Tax
                   cell's inline toggle rather than burning a separate grid
-                  cell on a mode picker. */}
+                  cell on a mode picker. Both cells now ask for an ANNUAL
+                  figure (audit B6): the dollar input shows and takes the
+                  annual premium and converts at the input boundary. The
+                  stored model is unchanged: the mode value is still
+                  "monthly" and the field is still insuranceMonthly
+                  (lib/insurance-input.ts). */}
               <Controller
                 name="insuranceInputMode"
                 control={control}
@@ -677,7 +690,7 @@ export function OperatingExpensesSection({
                   >
                     {[
                       { value: "percent", label: "Annual %" },
-                      { value: "monthly", label: "Monthly $" },
+                      { value: "monthly", label: "Annual $" },
                     ].map((option) => (
                       <button
                         key={option.value}
@@ -695,7 +708,7 @@ export function OperatingExpensesSection({
                         }}
                         aria-pressed={field.value === option.value}
                         className={cn(
-                          "min-h-11 w-full rounded-md px-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset",
+                          "min-h-11 w-full rounded-md px-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset",
                           field.value === option.value
                             ? "bg-primary text-primary-foreground"
                             : "text-muted-foreground hover:text-foreground",
@@ -718,13 +731,15 @@ export function OperatingExpensesSection({
                         id="insuranceAmount"
                         name={field.name}
                         ref={field.ref}
-                        value={field.value}
-                        onValueChange={field.onChange}
+                        value={insuranceAnnualFromMonthly(field.value)}
+                        onValueChange={(annual) =>
+                          field.onChange(insuranceMonthlyFromAnnual(annual))
+                        }
                         onBlur={field.onBlur}
                         step={1}
                         min={0}
-                        max={1_000_000}
-                        placeholder={String(insuranceEst)}
+                        max={12_000_000}
+                        placeholder={(insuranceEst * 12).toLocaleString("en-US")}
                         aria-invalid={!!errors.insuranceMonthly}
                         aria-describedby={
                           errors.insuranceMonthly
@@ -766,8 +781,8 @@ export function OperatingExpensesSection({
               </div>
               <FieldHint>
                 {insuranceInputMode === "monthly"
-                  ? "Flat monthly insurance cost. Leave blank to fall back to the current estimate."
-                  : "Annual insurance rate applied to purchase price. Leave blank to use the default 0.5%."}
+                  ? "The annual premium from a quote. Blank falls back to the current estimate."
+                  : "An annual rate on the purchase price. Blank uses the default 0.5%."}
               </FieldHint>
               <FieldError
                 id="insuranceAmount-error"
@@ -779,8 +794,38 @@ export function OperatingExpensesSection({
               />
             </SectionField>
 
-            <SectionField>
+          </div>
+        </div>
+
+        <div
+          className={cn(
+            showAdvanced &&
+              "rounded-xl border border-[var(--brand-orange)]/10 bg-card/50 p-2",
+          )}
+        >
+          <p
+            className={cn(
+              "px-2 pb-2 pt-1 text-sm font-medium text-muted-foreground",
+              !showAdvanced && "hidden",
+            )}
+          >
+            Monthly Operating Expenses
+          </p>
+          {/* The single-value fields, one field size for all six (audit
+            B6): HOA, Utilities, Maintenance, Vacancy, Management, CapEx. Two
+            columns from @md (28rem) and three from @2xl (42rem), keyed off
+            this card's width. The old steps (@xl / @4xl / @6xl) never
+            engaged in the 525px input pane at 1280px, so each of these took
+            a full row there. */}
+          <div className="grid grid-cols-1 gap-3 @md:grid-cols-2 @2xl:grid-cols-3">
+            <SectionField
+              className={cn(
+                "rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3",
+                !showAdvanced && "hidden",
+              )}
+            >
               <FieldLabel
+                icon={<Building2 className="size-3" />}
                 htmlFor="hoaMonthly"
                 label="HOA (Monthly $)"
                 term="hoa"
@@ -815,39 +860,12 @@ export function OperatingExpensesSection({
                   )}
                 />
               </div>
-              <FieldHint>
-                Monthly homeowners association fees if applicable.
-              </FieldHint>
               <FieldError
                 id="hoaMonthly-error"
                 message={errors.hoaMonthly?.message}
               />
             </SectionField>
-          </div>
-        </div>
 
-        <div
-          className={cn(
-            showAdvanced &&
-              "rounded-xl border border-[var(--brand-orange)]/10 bg-card/50 p-2",
-          )}
-        >
-          <p
-            className={cn(
-              "px-2 pb-2 pt-1 text-xs font-medium text-muted-foreground",
-              !showAdvanced && "hidden",
-            )}
-          >
-            Monthly Operating Expenses
-          </p>
-          {/* Container-width steps (financing-section pattern): 3-up needs
-            ~@4xl (56rem) and 5-up only engages at @6xl (72rem) — i.e. the
-            full-width post-run layout, never the input-phase pane. The old
-            viewport-keyed 2xl:grid-cols-5 fired on every ≥1536px screen
-            while the card sat in a 726px pane. (The former !showAdvanced →
-            xl:grid-cols-4 branch was dead: every cell in this grid carries
-            `!showAdvanced && "hidden"` and the whole region is hidden too.) */}
-          <div className="grid grid-cols-1 gap-3 @xl:grid-cols-2 @4xl:grid-cols-3 @6xl:grid-cols-5">
             <SectionField
               className={cn(
                 "rounded-lg border border-[var(--brand-orange)]/10 bg-card p-3",
@@ -1072,10 +1090,12 @@ export function OperatingExpensesSection({
             !showAdvanced && "hidden",
           )}
         >
-          <p className="mb-3 text-xs font-medium text-muted-foreground">
-            Advanced options (optional)
-          </p>
-          <div className="grid grid-cols-1 gap-x-6 gap-y-4 md:grid-cols-2 xl:grid-cols-4">
+          <h4 className="mb-3 text-sm font-medium text-muted-foreground">
+            Growth rates
+          </h4>
+          {/* Same two-then-three column steps as the single-value grid above
+              (audit B6): at xl:grid-cols-4 these sat in ~110px boxes. */}
+          <div className="grid grid-cols-1 gap-x-6 gap-y-4 @md:grid-cols-2 @2xl:grid-cols-3">
             {TAX_STRATEGY_RELEASED ? (
               <>
                 <div>
@@ -1319,7 +1339,7 @@ export function OperatingExpensesSection({
                 <div>
                   <FieldLabel
                     htmlFor="taxRatePct"
-                    label="Tax Rate % (Optional)"
+                    label="Tax Rate % (optional)"
                     term="taxSavings"
                   />
                   <div className="relative">
