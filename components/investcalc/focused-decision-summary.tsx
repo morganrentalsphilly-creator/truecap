@@ -972,8 +972,11 @@ export function FocusedDecisionSummary({
 
   // One Save button, placed by who is looking. Signed in: the outline "Save"
   // after "Edit assumptions", as before. Anonymous: the row's filled primary,
-  // first, "Save this deal free" (it starts the free-account hand-off), on
-  // its own full-width line in the two-up phone grid.
+  // first, "Save this deal free" (it starts the free-account hand-off). It
+  // takes one cell of the two-up phone grid, not a row of its own: the action
+  // row has to end inside the first phone screen (public-product.spec), and
+  // a third row pushed it under the fold. Its icon shows from 640px, as
+  // "Next deal"'s does, so the label keeps to one line in a 160px cell.
   const saveAction = (
     <Button
       type="button"
@@ -988,13 +991,16 @@ export function FocusedDecisionSummary({
       className={
         isAuthenticated
           ? "h-11 w-full gap-2 rounded-md max-[250px]:h-auto max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight sm:w-auto"
-          : "h-auto min-h-11 w-full gap-2 whitespace-normal rounded-md py-2 text-center leading-tight min-[320px]:col-span-2 sm:h-11 sm:w-auto sm:whitespace-nowrap sm:py-0"
+          : "h-auto min-h-11 w-full gap-2 whitespace-normal rounded-md py-2 text-center leading-tight sm:h-11 sm:w-auto sm:whitespace-nowrap sm:py-0"
       }
     >
       {isSaving ? (
         <Loader2 className="size-4 animate-spin" aria-hidden />
       ) : (
-        <Save className="size-4" aria-hidden />
+        <Save
+          className={isAuthenticated ? "size-4" : "size-4 max-sm:hidden"}
+          aria-hidden
+        />
       )}
       {isSaving
         ? "Saving…"
