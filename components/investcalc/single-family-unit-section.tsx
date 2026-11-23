@@ -186,13 +186,13 @@ export function SingleFamilyUnitSection({
       {!bare ? (
         <div className="flex items-center gap-2 mb-5">
           <Home className="w-4 h-4 text-primary" />
-          <span className="font-semibold text-sm text-foreground">
+          <h3 className="font-semibold text-sm text-foreground">
             {isSecondary
               ? extraFields
                 ? "Property extras"
                 : "Bathrooms & size"
               : "Unit Details"}
-          </span>
+          </h3>
           {isSecondary ? (
             <span className="text-2xs font-normal text-muted-foreground">
               (optional)

@@ -80,9 +80,9 @@ export function PropertyTypeSection({
     <div className="bg-card rounded-2xl border border-border p-4 shadow-sm sm:p-6">
       <div className="flex items-center gap-2 mb-4">
         <Target className="w-4 h-4 text-primary" />
-        <span className="font-semibold text-sm text-foreground">
+        <h3 className="font-semibold text-sm text-foreground">
           Property Setup
-        </span>
+        </h3>
       </div>
 
       {/* Property type - segmented control. A 3-way choice doesn't need a

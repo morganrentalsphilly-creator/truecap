@@ -87,7 +87,7 @@ export function FinancingSection({
     <div className="@container bg-card rounded-2xl border border-border shadow-sm p-4 sm:p-6">
       <div className="flex items-center gap-2 mb-5">
         <DollarSign className="w-4 h-4 text-[var(--brand-green)]" />
-        <span className="font-semibold text-sm text-foreground">Financing</span>
+        <h3 className="font-semibold text-sm text-foreground">Financing</h3>
       </div>
 
       {isFeatureEnabled("financing_profiles") && onAppliedProfileChange ? (

@@ -8747,6 +8747,15 @@ export function InvestCalcPage({
     replaceSavedDealUrl(null);
     setSavedTemplateFallback(null);
     setDeletedDealRecoveryActive(false);
+    // The control that was pressed is gone (the result's own button) or the
+    // confirm dialog just closed, and focus fell to <body> (audit C3). A new
+    // analysis starts at the address. Two frames: the form is hidden while a
+    // result shows and has to be back in the layout before it can take focus.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.getElementById("address")?.focus();
+      });
+    });
   };
 
   // Dashboard-shell New Analysis controls stay mounted with this route. A
@@ -10498,6 +10507,11 @@ export function InvestCalcPage({
           </Button>
         </div>
       ) : null}
+      {/* The skip link's target (audit C3). <main id="main"> used to start at
+          the form, AFTER the section holding the page's h1, so "Skip to main
+          content" skipped the heading and the h1 sat outside the main
+          landmark. Main now wraps the heading section and the form. */}
+      <main id="main">
       {/* Hero section */}
       <section
         aria-label="Analysis setup"
@@ -10716,8 +10730,8 @@ export function InvestCalcPage({
       {/* Bottom padding on mobile reserves room for the fixed Calculate bar
           (~h-12 button + its own safe-area pad) so the last form control is
           never trapped under it on phones with a home indicator. */}
-      <main
-        id="main"
+      <div
+        data-analyzer-main=""
         className="max-w-7xl mx-auto px-4 sm:px-6 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:pb-16"
       >
         <form
@@ -11068,8 +11082,10 @@ export function InvestCalcPage({
                     tabIndex={-1}
                     className="min-w-0 scroll-mt-24 rounded-xl border-0 p-0 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   >
-                    <legend className="mb-2 text-sm font-semibold text-foreground">
-                      3. Rental income
+                    <legend className="mb-2">
+                      <h2 className="text-sm font-semibold text-foreground">
+                        3. Rental income
+                      </h2>
                     </legend>
                     {canChoosePropertyType ? (
                       <button
@@ -11290,9 +11306,9 @@ export function InvestCalcPage({
                       <div className="bg-card rounded-lg border border-border shadow-sm p-6">
                         <div className="flex items-center gap-2 mb-5">
                           <Home className="w-4 h-4 text-primary" />
-                          <span className="font-semibold text-sm text-foreground">
+                          <h3 className="font-semibold text-sm text-foreground">
                             Property extras
-                          </span>
+                          </h3>
                           <span className="text-2xs font-normal text-muted-foreground">
                             (optional)
                           </span>
@@ -11920,6 +11936,7 @@ export function InvestCalcPage({
               ) : null}
             </div>
           )}
+      </div>
       </main>
       {/* One-question testimonial ask after a PDF export or third saved
           deal (window event from those handlers). Once per browser, ever;
@@ -12078,6 +12095,18 @@ export function InvestCalcPage({
                   approvedAutofillFields,
                 );
                 setPendingAutofillReview(null);
+                // The dialog was opened by the lookup's result, not by a
+                // click it could hand focus back to, so closing it dropped
+                // focus on <body> (audit C3). Return to the lookup button,
+                // the control that started this; the dialog's own
+                // close-focus step runs first, so wait a tick.
+                window.setTimeout(() => {
+                  document
+                    .querySelector<HTMLElement>(
+                      '[aria-describedby="property-lookup-help"]',
+                    )
+                    ?.focus();
+                }, 60);
               }}
             >
               Apply reviewed values

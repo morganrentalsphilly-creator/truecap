@@ -190,10 +190,15 @@ describe("mobile layout guards", () => {
     expect(css).toMatch(
       /\.dashboard-shell #main \{\s*scroll-margin-top: 4rem;/,
     );
-    // The shell's skip link must stay viewport-fixed: .dashboard-shell is not
-    // positioned, so focus:absolute pins it to the document top instead.
+    // Re-anchored (2026-11 audit C3): the dashboard had two skip links, the
+    // root layout's and the shell's own. The shell's duplicate is gone; the
+    // one remaining link must stay viewport-fixed (focus:absolute would pin
+    // it to the document top, out of sight on a scrolled page).
     const shell = read("../../components/dashboard/dashboard-shell.tsx");
-    const skipLinkClasses = shell.match(/className="sr-only[^"]*"/)?.[0] ?? "";
+    expect(shell).not.toMatch(/<a\s+href="#main"/);
+    const layout = read("../../app/layout.tsx");
+    expect(layout.match(/href="#main"/g)).toHaveLength(1);
+    const skipLinkClasses = layout.match(/className="sr-only[^"]*"/)?.[0] ?? "";
     expect(skipLinkClasses).toContain("focus:fixed");
     expect(skipLinkClasses).not.toContain("focus:absolute");
   });

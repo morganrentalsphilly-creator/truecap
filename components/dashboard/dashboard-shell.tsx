@@ -43,19 +43,12 @@ export function DashboardShell({
 }) {
   return (
     <div className="dashboard-shell flex min-h-screen w-full overflow-x-clip bg-background text-foreground">
-      {/* Skip link — first focusable element, so keyboard/switch users can
-          bypass the persistent sidebar nav on every page (the shell stays
-          mounted across navigations). Targets the <main id="main"> in the page
-          (globals.css gives it a scroll-margin so the landing spot clears the
-          fixed mobile Topbar). focus:fixed, matching the root-layout skip
-          link: .dashboard-shell is not positioned, so focus:absolute pinned
-          the link to the DOCUMENT top and it scrolled out of sight. */}
-      <a
-        href="#main"
-        className="sr-only z-50 rounded-lg bg-primary px-4 py-2 font-semibold text-primary-foreground shadow-lg focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
-      >
-        Skip to content
-      </a>
+      {/* No skip link here (2026-11 audit C3). The root layout already
+          renders "Skip to main content" as the first focusable element of
+          every page, targeting the same <main id="main">; this shell added a
+          second one, "Skip to content", right behind it, so a keyboard user
+          met two links doing one job. The root layout's link is the one
+          every page shares. */}
       <Sidebar activeDealCount={activeDealCount} navAccess={navAccess} />
       <DashboardSheet activeDealCount={activeDealCount} navAccess={navAccess}>
         {children}

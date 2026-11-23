@@ -59,11 +59,13 @@ describe("accessibility audit follow-up guards", () => {
     const property = read(
       "../../components/investcalc/property-details-section.tsx",
     );
+    // Re-anchored (2026-11 audit C3): each legend now holds a real heading,
+    // so the form has an outline below its h1. The names are unchanged.
     expect(normalizeSource(property)).toContain(
-      normalizeSource(">1. Property</legend>"),
+      normalizeSource(">1. Property</h2></legend>"),
     );
     expect(normalizeSource(property)).toContain(
-      normalizeSource(">2. Purchase price</legend>"),
+      normalizeSource(">2. Purchase price</h2></legend>"),
     );
     expect(property).toContain('bare ? "Price to analyze" : "Purchase Price"');
     expect(property).toContain('aria-describedby="property-lookup-help"');

@@ -278,16 +278,23 @@ export function PropertyDetailsSection({
     return (
       <div className="space-y-6">
         <fieldset className="min-w-0 border-0 p-0">
-          <legend className="mb-2 text-sm font-semibold text-foreground">
-            1. Property
+          {/* A real heading inside the legend (audit C3): the section
+              titles were styled text only, so the form had no outline below
+              its h1. Same classes, no visual change. */}
+          <legend className="mb-2">
+            <h2 className="text-sm font-semibold text-foreground">
+              1. Property
+            </h2>
           </legend>
           {addressBlock}
           {listingLinkSlot}
           {sampleSlot}
         </fieldset>
         <fieldset className="min-w-0 border-0 p-0">
-          <legend className="mb-2 text-sm font-semibold text-foreground">
-            2. Purchase price
+          <legend className="mb-2">
+            <h2 className="text-sm font-semibold text-foreground">
+              2. Purchase price
+            </h2>
           </legend>
           {priceGrid}
         </fieldset>
@@ -299,9 +306,9 @@ export function PropertyDetailsSection({
     <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
       <div className="flex items-center gap-2 mb-5">
         <Home className="w-4 h-4 text-primary" />
-        <span className="font-semibold text-sm text-foreground">
+        <h2 className="font-semibold text-sm text-foreground">
           Property Details
-        </span>
+        </h2>
       </div>
 
       <div className="space-y-4">
