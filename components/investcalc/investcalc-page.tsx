@@ -10287,6 +10287,132 @@ export function InvestCalcPage({
     return () => document.body.removeAttribute("data-truecap-results-mode");
   }, [postAnalysisMode]);
 
+  // ── The result has a history entry, a URL and a title (audit A8) ─────────
+  // The result renders in place, so without this the URL stayed
+  // /dashboard/new, the title stayed "New analysis" and the browser's Back
+  // button left the page from a result. Showing a result now pushes
+  // `?view=result`; Back returns to the form with every input intact (the
+  // same state "Edit assumptions" opens) and Forward returns to the result.
+  // The URL is the only source of truth: nothing is stored in history.state,
+  // which the Next router owns.
+  /** The first run of the sync effect below, after the mount bootstrap. */
+  const resultViewSettledRef = useRef(false);
+  /** True while the result's history entry sits directly on top of a form
+   *  entry this session created, so leaving the result can go Back to it. */
+  const resultEntryOverFormRef = useRef(false);
+  const resultViewWasActiveRef = useRef(false);
+  useEffect(() => {
+    if (!isCalculatorReady) return;
+    const firstSettle = !resultViewSettledRef.current;
+    resultViewSettledRef.current = true;
+    const wasActive = resultViewWasActiveRef.current;
+    resultViewWasActiveRef.current = postAnalysisMode;
+    try {
+      const here = window.location.href;
+      const inUrl = hasResultView(here);
+      if (postAnalysisMode) {
+        if (inUrl) return;
+        const path = resultViewPath(here, true);
+        if (firstSettle) {
+          // A result that was already there when the page loaded (a saved
+          // deal opened from My Deals): mark the view, but add no entry.
+          // There is no form state beneath it to go back to.
+          window.history.replaceState(null, "", path);
+        } else {
+          window.history.pushState(null, "", path);
+          resultEntryOverFormRef.current = true;
+        }
+        return;
+      }
+      if (!inUrl) return;
+      // A run in flight keeps the entry: the result is about to return.
+      if (isCalculating) return;
+      if (wasActive && resultEntryOverFormRef.current) {
+        // Left the result from inside the app ("Edit assumptions", a new
+        // analysis): step back onto the form's own entry instead of leaving
+        // a second copy of it in the history.
+        resultEntryOverFormRef.current = false;
+        window.history.back();
+      } else {
+        // `?view=result` with no result to show (a reload, a pasted link, a
+        // Forward after the result was cleared): the form, with its draft.
+        window.history.replaceState(null, "", resultViewPath(here, false));
+      }
+    } catch {
+      // History is best-effort; the result itself is on screen either way.
+    }
+  }, [isCalculatorReady, isCalculating, postAnalysisMode]);
+
+  useEffect(() => {
+    const onPopState = () => {
+      let inUrl = false;
+      try {
+        inUrl = hasResultView(window.location.href);
+      } catch {
+        return;
+      }
+      if (inUrl) {
+        if (analysisResult && showResults) {
+          // Forward, onto the result's entry. The form entry is beneath it.
+          resultEntryOverFormRef.current = true;
+          if (isEditingAssumptions) handleBackToResult();
+        } else {
+          try {
+            window.history.replaceState(
+              null,
+              "",
+              resultViewPath(window.location.href, false),
+            );
+          } catch {
+            /* best-effort */
+          }
+        }
+        return;
+      }
+      if (!postAnalysisMode) return;
+      // Back, from the result to the form: the inputs are intact, and the
+      // result is one "Done editing" (or Forward) away.
+      resultEntryOverFormRef.current = false;
+      setIsEditingAssumptions(true);
+      setAdvancedOpen(false);
+      requestAnimationFrame(() => {
+        document
+          .querySelector('[data-calc-form="true"]')
+          ?.scrollIntoView({ behavior: scrollBehavior(), block: "start" });
+        document
+          .querySelector<HTMLElement>('[data-editing-assumptions-banner="true"]')
+          ?.focus({ preventScroll: true });
+      });
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  });
+
+  // The title names the result while it is on screen and goes back to the
+  // page's own title with the form. Runs after every render on purpose: the
+  // router re-applies the route's metadata title when the URL changes.
+  const resultTitleAddress = analysisValues?.address ?? null;
+  const pageTitleBeforeResultRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (postAnalysisMode) {
+      const title = resultViewTitle(
+        resultTitleAddress,
+        // A property address must not reach a third-party tag through the
+        // page title; see resultViewTitle.
+        !documentMayHaveThirdPartyTelemetry(),
+      );
+      if (document.title !== title) {
+        if (pageTitleBeforeResultRef.current === null) {
+          pageTitleBeforeResultRef.current = document.title;
+        }
+        document.title = title;
+      }
+    } else if (pageTitleBeforeResultRef.current !== null) {
+      document.title = pageTitleBeforeResultRef.current;
+      pageTitleBeforeResultRef.current = null;
+    }
+  });
+
   // Tell the marketing chrome the visitor is now USING the analyzer. The
   // homepage's sticky conversion bar ("Ready to underwrite a deal? It's
   // free · Analyze free") listens for this and hides — it kept selling the
