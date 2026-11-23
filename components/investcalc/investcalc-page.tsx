@@ -85,8 +85,12 @@ import {
   type StrategyStarterPreview,
 } from "./strategy-chips";
 import { AssumptionsStrip } from "./assumptions-strip";
-import { EnrichmentReceipt } from "./enrichment-receipt";
 import {
+  EnrichmentReceipt,
+  enrichmentRentSourceLabel,
+} from "./enrichment-receipt";
+import {
+  buildPreviewAssumptionBasis,
   computeExpensesEdited,
   computeStrategyOwnedFields,
   type AssumptionChipTarget,
@@ -958,11 +962,6 @@ type EnrichmentCapture = {
 function provNum(v: unknown): number | null {
   const n = typeof v === "number" ? v : Number(v);
   return Number.isFinite(n) ? n : null;
-}
-
-function compactPercent(value: unknown): string | null {
-  const n = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(n) ? String(Number(n.toFixed(2))) : null;
 }
 
 /** Build the provenance payload from captured enrichment + current values,
@@ -3320,19 +3319,42 @@ export function InvestCalcPage({
   const watchedMaintenancePct = form.watch("maintenancePct");
   const watchedMgmtPct = form.watch("mgmtPct");
   const watchedCapexPct = form.watch("capexPct");
-  const livePreviewAssumptionBasis = [
-    compactPercent(watchedDownPaymentPct) != null
-      ? `${compactPercent(watchedDownPaymentPct)}% down`
-      : null,
-    compactPercent(watchedInterestRate) != null
-      ? `${compactPercent(watchedInterestRate)}% interest`
-      : null,
-    compactPercent(watchedVacancyPct) != null
-      ? `${compactPercent(watchedVacancyPct)}% vacancy`
-      : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  // The preview's "Key assumptions shown" list is built from the same chips
+  // the "Review assumptions" card renders, so the sentence and the chips
+  // always name the same values (audit A1: the sentence listed three, the
+  // card five, and neither listed maintenance, management or CapEx). The
+  // watch subscribes this render to the tax and insurance fields the other
+  // watched values above do not cover.
+  const [
+    watchedPropertyTaxInputMode,
+    watchedPropertyTaxPct,
+    watchedPropertyTaxAnnual,
+    watchedInsuranceInputMode,
+    watchedInsurancePct,
+    watchedInsuranceMonthly,
+  ] = form.watch([
+    "propertyTaxInputMode",
+    "propertyTaxPct",
+    "propertyTaxAnnual",
+    "insuranceInputMode",
+    "insurancePct",
+    "insuranceMonthly",
+  ]);
+  const livePreviewAssumptionBasis = buildPreviewAssumptionBasis({
+    downPaymentPct: watchedDownPaymentPct,
+    interestRate: watchedInterestRate,
+    loanTermYears: watchedLoanTermYears,
+    propertyTaxInputMode: watchedPropertyTaxInputMode,
+    propertyTaxPct: watchedPropertyTaxPct,
+    propertyTaxAnnual: watchedPropertyTaxAnnual,
+    insuranceInputMode: watchedInsuranceInputMode,
+    insurancePct: watchedInsurancePct,
+    insuranceMonthly: watchedInsuranceMonthly,
+    vacancyPct: watchedVacancyPct,
+    maintenancePct: watchedMaintenancePct,
+    mgmtPct: watchedMgmtPct,
+    capexPct: watchedCapexPct,
+  });
 
   const analyzerSteps = useMemo(
     () =>

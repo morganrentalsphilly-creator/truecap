@@ -45,7 +45,9 @@ type Props = {
   livePreview: LivePreviewSnapshot | null;
   /** Debounced screen-reader announcement (owned by investcalc-page). */
   livePreviewMsg: string;
-  /** Three high-impact assumptions shown as a concise preview summary. */
+  /** The assumptions behind the preview, in the same words and from the same
+   * builder as the "Review assumptions" chips (lib/assumption-chips.ts
+   * buildPreviewAssumptionBasis), so the two cannot disagree (audit A1). */
   assumptionBasis?: string;
   /** Desktop cockpit action placed directly beneath the live preview. */
   desktopAction?: ReactNode;
@@ -202,10 +204,10 @@ export function LiveVerdictPanel({
               : `About $${Math.abs(Math.round(livePreview.netCashFlow)).toLocaleString()}/month negative at these assumptions.`}
           </p>
           {assumptionBasis ? (
-            <p className="mb-3 text-2xs leading-snug text-muted-foreground">
-              Key assumptions shown: {assumptionBasis}. Price, rent, financing,
-              taxes, and the expense assumptions on this form are included;
-              review them before relying on this screen.
+            <p className="mb-2 text-sm leading-snug text-muted-foreground">
+              Key assumptions shown: {assumptionBasis}. Price, rent, and
+              the expense assumptions on this form are included; review them
+              before relying on this screen.
             </p>
           ) : null}
           <div className="grid grid-cols-1 gap-2 min-[320px]:grid-cols-3 sm:gap-3">

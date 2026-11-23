@@ -43,9 +43,22 @@ export type AssumptionChipBadge = {
 };
 
 export type AssumptionChip = {
-  id: "financing" | "taxes" | "insurance" | "vacancy" | "template" | "extras";
+  id:
+    | "financing"
+    | "taxes"
+    | "insurance"
+    | "vacancy"
+    | "maintenance"
+    | "management"
+    | "capex"
+    | "template"
+    | "extras";
   /** Full chip text, e.g. "20% down @ 6.9%" or "Taxes 1.31%". */
   label: string;
+  /** The same value in the preview's words ("vacancy 5%"), for the "Key
+   *  assumptions shown" sentence. Present on every chip whose value drives
+   *  the preview, so that sentence and the chips cannot disagree (audit A1). */
+  basis?: string;
   badge: AssumptionChipBadge | null;
   /** Template chip renders a ✓ when true. */
   applied?: boolean;
@@ -75,6 +88,9 @@ export type AssumptionChipValues = {
   insurancePct?: unknown;
   insuranceMonthly?: unknown;
   vacancyPct?: unknown;
+  maintenancePct?: unknown;
+  mgmtPct?: unknown;
+  capexPct?: unknown;
   yearBuilt?: unknown;
   bathrooms?: unknown;
   sqft?: unknown;
@@ -105,7 +121,20 @@ export type AssumptionChipOptions = {
    * drops out as soon as the user changes it, so "template" is always a
    * value-bound statement rather than stale click history. */
   templateOwnedFields?: ReadonlySet<string>;
+  /** True when the form's starting rate is the product fallback because the
+   * server could not read the FRED benchmark (audit A2). The untouched
+   * fallback is then labeled as one instead of as a "TrueCap default". */
+  rateIsFallback?: boolean;
 };
+
+/** The product starting values the "TrueCap default" badge stands for. They
+ *  mirror `defaultValues` in lib/investcalc-schema.ts. */
+const DEFAULT_PERCENT_OF_RENT = {
+  vacancyPct: 5,
+  maintenancePct: 10,
+  mgmtPct: 8,
+  capexPct: 5,
+} as const;
 
 /** Number-or-null coercion for RHF values (NaN / "" / non-numeric → null). */
 function num(v: unknown): number | null {
@@ -272,13 +301,19 @@ export function buildAssumptionChips(
       down != null && rate != null
         ? `${fmtPct(down)}% down · ${fmtPct(rate)}% interest${term != null ? ` · ${fmtPct(term)} years` : ""}`
         : "Financing —",
+    basis:
+      down != null && rate != null
+        ? `${fmtPct(down)}% down, ${fmtPct(rate)}% interest${term != null ? `, ${fmtPct(term)} years` : ""}`
+        : undefined,
     badge: rateIsLive
       ? { kind: "live", text: "live rate" }
       : (scopedFinancingSource(templateFinancing, "template") ??
         scopedFinancingSource(playFinancing, "play") ??
         (provenance.interestRate || financingIsCustom
           ? { kind: "yours", text: "custom financing" }
-          : { kind: "default", text: "TrueCap default" })),
+          : opts.rateIsFallback
+            ? { kind: "default", text: "fallback rate" }
+            : { kind: "default", text: "TrueCap default" })),
     target: "financing",
     focusFieldId: "downPaymentPct",
     pulseKey: rateIsLive ? "rate:fred" : null,
@@ -306,6 +341,9 @@ export function buildAssumptionChips(
       : taxUsesGenericFallback
         ? "Taxes 1.1% default"
         : `Taxes ${fmtPct(num(values.propertyTaxPct) ?? 1.1)}% of price/year`,
+    basis: taxAnnualMode
+      ? `taxes $${fmtMoney(taxAnnual)}/yr`
+      : `taxes ${fmtPct(num(values.propertyTaxPct) ?? 1.1)}%`,
     badge: taxIsState
       ? {
           kind: "state",
@@ -345,6 +383,10 @@ export function buildAssumptionChips(
       values.insuranceInputMode === "monthly" && insMo != null
         ? `Insurance $${fmtMoney(insMo)}/mo`
         : `Insurance ${fmtPct(num(values.insurancePct) ?? 0.5)}% of price/year`,
+    basis:
+      values.insuranceInputMode === "monthly" && insMo != null
+        ? `insurance $${fmtMoney(insMo)}/mo`
+        : `insurance ${fmtPct(num(values.insurancePct) ?? 0.5)}%`,
     badge: templateOwnsActiveInsurance
       ? templateBadge
       : playOwnsActiveInsurance && play
@@ -356,21 +398,44 @@ export function buildAssumptionChips(
     focusFieldId: "insuranceAmount",
     pulseKey: null,
   });
-  chips.push({
-    id: "vacancy",
-    label: `Vacancy ${fmtPct(num(values.vacancyPct) ?? 5)}% of rent`,
-    badge:
-      templateOwned("vacancyPct").length === 1
-        ? templateBadge
-        : playOwned("vacancyPct").length === 1 && play
-          ? { kind: "play", text: play.label }
-          : userEdited("vacancyPct") || (num(values.vacancyPct) ?? 5) !== 5
-            ? { kind: "yours", text: "yours" }
-            : { kind: "default", text: "TrueCap default" },
-    target: "expenses",
-    focusFieldId: "vacancyPct",
-    pulseKey: null,
-  });
+  // ── Percent-of-rent assumptions: vacancy, maintenance, management, CapEx.
+  // All four drive the preview (23% of rent rides on the last three alone),
+  // so all four get a chip with the same source tags and the same edit
+  // behaviour (audit A1: the strip promised "every source is labeled" and
+  // showed only vacancy). Read from form state like every other chip; a
+  // cleared field shows "—" rather than a number the engine would not use.
+  const percentOfRentChip = (
+    id: "vacancy" | "maintenance" | "management" | "capex",
+    field: keyof typeof DEFAULT_PERCENT_OF_RENT,
+    name: string,
+  ) => {
+    const value = num(values[field]);
+    const productDefault = DEFAULT_PERCENT_OF_RENT[field];
+    chips.push({
+      id,
+      label:
+        value != null ? `${name} ${fmtPct(value)}% of rent` : `${name} —`,
+      basis:
+        value != null
+          ? `${name === "CapEx" ? name : name.toLowerCase()} ${fmtPct(value)}%`
+          : undefined,
+      badge:
+        templateOwned(field).length === 1
+          ? templateBadge
+          : playOwned(field).length === 1 && play
+            ? { kind: "play", text: play.label }
+            : userEdited(field) || (value ?? productDefault) !== productDefault
+              ? { kind: "yours", text: "yours" }
+              : { kind: "default", text: "TrueCap default" },
+      target: "expenses",
+      focusFieldId: field,
+      pulseKey: null,
+    });
+  };
+  percentOfRentChip("vacancy", "vacancyPct", "Vacancy");
+  percentOfRentChip("maintenance", "maintenancePct", "Maintenance");
+  percentOfRentChip("management", "mgmtPct", "Management");
+  percentOfRentChip("capex", "capexPct", "CapEx");
 
   // ── Template: only when a template is linked and its card is mounted ───
   if (values.templateId && !opts.hasActiveStrategy) {
@@ -414,4 +479,22 @@ export function buildAssumptionChips(
   }
 
   return chips;
+}
+
+/**
+ * The preview's "Key assumptions shown: …" list, built from the SAME chips
+ * the strip renders so the sentence and the chips always agree (audit A1).
+ * Labels depend only on form values, so no provenance is needed here.
+ */
+export function buildPreviewAssumptionBasis(
+  values: AssumptionChipValues,
+): string {
+  return buildAssumptionChips(
+    values,
+    {},
+    { expensesEdited: false, templateName: null, hasActiveStrategy: false },
+  )
+    .map((chip) => chip.basis)
+    .filter((basis): basis is string => Boolean(basis))
+    .join(", ");
 }

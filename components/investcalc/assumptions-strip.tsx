@@ -91,6 +91,10 @@ type Props = {
     TemplateAssumptionSource & { id: string; templateName: string }
   >;
   savedTemplateFallback: { id: string; templateName: string } | null;
+  /** The form's starting rate is the product fallback because the server
+   *  could not read the FRED benchmark (audit A2); the untouched financing
+   *  chip then says "fallback rate". */
+  rateIsFallback?: boolean;
   /** Strip footer slot (SaveAsDefaultsChip — renders null until useful). */
   footer?: ReactNode;
 };
@@ -107,6 +111,7 @@ export function AssumptionsStrip({
   strategyApplied = null,
   templateOptions,
   savedTemplateFallback,
+  rateIsFallback = false,
   footer,
 }: Props) {
   // Subscribe to all form changes so chips re-derive on every value write —
@@ -166,6 +171,7 @@ export function AssumptionsStrip({
       ? { label: strategyApplied.label, ownedFields: strategyOwnedFields }
       : null,
     templateOwnedFields,
+    rateIsFallback,
   });
 
   // ── Arrival pulse ─────────────────────────────────────────────────────
