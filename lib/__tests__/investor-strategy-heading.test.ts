@@ -9,14 +9,16 @@ import {
 
 describe("strategy-aware underwriting heading", () => {
   it("keeps the default heading and names every active strategy truthfully", () => {
-    expect(getUnderwritingHeading(null)).toBe("Underwrite a buy & hold rental");
+    // Plain language since the 2026-11 ads pass (C5): "analyze", not
+    // "underwrite", in the default heading and for every strategy.
+    expect(getUnderwritingHeading(null)).toBe("Analyze a rental property");
     expect(getUnderwritingHeading("unknown-strategy")).toBe(
-      "Underwrite a buy & hold rental",
+      "Analyze a rental property",
     );
 
     for (const strategy of INVESTOR_STRATEGIES) {
       expect(getUnderwritingHeading(strategy.key)).toBe(
-        `${strategy.label} underwriting`,
+        `${strategy.label} analysis`,
       );
     }
   });

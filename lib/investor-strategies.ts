@@ -208,8 +208,10 @@ export function canChoosePropertyTypeForStrategy(
  * every active strategy is a buy-and-hold rental. Unknown/cleared keys retain
  * the familiar default starting experience. */
 export function getUnderwritingHeading(key: string | null | undefined): string {
+  // Plain language (2026-11 ads pass, C5): a visitor from an ad "analyzes" a
+  // property; "underwrite" is the trade's word for the same thing.
   const strategy = getStrategyByKey(key);
   return strategy
-    ? `${strategy.label} underwriting`
-    : "Underwrite a buy & hold rental";
+    ? `${strategy.label} analysis`
+    : "Analyze a rental property";
 }
