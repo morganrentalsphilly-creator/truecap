@@ -23,6 +23,13 @@ import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 
 type Props = {
   form: UseFormReturn<InvestmentFormValues>;
+  /**
+   * False while the form holds nothing the visitor entered. The indicator
+   * then shows nothing and forgets any earlier save, so an untouched form (a
+   * first visit, or the blank form after "Start new analysis") never says
+   * "Draft saved on this device" (audit C5).
+   */
+  active?: boolean;
 };
 
 /**
@@ -51,7 +58,7 @@ function isLocalStorageWritable(): boolean {
   }
 }
 
-export function AutosaveIndicator({ form }: Props) {
+export function AutosaveIndicator({ form, active = true }: Props) {
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   // True when the last save tick found storage unwritable — drives the honest
@@ -72,8 +79,23 @@ export function AutosaveIndicator({ form }: Props) {
   // there leaks a timer per keystroke (and defeats the debounce). Clearing
   // the prior ref-held timer each change is the correct pattern.
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Only a change the visitor made starts the indicator. RHF reports those
+  // with type "change"; the programmatic writes at mount (defaults, a restored
+  // draft, an address lookup) carry no type, and counting them is what put
+  // "Draft saved on this device" on a form nobody had touched.
+  const hasUserEditRef = useRef(false);
   useEffect(() => {
-    const subscription = form.watch(() => {
+    if (active) return;
+    hasUserEditRef.current = false;
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setIsSaving(false);
+    setSaveFailed(false);
+    setSavedAt(null);
+  }, [active]);
+  useEffect(() => {
+    const subscription = form.watch((_values, info) => {
+      if (info.type === "change") hasUserEditRef.current = true;
+      if (!hasUserEditRef.current) return;
       setIsSaving(true);
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
@@ -100,6 +122,7 @@ export function AutosaveIndicator({ form }: Props) {
   // Nothing to show until at least one save fires (avoids "Auto-saved
   // just now" appearing on first paint before the user has touched
   // anything). A detected save failure is also worth surfacing.
+  if (!active) return null;
   if (savedAt === null && !isSaving && !saveFailed) return null;
 
   const relative = (() => {

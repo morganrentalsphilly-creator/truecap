@@ -348,7 +348,7 @@ export function YearBuiltField({
         min={1800}
         max={new Date().getFullYear() + 5}
         step={1}
-        placeholder="e.g. 2,015"
+        placeholder="e.g. 2015"
         aria-invalid={!!errors.yearBuilt}
         aria-describedby={errors.yearBuilt ? "yearBuilt-error" : undefined}
         className={cn(

@@ -85,6 +85,16 @@ import {
   type StrategyStarterPreview,
 } from "./strategy-chips";
 import { AssumptionsStrip } from "./assumptions-strip";
+import { StuckFlag } from "./stuck-sentinel";
+import {
+  hasResultView,
+  resultViewPath,
+  resultViewTitle,
+} from "@/lib/result-view-url";
+import {
+  hasEditedStartingValue,
+  matchesFixtureValues,
+} from "@/lib/analyzer-pristine";
 import {
   EnrichmentReceipt,
   enrichmentRentSourceLabel,
@@ -2311,6 +2321,17 @@ export function InvestCalcPage({
   );
 
   const propertyType = form.watch("propertyType");
+  // What an untouched new analysis holds for the current property type: the
+  // baseline "did the visitor change anything?" is measured against.
+  const startingFormValues = useMemo(
+    () =>
+      buildNewAnalysisDefaults(
+        propertyType,
+        userAnalysisDefaults,
+        startingRateBenchmark?.rate,
+      ),
+    [propertyType, startingRateBenchmark, userAnalysisDefaults],
+  );
   const propertyTypeLabel =
     PROPERTY_TYPES.find((type) => type.value === propertyType)?.label ??
     "Property";
@@ -8658,9 +8679,27 @@ export function InvestCalcPage({
     // wipes address/price/rent and clears the localStorage draft, so
     // a misclick here is irrecoverable. A native confirm() is the
     // lightest possible guard - no modal infrastructure needed.
+    // An untouched sample deal is not the visitor's work: every value is the
+    // fixture's, so there is nothing to lose and nothing to confirm (audit
+    // C5). One edit to any sample value and the confirm is back.
+    const currentValues = form.getValues();
+    const untouchedSample =
+      !savedDealId &&
+      !hasPendingDealChanges &&
+      !hasUnappliedTargetDraft &&
+      isTrueCapSyntheticSampleAddress(currentValues.address) &&
+      matchesFixtureValues(
+        currentValues,
+        SAMPLE_DEAL_FIXTURE.values as Record<string, unknown>,
+      );
+    // Unsaved work is a result on screen or values the visitor entered, read
+    // from the form itself rather than from isDirty (which a blurred empty
+    // number field also sets).
+    const hasUnsavedWork =
+      Boolean(analysisResult) || hasMeaningfulInput || hasEditedStartingValues;
     const shouldConfirm =
-      hasPendingDealChanges ||
-      (!savedDealId && (Boolean(analysisResult) || form.formState.isDirty));
+      !untouchedSample &&
+      (hasPendingDealChanges || (!savedDealId && hasUnsavedWork));
     if (shouldConfirm) {
       const ok = await confirmDialog({
         title: "Start a new analysis?",
@@ -9956,11 +9995,22 @@ export function InvestCalcPage({
     !isAuthenticated && isCityOnlyAddress(watchedAddress);
   const hasPropertyAvailable =
     Boolean(watchedAddress?.trim()) && !addressIsAreaOnly;
+  // "The visitor changed an assumption" is read from the values, not from
+  // React Hook Form's isDirty (audit A9). isDirty flips when an empty number
+  // field is merely blurred (NaN is not the undefined it started as), so the
+  // same blank form showed "Try a sample deal" on one visit and "Add address
+  // to run full analysis" on the next. An empty form now always shows the
+  // same state.
+  const hasEditedStartingValues = hasEditedStartingValue(
+    form.formState.dirtyFields,
+    form.getValues(),
+    startingFormValues,
+  );
   const needsAddressForFullAnalysis =
     !hasPropertyAvailable &&
     (hasMeaningfulInput ||
       activeStrategyKey !== null ||
-      form.formState.isDirty);
+      hasEditedStartingValues);
   // The primary CTA may become the sample launcher ONLY on a pristine form
   // that is still using the implicit Buy & Hold default.
   // With price/rent already typed (address pending), one tap on what looks
@@ -9975,7 +10025,7 @@ export function InvestCalcPage({
     activeStrategyKey === null &&
     !hasPropertyAvailable &&
     !hasMeaningfulInput &&
-    !form.formState.isDirty;
+    !hasEditedStartingValues;
   const canUseActiveStrategyPrimaryOutput =
     !activeStrategy?.primaryOutputIsPro ||
     (activeStrategy.key === "wholesale-mao"
@@ -10970,9 +11020,13 @@ export function InvestCalcPage({
                           {primaryActionLabel}
                         </Button>
                         <p className="mt-2 text-center text-2xs leading-snug text-muted-foreground">
-                          {activeRunPromisesOfferCeiling
-                            ? `Offer Ceiling criteria: ${decisionTargetLabel}`
-                            : "Run the complete analysis with the assumptions shown."}
+                          {primaryCtaRunsSample
+                            ? // The empty form's button loads the sample, so its
+                              // caption describes the sample (audit A9).
+                              "See a full sample report. No address needed."
+                            : activeRunPromisesOfferCeiling
+                              ? `Offer Ceiling criteria: ${decisionTargetLabel}`
+                              : "Run the complete analysis with the assumptions shown."}
                         </p>
                       </div>
                     }
@@ -11350,7 +11404,14 @@ export function InvestCalcPage({
                 {/* Only when the localStorage draft writer is actually active
                   (anonymous / new-deal). Editing a loaded saved deal skips
                   the draft write, so showing "Auto-saved" there would lie. */}
-                {!savedDealId ? <AutosaveIndicator form={form} /> : null}
+                {!savedDealId ? (
+                  <AutosaveIndicator
+                    form={form}
+                    // Nothing has been entered yet, so there is no draft to
+                    // report (audit C5).
+                    active={hasMeaningfulInput || hasEditedStartingValues}
+                  />
+                ) : null}
               </div>
             </div>
             {/* end DESKTOP COCKPIT grid wrapper */}

@@ -217,9 +217,15 @@ export const investmentFormSchema = z
     propertyType: z.enum(["single-family", "multi-family", "owner-occupant"], {
       required_error: "Select a property type",
     }),
+    // Two messages for two different mistakes (2026-11 audit A9): an empty
+    // field asks for the address; a fragment asks for the whole address. The
+    // rule itself is unchanged: at least 5 and at most 200 characters.
     address: z
-      .string()
-      .min(5, "Address must be at least 5 characters")
+      .string({
+        required_error: "Enter the property address to run the full analysis.",
+      })
+      .min(1, "Enter the property address to run the full analysis.")
+      .min(5, "Enter the full street address.")
       .max(200, "Address is too long"),
     purchasePrice: z
       .number({ invalid_type_error: "Enter purchase price" })
