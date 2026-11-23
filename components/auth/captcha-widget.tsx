@@ -19,7 +19,17 @@
  *
  * Uses Turnstile's explicit render API so React owns the container. The token
  * is reported up via onToken; Turnstile tokens expire (~5 min), and the
- * expired-callback reports null so the form disables submit until re-solved.
+ * expired-callback reports null so the form waits for a new one.
+ *
+ * SHOWN ONLY WHEN IT NEEDS THE VISITOR (2026-11 ads pass, B5): the widget is
+ * rendered with `appearance: "interaction-only"` (Cloudflare's widget
+ * configuration reference: "The widget becomes visible only when visitor
+ * interaction is required"), so most visitors never see a "Verify you are
+ * human" box in the form. Verification itself is unchanged: the same widget
+ * runs, the same token is issued and Supabase (or lib/turnstile.ts) verifies
+ * it exactly as before. The container reserves no height while the widget is
+ * hidden, and onInteractiveChange tells the form when a challenge is on
+ * screen so its message can point at it.
  *
  * A TOKEN WORKS ONCE. Supabase checks the captcha before the credentials and
  * Cloudflare rejects a replayed token ("timeout-or-duplicate"), so a token
@@ -57,8 +67,11 @@ type TurnstileApi = {
       callback: (token: string) => void;
       "expired-callback": () => void;
       "error-callback": () => void;
+      "before-interactive-callback"?: () => void;
+      "after-interactive-callback"?: () => void;
       theme: "light";
       size: "flexible";
+      appearance: "always" | "execute" | "interaction-only";
     }
   ) => string;
   reset: (widgetId: string) => void;
@@ -146,9 +159,15 @@ function loadScript(): Promise<TurnstileApi | null> {
 export function CaptchaWidget({
   onToken,
   onUnavailable,
+  onInteractiveChange,
   ref,
   siteKey = CAPTCHA_SITE_KEY,
 }: {
+  /**
+   * True while Turnstile is showing a challenge the visitor has to answer,
+   * false again once it leaves that state. Presentation only.
+   */
+  onInteractiveChange?: (interactive: boolean) => void;
   /**
    * The widget's site key. Defaults to the auth forms' widget. The memo form
    * passes its own (MEMO_CAPTCHA_SITE_KEY), whose tokens TrueCap verifies
@@ -180,6 +199,10 @@ export function CaptchaWidget({
   useEffect(() => {
     onUnavailableRef.current = onUnavailable;
   }, [onUnavailable]);
+  const onInteractiveChangeRef = useRef(onInteractiveChange);
+  useEffect(() => {
+    onInteractiveChangeRef.current = onInteractiveChange;
+  }, [onInteractiveChange]);
 
   // The rendered widget's id, kept for reset(). Null until Turnstile has
   // rendered and again after unmount.
@@ -215,6 +238,11 @@ export function CaptchaWidget({
           onTokenRef.current(null);
           onUnavailableRef.current?.();
         },
+        "before-interactive-callback": () => onInteractiveChangeRef.current?.(true),
+        "after-interactive-callback": () => onInteractiveChangeRef.current?.(false),
+        // Visible only when a challenge needs the visitor; see the note at
+        // the top of this file.
+        appearance: "interaction-only",
         // Pinned light, not "auto": the auth page is the light paper
         // (auth-shell bg-background) and the site ships light-only, so an
         // OS-dark visitor got a jarring black box in the middle of a light form.
@@ -237,5 +265,8 @@ export function CaptchaWidget({
   }, [enabled, siteKey]);
 
   if (!enabled) return null;
-  return <div ref={containerRef} className="min-h-[65px]" />;
+  // No reserved height: hidden, the widget takes no room in the form; shown,
+  // Turnstile's own frame (65px) sets it. empty:hidden keeps the form's
+  // vertical rhythm from counting an empty block before the script loads.
+  return <div ref={containerRef} data-captcha-widget="" className="empty:hidden" />;
 }

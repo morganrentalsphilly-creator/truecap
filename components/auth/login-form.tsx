@@ -51,6 +51,14 @@ export function LoginForm() {
   // toast only — droppable by TOAST_LIMIT and invisible to a screen reader
   // focused on the form).
   const [signInError, setSignInError] = useState<string | null>(null);
+  // The human check is invisible unless it needs the visitor
+  // (components/auth/captcha-widget.tsx), so the Sign in button is never
+  // greyed out waiting for its token: pressing it early says why instead.
+  const [captchaInteractive, setCaptchaInteractive] = useState(false);
+  const [humanCheckMessage, setHumanCheckMessage] = useState<string | null>(null);
+  useEffect(() => {
+    if (captchaToken) setHumanCheckMessage(null);
+  }, [captchaToken]);
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -94,6 +102,16 @@ export function LoginForm() {
   }, [searchParams, toast]);
 
   async function onSubmit(values: LoginInput) {
+    if (captchaEnabled && !captchaUnavailable && !captchaToken) {
+      setSignInError(null);
+      setHumanCheckMessage(
+        captchaInteractive
+          ? "Complete the human check above, then sign in."
+          : "We're still checking that you're human. It takes a few seconds. Try again.",
+      );
+      return;
+    }
+    setHumanCheckMessage(null);
     setIsSubmitting(true);
     try {
       const result = await signInAction({ ...values, captchaToken: captchaToken ?? undefined });
@@ -315,13 +333,23 @@ export function LoginForm() {
           ref={captchaRef}
           onToken={setCaptchaToken}
           onUnavailable={() => setCaptchaUnavailable(true)}
+          onInteractiveChange={setCaptchaInteractive}
         />
+        {humanCheckMessage ? (
+          <p
+            role="alert"
+            data-human-check-message=""
+            className="rounded-md border border-destructive px-4 py-3 text-sm leading-relaxed text-foreground"
+          >
+            {humanCheckMessage}
+          </p>
+        ) : null}
 
         <Button
           type="submit"
           size="cta"
           className="w-full"
-          disabled={isSubmitting || (captchaEnabled && !captchaUnavailable && !captchaToken)}
+          disabled={isSubmitting}
         >
           {isSubmitting ? (
             <>
