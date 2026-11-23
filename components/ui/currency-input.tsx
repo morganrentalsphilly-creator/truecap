@@ -109,9 +109,39 @@ export function updateCurrencyDraft(
 ): CurrencyDraftUpdate {
   const parsed = parseCurrencyInput(nextDisplay);
   if (parsed === undefined) {
+    // "385k" and "1.2m" have one reading, so the suffix is expanded the
+    // moment it is typed or pasted instead of being dropped: dropping the "k"
+    // left $385 in a price field and an error about a $10,000 minimum.
+    const expanded = expandCurrencyShorthand(nextDisplay);
+    if (expanded !== null) {
+      return {
+        accepted: true,
+        display: formatCurrencyInput(expanded),
+        value: expanded,
+      };
+    }
     return { accepted: false, display: currentDisplay };
   }
   return { accepted: true, display: nextDisplay, value: parsed };
+}
+
+/**
+ * A number directly followed by one magnitude suffix: "385k" is 385,000 and
+ * "1.2m" is 1,200,000. Null for everything else, so the strict parser's
+ * rejections ("1e6", "12..5", "-$500", two suffixes) stay rejections.
+ */
+export function expandCurrencyShorthand(value: string): number | null {
+  const match = /^\$?\s*([0-9][0-9,]*(?:\.[0-9]+)?)\s*([km])$/i.exec(
+    value.trim(),
+  );
+  if (!match) return null;
+  const base = Number(match[1].replace(/,/g, ""));
+  if (!Number.isFinite(base)) return null;
+  const expanded =
+    base * (match[2].toLowerCase() === "k" ? 1_000 : 1_000_000);
+  // Currency inputs carry at most two decimals.
+  const rounded = Math.round(expanded * 100) / 100;
+  return Number.isFinite(rounded) ? rounded : null;
 }
 
 type CurrencyInputProps = Omit<

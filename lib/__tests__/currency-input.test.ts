@@ -1,6 +1,7 @@
 import { createFormControl } from "react-hook-form";
 import { describe, expect, it, vi } from "vitest";
 import {
+  expandCurrencyShorthand,
   formatCurrencyInput,
   parseCurrencyInput,
   updateCurrencyDraft,
@@ -135,5 +136,66 @@ describe("currency input formatting", () => {
 
     expect(onValid).toHaveBeenCalledWith({ rehabBudget: null }, undefined);
     expect(onValid).not.toHaveBeenCalledWith({ rehabBudget: 25000 }, undefined);
+  });
+});
+
+describe("currency shorthand (audit B4)", () => {
+  it("expands a k or m suffix to the full amount", () => {
+    expect(expandCurrencyShorthand("385k")).toBe(385_000);
+    expect(expandCurrencyShorthand("385K")).toBe(385_000);
+    expect(expandCurrencyShorthand("1.2m")).toBe(1_200_000);
+    expect(expandCurrencyShorthand("1.25M")).toBe(1_250_000);
+    expect(expandCurrencyShorthand("$2.8k")).toBe(2_800);
+    expect(expandCurrencyShorthand("1,250k")).toBe(1_250_000);
+    expect(expandCurrencyShorthand(" 450 k ")).toBe(450_000);
+  });
+
+  it("leaves everything without exactly one trailing suffix alone", () => {
+    expect(expandCurrencyShorthand("385")).toBeNull();
+    expect(expandCurrencyShorthand("k")).toBeNull();
+    expect(expandCurrencyShorthand("385kk")).toBeNull();
+    expect(expandCurrencyShorthand("385km")).toBeNull();
+    expect(expandCurrencyShorthand("3k85")).toBeNull();
+    expect(expandCurrencyShorthand("-385k")).toBeNull();
+    expect(expandCurrencyShorthand("1e6k")).toBeNull();
+    expect(expandCurrencyShorthand("385 thousand")).toBeNull();
+  });
+
+  it("commits the expanded amount when the suffix is typed", () => {
+    let display = "";
+    const committed: Array<number | null> = [];
+    for (const next of ["3", "38", "385", "385k"]) {
+      const update = updateCurrencyDraft(display, next);
+      expect(update.accepted).toBe(true);
+      if (!update.accepted) continue;
+      display = update.display;
+      committed.push(update.value);
+    }
+    expect(display).toBe("385,000");
+    expect(committed).toEqual([3, 38, 385, 385_000]);
+  });
+
+  it("expands a decimal amount typed with an m suffix", () => {
+    const update = updateCurrencyDraft("1.2", "1.2m");
+    expect(update).toEqual({
+      accepted: true,
+      display: "1,200,000",
+      value: 1_200_000,
+    });
+  });
+
+  it("accepts a pasted shorthand through the same path", () => {
+    expect(updateCurrencyDraft("", "$385k")).toEqual({
+      accepted: true,
+      display: "385,000",
+      value: 385_000,
+    });
+  });
+
+  it("still rejects a letter that is not a magnitude suffix", () => {
+    expect(updateCurrencyDraft("385", "385x")).toEqual({
+      accepted: false,
+      display: "385",
+    });
   });
 });
