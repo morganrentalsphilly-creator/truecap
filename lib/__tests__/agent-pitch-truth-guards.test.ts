@@ -168,13 +168,17 @@ describe("what the money pages say about DealCheck's PDF reports", () => {
   it("uses the one checked sentence and never says branding is on every plan", () => {
     for (const file of [
       "app/for-agents/page.tsx",
-      "app/pricing/page.tsx",
       "components/marketing/landing-sections.tsx",
     ]) {
       const text = copy(file);
       expect(text, file).toContain(DEALCHECK_SENTENCE);
       expect(text, file).not.toMatch(/branded PDF[^.]*\b(?:free|any plan|every plan|its plans)\b/i);
     }
+    // /pricing no longer describes DealCheck at all (2026-11 ads pass, E4):
+    // no competitor prices and no claim about its reports, one link out.
+    const pricing = copy("app/pricing/page.tsx");
+    expect(pricing).not.toMatch(/branded PDF[^.]*\b(?:free|any plan|every plan|its plans)\b/i);
+    expect(pricing).not.toContain("DealCheck plan");
   });
 });
 
@@ -223,6 +227,15 @@ describe("TrueCap's own product on the money and persona pages", () => {
     );
     expect(copy("components/marketing/landing-sections.tsx")).toContain(
       "Buy Boxes you assign to clients (up to 100 per account)",
+    );
+    // The /pricing table's Agent Pro cell reads the enforced constant. It
+    // was typed "Up to 12 per account" (the Pro cap) beside a card that said
+    // 100 (2026-11 ads pass, E3).
+    const pricing = read("app/pricing/page.tsx");
+    expect(pricing).toContain('"Buy Boxes assigned to clients": `Up to ${MAX_AGENT_BUY_BOXES} per account`,');
+    expect(pricing).not.toContain("Up to 12 per account");
+    expect(read("lib/commercial-limits.ts")).toContain(
+      'return features.includes("client_buy_box") ? MAX_AGENT_BUY_BOXES : MAX_BUY_BOXES;',
     );
   });
 

@@ -115,12 +115,25 @@ describe("no-card product evaluation", () => {
     const plans = read("../../components/marketing/pricing-toggle-plans.tsx");
     const buttons = read("../../components/marketing/pricing-plan-buttons.tsx");
     const signup = read("../../components/auth/sign-up-form.tsx");
-    // The Pro card's anonymous CTA starts the no-card evaluation. The Agent
-    // Pro card's cannot claim to (the evaluation never includes the client
+    // The Pro card's anonymous CTA starts the no-card trial, under the one
+    // name the trial has everywhere (2026-11 ads pass, E2: it read "Start Pro
+    // evaluation — no card" here and "See Pro pricing" on the homepage). The
+    // Agent Pro card's cannot claim to (the trial never includes the client
     // roster — lib/entitlements.ts), so it promises only the free account.
-    expect(buttons).toContain("`Start ${tierName} evaluation — no card`");
+    const signupHref = read("../../lib/plan-signup-href.ts");
+    expect(signupHref).toContain('export const PRO_TRIAL_CTA_LABEL = "Start free trial, no card";');
+    expect(buttons).toContain(': PRO_TRIAL_CTA_LABEL}');
+    expect(buttons).not.toMatch(/evaluation — no card/);
     expect(buttons).toContain('"Create a free account — no card"');
-    expect(buttons).toContain("plan=${plan}&billing=${billing}");
+    expect(buttons).toContain("planSignupHref(plan, billing)");
+    expect(signupHref).toContain("plan=${plan}&billing=${billing}");
+    // The homepage's Pro card carries the same label and the same URL.
+    expect(read("../../components/marketing/landing-sections.tsx")).toContain(
+      "trialCta: { label: PRO_TRIAL_CTA_LABEL, className: ctaSecondary }",
+    );
+    expect(read("../../components/home/plans-toggle.tsx")).toContain(
+      'planSignupHref("investor-pro", cadence)',
+    );
     expect(buttons).not.toContain("resolveCheckoutResumeForSlot");
     // The allowance is stated once, under the CTA, in every trial state
     // (2026-09 audit removed the duplicate pill beside the price).

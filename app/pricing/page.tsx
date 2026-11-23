@@ -1,8 +1,9 @@
 /**
  * Public /pricing page. Outcome line with the stage chooser beside it, plans
  * (annual-first) with the trial terms and trust row under the cards, the
- * feature table, the value stack, product shots, the DealCheck comparison,
- * FAQ. Amounts come only from
+ * feature table, the value stack, product shots, FAQ (with one text link to
+ * the DealCheck comparison page; the section that quoted a competitor's
+ * prices here was removed in the 2026-11 ads pass, E4). Amounts come only from
  * lib/public-pricing.ts and the Stripe display prices. For
  * unauthenticated visitors the paid CTA is a full-document link to
  * /auth/sign-up?plan=<plan>&billing=<billing>&next=/dashboard/new
@@ -72,6 +73,7 @@ import {
   PUBLIC_PRO_MONTHLY_USD,
 } from "@/lib/public-pricing";
 import {
+  paidAnnualChargeNote,
   paidPriceDisplay,
   planPrices,
   type PaidPlanPrices,
@@ -81,6 +83,7 @@ import {
   summarizePricingEvaluation,
 } from "@/lib/pricing-evaluation";
 import { PRODUCT_PLAN_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
+import { MAX_AGENT_BUY_BOXES } from "@/lib/commercial-limits";
 import { ScrollX } from "@/components/ui/scroll-x";
 import { JsonLd } from "@/components/seo/json-ld";
 import { cn } from "@/lib/utils";
@@ -188,7 +191,11 @@ const FEATURE_COMPARISON: Array<
  */
 const AGENT_PRO_CELLS: Record<string, boolean | string> = {
   "Client roster (up to 100 clients)": true,
-  "Buy Boxes assigned to clients": "Up to 12 per account",
+  // The cap the code enforces for an Agent Pro account
+  // (lib/commercial-limits.ts buyBoxLimitForFeatures: client_buy_box gets
+  // MAX_AGENT_BUY_BOXES), read from the constant. This cell said "Up to 12",
+  // which is the Pro cap, beside a card that said 100 (ads pass, E3).
+  "Buy Boxes assigned to clients": `Up to ${MAX_AGENT_BUY_BOXES} per account`,
   "Client-report share links": true,
 };
 const agentProCell = (label: string, pro: boolean | string) =>
@@ -407,6 +414,9 @@ function PricingStages({
         // Monthly keeps Stripe's own label, as the card's monthly figure does.
         price: cadence === "monthly" ? prices.monthlyLabel : formatPublicUsd(value),
         period,
+        // One unit down the list (E1): annual is the monthly equivalent with
+        // the annual total beside it, as on the cards.
+        note: cadence === "annual" ? paidAnnualChargeNote(prices) : null,
       };
     });
   const stages = [
@@ -414,7 +424,7 @@ function PricingStages({
       job: "Screen the deal",
       product: "Free",
       href: "#plans",
-      prices: [{ cadence: null, price: "$0", period: "forever" }],
+      prices: [{ cadence: null, price: "$0", period: "forever", note: null }],
       answer: "Understand the economics before spending more time on the property.",
     },
     {
@@ -474,10 +484,15 @@ function PricingStages({
                 <p
                   key={row.cadence ?? "free"}
                   data-stage-cadence={row.cadence ?? undefined}
-                  className="flex items-baseline justify-end gap-x-1 whitespace-nowrap"
+                  className="flex flex-wrap items-baseline justify-end gap-x-1"
                 >
-                  <LedgerFigure className="text-xl font-medium">{row.price}</LedgerFigure>
-                  <span className="text-sm text-muted-foreground">{row.period}</span>
+                  <LedgerFigure className="whitespace-nowrap text-xl font-medium">{row.price}</LedgerFigure>
+                  <span className="whitespace-nowrap text-sm text-muted-foreground">{row.period}</span>
+                  {row.note ? (
+                    <span className="basis-full whitespace-nowrap text-right font-figure text-sm text-muted-foreground">
+                      {row.note}
+                    </span>
+                  ) : null}
                 </p>
               ))}
             </div>
@@ -873,7 +888,7 @@ export default function PricingPage() {
         </Section>
 
         {/* The explanation after the table: the paid tiers as outcomes (its
-            own Section), the tier shots, then the DealCheck comparison. The
+            own Section), then the tier shots. The
             value stack sits between the table ("What you get") and the shots
             ("What you get at each tier") so the two headings never meet. */}
         <PricingValueStack agentProConfigured={agentProConfigured} />
@@ -926,39 +941,6 @@ export default function PricingPage() {
           </div>
         </Section>
 
-        {/* One honest comparison (docs/site-overhaul.md Phase 9). The
-            DealCheck figures live in DEALCHECK_COMPARISON so this file holds
-            no amounts. As rendered on dealcheck.io/pricing on 2026-10-02 they
-            are the per-month prices under yearly billing (paying monthly
-            costs more), so the heading says "a month, billed yearly".
-            Branding on DealCheck's PDF reports is a DealCheck Pro feature;
-            every plan exports the report itself. */}
-        <Section
-          data-pricing-comparison
-          aria-labelledby="pricing-dealcheck-title"
-        >
-          <div className="max-w-3xl">
-            <SectionHeading id="pricing-dealcheck-title">
-              How this compares to DealCheck ({formatUsdWhole(DEALCHECK_COMPARISON.plusMonthlyUsd)}{" "}
-              Plus / {formatUsdWhole(DEALCHECK_COMPARISON.proMonthlyUsd)} Pro a month, billed yearly)
-            </SectionHeading>
-            <p className="mt-3 max-w-[62ch] text-pretty text-lg leading-relaxed text-muted-foreground">
-              Both tools support rental analysis, purchase criteria, offer calculations,
-              and reports. TrueCap brings editable assumptions, published methodology,
-              downside checks, and client-specific Buy Boxes into one screening workflow.
-              {agentProConfigured
-                ? " Every DealCheck plan exports a PDF report; putting your own name and logo on it needs DealCheck Pro. For agents, Agent Pro is for screening each listing against a specific client's Buy Box, that client's Offer Ceiling, and a co-branded decision memo the client can open without an account."
-                : ""}
-            </p>
-            <IntentPrefetchLink
-              href={DEALCHECK_COMPARISON.href}
-              className="tc-link mt-3 inline-flex min-h-11 items-center"
-            >
-              Read the full DealCheck comparison
-            </IntentPrefetchLink>
-          </div>
-        </Section>
-
         {/* Consented quotes from the in-product prompt (Phase 5); renders
             nothing until real published rows exist. */}
         {/* No paid-customer heading override: publication is gated on activity
@@ -991,6 +973,17 @@ export default function PricingPage() {
                 >
                   Email hello@usetruecap.com
                 </a>
+              </p>
+              {/* The one pointer to the comparison page (ads pass, E4): this
+                  page quotes no competitor's prices. */}
+              <p data-pricing-comparison-link="" className="text-base text-muted-foreground">
+                Comparing tools?{" "}
+                <IntentPrefetchLink
+                  href={DEALCHECK_COMPARISON.href}
+                  className="tc-link inline-flex min-h-11 items-center"
+                >
+                  TrueCap vs DealCheck
+                </IntentPrefetchLink>
               </p>
               <ActionRow className="mt-6">
                 <Link

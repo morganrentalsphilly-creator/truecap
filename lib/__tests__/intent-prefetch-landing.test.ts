@@ -317,16 +317,28 @@ describe("paid landing pages: intent-only prefetch (source)", () => {
     // page's scroll while the short auth page was still mounted: /for-agents
     // reopened at 483px (1095 wide) instead of the pricing close it left, and
     // /pricing at its hero. A plain <a> gives Back the browser's own restore.
-    const buttons = read("components/marketing/pricing-plan-buttons.tsx");
-    const signUpHref = /^\{`\/auth\/sign-up\?/;
-    const anchors = openingTags(buttons, ["a"]).filter(({ tag }) =>
-      signUpHref.test(hrefSource(tag) ?? ""),
+    // The URL is built by one helper (lib/plan-signup-href.ts) that the
+    // /pricing cards and the homepage's Pro card share (2026-11 ads pass, E2).
+    expect(read("lib/plan-signup-href.ts")).toContain(
+      "`/auth/sign-up?plan=${plan}&billing=${billing}&next=${encodeURIComponent(\"/dashboard/new\")}`",
     );
-    expect(anchors, "the /pricing cards' visitor sign-up is an <a>").toHaveLength(1);
-    expect(
-      openingTags(buttons, ["Link"]).filter(({ tag }) => signUpHref.test(hrefSource(tag) ?? "")),
-      "no next/link to /auth/sign-up on the /pricing cards",
-    ).toEqual([]);
+    const signUpHref = /^\{planSignupHref\(/;
+    for (const [file, label] of [
+      ["components/marketing/pricing-plan-buttons.tsx", "the /pricing cards' visitor sign-up"],
+      ["components/home/plans-toggle.tsx", "the homepage Pro card's trial link"],
+    ] as const) {
+      const source = read(file);
+      const anchors = openingTags(source, ["a"]).filter(({ tag }) =>
+        signUpHref.test(hrefSource(tag) ?? ""),
+      );
+      expect(anchors, `${label} is an <a>`).toHaveLength(1);
+      expect(
+        openingTags(source, ["Link", "IntentPrefetchLink"]).filter(({ tag }) =>
+          /sign-up|planSignupHref/.test(hrefSource(tag) ?? ""),
+        ),
+        `no next/link to /auth/sign-up in ${file}`,
+      ).toEqual([]);
+    }
     // /for-agents' close goes through TrackedMarketingLink, which renders an
     // /auth/ href as an <a> (the rendered layer checks the close's link).
     const tracked = read("components/marketing/tracked-marketing-link.tsx");

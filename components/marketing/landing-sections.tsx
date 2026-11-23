@@ -58,6 +58,7 @@ import { buildSampleDealLedger, formatLedgerDollars, type SampleDealLedger } fro
 import { loadStripeDisplayPrice } from "@/lib/stripe/display-prices";
 import { cn } from "@/lib/utils";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
+import { PRO_TRIAL_CTA_LABEL } from "@/lib/plan-signup-href";
 import { VERIFIED_TESTIMONIALS, isPublicationReady } from "@/lib/proof-records";
 import { JsonLd } from "@/components/seo/json-ld";
 import { AGENT_FAQS } from "@/lib/agent-faqs";
@@ -1052,11 +1053,9 @@ export async function PdfProUpsell() {
           audience: "Know what to offer on every deal.",
           answers: proPlanAnswers(),
           prices: prices.pro,
-          action: (
-            <IntentPrefetchLink href="/pricing" className={ctaSecondary}>
-              See Pro pricing
-            </IntentPrefetchLink>
-          ),
+          // The same action, label and sign-up URL as /pricing's Pro card
+          // (ads pass, E2); the toggle sets the billing period in the link.
+          trialCta: { label: PRO_TRIAL_CTA_LABEL, className: ctaSecondary },
           footnote: (
             <>
               Create an account for a {PRODUCT_EVALUATION_DAYS}-day free trial:{" "}

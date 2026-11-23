@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { track } from "@/lib/analytics/site-events";
+import { planSignupHref, PRO_TRIAL_CTA_LABEL } from "@/lib/plan-signup-href";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { createCheckoutSessionAction } from "@/app/actions/billing";
@@ -130,7 +131,6 @@ export function PricingPlanButtons({
   }
 
   if (!isAuthenticated) {
-    const tierName = slot.startsWith("agent_pro_") ? "Agent Pro" : "Pro";
     const plan = slot.startsWith("agent_pro_") ? "agent-pro" : "investor-pro";
     const billing = slot.endsWith("_annual") ? "annual" : "monthly";
     // A full-document navigation, not next/link: a visitor who backs out of
@@ -139,13 +139,13 @@ export function PricingPlanButtons({
     // mounted, so the position was clamped to its height (483px at 1095,
     // 415px at 390) and /pricing reopened at its hero.
     return (
-      <a
-        href={`/auth/sign-up?plan=${plan}&billing=${billing}&next=${encodeURIComponent("/dashboard/new")}`}
-        className={actionClass}
-      >
-        {tierName === "Agent Pro"
+      <a href={planSignupHref(plan, billing)} className={actionClass}>
+        {/* The trial covers Pro analyses, so the Pro card names it. It does
+            not include Agent Pro's roster or client Buy Boxes, so that card
+            offers the free account and says nothing of a trial. */}
+        {plan === "agent-pro"
           ? "Create a free account — no card"
-          : `Start ${tierName} evaluation — no card`}
+          : PRO_TRIAL_CTA_LABEL}
       </a>
     );
   }

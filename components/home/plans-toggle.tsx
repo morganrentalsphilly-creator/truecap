@@ -22,13 +22,20 @@ import {
   type PaidPlanPrices,
 } from "@/components/marketing/cadence-toggle";
 import { PlanCard, type PlanCardAnswer } from "@/components/marketing/plan-card";
+import { planSignupHref } from "@/lib/plan-signup-href";
 import { cn } from "@/lib/utils";
 
 export type { PaidPlanPrices };
 
 export type PlansToggleProps = {
   freeCard: { audience: string; priceNote: string; answers: PlanCardAnswer[]; action: ReactNode };
-  proCard: { name: string; audience: string; answers: PlanCardAnswer[]; action: ReactNode; footnote: ReactNode; prices: PaidPlanPrices };
+  /**
+   * The Pro card's action is the no-card trial (ads pass, E2): a link to the
+   * sign-up URL /pricing's Pro card uses, with the billing period the toggle
+   * is on. Its label and classes are set on the server and passed in, so no
+   * copy lives here.
+   */
+  proCard: { name: string; audience: string; answers: PlanCardAnswer[]; trialCta: { label: string; className: string }; footnote: ReactNode; prices: PaidPlanPrices };
   agentProCard: { rootProps?: Record<`data-${string}`, string>; audience: string; answers: PlanCardAnswer[]; note: ReactNode; action: ReactNode; prices: PaidPlanPrices } | null;
 };
 
@@ -59,7 +66,13 @@ export function PlansToggle({ freeCard, proCard, agentProCard }: PlansToggleProp
           period={paidPriceDisplay(proCard.prices, cadence).period}
           priceNote={<span className="font-figure">{paidPriceNote(proCard.prices, cadence)}</span>}
           answers={proCard.answers}
-          action={proCard.action}
+          action={
+            // A full-document link, like /pricing's: Back from sign-up
+            // returns to the card the visitor was reading.
+            <a href={planSignupHref("investor-pro", cadence)} className={proCard.trialCta.className}>
+              {proCard.trialCta.label}
+            </a>
+          }
           footnote={proCard.footnote}
         />
         {agentProCard ? (

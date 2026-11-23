@@ -161,18 +161,16 @@ export default async function ForAgentsPage() {
     loadStripeDisplayPrice("agent_pro_annual"),
   ]);
   // Mirror /pricing's cards (paidPriceDisplay): on annual, the per-month
-  // equivalent only when it is whole dollars, else the annual charge itself
-  // ($590/year, never $49.17/month: founder decision 2026-10-21, audit A13).
+  // equivalent to the cent, with the annual total beside it ($49.17/month,
+  // $590 charged once a year: founder decision 2026-11-23, ads pass E1).
   // Amounts come from the Stripe display price, with the public catalog as
   // the documented fallback.
   const agentPrices = planPrices(agentMonthly, agentAnnual, {
     monthly: PUBLIC_AGENT_PRO_MONTHLY_USD,
     annual: PUBLIC_AGENT_PRO_ANNUAL_USD,
   });
-  const annualDisplay = paidPriceDisplay(agentPrices, "annual");
-  const annualFigure =
-    annualDisplay.period === "/yr" ? agentPrices.annualLabel : formatPublicUsd(annualDisplay.value);
-  const annualPeriod = annualDisplay.period === "/yr" ? "/year" : "/month";
+  const annualFigure = formatPublicUsd(paidPriceDisplay(agentPrices, "annual").value);
+  const annualPeriod = "/month";
   const annualLabel = agentPrices.annualLabel;
   const monthlyLabel = agentPrices.monthlyLabel;
 
@@ -503,7 +501,7 @@ export default async function ForAgentsPage() {
                         <span className="text-base text-muted-foreground">{annualPeriod}</span>
                       </dd>
                       <dd className="mt-1 text-sm text-muted-foreground">
-                        {annualPeriod === "/year" ? "Charged once a year" : `${annualLabel} charged once a year`}
+                        {`${annualLabel} charged once a year`}
                       </dd>
                     </div>
                     <div className="border-b border-rule-soft py-3">

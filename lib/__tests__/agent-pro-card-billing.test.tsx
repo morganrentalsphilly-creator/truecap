@@ -72,13 +72,15 @@ describe("/pricing Agent Pro card", () => {
     // (components/marketing/cadence-toggle.tsx), whose segments are radios.
     expect(html).toMatch(/aria-checked="true"[^>]*>Annual/);
     const card = agentCard(html);
-    // Re-anchored 2026-10-21 (audit A13, founder decision): $590 a year has
-    // no whole-dollar monthly equivalent, so the card shows the annual charge
-    // itself ("$590" over "/yr"), never "$49.17/mo".
-    expect(card).toContain(formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD));
-    expect(card).toContain("/yr");
-    expect(card).not.toContain(formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD / 12));
-    expect(card).toContain("billed annually");
+    // Re-anchored 2026-11-23 (ads pass E1, founder decision; it replaces the
+    // 2026-10-21 one): every paid card shows ONE unit, the monthly
+    // equivalent to the cent ("$49.17" over "/mo"), with the annual total
+    // beside it ("billed annually ($590)"). No card shows a "/yr" figure
+    // (the saving in the note is still per year).
+    expect(card).toContain(formatPublicUsd(Math.round((PUBLIC_AGENT_PRO_ANNUAL_USD / 12) * 100) / 100));
+    expect(card).toContain("/mo");
+    expect(card).not.toMatch(/>\/yr</);
+    expect(card).toContain(`billed annually (${formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD)})`);
     expect(card).not.toContain("billed monthly");
     expect(card).not.toContain(formatPublicUsd(PUBLIC_AGENT_PRO_MONTHLY_USD));
     // Its sign-up carries the period the card shows, as /for-agents' does.
@@ -89,11 +91,12 @@ describe("/pricing Agent Pro card", () => {
     const card = agentCard(
       renderPlans({ agentAnnual: { amountLabel: "$590", period: "year" } }),
     );
-    // Re-anchored 2026-10-21 (audit A13): the annual charge, not $49.17/mo.
-    expect(card).toContain("$590");
-    expect(card).toContain("/yr");
-    expect(card).not.toContain("$49.17");
-    expect(card).toContain("billed annually");
+    // Re-anchored 2026-11-23 (ads pass E1): the monthly equivalent, with the
+    // annual charge beside it.
+    expect(card).toContain("$49.17");
+    expect(card).toContain("/mo");
+    expect(card).not.toMatch(/>\/yr</);
+    expect(card).toContain("billed annually ($590)");
   });
 
   // Row P2-13: the saving was printed on the Pro card only, rounded up to the
@@ -113,9 +116,11 @@ describe("/pricing Agent Pro card", () => {
     );
     expect(pro).not.toContain(agentSaving);
     const agent = agentCard(html);
-    // Re-anchored 2026-10-21: the figure above is the annual charge, so the
-    // note does not repeat it.
-    expect(agent).toContain(`billed annually · ${agentSaving}`);
+    // Re-anchored 2026-11-23 (ads pass E1): the figure above is the monthly
+    // equivalent, so the note carries the annual total, as Pro's does.
+    expect(agent).toContain(
+      `billed annually (${formatPublicUsd(PUBLIC_AGENT_PRO_ANNUAL_USD)}) · ${agentSaving}`,
+    );
     expect(agent).not.toContain(proSaving);
     // The same figures when Stripe's display prices resolved.
     const resolved = renderPlans({

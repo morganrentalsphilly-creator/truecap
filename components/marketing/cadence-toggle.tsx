@@ -27,6 +27,7 @@ export {
   annualCostsLess,
   annualSavingFloorPct,
   annualSavingUsd,
+  paidAnnualChargeNote,
   paidPriceDisplay,
   planPrices,
   paidChargeToday,
@@ -38,8 +39,8 @@ export {
 
 /** The per-month figure at a cadence: the monthly price, or the annual charge over twelve months. */
 export function PaidPlanPrice({ prices, cadence }: { prices: PaidPlanPrices; cadence: Cadence }) {
-  // The card's period comes from the same call (paidPriceDisplay): "/mo", or
-  // "/yr" when the annual charge has no whole-dollar monthly equivalent.
+  // The card's period comes from the same call (paidPriceDisplay): always
+  // "/mo"; the annual total is the note under the figure.
   const { value } = paidPriceDisplay(prices, cadence);
   // Two decimals only when the amount has cents ($25 from $300 a year, $29.99
   // month to month), as formatPublicUsd prints them.

@@ -75,20 +75,27 @@ export function annualSavingFloorPct(
 }
 
 /**
- * The figure a paid card shows at a cadence (founder decision 2026-10-21,
- * audit A13): the monthly price; on annual, the per-month equivalent when it
- * is whole dollars ($300 a year is $25/mo), else the annual charge itself
- * ($590/yr): never a cents figure ($49.17/mo) that no one is charged.
+ * The figure a paid card shows at a cadence: ONE unit, dollars per month
+ * (founder decision 2026-11-23, ads pass E1). On annual it is the annual
+ * charge over twelve months, to the cent ($300 a year is $25/mo, $590 a year
+ * is $49.17/mo), and the annual total always sits beside it
+ * (paidAnnualChargeNote), so the amount actually charged is never out of
+ * sight. This replaces the 2026-10-21 rule, which showed a whole-dollar
+ * monthly equivalent for one plan and the annual charge for the other: Pro
+ * read "$25 /mo" beside Agent Pro's "$590 /yr", two units in one row.
  */
 export function paidPriceDisplay(
   prices: Pick<PaidPlanPrices, "monthly" | "annual">,
   cadence: Cadence,
-): { value: number; period: "/mo" | "/yr" } {
+): { value: number; period: "/mo" } {
   if (cadence === "monthly") return { value: prices.monthly, period: "/mo" };
-  const perMonth = prices.annual / 12;
-  return Number.isInteger(perMonth)
-    ? { value: perMonth, period: "/mo" }
-    : { value: prices.annual, period: "/yr" };
+  return { value: Math.round((prices.annual / 12) * 100) / 100, period: "/mo" };
+}
+
+/** "billed annually ($300)": the annual total that goes beside a monthly
+ *  equivalent, from the plan's own annual label. */
+export function paidAnnualChargeNote(prices: Pick<PaidPlanPrices, "annualLabel">): string {
+  return `billed annually (${prices.annualLabel})`;
 }
 
 /**
@@ -100,11 +107,7 @@ export function paidPriceDisplay(
 export function paidPriceNote(prices: PaidPlanPrices, cadence: Cadence): string {
   if (cadence === "monthly") return "billed monthly";
   const saving = annualSavingUsd(prices);
-  // When the figure above is the annual charge, the note does not repeat it.
-  const charge =
-    paidPriceDisplay(prices, cadence).period === "/yr"
-      ? "billed annually"
-      : `billed annually (${prices.annualLabel})`;
+  const charge = paidAnnualChargeNote(prices);
   return saving > 0 ? `${charge} · Save ${formatPublicUsd(saving)}/yr` : charge;
 }
 

@@ -65,26 +65,34 @@ describe("Phase 9 — pricing page", () => {
     const pricing = read("components/marketing/cadence-pricing.ts");
     expect(toggle).toContain("PaidPlanPrice");
     expect(toggle).toContain("paidPriceNote");
-    // Re-anchored 2026-10-21 (audit A13): the figure is paidPriceDisplay's,
-    // the annual charge over twelve months when that is whole dollars, else
-    // the annual charge itself (founder decision).
+    // Re-anchored 2026-11-23 (ads pass E1, founder decision): the figure is
+    // paidPriceDisplay's, always the annual charge over twelve months, to the
+    // cent, in "/mo", with the annual total in the note beside it.
     expect(cadence).toContain("paidPriceDisplay(prices, cadence)");
-    expect(pricing).toContain("const perMonth = prices.annual / 12;");
-    expect(pricing).toContain("billed annually");
+    expect(pricing).toContain("Math.round((prices.annual / 12) * 100) / 100");
+    expect(pricing).not.toContain('"/yr"');
+    expect(pricing).toContain("`billed annually (${prices.annualLabel})`");
+    // The hero's stage list shows the same unit and the same total.
+    expect(read("app/pricing/page.tsx")).toContain(
+      'note: cadence === "annual" ? paidAnnualChargeNote(prices) : null,',
+    );
   });
 
-  it("carries one honest DealCheck comparison that links to /vs/dealcheck", () => {
+  it("quotes no competitor prices and links once to /vs/dealcheck", () => {
+    // 2026-11 ads pass (E4): the section "How this compares to DealCheck
+    // ($10 Plus / $20 Pro a month, billed yearly)" is gone from this page.
+    // One text link by the FAQ points at the comparison page instead.
     const page = read("app/pricing/page.tsx");
-    expect(page).toContain("data-pricing-comparison");
-    expect(page).toContain("DEALCHECK_COMPARISON.plusMonthlyUsd");
-    expect(page).toContain("DEALCHECK_COMPARISON.proMonthlyUsd");
-    // The two figures are DealCheck's per-month prices under yearly billing,
-    // so the heading has to carry the unit and the billing term.
-    expect(page).toMatch(/DEALCHECK_COMPARISON\.proMonthlyUsd\)\} Pro a month, billed yearly\)/);
+    expect(page).not.toContain("DEALCHECK_COMPARISON.plusMonthlyUsd");
+    expect(page).not.toContain("DEALCHECK_COMPARISON.proMonthlyUsd");
+    expect(page).not.toContain("How this compares to DealCheck");
+    expect(page).not.toContain("pricing-dealcheck-title");
+    expect(page.match(/href=\{DEALCHECK_COMPARISON\.href\}/g)).toHaveLength(1);
+    expect(page.replace(/\s+/g, " ")).toMatch(
+      /Comparing tools\?\{" "\} <IntentPrefetchLink href=\{DEALCHECK_COMPARISON\.href\}[^>]*> TrueCap vs DealCheck <\/IntentPrefetchLink>/,
+    );
     expect(page).toContain("If you only need metrics");
     expect(DEALCHECK_COMPARISON.href).toBe("/vs/dealcheck");
-    expect(DEALCHECK_COMPARISON.plusMonthlyUsd).toBe(10);
-    expect(DEALCHECK_COMPARISON.proMonthlyUsd).toBe(20);
   });
 
   it("keeps the trust row, the tier shots, the testimonials, and the FAQ on the page", () => {
