@@ -11208,9 +11208,13 @@ export function InvestCalcPage({
                             ? // The empty form's button loads the sample, so its
                               // caption describes the sample (audit A9).
                               "See a full sample report. No address needed."
-                            : activeRunPromisesOfferCeiling
-                              ? `Offer Ceiling criteria: ${decisionTargetLabel}`
-                              : "Run the complete analysis with the assumptions shown."}
+                            : needsAddressForFullAnalysis
+                              ? // The button asks for the address, so the
+                                // caption does not promise a run yet.
+                                "The preview is live. Add the address to run the full analysis."
+                              : activeRunPromisesOfferCeiling
+                                ? `Offer Ceiling criteria: ${decisionTargetLabel}`
+                                : "Run the complete analysis with the assumptions shown."}
                         </p>
                       </div>
                     }
