@@ -81,8 +81,9 @@ export async function Testimonials({
  * the same rule: with no rows, or on any read failure, it renders NOTHING,
  * not a heading, a rule or a placeholder.
  *
- * "band" is a full-width strip under a page hero, set on the page container
- * with one bottom line; "stacked" is a narrow column (the auth page).
+ * "band" is a full-width strip under a page hero, on the page container: the
+ * hero's bottom rule opens it and the next section's top rule closes it, so
+ * it draws none of its own. "stacked" is a narrow column (the auth page).
  */
 export async function QuoteStrip({
   limit = 2,
@@ -131,9 +132,9 @@ export async function QuoteStrip({
     <section
       aria-label="From people who use it"
       data-quote-strip=""
-      className={cn("border-b border-border bg-background", className)}
+      className={cn("bg-background", className)}
     >
-      <div className={cn(PAGE_CONTAINER, "pb-2 pt-6")}>{quotes}</div>
+      <div className={cn(PAGE_CONTAINER, "pb-4 pt-8")}>{quotes}</div>
     </section>
   ) : (
     <section

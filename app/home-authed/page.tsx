@@ -17,7 +17,7 @@
  */
 
 import type { Metadata } from "next";
-import { Testimonials } from "@/components/marketing/testimonials";
+import { QuoteStrip, Testimonials } from "@/components/marketing/testimonials";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/investcalc/header";
 import { AnalyzePageContent } from "@/components/marketing/analyze-page-content";
@@ -256,6 +256,7 @@ export default async function AuthedHome({
           section list and that neither page imports the analyzer. */}
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
       {!user && <MarketingHero />}
+      {!user && <QuoteStrip />}
       {!user && (
         <div className="truecap-marketing-tail contents">
           <HowTrueCapWorks />

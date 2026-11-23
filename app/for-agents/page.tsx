@@ -27,7 +27,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { permanentRedirect } from "next/navigation";
-import { Fragment } from "react";
+import { Fragment, Suspense } from "react";
 import { Header } from "@/components/investcalc/header";
 import { AgentProPageTracker } from "@/components/analytics/agent-pro-page-tracker";
 import { LedgerFigure } from "@/components/ledger/ledger-parts";
@@ -51,6 +51,7 @@ import { ClientPdfCover } from "@/components/marketing/client-pdf-cover";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { QuoteStrip } from "@/components/marketing/testimonials";
 import { AgentProofSection } from "@/components/marketing/testimonial-card";
 import { TrackedMarketingLink } from "@/components/marketing/tracked-marketing-link";
 import { buttonVariants } from "@/components/ui/button";
@@ -242,6 +243,13 @@ export default async function ForAgentsPage() {
           }
           aside={<SampleClientPreview />}
         />
+
+        {/* Consented quotes under the hero (2026-11 ads pass, D1); nothing
+            at all until a published row exists. Suspense, as /pricing wraps
+            its quotes: the strip reads its rows asynchronously. */}
+        <Suspense fallback={null}>
+          <QuoteStrip />
+        </Suspense>
 
         <SampleClientWorkflow />
 

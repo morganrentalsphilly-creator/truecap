@@ -23,7 +23,7 @@
  */
 
 import type { Metadata } from "next";
-import { Testimonials } from "@/components/marketing/testimonials";
+import { QuoteStrip, Testimonials } from "@/components/marketing/testimonials";
 import { Suspense } from "react";
 import { Header } from "@/components/investcalc/header";
 import { BillingSuccessBanner } from "@/components/marketing/billing-success-banner";
@@ -179,6 +179,9 @@ export default function Home() {
           that the analyzer (which carried <main id="main">) lives at /analyze. */}
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
       <MarketingHero />
+      {/* Consented quotes, right under the hero (2026-11 ads pass, D1): the
+          two most recent published rows; nothing at all until one exists. */}
+      <QuoteStrip />
       {/* The analyzer itself lives at /analyze (2026-09 overhaul): the hero
           captures an address or listing link and hands off there, so this
           page ships NO calculator JS. Keep it that way — Phase 7's homepage

@@ -22,7 +22,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Fragment } from "react";
+import { Fragment, Suspense } from "react";
 import { Header } from "@/components/investcalc/header";
 // Links below the first screen prefetch on hover or keyboard focus, not on
 // scroll. The hero's pricing link keeps next/link's default; /analyze never
@@ -35,6 +35,7 @@ import { DECISION_SHOT, ProductShot } from "@/components/marketing/product-shot"
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
+import { QuoteStrip } from "@/components/marketing/testimonials";
 import { buttonVariants } from "@/components/ui/button";
 import {
   PRODUCT_EVALUATION_COMPARISON_LIMIT,
@@ -232,6 +233,13 @@ export default function ForInvestorsPage() {
             />
           }
         />
+
+        {/* Consented quotes under the hero (2026-11 ads pass, D1); nothing
+            at all until a published row exists. Suspense, as /pricing wraps
+            its quotes: the strip reads its rows asynchronously. */}
+        <Suspense fallback={null}>
+          <QuoteStrip />
+        </Suspense>
 
         {/* Strategies: ruled rows, the title, what the numbers cover, the way in. */}
         <Section aria-labelledby="strategies-heading">
