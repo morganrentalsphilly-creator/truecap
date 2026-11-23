@@ -499,8 +499,10 @@ export function Header({
             />
           ) : (
             <>
-              {/* Desktop (lg+): Sign in + Create account beside the marketing nav.
-                  IntentPrefetchLink, not a default <Link>: in the first
+              {/* Desktop (lg+): one primary action, the same one the hero and
+                  the phone header carry: "Analyze a deal free" (2026-11 ads
+                  pass, C4). Sign in and Create account are text links beside
+                  it. IntentPrefetchLink, not a default <Link>: in the first
                   screen of every page, a default link prefetched both auth
                   routes and supabase-js (about 100 KB of script) on every
                   anonymous desktop load. These prefetch on hover or keyboard
@@ -512,13 +514,19 @@ export function Header({
              asChild>
                 <IntentPrefetchLink href="/auth/login" rel="nofollow">Sign in</IntentPrefetchLink>
               </Button>
-              {/* "Create account" is a primary button at the control radius,
-                  not a pill, and carries no glow (DESIGN.md "Header"). */}
+              <Button variant="ghost"
+              className="hidden lg:inline-flex h-9 px-4 text-base font-medium text-foreground hover:bg-accent"
+             asChild>
+                <IntentPrefetchLink href="/auth/sign-up" rel="nofollow">Create account</IntentPrefetchLink>
+              </Button>
+              {/* The primary button, at the control radius, no pill and no
+                  glow (DESIGN.md "Header"). /analyze never prefetches. */}
               <Button
                 asChild
+                data-header-analyze-cta-desktop=""
                 className="hidden lg:inline-flex h-9 px-4 text-base font-semibold"
               >
-                <IntentPrefetchLink href="/auth/sign-up" rel="nofollow">Create account</IntentPrefetchLink>
+                <Link href="/analyze" prefetch={false}>Analyze a deal free</Link>
               </Button>
               {/* Phones + tablets (<lg): ONE row — the primary Analyze action
                   and a hamburger for everything else. */}
