@@ -10748,14 +10748,24 @@ export function InvestCalcPage({
                 // ring (app/globals.css).
                 data-editing-assumptions-banner="true"
                 tabIndex={-1}
-                className="rounded-lg border border-border bg-card/95 p-4 shadow-md outline-none backdrop-blur sm:sticky sm:top-2 sm:z-30"
+                // Sticks BELOW the app header, never over it (audit A7). The
+                // header is sticky at top-0, 64px tall, z-20; this panel sat
+                // at top-2 with z-30, so once scrolled it covered search, New
+                // Analysis and the account menu. 4.5rem clears the header
+                // with the page's usual 8px, and z-10 keeps the header on top
+                // whatever happens. While stuck it also drops to one compact
+                // row (data-stuck, set by StuckFlag): the explanation is
+                // hidden and the three figures run inline, about 85px in
+                // place of 185px.
+                className="group/edit rounded-lg border border-border bg-card/95 p-4 shadow-md outline-none backdrop-blur sm:sticky sm:top-[4.5rem] sm:z-10 sm:data-[stuck=true]:py-2"
               >
+                <StuckFlag offset={72} />
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <p className="font-bold text-foreground">
                       Editing this analysis
                     </p>
-                    <p className="mt-0.5 text-sm text-muted-foreground">
+                    <p className="mt-0.5 text-sm text-muted-foreground sm:group-data-[stuck=true]/edit:hidden">
                       {needsPreRunTargetChoice
                         ? "Review the visible decision criteria below. The update action will adopt those criteria before calculating an Offer Ceiling."
                         : "Change only what you need. Edits stay in the form; incomplete entries keep the last complete result clearly labeled. Your saved deal is unchanged until you press Save."}
@@ -10763,7 +10773,7 @@ export function InvestCalcPage({
                     {!isAuthenticated && anonymousDecisionClaimSeen ? (
                       <p
                         data-anonymous-decision-note=""
-                        className="mt-1.5 text-sm text-muted-foreground"
+                        className="mt-1.5 text-sm text-muted-foreground sm:group-data-[stuck=true]/edit:hidden"
                       >
                         {ANONYMOUS_DECISION_INPUT_BOUND_NOTE}
                       </p>
@@ -10793,7 +10803,7 @@ export function InvestCalcPage({
                   </div>
                 </div>
                 <div
-                  className="mt-3 border-t border-border/70 pt-3"
+                  className="mt-3 border-t border-border/70 pt-3 sm:group-data-[stuck=true]/edit:mt-1 sm:group-data-[stuck=true]/edit:flex sm:group-data-[stuck=true]/edit:flex-wrap sm:group-data-[stuck=true]/edit:items-baseline sm:group-data-[stuck=true]/edit:gap-x-4 sm:group-data-[stuck=true]/edit:border-t-0 sm:group-data-[stuck=true]/edit:pt-0"
                   data-edit-live-readout="true"
                 >
                   <p
@@ -10811,7 +10821,7 @@ export function InvestCalcPage({
                       ? "Last complete result · fix the highlighted input"
                       : "Live · unsaved"}
                   </p>
-                  <dl className="mt-2 grid grid-cols-3 gap-2 text-sm">
+                  <dl className="mt-2 grid grid-cols-3 gap-2 text-sm sm:group-data-[stuck=true]/edit:mt-0 sm:group-data-[stuck=true]/edit:flex sm:group-data-[stuck=true]/edit:gap-x-4 [&>div]:sm:group-data-[stuck=true]/edit:flex [&>div]:sm:group-data-[stuck=true]/edit:items-baseline [&>div]:sm:group-data-[stuck=true]/edit:gap-1.5">
                     <div className="min-w-0">
                       <dt className="text-xs font-medium text-muted-foreground">
                         Cash flow
@@ -10874,7 +10884,14 @@ export function InvestCalcPage({
                 // at 375px the five pills clipped mid-circle with no scroll
                 // affordance. Sticky from sm: — on phones the bottom Run bar
                 // anchors the flow anyway.
-                className="hidden sm:sticky sm:top-2 sm:z-20 sm:block"
+                // Below the app header, never over it (audit A7). While the
+                // edit panel is up it owns that sticky slot, so the rail
+                // scrolls with the form instead of stacking under it.
+                className={
+                  isEditingAssumptions
+                    ? "hidden sm:block"
+                    : "hidden sm:sticky sm:top-[4.5rem] sm:z-10 sm:block"
+                }
               />
             )}
 
