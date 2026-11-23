@@ -4,14 +4,15 @@
  * "Starting assumptions" — the input-side assumptions strip
  * (calculator redesign Phase 3, blueprint §1 item 4).
  *
- * Replaces the "Improve accuracy (optional)" toggle button as the visual
- * entry point to the advanced region: the chips state every pre-answered
- * value as a settled fact with its source, and tapping one opens the
- * EXISTING mounted-but-hidden advanced block and scrolls to the matching
- * #step-* anchor (the exact handleStepNavigate mechanics — the parent's
- * onNavigate is a thin wrap of that handler). The advanced block itself is
- * untouched: every section stays MOUNTED with live RHF registration, this
- * card only changes what invites the user in.
+ * The chips state every pre-answered value as a settled fact with its
+ * source. Tapping one opens a small popover editor for THAT chip's fields
+ * (assumption-chip-editor.tsx), bound to the same form state and validation
+ * as the full section (2026-11 audit B1). A chip used to open the whole
+ * advanced region (about 45 inputs) and scroll some 1,500px to one field.
+ * The full region now opens only from its own toggle in this card's header,
+ * "Show all assumptions" / "Hide all assumptions", or from the "Open in all
+ * assumptions" link inside a chip's editor. The advanced block itself is
+ * untouched: every section stays MOUNTED with live RHF registration.
  *
  * DATA-DERIVED-STATE INVARIANT: chip content comes exclusively from watched
  * form values + the live enrichment provenance via the pure
@@ -30,7 +31,17 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { UseFormReturn } from "react-hook-form";
-import { Check, ChevronUp } from "lucide-react";
+import { Check, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  AssumptionChipEditor,
+  isEditableChipId,
+  type EditableChipId,
+} from "@/components/investcalc/assumption-chip-editor";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
 import type { EnrichmentProvenanceInput } from "@/lib/data-confidence";
 import {
@@ -73,11 +84,13 @@ type Props = {
   /** Nested operating-expense disclosure state, so expense chips announce
    * the region they actually reveal rather than only the outer panel. */
   expenseDetailsOpen?: boolean;
-  /** Chip tap → open the advanced block + scroll to the matching anchor.
-   *  Thin wrap of investcalc-page's handleStepNavigate. */
+  /** "Open in all assumptions" (inside a chip's editor) and the chips that
+   *  have no small editor → open the advanced block + scroll to the matching
+   *  anchor. Thin wrap of investcalc-page's handleStepNavigate. */
   onNavigate: (target: AssumptionChipTarget, focusFieldId?: string) => void;
-  /** "Hide details" → the existing toggleAdvanced (records the user's
-   *  remembered preference exactly as the old button did). */
+  /** The header toggle, "Show all assumptions" / "Hide all assumptions" →
+   *  the existing toggleAdvanced (records the user's remembered preference
+   *  exactly as the old button did). */
   onHideDetails: () => void;
   /** Active "Strategy" strategy (null = default flow). */
   activeStrategyKey: string | null;
@@ -98,6 +111,30 @@ type Props = {
   /** Strip footer slot (SaveAsDefaultsChip — renders null until useful). */
   footer?: ReactNode;
 };
+
+/** The popover's accessible name: "Edit financing", "Edit property tax". */
+function chipEditorName(chipId: EditableChipId): string {
+  switch (chipId) {
+    case "financing":
+      return "financing";
+    case "taxes":
+      return "property tax";
+    case "insurance":
+      return "insurance";
+    case "vacancy":
+      return "vacancy";
+    case "maintenance":
+      return "maintenance";
+    case "management":
+      return "management";
+    case "capex":
+      return "CapEx";
+    case "hoa-unit":
+      return "HOA dues";
+    case "extras":
+      return "property extras";
+  }
+}
 
 export function AssumptionsStrip({
   form,
@@ -239,17 +276,6 @@ export function AssumptionsStrip({
   // Focus landing zone for the "Hide details" collapse (see the button).
   const headingRef = useRef<HTMLHeadingElement | null>(null);
 
-  // Every chip target that opens the #advanced-options block gets the
-  // disclosure semantics. "property" belongs here too: its #step-type panel
-  // moved INSIDE the advanced block in Phase 4, so the template + MF-extras
-  // chips expand the same region as their siblings and must announce it
-  // (A11Y-PROPERTY-CHIP-ARIA).
-  const advancedTargets: AssumptionChipTarget[] = [
-    "financing",
-    "expenses",
-    "extras",
-    "property",
-  ];
   // HOA chip, only for an address with a unit number ("#209", "Apt 2B")
   // while HOA is still $0 and its field has not been visited. HOA sits in
   // the collapsed expense panel, so a condo's first result modeled no dues
@@ -275,32 +301,23 @@ export function AssumptionsStrip({
       }
     : null;
 
-  const renderChip = (chip: StripChip) => {
-    const opensAdvanced = advancedTargets.includes(chip.target);
-    const isExpanded =
-      chip.target === "expenses"
-        ? advancedOpen && expenseDetailsOpen
-        : advancedOpen;
-    return (
-      <button
-        key={chip.id}
-        type="button"
-        onClick={() => onNavigate(chip.target, chip.focusFieldId)}
-        aria-controls={
-          opensAdvanced
-            ? chip.target === "expenses"
-              ? "advanced-options operating-expenses-details"
-              : "advanced-options"
-            : undefined
-        }
-        aria-expanded={opensAdvanced ? isExpanded : undefined}
-        className={cn(
-          // The text face with tabular figures; Geist Mono only for the
-          // source tag (audit A11, DESIGN.md "Metadata").
-          "inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-2 font-figure text-sm font-medium text-foreground transition-colors duration-[var(--duration-fast)] hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-          pulsing[chip.id] && "animate-pulse border-primary bg-primary/10",
-        )}
-      >
+  // One chip editor open at a time. Radix returns focus to the chip when the
+  // popover closes (Escape, an outside click, Done, or Enter in a field).
+  const [openChipId, setOpenChipId] = useState<string | null>(null);
+
+  const chipClassName = (chipId: string) =>
+    cn(
+      // The text face with tabular figures; Geist Mono only for the
+      // source tag (audit A11, DESIGN.md "Metadata"). Below sm the tag
+      // stacks under the label: side by side at 375px a long tag ("replace
+      // with your local number") wrapped into two centred lines (audit C2).
+      "inline-flex min-h-11 max-w-full flex-col items-start gap-1 rounded-md border border-border bg-background px-2.5 py-2 font-figure text-sm font-medium text-foreground transition-colors duration-[var(--duration-fast)] hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:flex-row sm:items-center sm:gap-1.5",
+      pulsing[chipId] && "animate-pulse border-primary bg-primary/10",
+    );
+
+  const chipBody = (chip: StripChip) => (
+    <>
+      <span className="inline-flex min-w-0 items-center gap-1.5">
         <span className="min-w-0 whitespace-normal text-left leading-snug">
           {chip.label}
         </span>
@@ -310,19 +327,115 @@ export function AssumptionsStrip({
             aria-hidden
           />
         ) : null}
-        {chip.badge ? (
-          <span
-            className={cn(
-              "rounded-sm px-1 py-0.5 font-mono text-xs font-medium leading-none",
-              chip.badge.kind === "yours" || chip.badge.kind === "default"
-                ? "bg-muted text-muted-foreground"
-                : "bg-primary/10 text-primary",
-            )}
+      </span>
+      {chip.badge ? (
+        <span
+          className={cn(
+            "rounded-sm px-1 py-0.5 text-left font-mono text-xs font-medium leading-none",
+            chip.badge.kind === "yours" || chip.badge.kind === "default"
+              ? "bg-muted text-muted-foreground"
+              : "bg-primary/10 text-primary",
+          )}
+        >
+          {chip.badge.text}
+        </span>
+      ) : null}
+    </>
+  );
+
+  const renderChip = (chip: StripChip) => {
+    // The template chip and the multi-family extras chip have no small set
+    // of fields (a template picker, a property-type panel): they keep their
+    // link into the full section and say so.
+    const editable =
+      isEditableChipId(chip.id) && !(chip.id === "extras" && chip.target !== "extras");
+    if (!editable || !isEditableChipId(chip.id)) {
+      const isExpanded =
+        chip.target === "expenses"
+          ? advancedOpen && expenseDetailsOpen
+          : advancedOpen;
+      return (
+        <button
+          key={chip.id}
+          type="button"
+          onClick={() => onNavigate(chip.target, chip.focusFieldId)}
+          aria-controls="advanced-options"
+          aria-expanded={isExpanded}
+          className={chipClassName(chip.id)}
+        >
+          {chipBody(chip)}
+        </button>
+      );
+    }
+    const chipId = chip.id;
+    return (
+      <Popover
+        key={chip.id}
+        open={openChipId === chip.id}
+        onOpenChange={(open) => setOpenChipId(open ? chip.id : null)}
+      >
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            aria-haspopup="dialog"
+            data-assumption-chip={chip.id}
+            className={chipClassName(chip.id)}
           >
-            {chip.badge.text}
-          </span>
-        ) : null}
-      </button>
+            {chipBody(chip)}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent
+          align="start"
+          role="dialog"
+          aria-label={`Edit ${chipEditorName(chipId)}`}
+          data-assumption-chip-editor={chip.id}
+          // The 10px float radius and a width that fits a phone.
+          className="w-[min(20rem,calc(100vw-2rem))] rounded-xl p-4"
+          onKeyDown={(event) => {
+            // Enter in a field means "done". The popover is portaled out of
+            // the form in the DOM but not in React, so without this the
+            // form's own Enter handler (move to the next field) would run
+            // and send focus to the address input.
+            if (
+              event.key === "Enter" &&
+              !event.metaKey &&
+              !event.ctrlKey &&
+              event.target instanceof HTMLInputElement
+            ) {
+              event.preventDefault();
+              event.stopPropagation();
+              setOpenChipId(null);
+            }
+          }}
+        >
+          <AssumptionChipEditor
+            chipId={chipId}
+            form={form}
+            showYearBuilt={
+              !(values.propertyType === "single-family" && Boolean(activeStrategy))
+            }
+          />
+          <div className="mt-3 flex items-center justify-between gap-3 border-t border-border pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                setOpenChipId(null);
+                onNavigate(chip.target, chip.focusFieldId);
+              }}
+              className="tc-link inline-flex min-h-11 items-center text-sm font-semibold"
+            >
+              Open in all assumptions
+            </button>
+            <button
+              type="button"
+              onClick={() => setOpenChipId(null)}
+              className="inline-flex min-h-11 items-center rounded-md border border-border px-3 text-sm font-semibold text-foreground transition-colors duration-[var(--duration-fast)] hover:bg-muted focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            >
+              Done
+            </button>
+          </div>
+        </PopoverContent>
+      </Popover>
     );
   };
 
@@ -342,32 +455,34 @@ export function AssumptionsStrip({
           >
             Review assumptions
           </h2>
-          <p className="text-2xs leading-snug text-muted-foreground">
+          <p className="text-sm leading-snug text-muted-foreground">
             These values drive the preview. Every source is labeled, and every
             number is editable.
           </p>
         </div>
-        {advancedOpen ? (
-          <button
-            type="button"
-            onClick={() => {
-              // The button renders only while advancedOpen, so activating it
-              // unmounts the focused element and strands keyboard/SR focus
-              // on <body> at the top of a very long page. Hand focus to the
-              // strip heading BEFORE the collapse commits — the same fix
-              // class listing-link-input.tsx documents
-              // (A11Y-HIDE-DETAILS-FOCUS).
-              headingRef.current?.focus();
-              onHideDetails();
-            }}
-            aria-expanded={advancedOpen}
-            aria-controls="advanced-options"
-            className="inline-flex min-h-11 shrink-0 items-center gap-1 px-2 text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          >
-            Hide details
+        {/* The full region's own toggle (audit B1, B8). Always present, so
+            the label alone says which way it goes; it used to exist only
+            while open ("Hide details"), with the chips as the way in. */}
+        <button
+          type="button"
+          onClick={() => {
+            // Collapsing can strand keyboard/SR focus far down a very long
+            // page that has just become short. Keep it on this card's
+            // heading (A11Y-HIDE-DETAILS-FOCUS).
+            if (advancedOpen) headingRef.current?.focus();
+            onHideDetails();
+          }}
+          aria-expanded={advancedOpen}
+          aria-controls="advanced-options"
+          className="inline-flex min-h-11 shrink-0 items-center gap-1 px-2 text-sm font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        >
+          {advancedOpen ? "Hide all assumptions" : "Show all assumptions"}
+          {advancedOpen ? (
             <ChevronUp className="size-3.5" aria-hidden />
-          </button>
-        ) : null}
+          ) : (
+            <ChevronDown className="size-3.5" aria-hidden />
+          )}
+        </button>
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
