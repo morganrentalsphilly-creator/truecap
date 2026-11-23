@@ -309,8 +309,8 @@ interface AnalysisDashboardProps {
   /** Presentation only: the result on screen is this browser's no-signup
    *  decision, so the save prompt may call it "your free full decision". */
   anonymousFreeDecision?: boolean;
-  /** Rendered directly after the anonymous save prompt (the memo email
-   *  capture), so both asks sit under the decision card. */
+  /** The memo email form, when this visitor may request it. It renders
+   *  inside the anonymous save prompt, as that card's second path. */
   afterSavePromptSlot?: ReactNode;
   canUseProjections?: boolean;
   canUseTaxStrategy?: boolean;
@@ -1568,8 +1568,8 @@ export function AnalysisDashboard({
           isAuthenticated={isAuthenticated}
           isFreeDecision={anonymousFreeDecision}
           onPrepareSaveIntent={prepareAuthHandoff}
+          memoSlot={afterSavePromptSlot}
         />
-        {afterSavePromptSlot}
       </div>
     ) : null;
   const saveCaptureUnderDecision = Boolean(

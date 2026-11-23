@@ -48,9 +48,21 @@ type Props = {
   disabled?: boolean;
   /** Runs synchronously before leaving for OAuth (e.g. persist save intent). */
   onBeforeStart?: () => void;
+  /**
+   * "outline" (the default, the auth pages): the 48px secondary control.
+   * "primary": the one filled action of a card that leads with Google, such
+   * as the save prompt under a result. The "G" keeps its standard colors on a
+   * white tile, as Google's mark requires on a colored button.
+   */
+  variant?: "outline" | "primary";
 };
 
-export function GoogleAuthButton({ label = "Continue with Google", disabled = false, onBeforeStart }: Props) {
+export function GoogleAuthButton({
+  label = "Continue with Google",
+  disabled = false,
+  onBeforeStart,
+  variant = "outline",
+}: Props) {
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [isPending, setIsPending] = useState(false);
@@ -132,7 +144,12 @@ export function GoogleAuthButton({ label = "Continue with Google", disabled = fa
       onClick={handleClick}
       disabled={isDisabled}
       aria-label={label}
-      className="inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-md border border-input px-5 py-2 text-base font-semibold text-foreground transition-colors duration-150 hover:bg-band disabled:cursor-not-allowed disabled:opacity-60"
+      data-variant={variant}
+      className={
+        variant === "primary"
+          ? "inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-md bg-primary px-5 py-2 text-base font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-deep disabled:cursor-not-allowed disabled:opacity-60"
+          : "inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-md border border-input px-5 py-2 text-base font-semibold text-foreground transition-colors duration-150 hover:bg-band disabled:cursor-not-allowed disabled:opacity-60"
+      }
     >
       {isPending ? (
         <>
@@ -147,7 +164,13 @@ export function GoogleAuthButton({ label = "Continue with Google", disabled = fa
           <svg
             viewBox="0 0 18 18"
             xmlns="http://www.w3.org/2000/svg"
-            className="size-[18px]"
+            // On the filled button the mark sits on a white tile (4px, the
+            // tag radius), so its four colors never touch the cobalt.
+            className={
+              variant === "primary"
+                ? "box-content size-[18px] rounded-sm bg-card p-1"
+                : "size-[18px]"
+            }
             aria-hidden="true"
           >
             <path

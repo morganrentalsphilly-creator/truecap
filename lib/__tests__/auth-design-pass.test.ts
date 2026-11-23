@@ -113,9 +113,17 @@ describe("the auth screens are on the ledger tokens", () => {
 
   it("keeps the Google button a 48px secondary control", () => {
     const google = read(GOOGLE);
+    // The class string is one arm of a variant since the save card under a
+    // result got a filled Google button; on the auth screens the default is
+    // still this secondary control, and both arms are 48px.
     expect(google).toContain(
-      'className="inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-md border border-input px-5 py-2 text-base font-semibold text-foreground transition-colors duration-150 hover:bg-band disabled:cursor-not-allowed disabled:opacity-60"',
+      ': "inline-flex min-h-12 w-full items-center justify-center gap-3 rounded-md border border-input px-5 py-2 text-base font-semibold text-foreground transition-colors duration-150 hover:bg-band disabled:cursor-not-allowed disabled:opacity-60"',
     );
+    expect(google).toContain('variant = "outline",');
+    expect(google.match(/"inline-flex min-h-12 w-full /g)).toHaveLength(2);
+    for (const form of ["components/auth/sign-up-form.tsx", "components/auth/login-form.tsx"]) {
+      expect(read(form), form).not.toContain('variant="primary"');
+    }
   });
 
   it("puts no eyebrow above the trial summary's heading", () => {

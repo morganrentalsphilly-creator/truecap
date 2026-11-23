@@ -4,9 +4,12 @@
  * "Email me this decision memo" — one field, inline under the anonymous
  * visitor's free decision (docs/funnel-leaks-plan.md Phase A).
  *
- * An inline card, not an overlay: it sits under the decision card beside the
- * save prompt (2026-11 ads pass, A1; the parent sets the gap), never covers
- * the result, and the result is fully usable whether or not the send succeeds. Turnstile
+ * Inline, never an overlay: it is the second path of the save card under the
+ * decision card (components/marketing/signup-prompt-card.tsx sets the card
+ * and the rule above it; this component draws no chrome of its own), it never
+ * covers the result, and the result is fully usable whether or not the send
+ * succeeds. Its button is the card's secondary one and is never greyed out
+ * waiting for input: pressing it early says what is missing. Turnstile
  * loads only once the visitor focuses the field, so the analyzer's first
  * paint never waits on Cloudflare.
  *
@@ -14,7 +17,7 @@
  * MEMO_CONSENT_TEXT_VERSION in lib/memo-lead.ts.
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { captureMemoLeadAction } from "@/app/actions/memo-lead-capture";
 import {
@@ -22,6 +25,7 @@ import {
   MEMO_CAPTCHA_SITE_KEY,
   memoCaptchaEnabled,
 } from "@/components/auth/captcha-widget";
+import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/analytics";
 import { track } from "@/lib/analytics/site-events";
 import type { InvestmentFormValues } from "@/lib/investcalc-schema";
@@ -53,6 +57,11 @@ function readAttribution() {
   }
 }
 
+/** Said when Send is pressed before the invisible human check has answered;
+ *  the sign-up form's own sentence for the same wait. */
+const HUMAN_CHECK_PENDING =
+  "We're still checking that you're human. It takes a few seconds. Try again.";
+
 export function MemoEmailCapture({ getValues, maoTarget }: Props) {
   const [email, setEmail] = useState("");
   /** Honeypot — hidden from real users; the server silently drops a filled one. */
@@ -66,10 +75,24 @@ export function MemoEmailCapture({ getValues, maoTarget }: Props) {
    *  widget is remounted to issue a fresh one for the retry. */
   const [captchaNonce, setCaptchaNonce] = useState(0);
 
+  const waitingOnCaptcha =
+    memoCaptchaEnabled && captchaWanted && !captchaToken && !captchaUnavailable;
+  // The human check answered: the "still checking" line has nothing to say.
+  useEffect(() => {
+    if (captchaToken) setErrorMsg((current) => (current === HUMAN_CHECK_PENDING ? null : current));
+  }, [captchaToken]);
+
   const onSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
       if (status === "submitting") return;
+      // The button is not disabled while the invisible human check runs, so a
+      // press that beats its token is answered here and nothing is sent (the
+      // request would only be refused by the server's own check).
+      if (waitingOnCaptcha) {
+        setErrorMsg(HUMAN_CHECK_PENDING);
+        return;
+      }
       setStatus("submitting");
       setErrorMsg(null);
       track("memo_requested", { source: "analyze_result" });
@@ -94,24 +117,18 @@ export function MemoEmailCapture({ getValues, maoTarget }: Props) {
           "We couldn't email your memo right now. Your result is still here — please try again in a minute.",
       );
     },
-    [captchaToken, email, getValues, maoTarget, status, website],
+    [captchaToken, email, getValues, maoTarget, status, waitingOnCaptcha, website],
   );
 
-  const waitingOnCaptcha =
-    memoCaptchaEnabled && captchaWanted && !captchaToken && !captchaUnavailable;
-
   return (
-    <section
-      aria-labelledby="memo-email-capture-title"
-      className="rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6"
-    >
+    <section aria-labelledby="memo-email-capture-title" data-memo-capture="">
       {status === "success" ? (
         <div role="status">
-          <div className="flex items-center gap-2 text-[var(--metric-positive,#16a34a)]">
-            <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
-            <h3 id="memo-email-capture-title" className="text-base font-extrabold">
+          <div className="flex items-center gap-2 text-foreground">
+            <CheckCircle2 className="size-5" aria-hidden="true" />
+            <h4 id="memo-email-capture-title" className="text-base font-semibold">
               Memo sent
-            </h3>
+            </h4>
           </div>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             Check your inbox in a minute. The email links back to this decision.
@@ -119,13 +136,13 @@ export function MemoEmailCapture({ getValues, maoTarget }: Props) {
         </div>
       ) : (
         <>
-          <h3
+          <h4
             id="memo-email-capture-title"
-            className="text-base font-extrabold text-foreground"
+            className="text-base font-semibold text-foreground"
           >
             Email me this decision memo
-          </h3>
-          <form onSubmit={onSubmit} className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start">
+          </h4>
+          <form onSubmit={onSubmit} className="mt-2 flex max-w-2xl flex-col gap-2 sm:flex-row sm:items-start">
             <input
               type="text"
               name="website"
@@ -153,16 +170,20 @@ export function MemoEmailCapture({ getValues, maoTarget }: Props) {
                 disabled={status === "submitting"}
                 aria-invalid={status === "error" || undefined}
                 aria-describedby={errorMsg ? "memo-email-error" : "memo-email-hint"}
-                className="min-h-11 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="min-h-11 w-full rounded-md border border-input bg-field px-3 py-2 text-base outline-none transition-colors duration-150 focus:border-primary focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:text-sm"
               />
             </div>
-            <button
+            {/* The card's secondary action (Google above is the filled one).
+                Disabled only while a request is in flight: an empty field is
+                answered by the browser's own "fill out this field". */}
+            <Button
               type="submit"
-              disabled={status === "submitting" || email.trim().length === 0 || waitingOnCaptcha}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-60"
+              variant="outline"
+              disabled={status === "submitting"}
+              className="h-11 shrink-0 rounded-md px-4 text-sm font-semibold"
             >
               {status === "submitting" ? "Sending…" : "Send the memo"}
-            </button>
+            </Button>
           </form>
           {captchaWanted ? (
             <div className="mt-2">
