@@ -98,3 +98,22 @@ describe("Offer Ceiling run gate", () => {
     ).toBe(false);
   });
 });
+
+// 2026-11 ads pass (F1): on the empty public analyzer the button reads
+// "Analyze deal & calculate ceiling", and it sat above the sample button's
+// caption ("See a full sample report. No address needed."). The caption under
+// the analyze label now says what the analysis costs; the sample caption
+// stays for a button that carries the sample label.
+describe("the empty analyzer's run caption", () => {
+  it("is the free-decision line under the analyze label, and the sample line only under a sample label", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const page = readFileSync(
+      join(process.cwd(), "components/investcalc/investcalc-page.tsx"),
+      "utf8",
+    ).replace(/\s+/g, " ");
+    expect(page).toContain(
+      '!isAuthenticated && primaryActionLabel !== analyzerCta ? anonymousDecisionUsed ? "Create a free account for the exact Offer Ceiling." : "Your first full decision is free. No account." : "See a full sample report. No address needed."',
+    );
+  });
+});

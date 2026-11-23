@@ -11367,9 +11367,17 @@ export function InvestCalcPage({
                         </Button>
                         <p className="mt-2 text-center text-sm leading-snug text-muted-foreground">
                           {primaryCtaRunsSample
-                            ? // The empty form's button loads the sample, so its
-                              // caption describes the sample (audit A9).
-                              "See a full sample report. No address needed."
+                            ? // The empty form. The sample caption belongs to
+                              // a button that says "sample" (2026-11 ads
+                              // pass, F1). On the public analyzer the button
+                              // reads "Analyze deal & calculate ceiling", so
+                              // its caption says what that analysis costs:
+                              // nothing the first time, an account after.
+                              !isAuthenticated && primaryActionLabel !== analyzerCta
+                              ? anonymousDecisionUsed
+                                ? "Create a free account for the exact Offer Ceiling."
+                                : "Your first full decision is free. No account."
+                              : "See a full sample report. No address needed."
                             : needsAddressForFullAnalysis
                               ? // The button asks for the address, so the
                                 // caption does not promise a run yet.
