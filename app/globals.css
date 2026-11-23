@@ -913,6 +913,30 @@ textarea,
   animation: tc-shimmer 1.6s ease-in-out infinite;
 }
 
+/* Toasts (audit A6). From sm the toast viewport is the bottom-LEFT corner:
+   the bottom-right corner is where the analyzer's sticky run button lives
+   in the desktop cockpit, and a five-second toast sat on top of it. Two
+   adjustments keep the new lane clear as well. Inside the dashboard shell
+   the left 16rem from lg is the sidebar, so the lane starts after it; and
+   between sm and lg the analyzer's run bar is fixed across the whole
+   bottom edge, so the toast rides above it while that bar is up.
+   Unlayered on purpose: the viewport sets left/bottom with utilities, and a
+   rule inside @layer base would lose to them. */
+@media (min-width: 1024px) {
+  html:has(.dashboard-shell) [data-toast-viewport] {
+    left: calc(16rem + 1.25rem);
+  }
+}
+@media (min-width: 640px) and (max-width: 1023.9px) {
+  html[data-calc-bar="1"] [data-toast-viewport] {
+    bottom: 5.5rem;
+  }
+  /* The run bar stacked on the open cookie banner (about 148px together). */
+  html[data-calc-bar="1"]:has([data-above-cookie-banner]) [data-toast-viewport] {
+    bottom: 10.5rem;
+  }
+}
+
 /* A completed analysis becomes a focused product workspace. The calculator
    owns the body flag; server-rendered marketing remains in the document for
    the normal landing state but cannot trail thousands of pixels below results. */

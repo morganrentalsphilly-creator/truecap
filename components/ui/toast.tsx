@@ -13,8 +13,12 @@ const ToastProvider = ToastPrimitives.Provider
  * Where toasts appear. On phones the viewport starts at top-14 (56px), so a
  * toast (16px further down, the viewport's own padding) sits under the
  * sticky header instead of on top of the logo, "Analyze" and the menu
- * button. From sm it is the bottom-right corner; while the cookie banner is
- * up, components/ui/toaster.tsx lifts it clear of the banner's buttons.
+ * button. From sm it is the bottom-LEFT corner (audit A6): the bottom-right
+ * corner belongs to the analyzer's sticky run button, which a toast covered
+ * for its five seconds. app/globals.css moves the lane past the dashboard
+ * sidebar and above the tablet run bar ([data-toast-viewport]); while the
+ * cookie banner is up, components/ui/toaster.tsx lifts it clear of the
+ * banner's buttons.
  */
 const ToastViewport = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Viewport>,
@@ -22,8 +26,9 @@ const ToastViewport = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Viewport
     ref={ref}
+    data-toast-viewport=""
     className={cn(
-      'fixed top-14 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-5 sm:right-5 sm:top-auto sm:flex-col md:max-w-[390px]',
+      'fixed top-14 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-5 sm:left-5 sm:top-auto sm:max-w-[calc(100vw-2.5rem)] sm:flex-col md:max-w-[390px]',
       className,
     )}
     {...props}
@@ -42,7 +47,7 @@ ToastViewport.displayName = ToastPrimitives.Viewport.displayName
  * inside the overflow-hidden box instead of being clipped at the bottom.
  */
 const toastVariants = cva(
-  'group pointer-events-auto relative flex min-h-16 w-full items-start justify-between gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 pr-14 text-foreground shadow-md transition-transform data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full',
+  'group pointer-events-auto relative flex min-h-16 w-full items-start justify-between gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 pr-14 text-foreground shadow-md transition-transform data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=closed]:sm:slide-out-to-left-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full',
   {
     variants: {
       variant: {
