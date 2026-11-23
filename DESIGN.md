@@ -379,8 +379,10 @@ and takes the float shadow; reduced motion keeps it still.
   on soft lines; a caption row is Geist Mono. The 2px graphite rule survives
   in one place: under a key figure's label row in a result card.
 - **Header:** the sheet at 90% with a blur, one bottom line, no shadow;
-  Analyze · For agents · For investors · Pricing · Learn; "Create account" is
-  a primary button at the control radius. It condenses on scroll (Phase 3).
+  Analyze · For agents · For investors · Pricing · Learn; "Analyze a deal
+  free" is the one primary button at the control radius, with "Sign in" and
+  "Create account" as text links (2026-11-23; it was "Create account"). It
+  condenses on scroll (Phase 3).
 - **Footer:** the sheet, lines between column groups, sentence-case heads,
   one Disclaimer with unchanged text.
 - **Sticky chrome never hides focus:** scroll padding clears the header and
@@ -790,6 +792,36 @@ change) sit above it.
   cents shows as the annual charge ("$590/yr"); the stage list follows the
   toggle; Sentry's browser SDK starts after the first input. The record is
   `docs/overhaul-2026-10/trust-pass/README.md`.
+- 2026-11-23, ads-readiness pass (founder brief, before paid traffic). These
+  replace earlier lines in this file where they differ:
+  - **Positioning.** The homepage leads with the investor: the H1 is "Know
+    your max offer on any rental.", the three steps are first person, the FAQ
+    is the investor set and the close is the /for-investors close. Agents get
+    one cue above the hero form ("Working with investor clients? For
+    agents"), one compact band, and /for-agents, which now holds "Make it
+    yours." The hero carries no listing-paste fine print.
+  - **Header.** The one primary button is "Analyze a deal free" at every
+    width; "Sign in" and "Create account" are text links on desktop.
+  - **The result, logged out.** The save prompt and the memo email sit
+    directly under the decision card, above the Deal score (this replaces
+    "the sign-up prompt sits below the numbers"). The card's primary action is
+    "Save this deal free" and "Tune targets" is secondary; signed-in users keep
+    "Tune targets" primary. Phones get a sticky "Save this deal free" bar that
+    stands down while a Save is on screen and stacks on the cookie banner.
+    Back, Forward and reload on `?view=result` reopen the stored result.
+  - **Sign-up.** Headline, one line, the Google button, the email form, fine
+    print; the trial's terms in a "What the trial includes" disclosure; one
+    password field with the policy as a live checklist; the submit button is
+    never disabled for a missing field or token; Turnstile is
+    `interaction-only`.
+  - **Pricing.** One unit: on annual every paid price is the monthly
+    equivalent to the cent with the annual total beside it ("$49.17/mo,
+    billed annually ($590)"; this replaces the "$590/yr" rule above). The Pro
+    trial has one name, "Start free trial, no card". /pricing quotes no
+    competitor prices.
+  - **Proof.** `QuoteStrip` under the hero of /, /for-investors, /for-agents
+    and under the sign-up form: published, consented quotes only, and
+    nothing at all when there are none.
 
 ## Do and don't
 

@@ -15,10 +15,12 @@ deal meets a Buy Box (the client's or the investor's targets), the Offer
 Ceiling (the highest price that still meets them), cash flow, cap rate,
 cash-on-cash, DSCR, a Deal score and 10-year projections, plus a
 shareable read-only link. An agent can keep a roster of clients, assign
-Buy Boxes to them (capped per account by `MAX_BUY_BOXES` in
-`app/actions/user-buy-boxes.ts`) and send a co-branded report. The homepage
-speaks to the agent first; `PRODUCT.md` and `docs/voice.md` carry the
-approved hero.
+Buy Boxes to them (capped per account in `lib/commercial-limits.ts`: 12, or
+100 with Agent Pro) and send a co-branded report. The homepage speaks to the
+investor first since the 2026-11-23 ads pass (the H1 is "Know your max offer
+on any rental."; agents get one cue above the hero form, one band and
+`/for-agents`); `DESIGN.md`'s decisions log has the entry. `PRODUCT.md` and
+`docs/voice.md` predate it and still describe the agent-first hero.
 
 - **Audience**: real estate agents who work with investor clients (primary)
   and solo / small-portfolio buy-and-hold investors and house hackers
