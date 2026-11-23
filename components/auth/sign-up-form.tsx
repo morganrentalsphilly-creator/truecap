@@ -92,6 +92,15 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
   );
   const [showPassword, setShowPassword] = useState(false);
   const [hasPendingDeal, setHasPendingDeal] = useState(false);
+  // True once React has taken over the form. Until then the button is a plain
+  // button, so a click in the first moments of a slow load cannot submit the
+  // form natively (the browser would put the fields in the address bar). The
+  // button used to be disabled until the human check answered, which hid
+  // this; it is never greyed out now (B4), so the guard is explicit.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
   // Inline, announced failure state (2026-09 audit: a rejected sign-up used
   // to be a single toast that TOAST_LIMIT could drop, with the fields never
   // marked invalid).
@@ -357,6 +366,10 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
+          // Never GET: if anything ever submits this form without React, the
+          // fields must not land in a URL.
+          method="post"
+          data-hydrated={hydrated ? "" : undefined}
           className="space-y-5"
           noValidate
         >
@@ -521,7 +534,7 @@ export function SignUpForm({ agentProConfigured = false }: SignUpFormProps) {
               shows what is missing, next to the field or just above. Only an
               in-flight request disables it. */}
           <Button
-            type="submit"
+            type={hydrated ? "submit" : "button"}
             size="cta"
             className="w-full"
             disabled={isSubmitting}

@@ -114,6 +114,7 @@ describe("FormControl describes a field by its error (P2-73)", () => {
     const inputs = login.match(/<Input\b[^>]*>/g) ?? [];
     expect(inputs).toHaveLength(2);
     for (const tag of inputs) expect(tag).toContain('aria-required="true"');
-    expect(login).toMatch(/<form onSubmit=\{form\.handleSubmit\(onSubmit\)\}[^>]*\bnoValidate>/);
+    // (The tag spans lines since it gained method="post"; still noValidate.)
+    expect(login).toMatch(/<form\s+onSubmit=\{form\.handleSubmit\(onSubmit\)\}[^>]*\bnoValidate\s*>/);
   });
 });

@@ -92,7 +92,23 @@ describe("the auth screens are on the ledger tokens", () => {
 
   it.each(FORMS)("%s submits with the 48px primitive button, no glow", (file) => {
     const source = read(file);
-    expect(source.match(/type="submit"\s+size="cta"\s+className="w-full"/g)).toHaveLength(1);
+    // Sign-up and sign-in become a submit once hydrated (the button is never
+    // greyed out waiting for the human check, so the type is what keeps a
+    // click before hydration from submitting the form natively).
+    expect(
+      source.match(/type=(?:"submit"|\{hydrated \? "submit" : "button"\})\s+size="cta"\s+className="w-full"/g),
+    ).toHaveLength(1);
+  });
+
+  it("sign-up and sign-in cannot submit natively before React takes over", () => {
+    for (const file of ["components/auth/sign-up-form.tsx", "components/auth/login-form.tsx"]) {
+      const source = read(file);
+      expect(source, file).toContain('type={hydrated ? "submit" : "button"}');
+      // And if anything ever does submit the form without React, never as a GET.
+      expect(source, file).toMatch(/onSubmit=\{form\.handleSubmit\(onSubmit\)\}[\s\S]{0,220}method="post"/);
+      // The button is disabled only while a request is in flight.
+      expect(source.replace(/\s+/g, " "), file).toMatch(/size="cta" className="w-full" disabled=\{isSubmitting\}/);
+    }
   });
 
   it("keeps the Google button a 48px secondary control", () => {

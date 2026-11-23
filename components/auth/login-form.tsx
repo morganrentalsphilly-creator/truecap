@@ -59,6 +59,14 @@ export function LoginForm() {
   useEffect(() => {
     if (captchaToken) setHumanCheckMessage(null);
   }, [captchaToken]);
+  // True once React has taken over the form. Until then the button is a plain
+  // button: a click during a slow load must not submit the form natively
+  // (the browser would put the email and password in the address bar). The
+  // disabled-until-token state used to prevent that by accident.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -220,7 +228,14 @@ export function LoginForm() {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          // Never GET: the fields must not land in a URL, whatever submits it.
+          method="post"
+          data-hydrated={hydrated ? "" : undefined}
+          className="space-y-5"
+          noValidate
+        >
         <FormField
           control={form.control}
           name="email"
@@ -346,7 +361,7 @@ export function LoginForm() {
         ) : null}
 
         <Button
-          type="submit"
+          type={hydrated ? "submit" : "button"}
           size="cta"
           className="w-full"
           disabled={isSubmitting}
