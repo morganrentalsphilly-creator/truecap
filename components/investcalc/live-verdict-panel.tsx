@@ -14,7 +14,8 @@ import { formatDscr } from "@/lib/financial-presentation";
 import { runTargetsLine } from "@/lib/limiting-factor";
 import { useCookieBannerOpen } from "@/lib/use-cookie-banner";
 import { GlossaryTip } from "./glossary-tip";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { buildSampleDealLedger, formatLedgerDollars } from "@/lib/sample-deal-ledger";
 import { AnimatedNumber } from "@/components/motion/animated-number";
 
 /** The lightweight pre-run verdict snapshot computed by the form watcher. */
@@ -63,7 +64,57 @@ type Props = {
   /** The targets the full run will test, in the run's words ("break-even
    * cash flow · DSCR ≥ 1.25"), so the preview names them (audit A15). */
   runTargets?: string | null;
+  /**
+   * Show the sample deal's result, in miniature, in the empty state (desktop
+   * only, like the empty state itself). For visitors without an account: the
+   * right column of an ad click's first screen was an empty dashed box, and
+   * this is what the box is waiting to become. Every figure is the engine's
+   * own sample-deal output (lib/sample-deal-ledger.ts), labeled a sample.
+   */
+  showSampleExample?: boolean;
 };
+
+/**
+ * The sample deal's result as the empty state's example. Three lines, no
+ * more: the Run button sits under this box in the sticky column, and it has
+ * to stay clear of the cookie banner in a 1095x760 window.
+ */
+function SampleExample() {
+  const ledger = useMemo(() => buildSampleDealLedger(), []);
+  if (!ledger) return null;
+  const rows: { label: string; value: string }[] = [
+    { label: "Asking", value: formatLedgerDollars(ledger.askingPrice) },
+    {
+      label: "Cash flow after reserves",
+      value: `${formatLedgerDollars(ledger.cashFlowMonthly.asking)}/mo`,
+    },
+  ];
+  return (
+    <div data-live-verdict-sample="" className="mt-4 border-t border-border pt-3">
+      <p className="flex justify-between gap-3 font-mono text-xs text-muted-foreground">
+        <span>{ledger.title}</span>
+        <span>Sample deal</span>
+      </p>
+      <div className="mt-2 flex items-baseline justify-between gap-3 border-b-2 border-foreground pb-1.5">
+        <span className="text-sm font-semibold text-foreground">Offer Ceiling</span>
+        <span className="highlight-stroke font-display font-figure text-2xl leading-none text-foreground">
+          {formatLedgerDollars(ledger.offerCeiling)}
+        </span>
+      </div>
+      <dl>
+        {rows.map((row) => (
+          <div
+            key={row.label}
+            className="flex items-baseline justify-between gap-3 border-b border-rule-soft py-1.5 text-sm last:border-b-0 last:pb-0"
+          >
+            <dt className="text-muted-foreground">{row.label}</dt>
+            <dd className="font-figure font-medium text-foreground">{row.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
 
 function DesktopAction({ children }: { children: ReactNode }) {
   const [submitInView, setSubmitInView] = useState(false);
@@ -132,6 +183,7 @@ export function LiveVerdictPanel({
   proOutputsIncluded = true,
   hasInvalidInput = false,
   runTargets,
+  showSampleExample = false,
 }: Props) {
   return (
     <>
@@ -158,9 +210,13 @@ export function LiveVerdictPanel({
         <aside
           data-live-verdict-empty=""
           aria-label="Live screening preview guidance"
-          className="hidden min-h-56 items-center rounded-lg border border-dashed border-border bg-card/60 p-6 lg:flex"
+          className={cn(
+            "hidden min-h-56 items-center rounded-lg border border-dashed border-border bg-card/60 lg:flex",
+            // The example fills the box, so it takes the tighter padding.
+            showSampleExample ? "p-5" : "p-6",
+          )}
         >
-          <div className="max-w-sm">
+          <div className={showSampleExample ? "w-full" : "max-w-sm"}>
             <p className="inline-flex items-center gap-2 font-mono text-xs text-muted-foreground">
               <span
                 aria-hidden="true"
@@ -182,6 +238,7 @@ export function LiveVerdictPanel({
                 </>
               )}
             </p>
+            {showSampleExample ? <SampleExample /> : null}
           </div>
         </aside>
       ) : null}

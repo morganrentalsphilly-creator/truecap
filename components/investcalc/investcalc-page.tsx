@@ -11351,6 +11351,9 @@ export function InvestCalcPage({
                         form.formState.errors.monthlyRent,
                     )}
                     runTargets={visibleDecisionTarget ? decisionTargetLabel : null}
+                    // Visitors without an account see what the empty box
+                    // becomes: the sample deal's result, in miniature.
+                    showSampleExample={!isAuthenticated}
                     desktopAction={
                       <div>
                         <Button

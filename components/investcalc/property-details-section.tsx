@@ -146,7 +146,35 @@ export function PropertyDetailsSection({
         onPlaceSelected={onAddressSelected}
       />
       <FieldError id="address-error" message={errors.address?.message} />
-      {showAutofill && onAutofillFromAddress ? (
+      {showAutofill && onAutofillFromAddress && autofillRequiresAccount ? (
+        // A visitor without an account cannot run the lookup, so it is one
+        // quiet line under the address, not the second control on the page
+        // (2026-11 polish): a bordered button that answers "free account
+        // required" sat between the address and the price for every ad
+        // click. Same action, same words, a link's weight.
+        <p
+          id="property-lookup-help"
+          className="mt-1 flex flex-wrap items-center gap-x-2 text-sm leading-snug text-muted-foreground"
+        >
+          <button
+            type="button"
+            onClick={onAutofillFromAddress}
+            disabled={isAutofilling || autofillPausedUntil != null}
+            className="tc-link inline-flex min-h-11 items-center font-medium disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isAutofilling
+              ? "Looking up property details…"
+              : "Look up property details"}
+          </button>
+          <span>
+            {autofillPausedUntil != null
+              ? autofillPausedUntil
+                ? `Autofill is back ${autofillPausedUntil}.`
+                : "Autofill is paused for now."
+              : "Optional lookup · Free account required."}
+          </span>
+        </p>
+      ) : showAutofill && onAutofillFromAddress ? (
         <div className="mt-2">
           <Button
             type="button"
@@ -185,9 +213,7 @@ export function PropertyDetailsSection({
               id="property-lookup-help"
               className="mt-1.5 max-w-prose text-sm leading-snug text-muted-foreground"
             >
-              {autofillRequiresAccount
-                ? "Optional lookup · Free account required."
-                : "Optional lookup of property facts and estimates."}{" "}
+              {"Optional lookup of property facts and estimates."}{" "}
               Review imported estimates before applying them. Your edits stay protected.
             </p>
           )}
