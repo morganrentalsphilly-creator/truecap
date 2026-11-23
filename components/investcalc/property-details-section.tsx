@@ -126,7 +126,7 @@ export function PropertyDetailsSection({
           covers most, not all addresses — rent-2) so an unmatched address
           never reads as a broken promise. */}
       {!bare ? (
-        <p className="mb-1.5 text-2xs leading-snug text-muted-foreground">
+        <p className="mb-1.5 text-sm leading-snug text-muted-foreground">
           <span className="font-semibold text-foreground">Fastest start</span>
           {
             " - type an address and we fill a national rate benchmark plus (where HUD data covers it) an area-rent benchmark. Enter the property tax from a local bill or reviewed rate. Or just enter price & rent to see a provisional screening result. Everything stays editable."
@@ -173,7 +173,7 @@ export function PropertyDetailsSection({
             <p
               id="property-lookup-help"
               data-autofill-paused=""
-              className="mt-1.5 max-w-prose text-2xs leading-snug text-muted-foreground"
+              className="mt-1.5 max-w-prose text-sm leading-snug text-muted-foreground"
             >
               {autofillPausedUntil
                 ? `Autofill is back ${autofillPausedUntil}.`
@@ -183,7 +183,7 @@ export function PropertyDetailsSection({
           ) : (
             <p
               id="property-lookup-help"
-              className="mt-1.5 max-w-prose text-2xs leading-snug text-muted-foreground"
+              className="mt-1.5 max-w-prose text-sm leading-snug text-muted-foreground"
             >
               {autofillRequiresAccount
                 ? "Optional lookup · Free account required."
@@ -263,7 +263,7 @@ export function PropertyDetailsSection({
         {priceSourceLabel ? (
           <p
             id="purchase-price-source"
-            className="mt-1.5 text-xs font-medium text-muted-foreground"
+            className="mt-1.5 text-sm font-medium text-muted-foreground"
           >
             Source: {priceSourceLabel}. Review before relying on it.
           </p>
@@ -363,7 +363,7 @@ export function YearBuiltField({
             "border-destructive focus-visible:ring-destructive",
         )}
       />
-      <p className="mt-1 text-2xs text-muted-foreground">
+      <p className="mt-1 text-sm text-muted-foreground">
         Used in the Deal score age-risk check. If left blank, a
         conservative uncertainty modifier applies. It does not auto-adjust your
         expense assumptions.

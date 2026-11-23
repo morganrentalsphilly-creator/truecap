@@ -35,8 +35,10 @@ describe("inline error text uses the text-safe red (P1-72, P1-46)", () => {
 
   it("FieldError, the analyzer's one field-error primitive, uses it", () => {
     const helpers = read("components/investcalc/form-field-helpers.tsx");
+    // Re-anchored (2026-11 audit B7): error text is 14px; the colour, the
+    // point of this guard, is unchanged.
     expect(helpers).toContain(
-      'role="alert" className="mt-1 text-xs text-destructive-text"',
+      'role="alert" className="mt-1 text-sm text-destructive-text"',
     );
     expect(helpers).not.toMatch(bareDestructive);
   });

@@ -431,7 +431,7 @@ export function OperatingExpensesSection({
             </span>
             {/* Full muted ink: at 80% opacity this 12px hint measured 4.48:1
                 on the card, under the 4.5:1 minimum. */}
-            <span className="text-xs text-muted-foreground self-center">
+            <span className="text-sm text-muted-foreground self-center">
               (all % of rent)
             </span>
           </div>
@@ -1380,7 +1380,7 @@ export function OperatingExpensesSection({
                     <div className="mb-2 flex min-h-11 min-w-0 items-start gap-1.5">
                       <Label
                         htmlFor="include-interest-deduction"
-                        className="min-w-0 flex-1 cursor-pointer py-3 text-xs font-medium text-muted-foreground [overflow-wrap:anywhere]"
+                        className="min-w-0 flex-1 cursor-pointer py-3 text-sm font-medium text-muted-foreground [overflow-wrap:anywhere]"
                       >
                         Include Interest Deduction
                       </Label>
@@ -1409,7 +1409,7 @@ export function OperatingExpensesSection({
                         </TooltipContent>
                       </Tooltip>
                     </div>
-                    <p className="text-2xs leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
+                    <p className="text-sm leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
                       Include mortgage interest deduction in cash flow and
                       taxes.
                     </p>

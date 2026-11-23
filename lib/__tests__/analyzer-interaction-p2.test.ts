@@ -269,7 +269,8 @@ describe("result rows, hints and links (P2-61, P2-68, P2-155)", () => {
   it("sets the '(all % of rent)' hint in full muted ink", () => {
     const expenses = read("components/investcalc/operating-expenses-section.tsx");
     const hint = expenses.slice(expenses.indexOf("(all % of rent)") - 120, expenses.indexOf("(all % of rent)"));
-    expect(hint).toContain('className="text-xs text-muted-foreground self-center"');
+    // Re-anchored (2026-11 audit B7): the hint is 14px; still full muted ink.
+    expect(hint).toContain('className="text-sm text-muted-foreground self-center"');
     expect(hint).not.toContain("text-muted-foreground/");
   });
 

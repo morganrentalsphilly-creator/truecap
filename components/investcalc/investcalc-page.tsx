@@ -11058,7 +11058,7 @@ export function InvestCalcPage({
                     }
                     sampleSlot={
                       showEmptyStateSampleLine ? (
-                        <p className="mt-2 text-xs text-muted-foreground">
+                        <p className="mt-2 text-sm text-muted-foreground">
                           No address handy?{" "}
                           <button
                             type="button"
@@ -11203,7 +11203,7 @@ export function InvestCalcPage({
                           <Calculator className="mr-2 size-5" />
                           {primaryActionLabel}
                         </Button>
-                        <p className="mt-2 text-center text-2xs leading-snug text-muted-foreground">
+                        <p className="mt-2 text-center text-sm leading-snug text-muted-foreground">
                           {primaryCtaRunsSample
                             ? // The empty form's button loads the sample, so its
                               // caption describes the sample (audit A9).
@@ -11415,7 +11415,7 @@ export function InvestCalcPage({
                     </p>
                     {preRunBuyBoxState === "error" &&
                     !hasAdoptedAnalysisTarget ? (
-                      <p className="mt-2 text-xs font-medium text-caution-text dark:text-caution-light">
+                      <p className="mt-2 text-sm font-medium text-caution-text dark:text-caution-light">
                         Your Buy Boxes could not be loaded. TrueCap will use the
                         starter criteria shown here; you can change them before
                         calculating.
@@ -11434,7 +11434,7 @@ export function InvestCalcPage({
                       <div className="space-y-4 border-t border-primary/15 px-2 py-4">
                         {eligiblePreRunBuyBoxes.length > 0 ? (
                           <div>
-                            <p className="text-xs font-semibold text-foreground">
+                            <p className="text-sm font-semibold text-foreground">
                               Saved criteria sets
                             </p>
                             <div
@@ -11575,7 +11575,7 @@ export function InvestCalcPage({
                 (right). Both desktop-only - mobile users get the
                 sticky bottom Calculate bar instead, and the autosave
                 indicator there would compete with iOS keyboard chrome. */}
-              <div className="hidden sm:flex items-center justify-between gap-3 text-2xs text-muted-foreground lg:col-span-3 lg:col-start-1">
+              <div className="hidden sm:flex items-center justify-between gap-3 text-sm text-muted-foreground lg:col-span-3 lg:col-start-1">
                 <p className="flex items-center gap-1.5">
                   <kbd className="inline-flex items-center rounded border border-border bg-card px-1.5 py-0.5 font-mono text-3xs font-semibold text-foreground">
                     {kbdModifier}
@@ -11699,7 +11699,7 @@ export function InvestCalcPage({
                 </div>
               ) : null}
               {analysisResult && !isCalculating && savedMethodologyLabel ? (
-                <p className="mb-3 text-2xs font-semibold text-muted-foreground">
+                <p className="mb-3 text-sm font-semibold text-muted-foreground">
                   {savedMethodologyLabel} ·{" "}
                   <Link
                     href="/methodology"
@@ -12024,7 +12024,7 @@ export function InvestCalcPage({
                     <p className="text-sm font-semibold text-foreground">
                       {conflict.label}
                     </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Yours:{" "}
                       <span className="font-medium text-foreground">
                         {format(conflict.current)}
@@ -12218,7 +12218,7 @@ export function InvestCalcPage({
                   <CopyPlus className="size-4 text-primary" />
                   Save as a new deal
                 </p>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   Keep the saved deal as it is and save your current inputs as a
                   separate deal for the new address.
                 </p>
@@ -12241,7 +12241,7 @@ export function InvestCalcPage({
                   <PencilLine className="size-4 text-muted-foreground" />
                   Update this deal&rsquo;s address
                 </p>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                   Update the saved deal with your current inputs, new address
                   included. Its notes, comps, and share links stay attached.
                 </p>

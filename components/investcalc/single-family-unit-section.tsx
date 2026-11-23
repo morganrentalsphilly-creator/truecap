@@ -378,7 +378,7 @@ export function SingleFamilyUnitSection({
         >
           <div className="flex items-center gap-2 mb-3">
             <CalendarClock className="w-4 h-4 text-primary" />
-            <span className="text-xs font-semibold text-foreground">
+            <span className="text-sm font-semibold text-foreground">
               Short-term rental income
             </span>
           </div>
@@ -481,7 +481,7 @@ export function SingleFamilyUnitSection({
             </div>
           </div>
           <p
-            className="mt-3 text-2xs text-muted-foreground"
+            className="mt-3 text-sm text-muted-foreground"
             aria-live="polite"
           >
             {strMonthlyRevenue != null ? (

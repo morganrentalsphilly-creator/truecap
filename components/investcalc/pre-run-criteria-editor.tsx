@@ -110,7 +110,7 @@ export function PreRunCriteriaEditor({
       <legend className="text-sm font-bold text-foreground">
         Adjust criteria before calculating
       </legend>
-      <p className="-mt-3 text-xs leading-relaxed text-muted-foreground">
+      <p className="-mt-3 text-sm leading-relaxed text-muted-foreground">
         Leave a field blank to ignore it. The main Analyze button uses the exact
         values below for this analysis.
       </p>
@@ -122,7 +122,7 @@ export function PreRunCriteriaEditor({
           const cashDscr = isCashPurchase && field === "dscr";
           return (
             <div key={field}>
-              <Label htmlFor={inputId} className="text-xs">
+              <Label htmlFor={inputId} className="text-sm">
                 {label}
               </Label>
               <Input
@@ -163,7 +163,7 @@ export function PreRunCriteriaEditor({
                 <p
                   id={errorId}
                   role="alert"
-                  className="mt-1 text-xs font-medium text-destructive-text"
+                  className="mt-1 text-sm font-medium text-destructive-text"
                 >
                   {validation.errors[field]}
                 </p>
@@ -173,7 +173,7 @@ export function PreRunCriteriaEditor({
         })}
       </div>
       {validation.formError ? (
-        <p role="alert" className="text-xs font-medium text-destructive-text">
+        <p role="alert" className="text-sm font-medium text-destructive-text">
           Choose at least one criterion before calculating an Offer Ceiling.
         </p>
       ) : null}

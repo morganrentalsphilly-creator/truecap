@@ -240,7 +240,7 @@ export function StickyCalculateBar({
       role="presentation"
     >
       {contextLabel ? (
-        <p className="mb-1.5 truncate text-center text-2xs text-muted-foreground">
+        <p className="mb-1.5 truncate text-center text-sm text-muted-foreground">
           {contextLabel}
         </p>
       ) : null}

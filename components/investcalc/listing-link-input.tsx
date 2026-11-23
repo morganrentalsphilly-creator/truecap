@@ -115,7 +115,7 @@ export function ListingLinkInput({
         )}
         <div className="min-w-0">
           <p className="font-semibold text-foreground">Address extracted</p>
-          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+          <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
             {importStatus.phase === "looking-up"
               ? "Looking up available starting assumptions. We’ll keep every value editable."
               : `Still needed: ${formatMissingFields(importStatus.missingFields)}.`}
@@ -134,7 +134,7 @@ export function ListingLinkInput({
       {priceLookupPausedUntil != null ? (
         <p
           data-listing-lookup-paused=""
-          className="mt-2 text-xs leading-relaxed text-muted-foreground"
+          className="mt-2 text-sm leading-relaxed text-muted-foreground"
         >
           {priceLookupPausedUntil
             ? `Live comps are paused until ${priceLookupPausedUntil}, so the asking price and property facts were not filled from the link.`
@@ -145,7 +145,7 @@ export function ListingLinkInput({
       {priceLookupRefused && priceLookupPausedUntil == null ? (
         <p
           data-listing-lookup-refused=""
-          className="mt-2 text-xs leading-relaxed text-muted-foreground"
+          className="mt-2 text-sm leading-relaxed text-muted-foreground"
         >
           Filling the asking price and property facts from a listing link needs
           a Pro or Agent Pro subscription. On this account, type them in.{" "}
@@ -182,13 +182,13 @@ export function ListingLinkInput({
       {importStatusPanel}
       <label
         htmlFor="listing-url"
-        className="text-xs font-semibold text-foreground"
+        className="text-sm font-semibold text-foreground"
       >
         Paste a listing link
       </label>
       <p
         id="listing-url-help"
-        className="mt-0.5 text-2xs text-muted-foreground"
+        className="mt-0.5 text-sm text-muted-foreground"
       >
         {SUPPORTED_LISTING_SITES_TEXT}: TrueCap extracts the address. When
         available, a signed-in lookup on Pro or Agent Pro can also fill the
@@ -231,7 +231,7 @@ export function ListingLinkInput({
           id="listing-url-error"
           role="alert"
           aria-live="assertive"
-          className="mt-1.5 text-2xs text-[var(--metric-negative,#dc2626)]"
+          className="mt-1.5 text-sm text-[var(--metric-negative,#dc2626)]"
         >
           Couldn&apos;t read that link — type the full property address instead.
         </p>

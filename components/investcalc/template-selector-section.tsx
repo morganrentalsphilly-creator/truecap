@@ -282,7 +282,7 @@ export function TemplateSelectorSection({
 
   return (
     <div className="mt-4 space-y-2 border-t border-border pt-4">
-      <p className="text-xs font-semibold text-muted-foreground">
+      <p className="text-sm font-semibold text-muted-foreground">
         Template
       </p>
       <div className="flex min-w-0 items-center gap-2">
@@ -428,7 +428,7 @@ export function TemplateSelectorSection({
         </Button>
       </div>
       {mainFormErrors.templateId?.message && (
-        <p id="templateId-error" role="alert" className="text-xs text-destructive-text">
+        <p id="templateId-error" role="alert" className="text-sm text-destructive-text">
           {mainFormErrors.templateId?.message}
         </p>
       )}

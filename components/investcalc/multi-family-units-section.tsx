@@ -221,7 +221,7 @@ export function MultiFamilyUnitsSection({
 
       <div className="space-y-4">
         {isHouseHack && (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Choose exactly one unit to live in. Its rent is fixed at $0 and is
             not counted as rental income; enter rent only for the units you will
             lease.
@@ -283,7 +283,7 @@ export function MultiFamilyUnitsSection({
                     <p className="text-sm font-medium text-foreground">
                       Owner occupied unit
                     </p>
-                    <p className="text-2xs text-muted-foreground [overflow-wrap:anywhere]">
+                    <p className="text-sm text-muted-foreground [overflow-wrap:anywhere]">
                       Turn this on for the unit you live in.
                     </p>
                   </div>
@@ -305,7 +305,7 @@ export function MultiFamilyUnitsSection({
                 <div>
                   <Label
                     htmlFor={`unit-${index}-bedrooms`}
-                    className="text-xs font-semibold text-primary mb-1 block"
+                    className="text-sm font-semibold text-primary mb-1 block"
                   >
                     Bedrooms{" "}
                     <span className="font-normal normal-case tracking-normal text-muted-foreground">
@@ -343,7 +343,7 @@ export function MultiFamilyUnitsSection({
                 <div>
                   <Label
                     htmlFor={`unit-${index}-bathrooms`}
-                    className="text-xs font-semibold text-primary mb-1 block"
+                    className="text-sm font-semibold text-primary mb-1 block"
                   >
                     Bathrooms{" "}
                     <span className="font-normal normal-case tracking-normal text-muted-foreground">
@@ -381,7 +381,7 @@ export function MultiFamilyUnitsSection({
                 <div>
                   <Label
                     htmlFor={`unit-${index}-sqft`}
-                    className="text-xs font-semibold text-primary mb-1 block"
+                    className="text-sm font-semibold text-primary mb-1 block"
                   >
                     Sq Ft{" "}
                     <span className="font-normal normal-case tracking-normal text-muted-foreground">
@@ -417,7 +417,7 @@ export function MultiFamilyUnitsSection({
                 <div>
                   <Label
                     htmlFor={`unit-${index}-monthlyRent`}
-                    className="text-xs font-semibold text-primary mb-1 block"
+                    className="text-sm font-semibold text-primary mb-1 block"
                   >
                     {isOwner ? "Owner unit rent" : "Monthly Rent"}
                   </Label>
@@ -466,7 +466,7 @@ export function MultiFamilyUnitsSection({
                   {isOwner ? (
                     <p
                       id={`unit-${index}-owner-rent-help`}
-                      className="mt-1 text-2xs leading-relaxed text-muted-foreground"
+                      className="mt-1 text-sm leading-relaxed text-muted-foreground"
                     >
                       Fixed at $0 and not counted as rental income.
                     </p>
@@ -481,7 +481,7 @@ export function MultiFamilyUnitsSection({
               {rentHint ? (
                 <p
                   className={cn(
-                    "mt-2 text-2xs leading-relaxed",
+                    "mt-2 text-sm leading-relaxed",
                     unitVerdict?.verdict === "above"
                       ? "text-caution-text"
                       : "text-muted-foreground",
@@ -498,12 +498,12 @@ export function MultiFamilyUnitsSection({
           single-family whisper) - it reads as information, not an error,
           so it must not share styling with the validation message below. */}
       {rentCheck.rollup ? (
-        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           {rentCheck.rollup}
         </p>
       ) : null}
       {typeof unitsArrayErrorMessage === "string" && (
-        <p className="mt-3 text-xs text-destructive-text">
+        <p className="mt-3 text-sm text-destructive-text">
           {unitsArrayErrorMessage}
         </p>
       )}

@@ -166,7 +166,7 @@ export function FinancingProfileSelector({
                 Using your {appliedProfile.name} Financing Profile
               </div>
               <p className="mt-1 text-sm text-foreground/80">{profileSummary(appliedProfile)}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="mt-1 text-sm text-muted-foreground">
                 {formatVerified(appliedProfile.lastVerifiedAt)} · terms locked when applied
               </p>
             </div>
@@ -181,7 +181,7 @@ export function FinancingProfileSelector({
             </Button>
           </div>
           {unmodeled.length > 0 ? (
-            <p className="mt-2 text-2xs leading-relaxed text-caution-text dark:text-caution-light">
+            <p className="mt-2 text-sm leading-relaxed text-caution-text dark:text-caution-light">
               Recorded but not included in current return calculations: {unmodeled.join(", ")}.
             </p>
           ) : null}
@@ -189,7 +189,7 @@ export function FinancingProfileSelector({
       ) : (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="min-w-0 flex-1">
-            <label htmlFor="financing-profile-selector" className="flex items-center gap-2 text-xs font-semibold text-[var(--brand-green)]">
+            <label htmlFor="financing-profile-selector" className="flex items-center gap-2 text-sm font-semibold text-[var(--brand-green)]">
               <Landmark aria-hidden className="size-4" /> Financing Profile
             </label>
             <select
@@ -206,7 +206,7 @@ export function FinancingProfileSelector({
               ))}
             </select>
             {selectedProfile ? (
-              <p id="financing-profile-selector-summary" className="mt-1 text-2xs text-muted-foreground">
+              <p id="financing-profile-selector-summary" className="mt-1 text-sm text-muted-foreground">
                 {profileSummary(selectedProfile)} · {formatVerified(selectedProfile.lastVerifiedAt)}
               </p>
             ) : null}
@@ -225,7 +225,7 @@ export function FinancingProfileSelector({
       <div className="mt-2 text-right">
         <Link
           href="/settings#financing-profiles"
-          className="inline-flex min-h-11 items-center text-2xs font-medium text-muted-foreground underline-offset-2 hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className="inline-flex min-h-11 items-center text-sm font-medium text-muted-foreground underline-offset-2 hover:underline focus-visible:rounded focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           Manage financing profiles
         </Link>

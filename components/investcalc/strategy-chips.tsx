@@ -171,12 +171,12 @@ export function StrategyChips({
         <div>
           <p
             id={labelId}
-            className="text-xs font-medium text-muted-foreground"
+            className="text-sm font-medium text-muted-foreground"
           >
             {label}
           </p>
           {description ? (
-            <p className="mt-1 text-2xs leading-relaxed text-muted-foreground">
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
               {description}
             </p>
           ) : null}
@@ -231,7 +231,7 @@ export function StrategyChips({
       {activeKey && active.productStage !== "core" ? (
         <div
           role="note"
-          className="mt-2 rounded-lg border border-caution/40 bg-caution-light px-3 py-2 text-2xs leading-relaxed text-foreground"
+          className="mt-2 rounded-lg border border-caution/40 bg-caution-light px-3 py-2 text-sm leading-relaxed text-foreground"
         >
           <span className="font-bold">{activeDisplay.label} mode.</span>{" "}
           {active.focusHint}
@@ -262,7 +262,7 @@ export function StrategyChips({
             }
           }}
         >
-          <p className="rounded-lg border border-caution/40 bg-caution-light px-3 py-2 text-2xs leading-relaxed text-foreground">
+          <p className="rounded-lg border border-caution/40 bg-caution-light px-3 py-2 text-sm leading-relaxed text-foreground">
             <span className="font-bold">
               Changing analysis type can change your property model and apply
               starter assumptions.
@@ -285,7 +285,7 @@ export function StrategyChips({
               >
                 Switch to {strategyDisplay(pendingStrategy).label}?
               </h3>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
                 Choose what TrueCap should do with the assumptions already in
                 this deal. Nothing changes until you confirm.
               </p>

@@ -108,7 +108,7 @@ export function FinancingSection({
           <div className="mb-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
             <Label
               htmlFor="downPaymentPct"
-              className="min-w-0 flex-1 text-xs font-semibold text-muted-foreground [overflow-wrap:anywhere]"
+              className="min-w-0 flex-1 text-sm font-semibold text-muted-foreground [overflow-wrap:anywhere]"
             >
               Down Payment %
             </Label>
@@ -142,7 +142,7 @@ export function FinancingSection({
             message={errors.downPaymentPct?.message}
           />
           {isAllCash && (
-            <p className="mt-1 text-2xs leading-snug text-muted-foreground [overflow-wrap:anywhere]">
+            <p className="mt-1 text-sm leading-snug text-muted-foreground [overflow-wrap:anywhere]">
               Modeling this as an all-cash purchase — no mortgage, so
               there&apos;s no debt-coverage ratio (DSCR). You&apos;ll still get
               cash-on-cash and monthly cash flow.
@@ -154,7 +154,7 @@ export function FinancingSection({
           <div className="mb-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
             <Label
               htmlFor="interestRate"
-              className="min-w-0 flex-1 text-xs font-semibold text-muted-foreground [overflow-wrap:anywhere]"
+              className="min-w-0 flex-1 text-sm font-semibold text-muted-foreground [overflow-wrap:anywhere]"
             >
               Interest Rate %
             </Label>
@@ -193,7 +193,7 @@ export function FinancingSection({
           <div className="mb-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
             <Label
               htmlFor="loanTermYears"
-              className="min-w-0 flex-1 text-xs font-semibold text-muted-foreground [overflow-wrap:anywhere]"
+              className="min-w-0 flex-1 text-sm font-semibold text-muted-foreground [overflow-wrap:anywhere]"
             >
               Loan Term (Years)
             </Label>
@@ -229,7 +229,7 @@ export function FinancingSection({
           <div className="mb-1.5 flex min-w-0 flex-wrap items-center gap-1.5">
             <Label
               htmlFor="closingCostsPct"
-              className="min-w-0 flex-1 text-xs font-semibold text-muted-foreground [overflow-wrap:anywhere]"
+              className="min-w-0 flex-1 text-sm font-semibold text-muted-foreground [overflow-wrap:anywhere]"
             >
               {closingCostsInputMode === "fixed"
                 ? "Closing Costs $"
@@ -331,7 +331,7 @@ export function FinancingSection({
               </>
             )}
           </div>
-          <p className="mt-1 text-2xs text-muted-foreground [overflow-wrap:anywhere]">
+          <p className="mt-1 text-sm text-muted-foreground [overflow-wrap:anywhere]">
             {closingCostsInputMode === "fixed"
               ? "Exact modeled cash closing costs."
               : "Defaults to 3% of purchase price if left blank."}
@@ -349,7 +349,7 @@ export function FinancingSection({
         <div>
           <Label
             htmlFor="rehabBudget"
-            className="mb-1.5 block text-xs font-semibold text-muted-foreground [overflow-wrap:anywhere]"
+            className="mb-1.5 block text-sm font-semibold text-muted-foreground [overflow-wrap:anywhere]"
           >
             Rehab / Initial Repairs <OptionalMark />
           </Label>
@@ -382,7 +382,7 @@ export function FinancingSection({
               )}
             />
           </div>
-          <p className="mt-1 text-2xs text-muted-foreground [overflow-wrap:anywhere]">
+          <p className="mt-1 text-sm text-muted-foreground [overflow-wrap:anywhere]">
             Up-front repairs — added to cash invested (lowers cash-on-cash).
           </p>
           <FieldError
@@ -404,7 +404,7 @@ export function FinancingSection({
             <div>
               <Label
                 htmlFor="pmiAnnualRatePct"
-                className="mb-1.5 block text-xs font-semibold text-muted-foreground [overflow-wrap:anywhere]"
+                className="mb-1.5 block text-sm font-semibold text-muted-foreground [overflow-wrap:anywhere]"
               >
                 PMI / MIP rate %
                 <span className="ml-1 normal-case font-normal text-muted-foreground">
@@ -436,7 +436,7 @@ export function FinancingSection({
                 />
                 <Percent className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               </div>
-              <p className="mt-1 text-2xs leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
                 {usesOwnerOccupantPmiDefault
                   ? "Annual mortgage insurance, % of loan. Owner-occupant screening default: 0.8%; replace it with the lender's premium or enter 0 if none."
                   : "Annual mortgage insurance, % of loan. No premium is assumed for an investment property when this is blank; enter the lender's rate if one applies."}
@@ -458,15 +458,15 @@ export function FinancingSection({
                   type="checkbox"
                   className="size-5 shrink-0 rounded border-input accent-[var(--brand-green)]"
                 />
-                <span className="min-w-0 text-xs leading-snug text-foreground [overflow-wrap:anywhere]">
+                <span className="min-w-0 text-sm leading-snug text-foreground [overflow-wrap:anywhere]">
                   Runs for the life of the loan
-                  <span className="block text-2xs text-muted-foreground">
+                  <span className="block text-sm text-muted-foreground">
                     Select for loan-life MIP; conventional PMI otherwise uses scheduled 78% termination.
                   </span>
                 </span>
               </label>
             ) : (
-              <p className="rounded-lg border border-caution/30 bg-caution-light px-3 py-2 text-2xs leading-relaxed text-caution-text @xl:mt-7 dark:border-caution dark:bg-caution/20 dark:text-caution-light">
+              <p className="rounded-lg border border-caution/30 bg-caution-light px-3 py-2 text-sm leading-relaxed text-caution-text @xl:mt-7 dark:border-caution dark:bg-caution/20 dark:text-caution-light">
                 Rental-loan mortgage insurance is conservatively modeled through payoff. Confirm any earlier cancellation in the written loan terms.
               </p>
             )}

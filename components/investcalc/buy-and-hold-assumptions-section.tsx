@@ -57,7 +57,7 @@ function MoneyField({
     <div className="min-w-0">
       <Label
         htmlFor={name}
-        className="mb-1.5 block text-xs font-semibold text-foreground"
+        className="mb-1.5 block text-sm font-semibold text-foreground"
       >
         {label}
       </Label>
@@ -97,7 +97,7 @@ function MoneyField({
       {hint ? (
         <p
           id={hintId}
-          className="mt-1 text-2xs leading-relaxed text-muted-foreground"
+          className="mt-1 text-sm leading-relaxed text-muted-foreground"
         >
           {hint}
         </p>
@@ -135,7 +135,7 @@ function NumberField({
     <div className="min-w-0">
       <Label
         htmlFor={name}
-        className="mb-1.5 block text-xs font-semibold text-foreground"
+        className="mb-1.5 block text-sm font-semibold text-foreground"
       >
         {label}
       </Label>
@@ -172,7 +172,7 @@ function NumberField({
       {hint ? (
         <p
           id={hintId}
-          className="mt-1 text-2xs leading-relaxed text-muted-foreground"
+          className="mt-1 text-sm leading-relaxed text-muted-foreground"
         >
           {hint}
         </p>
@@ -201,7 +201,7 @@ function AssumptionGroup({
           {title}
         </span>
       </legend>
-      <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
+      <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
         {description}
       </p>
       {children}
@@ -232,7 +232,7 @@ export function BuyAndHoldAssumptionsSection({
         >
           Detailed buy-and-hold assumptions
         </h3>
-        <p className="mt-1 max-w-3xl text-xs leading-relaxed text-muted-foreground">
+        <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted-foreground">
           Optional deal-specific detail. These values are included in the saved
           underwrite, shared decision and report. Leave a field blank only when
           it does not apply; a typed 0 means you intentionally modeled none.
@@ -264,7 +264,7 @@ export function BuyAndHoldAssumptionsSection({
                   })
                 }
                 className={cn(
-                  "min-h-11 rounded-md px-3 text-xs font-semibold capitalize focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+                  "min-h-11 rounded-md px-3 text-sm font-semibold capitalize focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                   operatingScenario === scenario
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground",
@@ -489,7 +489,7 @@ export function BuyAndHoldAssumptionsSection({
               />
             </div>
           ) : (
-            <p className="rounded-lg border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+            <p className="rounded-lg border border-border bg-muted/30 p-3 text-sm text-muted-foreground">
               This is an all-cash acquisition, so loan-specific fields are not
               applied.
             </p>
@@ -548,7 +548,7 @@ export function BuyAndHoldAssumptionsSection({
               hint="Used only in pre-tax hold-return math; no exit or tax strategy is implied."
             />
           </div>
-          <p className="mt-4 rounded-lg border border-caution/30 bg-caution-light px-3 py-2 text-2xs leading-relaxed text-caution-text dark:border-caution dark:bg-caution/20 dark:text-caution-light">
+          <p className="mt-4 rounded-lg border border-caution/30 bg-caution-light px-3 py-2 text-sm leading-relaxed text-caution-text dark:border-caution dark:bg-caution/20 dark:text-caution-light">
             This is not a renovation lifecycle model. Draw/funding timing,
             placed-in-service and lease-up timing, repair-versus-capital
             classification, basis and tax treatment, and financed improvements

@@ -281,7 +281,7 @@ export function LiveVerdictPanel({
               it into an invitation to play with the one lever they control. */}
           {Math.round(livePreview.netCashFlow) < 0 &&
           livePreview.breakEvenPrice != null ? (
-            <p className="mt-2.5 border-l-2 border-border pl-2.5 text-2xs font-medium leading-snug text-foreground">
+            <p className="mt-2.5 border-l-2 border-border pl-2.5 text-sm font-medium leading-snug text-foreground">
               Breaks even near{" "}
               <span className="font-figure font-semibold">
                 ${Math.round(livePreview.breakEvenPrice).toLocaleString()}
@@ -290,7 +290,7 @@ export function LiveVerdictPanel({
               assumption.
             </p>
           ) : Math.round(livePreview.netCashFlow) < 0 ? (
-            <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-2xs font-semibold leading-snug text-foreground">
+            <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-sm font-semibold leading-snug text-foreground">
               Negative at these assumptions. Run the full analysis to review the
               price, rent, financing, and expense levers.
             </p>
@@ -299,12 +299,12 @@ export function LiveVerdictPanel({
             // already has: name the one metric dragging the verdict (facts
             // only — thresholds mirror classifyDeal, see lib/limiting-factor.ts)
             // so the amber pill isn't a dead end.
-            <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-2xs font-semibold leading-snug text-foreground">
+            <p className="mt-2.5 rounded-lg bg-background/60 px-2.5 py-2 text-sm font-semibold leading-snug text-foreground">
               {livePreview.limitingFactor}
             </p>
           ) : null}
           {runTargets ? (
-            <p data-live-run-targets="" className="mt-2.5 text-xs font-medium leading-snug text-foreground">
+            <p data-live-run-targets="" className="mt-2.5 text-sm font-medium leading-snug text-foreground">
               {runTargetsLine(runTargets)}
             </p>
           ) : null}
