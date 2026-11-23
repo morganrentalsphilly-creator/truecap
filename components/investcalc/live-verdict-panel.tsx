@@ -215,8 +215,13 @@ export function LiveVerdictPanel({
             </p>
           ) : null}
           <div className="grid grid-cols-1 gap-2 min-[320px]:grid-cols-3 sm:gap-3">
+            {/* Every label sits in the same 44px row (audit C1). The glossary
+                triggers on Cap rate and DSCR are 44px tall hit areas; with a
+                plain text label beside them, "Cash flow" and its figure rode
+                higher than the other two. One row height for all three puts
+                the labels on one line and the figures on one baseline. */}
             <div>
-              <div className="text-xs font-medium text-muted-foreground">
+              <div className="flex h-11 items-center text-xs font-medium text-muted-foreground">
                 Cash flow
               </div>
               <div
@@ -240,8 +245,8 @@ export function LiveVerdictPanel({
                   the preview renders before the tipped metrics band exists,
                   so a first-timer meets "Cap rate"/"DSCR" here first. Same
                   no-underline treatment as the MetricCard labels. */}
-              <div className="text-xs font-medium text-muted-foreground">
-                <GlossaryTip term="capRate" className="!no-underline">
+              <div className="flex h-11 items-center text-xs font-medium text-muted-foreground">
+                <GlossaryTip term="capRate" className="!no-underline !justify-start">
                   Cap rate
                 </GlossaryTip>
               </div>
@@ -250,8 +255,8 @@ export function LiveVerdictPanel({
               </div>
             </div>
             <div>
-              <div className="text-xs font-medium text-muted-foreground">
-                <GlossaryTip term="dscr" className="!no-underline">
+              <div className="flex h-11 items-center text-xs font-medium text-muted-foreground">
+                <GlossaryTip term="dscr" className="!no-underline !justify-start">
                   DSCR
                 </GlossaryTip>
               </div>
