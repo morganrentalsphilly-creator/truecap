@@ -102,8 +102,14 @@ describe("evidence workflow usability guards", () => {
     expect(page).toContain(
       "hasUnappliedTargetDraft ||\n      (isAuthenticated && Boolean(savedDealId) && hasUnsavedChanges)",
     );
-    expect(page).toContain(
-      "const shouldConfirm =\n      hasPendingDealChanges ||",
+    // Re-anchored (2026-11 audit C5): an untouched sample skips the confirm,
+    // and that exception itself requires no unapplied criteria draft, so a
+    // draft still always reaches the confirm.
+    expect(page.replace(/\s+/g, " ")).toContain(
+      "const shouldConfirm = !untouchedSample && (hasPendingDealChanges || (!savedDealId && hasUnsavedWork));",
+    );
+    expect(page.replace(/\s+/g, " ")).toContain(
+      "const untouchedSample = !savedDealId && !hasPendingDealChanges && !hasUnappliedTargetDraft &&",
     );
   });
 

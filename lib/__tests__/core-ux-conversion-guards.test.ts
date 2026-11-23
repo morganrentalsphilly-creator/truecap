@@ -274,7 +274,10 @@ describe("input-phase traps and mislabels", () => {
 
   it("the primary CTA only becomes the sample launcher on a pristine form", () => {
     expect(calculator.replace(/\s+/g, "")).toContain(
-      "activeStrategyKey===null&&!hasPropertyAvailable&&!hasMeaningfulInput&&!form.formState.isDirty",
+      // Re-anchored (2026-11 audit A9): "pristine" is read from the field
+      // values (lib/analyzer-pristine.ts), not from isDirty, which a blurred
+      // empty number field also sets.
+      "activeStrategyKey===null&&!hasPropertyAvailable&&!hasMeaningfulInput&&!hasEditedStartingValues",
     );
     expect(calculator).toContain(
       "onClick={() => void handlePrimaryRunAction()}",
