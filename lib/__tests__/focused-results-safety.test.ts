@@ -36,8 +36,10 @@ describe("focused decision safety", () => {
     expect(summary).toContain("const applyTargetDraft = () =>");
     expect(summary).toContain("onTargetChange(nextTarget)");
     expect(summary).toContain("targetDraftBlocksActions");
-    expect(summary).toContain(
-      'isSaving ? "Saving…" : isSaved ? "Saved" : "Save"',
+    // One Save button: "Save" for an account, "Save this deal free" for an
+    // anonymous visitor, whose primary action it is.
+    expect(summary.replace(/\s+/g, " ")).toContain(
+      'isSaving ? "Saving…" : isSaved ? "Saved" : isAuthenticated ? "Save" : "Save this deal free"',
     );
     expect(summary).toContain(
       "Apply or cancel the criteria edits before taking another action.",

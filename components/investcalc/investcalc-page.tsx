@@ -1518,6 +1518,12 @@ export function InvestCalcPage({
   // nothing typed in between is thrown away by that navigation.
   const [inputPausedForSave, setInputPausedForSave] = useState(false);
   const [isAutoSaveResuming, setIsAutoSaveResuming] = useState(false);
+  // Back, Forward or a reload landed on `?view=result` and the restored draft
+  // is exactly the last finished run (2026-11 ads pass, A5): the result is
+  // being put back on screen. While this is set the form and its "Draft
+  // restored" notice stay out of the way and the results region shows its
+  // loading state, so the visitor never sees the form in between.
+  const [isReopeningResult, setIsReopeningResult] = useState(false);
   // Duplicate-address collision from the save flow. Non-null opens the
   // chooser dialog with the user's own colliding saved deal so they can
   // overwrite it or keep both as scenarios.
@@ -1953,6 +1959,98 @@ export function InvestCalcPage({
         setIsLoadingDealScore(false);
       }
     }
+  };
+
+  /**
+   * Put this browser's last finished no-account run back on screen (2026-11
+   * ads pass, A5): Back from sign-up, Forward, or a reload on `?view=result`.
+   *
+   * It is the same analysis coming back, not a new run, so it does not go
+   * through onSubmit: nothing here starts a run, counts one, or reports one.
+   * Like the saved-deal open above, it recomputes from the stored inputs
+   * (pure client math) and commits the result. The one server call re-reads
+   * the signed no-signup grant for these exact inputs, which is what lets the
+   * exact Offer Ceiling be served again; a grant bound to other inputs leaves
+   * the range, as a run would. Any failure leaves the form, with its draft.
+   */
+  const reopenFinishedResult = async (values: InvestmentFormValues) => {
+    preloadAnalysisDashboard();
+    const reopenGeneration = forkGenerationRef.current;
+    try {
+      const result = calculateAnalysis(values);
+      const computedFingerprint = formSnapshotForCompare(values);
+      const anonymousGrant = await claimAnonymousDecisionAction(values);
+      // A reset or a new deal started while the grant was read.
+      if (forkGenerationRef.current !== reopenGeneration) return;
+      const boundFormSnapshot = bindAnonymousDecisionPresentationGrant(
+        anonymousGrant.ok,
+        computedFingerprint,
+        formSnapshotForCompare(form.getValues()),
+      );
+      anonymousDecisionGrantFormJsonRef.current = boundFormSnapshot;
+      setAnonymousDecisionGrantAvailable(boundFormSnapshot !== null);
+      if (anonymousGrant.ok || anonymousGrant.code === "LIMIT_REACHED") {
+        setAnonymousDecisionClaimSeen(true);
+        setAnonymousDecisionUsed(true);
+      }
+      setIsSampleProPreview(false);
+      setSavedMethodologyLabel(null);
+      setRecordedOfferCeiling(null);
+      setRecordedSpecialistAnalysis(null);
+      setAnalysisResult(result);
+      setResultRunId((n) => n + 1);
+      setStaleResultsWarning(false);
+      setAnalysisValues(values);
+      setProjectionSource(
+        canUseProjections ? buildProjectionSource(null, values, result) : null,
+      );
+      setTaxStrategySource(
+        canUseTaxStrategy ? buildTaxStrategySource(null, values, result) : null,
+      );
+      setExitScenarioSource(
+        canUseExitScenarios
+          ? buildExitScenarioSource(
+              null,
+              values,
+              result,
+              result.tenYearProjection,
+              result.taxStrategyYears,
+            )
+          : null,
+      );
+      if (computedFingerprint) {
+        lastComputedFormJsonRef.current = computedFingerprint;
+      }
+      setShowResults(true);
+      setIsEditingAssumptions(false);
+      setIsReopeningResult(false);
+      await loadDealScore(values, result);
+    } catch {
+      // Offline, or the grant could not be read: the form and its restored
+      // draft are what the visitor gets, as before this existed.
+    } finally {
+      setIsReopeningResult(false);
+    }
+  };
+  /** The stored inputs, when they are exactly the last finished run and can
+   *  be reopened as a result; null otherwise. */
+  const finishedRunToReopen = (
+    draft: InvestmentFormValues | null,
+  ): InvestmentFormValues | null => {
+    if (isAuthenticated || !draft) return null;
+    // The sample is a demo, never this visitor's stored deal.
+    if (isTrueCapSyntheticSampleAddress(draft.address)) return null;
+    try {
+      if (
+        readCompletedRunFingerprint() !== maoTargetAnalysisFingerprint(draft)
+      ) {
+        return null;
+      }
+    } catch {
+      return null;
+    }
+    const exact = releasedInvestmentFormSchema.safeParse(draft);
+    return exact.success ? exact.data : null;
   };
 
   // The starting mortgage rate (audit A2). The server-read FRED benchmark is
@@ -5998,6 +6096,22 @@ export function InvestCalcPage({
           const matchesSyntheticSampleDraft =
             restoredAnalyzerStrategyKey === SAMPLE_DEAL_FIXTURE.strategyKey &&
             isTrueCapSyntheticSampleAddress(normalized.address);
+          // The URL says "the result" (`?view=result`: Back from sign-up,
+          // Forward, a reload) and the draft is exactly the run that last
+          // finished in this browser: put that result back instead of the
+          // form (2026-11 ads pass, A5). Anonymous visitors only; a signed-in
+          // run is metered, and its page keeps today's restore.
+          let finishedRunValues: InvestmentFormValues | null = null;
+          if (!resumesPendingSaveAfterAuth && !resumesPendingShareAfterAuth) {
+            try {
+              finishedRunValues = hasResultView(window.location.href)
+                ? finishedRunToReopen(normalized)
+                : null;
+            } catch {
+              finishedRunValues = null;
+            }
+          }
+          const reopensFinishedResult = finishedRunValues !== null;
           const isSyntheticSampleDraft =
             matchesSyntheticSampleDraft &&
             !resumesPendingSaveAfterAuth &&
@@ -6006,6 +6120,7 @@ export function InvestCalcPage({
           // navigation (not a reload or Back), is a finished deal, not work
           // in progress: the visitor came for the next one (audit A19).
           const isFinishedRunOnFreshVisit =
+            !reopensFinishedResult &&
             !resumesPendingSaveAfterAuth &&
             !resumesPendingShareAfterAuth &&
             isFreshNavigation() &&
@@ -6193,6 +6308,18 @@ export function InvestCalcPage({
             });
             queueMicrotask(() => {
               isProgrammaticResetRef.current = false;
+            });
+            return;
+          }
+          // The targets the run used came back with the draft's binding
+          // above. Criteria that need a review are a question for the form,
+          // so that case keeps the form.
+          if (finishedRunValues && !restoredDecisionBinding.needsReview) {
+            const valuesToReopen = finishedRunValues;
+            setIsReopeningResult(true);
+            queueMicrotask(() => {
+              isProgrammaticResetRef.current = false;
+              void reopenFinishedResult(valuesToReopen);
             });
             return;
           }
@@ -10153,10 +10280,11 @@ export function InvestCalcPage({
     ? describeMaoTarget(visibleDecisionTarget)
     : "Fix the criteria below before calculating";
   const focusedResultsMode =
-    Boolean(analysisResult) &&
-    showResults &&
-    !isCalculating &&
-    !isEditingAssumptions;
+    isReopeningResult ||
+    (Boolean(analysisResult) &&
+      showResults &&
+      !isCalculating &&
+      !isEditingAssumptions);
   const postAnalysisMode =
     Boolean(analysisResult) &&
     showResults &&
@@ -10365,8 +10493,9 @@ export function InvestCalcPage({
         return;
       }
       if (!inUrl) return;
-      // A run in flight keeps the entry: the result is about to return.
-      if (isCalculating) return;
+      // A run in flight keeps the entry: the result is about to return. So
+      // does a stored result that is being reopened for this very entry.
+      if (isCalculating || isReopeningResult) return;
       if (wasActive && resultEntryOverFormRef.current) {
         // Left the result from inside the app ("Edit assumptions", a new
         // analysis): step back onto the form's own entry instead of leaving
@@ -10381,7 +10510,7 @@ export function InvestCalcPage({
     } catch {
       // History is best-effort; the result itself is on screen either way.
     }
-  }, [isCalculatorReady, isCalculating, postAnalysisMode]);
+  }, [isCalculatorReady, isCalculating, isReopeningResult, postAnalysisMode]);
 
   // The listener is attached ONCE and reads the current state through a ref.
   // Re-subscribing after every render (the pattern the shell's New Analysis
@@ -10403,6 +10532,24 @@ export function InvestCalcPage({
         // Forward, onto the result's entry. The form entry is beneath it.
         resultEntryOverFormRef.current = true;
         if (isEditingAssumptions) handleBackToResult();
+      } else if (isReopeningResult) {
+        // Already putting the stored result back for this entry.
+      } else if (
+        !decisionBasisNeedsReviewRef.current &&
+        finishedRunToReopen(
+          normalizeReleasedInvestmentFormDraft(form.getValues()),
+        )
+      ) {
+        // Forward onto the result's entry after the page was reloaded on the
+        // form: the inputs are still the last finished run, so reopen it.
+        const valuesToReopen = finishedRunToReopen(
+          normalizeReleasedInvestmentFormDraft(form.getValues()),
+        );
+        if (valuesToReopen) {
+          resultEntryOverFormRef.current = true;
+          setIsReopeningResult(true);
+          void reopenFinishedResult(valuesToReopen);
+        }
       } else {
         try {
           window.history.replaceState(
@@ -11673,7 +11820,10 @@ export function InvestCalcPage({
             decision and its primary actions fit in the first phone viewport;
             128px pushed them 37px past an 844px fold. */}
         {!isEditingAssumptions &&
-          (showResults || isCalculating || analysisResult !== null) && (
+          (showResults ||
+            isCalculating ||
+            isReopeningResult ||
+            analysisResult !== null) && (
             <div
               // The region takes programmatic focus after a run (a landmark for
               // assistive tech, never a mouse target), so it draws no ring: the
@@ -11782,7 +11932,7 @@ export function InvestCalcPage({
                   }
                   inputConfidence={currentInputConfidence}
                   onToggleInputVerified={handleToggleInputVerified}
-                  isLoading={isCalculating}
+                  isLoading={isCalculating || isReopeningResult}
                   dealScoreResult={dealScoreResult}
                   isLoadingDealScore={isLoadingDealScore}
                   propertyType={propertyType}
@@ -11895,6 +12045,26 @@ export function InvestCalcPage({
                   canCompareDeals={canCompareDeals}
                   canExportPdf={canExportPdf || anonymousDecisionGrantAvailable}
                   canExportUnsavedPdf={anonymousDecisionGrantAvailable}
+                  anonymousFreeDecision={
+                    !isAuthenticated &&
+                    anonymousDecisionGrantAvailable &&
+                    !isSampleProPreview
+                  }
+                  // Anonymous free decision only (never the sample preview):
+                  // one field to email this memo. The dashboard sets it under
+                  // the decision card beside the save prompt; a failed send
+                  // can never hide the analysis.
+                  afterSavePromptSlot={
+                    memoCaptureEnabled &&
+                    !isAuthenticated &&
+                    anonymousDecisionGrantAvailable &&
+                    !isSampleProPreview ? (
+                      <MemoEmailCapture
+                        getValues={() => analysisValues}
+                        maoTarget={analysisMaoTarget}
+                      />
+                    ) : null
+                  }
                   // During the sample-deal Pro preview the analysis flags
                   // are OR'd open so the demo shows the real Pro report.
                   // Save / PDF / share / compare keep their true gating —
@@ -11941,18 +12111,6 @@ export function InvestCalcPage({
                   }
                 />
               </AnalysisErrorBoundary>
-              {/* Anonymous free decision only (never the sample preview):
-                  one field to email this memo. Inline under the result, so a
-                  failed send can never hide the analysis. */}
-              {memoCaptureEnabled &&
-              !isAuthenticated &&
-              anonymousDecisionGrantAvailable &&
-              !isSampleProPreview ? (
-                <MemoEmailCapture
-                  getValues={() => analysisValues}
-                  maoTarget={analysisMaoTarget}
-                />
-              ) : null}
             </div>
           )}
       </div>

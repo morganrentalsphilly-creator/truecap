@@ -731,6 +731,25 @@ textarea,
       scroll-padding-bottom: calc(9.5rem + env(safe-area-inset-bottom));
     }
   }
+  /* The result's "Save this deal free" bar (phones, anonymous visitors;
+     components/investcalc/sticky-save-bar.tsx): 65px on the bottom edge, or
+     on top of the cookie banner while that is open, like the run bar above.
+     Scoped to the widths where the bar is displayed; from 640px the element
+     is in the DOM but hidden, and must not move anything. */
+  @media (max-width: 639.9px) {
+    html:has([data-sticky-save-bar]) {
+      scroll-padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    }
+    body:has([data-sticky-save-bar]) [data-site-footer] {
+      padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+    }
+    html:has([data-cookie-consent-banner]):has([data-sticky-save-bar]) {
+      scroll-padding-bottom: calc(9.5rem + env(safe-area-inset-bottom));
+    }
+    body:has([data-cookie-consent-banner]):has([data-sticky-save-bar]) [data-site-footer] {
+      padding-bottom: calc(11.5rem + env(safe-area-inset-bottom));
+    }
+  }
   #main {
     scroll-margin-top: 0rem;
   }

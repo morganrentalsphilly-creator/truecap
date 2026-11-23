@@ -4,8 +4,9 @@
  * "Email me this decision memo" — one field, inline under the anonymous
  * visitor's free decision (docs/funnel-leaks-plan.md Phase A).
  *
- * An inline card, not an overlay: it sits after the result, never covers it,
- * and the result is fully usable whether or not the send succeeds. Turnstile
+ * An inline card, not an overlay: it sits under the decision card beside the
+ * save prompt (2026-11 ads pass, A1; the parent sets the gap), never covers
+ * the result, and the result is fully usable whether or not the send succeeds. Turnstile
  * loads only once the visitor focuses the field, so the analyzer's first
  * paint never waits on Cloudflare.
  *
@@ -102,7 +103,7 @@ export function MemoEmailCapture({ getValues, maoTarget }: Props) {
   return (
     <section
       aria-labelledby="memo-email-capture-title"
-      className="mt-6 rounded-2xl border border-border bg-card p-5 sm:p-6"
+      className="rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6"
     >
       {status === "success" ? (
         <div role="status">

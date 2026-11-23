@@ -24,24 +24,40 @@ import Link from "next/link";
 import { Loader2, X } from "lucide-react";
 import { GoogleAuthButton } from "@/components/auth/google-auth-button";
 import {
-  isTrueCapSyntheticSampleAddress,
-  SAMPLE_DEAL_DISPLAY,
-} from "@/lib/sample-deal";
+  PRODUCT_EVALUATION_COMPARISON_LIMIT,
+  PRODUCT_EVALUATION_DAYS,
+  PRODUCT_EVALUATION_DEAL_LIMIT,
+} from "@/lib/product-access";
 import { setPendingSaveIntent } from "@/lib/save-intent";
 import { trackEvent } from "@/lib/analytics";
 
 interface SignupPromptCardProps {
-  /** The address the user just analyzed; surfaced for personalization. */
-  address?: string;
   /** True when the viewer is signed in. If so, render nothing. */
   isAuthenticated: boolean;
+  /**
+   * True when the result on screen is this browser's no-signup decision (the
+   * exact Offer Ceiling was served for it). The body's first sentence says so
+   * only then: a sample deal or a later run is not "your free full decision".
+   */
+  isFreeDecision?: boolean;
   /** Persist the exact analysis snapshot before auth navigation begins. */
   onPrepareSaveIntent?: () => unknown;
 }
 
+/**
+ * What a free account adds, said at the result (2026-11 ads pass, A3). The
+ * trial's numbers come from lib/product-access.ts, never typed here.
+ */
+export function saveDealAccountPitch(isFreeDecision: boolean): string {
+  const comparisons = `${PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison${
+    PRODUCT_EVALUATION_COMPARISON_LIMIT === 1 ? "" : "s"
+  }`;
+  return `${isFreeDecision ? "This was your free full decision. " : ""}A free account saves it and adds a ${PRODUCT_EVALUATION_DAYS}-day trial with ${PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and ${comparisons}. No card.`;
+}
+
 export function SignupPromptCard({
-  address,
   isAuthenticated,
+  isFreeDecision = false,
   onPrepareSaveIntent,
 }: SignupPromptCardProps) {
   const [dismissed, setDismissed] = useState(false);
@@ -59,41 +75,29 @@ export function SignupPromptCard({
     trackEvent("signup_started", { placement: "analysis_result", method });
   };
 
-  const cleanAddress = (address ?? "").trim();
-  // The sample deal carries an internal placeholder address; show the same
-  // "Philadelphia rental example" label the decision card derives, never the
-  // raw fixture string. Real addresses keep their street line only so the
-  // headline never truncates mid-word.
-  const dealLabel = isTrueCapSyntheticSampleAddress(cleanAddress)
-    ? `this ${SAMPLE_DEAL_DISPLAY.shortAddress}`
-    : cleanAddress
-      ? cleanAddress.split(",")[0].trim().slice(0, 48) || "this analysis"
-      : "this analysis";
-
   return (
-    <div className="rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6">
-      {/* Header — pill + dismiss */}
+    <div
+      data-save-capture-card=""
+      className="rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6"
+    >
+      {/* The heading with its dismiss beside it: no tag above a heading
+          (DESIGN.md "Chrome"). The dismiss keeps its 44px target and takes
+          its padding back out of the row. */}
       <div className="flex items-start justify-between gap-3">
-        <span className="inline-flex items-center rounded-sm border border-border px-1.5 py-0.5 font-mono text-2xs text-muted-foreground">
-          Free plan
-        </span>
+        <h3 className="font-display text-balance text-xl text-foreground sm:text-2xl">
+          Save this deal free
+        </h3>
         <button
           type="button"
           onClick={() => setDismissed(true)}
           aria-label="Dismiss signup prompt"
-          className="inline-flex size-11 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-band hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          className="-mr-2 -mt-2 inline-flex size-11 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-band hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           <X className="size-4" />
         </button>
       </div>
-
-      {/* Headline */}
-      <h3 className="mt-3 font-display text-balance text-xl text-foreground sm:text-2xl">
-        Create an account to save {dealLabel}
-      </h3>
-      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-        Save this underwriting and reopen it anywhere. Create a free
-        account—we&apos;ll save this deal automatically.
+      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+        {saveDealAccountPitch(isFreeDecision)}
       </p>
 
       {/* What the free account gives: three rows on lines (stacked on

@@ -593,7 +593,9 @@ describe("result editing and deleted-deal recovery", () => {
     );
 
     expect(compact(calculator)).toContain(
-      "const focusedResultsMode = Boolean(analysisResult) && showResults && !isCalculating && !isEditingAssumptions",
+      // Also true while a stored result is being reopened (Back, Forward or a
+      // reload on ?view=result): the form stays hidden until it is back.
+      "const focusedResultsMode = isReopeningResult || (Boolean(analysisResult) && showResults && !isCalculating && !isEditingAssumptions)",
     );
     expect(compact(calculator)).toContain(
       "const postAnalysisMode = Boolean(analysisResult) && showResults && !isCalculating && !isEditingAssumptions",

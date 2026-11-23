@@ -8,6 +8,7 @@ import {
   useReducer,
   useRef,
   useState,
+  type ReactNode,
 } from "react";
 import Link from "next/link";
 import { Disclaimer } from "@/components/marketing/disclaimer";
@@ -150,6 +151,7 @@ import { Activity, Target } from "lucide-react";
 import { MomentOfValueUpsell } from "@/components/marketing/moment-of-value-upsell";
 import { trackEvent } from "@/lib/analytics";
 import { SignupPromptCard } from "@/components/marketing/signup-prompt-card";
+import { StickySaveBar } from "@/components/investcalc/sticky-save-bar";
 import { RateAlertsToggle } from "@/components/settings/rate-alerts-toggle";
 import { CashFlowWaterfall } from "@/components/investcalc/cash-flow-waterfall";
 import { MortgageScenarioCompare } from "@/components/investcalc/mortgage-scenario-compare";
@@ -304,6 +306,12 @@ interface AnalysisDashboardProps {
   /** Exact no-signup decision grants may export without first creating a
    * saved row. The server still binds the report to that exact input set. */
   canExportUnsavedPdf?: boolean;
+  /** Presentation only: the result on screen is this browser's no-signup
+   *  decision, so the save prompt may call it "your free full decision". */
+  anonymousFreeDecision?: boolean;
+  /** Rendered directly after the anonymous save prompt (the memo email
+   *  capture), so both asks sit under the decision card. */
+  afterSavePromptSlot?: ReactNode;
   canUseProjections?: boolean;
   canUseTaxStrategy?: boolean;
   canUseExitScenarios?: boolean;
@@ -530,6 +538,8 @@ export function AnalysisDashboard({
   canCompareDeals = false,
   canExportPdf = false,
   canExportUnsavedPdf = false,
+  anonymousFreeDecision = false,
+  afterSavePromptSlot = null,
   canUseProjections = false,
   canUseTaxStrategy = false,
   canUseExitScenarios = false,
@@ -819,6 +829,15 @@ export function AnalysisDashboard({
   // this - projections, illustrative tax impact, exit scenarios, Screening Index, and
   // every Pro panel stay anchored to the saved/base analysis. Sliders
   // are a "what-if peek" on headline numbers, not a full reanalysis.
+  // The visitor tapped Save, Share or a sign-up button and the page is about
+  // to leave for /auth. Preparing that hand-off re-commits the adopted target
+  // upstream (a new object, sometimes a new source label), and the ceiling
+  // used to be solved again for it: the card fell back to "Calculating…" and
+  // "No qualifying Offer Ceiling was found" for the seconds the navigation
+  // took, under a ceiling it had just shown (2026-11 ads pass, A6). While
+  // this is set, nothing is re-solved and the resolved result stays on
+  // screen. An edit to the targets or the assumptions clears it.
+  const [authHandoffActive, setAuthHandoffActive] = useState(false);
   const [whatIfState, setWhatIfState] = useState<WhatIfState | null>(null);
   const [scenarioResetNotice, setScenarioResetNotice] = useState(false);
   // Drives a remount key on the sliders so reopening the panel starts them at
@@ -842,6 +861,8 @@ export function AnalysisDashboard({
   useEffect(() => {
     if (previousBaseAssumptionsRef.current === baseAssumptionsSignature) return;
     previousBaseAssumptionsRef.current = baseAssumptionsSignature;
+    // New assumptions end the auth hand-off hold on the Offer Ceiling.
+    setAuthHandoffActive(false);
     if (whatIfState?.isAdjusted) {
       setWhatIfState(null);
       setWhatIfOpen(false);
@@ -953,6 +974,8 @@ export function AnalysisDashboard({
   }, [maoTargetAnalysisKey, resolvedMaoSeedKey, resolvedMaoSeed]);
   const handleMaoTargetChange = useCallback(
     (target: MaoTarget) => {
+      // An edit is a new question: the auth hand-off hold (below) ends.
+      setAuthHandoffActive(false);
       dispatchMaoTarget({ type: "edit", target });
       onMaoTargetChange?.(target);
     },
@@ -1018,11 +1041,26 @@ export function AnalysisDashboard({
     errorCode: "VALIDATION_ERROR" | "RATE_LIMITED" | "SERVER_ERROR" | "NETWORK" | null;
   }>({ key: null, status: "idle", payload: null, errorCode: null });
   const [offerCeilingRetryNonce, setOfferCeilingRetryNonce] = useState(0);
+  // What the last finished request resolved, so a re-render with the same
+  // request (same values, target and source, new object identities) does not
+  // ask the server again.
+  const resolvedOfferCeilingRef = useRef<{ key: string; nonce: number } | null>(
+    null,
+  );
   useEffect(() => {
+    if (authHandoffActive) return;
     if (!offerCeilingRequestKey || !values || !activeMaoTarget) {
+      resolvedOfferCeilingRef.current = null;
       setOfferCeilingResolution({ key: null, status: "idle", payload: null, errorCode: null });
       return;
     }
+    if (
+      resolvedOfferCeilingRef.current?.key === offerCeilingRequestKey &&
+      resolvedOfferCeilingRef.current.nonce === offerCeilingRetryNonce
+    ) {
+      return;
+    }
+    resolvedOfferCeilingRef.current = null;
     let cancelled = false;
     setOfferCeilingResolution({
       key: offerCeilingRequestKey,
@@ -1037,6 +1075,13 @@ export function AnalysisDashboard({
     })
       .then((resolved) => {
         if (cancelled) return;
+        // Only a served result is reused; a failure is asked for again.
+        if (resolved.ok) {
+          resolvedOfferCeilingRef.current = {
+            key: offerCeilingRequestKey,
+            nonce: offerCeilingRetryNonce,
+          };
+        }
         setOfferCeilingResolution({
           key: offerCeilingRequestKey,
           status: resolved.ok ? "ready" : "error",
@@ -1058,22 +1103,29 @@ export function AnalysisDashboard({
     };
   }, [
     activeMaoTarget,
+    authHandoffActive,
     offerCeilingRequestKey,
     offerCeilingRetryNonce,
     offerCeilingTargetSource,
     values,
   ]);
+  // During the auth hand-off the last resolved result stands, whatever the
+  // request key has become (see authHandoffActive above).
+  const offerCeilingHeldForHandoff =
+    authHandoffActive && offerCeilingResolution.status === "ready";
   const currentOfferCeilingPayload: OfferCeilingAccessPayload | null =
     recordedOfferCeiling
       ? canUseMaxOffer && recordedOfferCeiling.captured
         ? { access: "exact", exact: recordedOfferCeiling.exact }
         : null
-      : offerCeilingResolution.key === offerCeilingRequestKey &&
-          offerCeilingResolution.status === "ready"
+      : offerCeilingHeldForHandoff ||
+          (offerCeilingResolution.key === offerCeilingRequestKey &&
+            offerCeilingResolution.status === "ready")
         ? offerCeilingResolution.payload
         : null;
   const offerCeilingIsLoading = Boolean(
     !recordedOfferCeiling &&
+    !offerCeilingHeldForHandoff &&
     offerCeilingRequestKey &&
     (offerCeilingResolution.key !== offerCeilingRequestKey ||
       offerCeilingResolution.status === "loading"),
@@ -1081,6 +1133,12 @@ export function AnalysisDashboard({
   const offerCeilingHasError = Boolean(
     !recordedOfferCeiling && offerCeilingResolution.status === "error",
   );
+  /** Persist the hand-off draft upstream (always the adopted pair on screen)
+   *  without disturbing the result. Every auth hand-off goes through here. */
+  const prepareAuthHandoff = () => {
+    setAuthHandoffActive(true);
+    return onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource);
+  };
   const exactOfferCeiling =
     currentOfferCeilingPayload?.access === "exact"
       ? currentOfferCeilingPayload.exact
@@ -1143,10 +1201,7 @@ export function AnalysisDashboard({
   // Google OAuth and keeps a "Sign in" cross-link (which threads ?next)
   // for the rare returning user.
   const goToLogin = () => {
-    const intendedDraft = onPrepareAuthSave(
-      adoptedMaoTarget,
-      adoptedMaoTargetSource,
-    );
+    const intendedDraft = prepareAuthHandoff();
     setPendingSaveIntent(intendedDraft);
     router.push("/auth/sign-up?next=/dashboard/new");
   };
@@ -1495,6 +1550,36 @@ export function AnalysisDashboard({
   // Presentation only: reads the ALREADY-COMPUTED Screening Index. The
   // recommendation string is the INTERNAL enum; <Verdict> maps it.
   const decisionFirst = isFeatureEnabled("decision_first_results");
+  // The two asks an anonymous visitor gets at the result: save it to a free
+  // account, and email the memo. ONE instance of each, directly under the
+  // decision card and above the Deal score (2026-11 ads pass, A1: on a phone
+  // they used to start 5,200px down a 7,150px page). When the decision card
+  // is not what leads the result (a specialist strategy, the legacy layout,
+  // Buy Box rules still loading) the block keeps its old place after the
+  // report, so it still renders exactly once.
+  const saveCaptureBlock =
+    result && !isLoading && !isAuthenticated ? (
+      <div
+        id="save-this-deal"
+        data-save-capture=""
+        className="scroll-mt-24 space-y-3"
+      >
+        <SignupPromptCard
+          isAuthenticated={isAuthenticated}
+          isFreeDecision={anonymousFreeDecision}
+          onPrepareSaveIntent={prepareAuthHandoff}
+        />
+        {afterSavePromptSlot}
+      </div>
+    ) : null;
+  const saveCaptureUnderDecision = Boolean(
+    decisionFirst &&
+      !strategyLeadsOutput &&
+      !targetActionsBlocked &&
+      result &&
+      values &&
+      activeMaoTarget,
+  );
   return (
     <div className="space-y-6">
       {result && values ? (
@@ -1739,7 +1824,7 @@ export function AnalysisDashboard({
             savedDealId={savedDealId}
             isAuthenticated={isAuthenticated}
             onPrepareAuthShare={() => {
-              onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource);
+              prepareAuthHandoff();
             }}
             targetResolutionState={effectiveBuyBoxTargetResolutionState}
             targetResolutionMessage={targetActionsBlockedReason}
@@ -1748,6 +1833,7 @@ export function AnalysisDashboard({
             adoptedDecisionBasis={normalizedDecisionBasis}
           />
           </ResultReveal>
+          {saveCaptureUnderDecision ? saveCaptureBlock : null}
           {/* Screening Index — the FREE 0-100 heuristic sold on /pricing and
               computed on every run, which the decision-first rebuild left
               with no rendering surface. It lives OUTSIDE the decision card
@@ -2147,7 +2233,7 @@ export function AnalysisDashboard({
               disabled={targetActionsBlocked}
               disabledReason={targetActionsBlockedReason}
               onPrepareAuth={() => {
-                onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource);
+                prepareAuthHandoff();
               }}
             />
             {/* Mobile-only "More" overflow - Compare, New Analysis and
@@ -2755,8 +2841,8 @@ export function AnalysisDashboard({
           unchanged: keepMounted so its saved-comps mount fetch and
           on-demand pull-on-click economics are identical. */}
 
-      {/* The free-tier sign-up prompt (SignupPromptCard) mounts AFTER the
-          ledger, below every number; see the end of this component. */}
+      {/* The anonymous save prompt (SignupPromptCard) sits under the decision
+          card; see saveCaptureBlock. */}
       {/* Retention: when a signed-in user has a saved deal on screen, offer
           the rate-alert opt-in right where the intent is, instead of burying
           it in /settings. Self-hides if already enabled or the schema
@@ -3008,23 +3094,20 @@ export function AnalysisDashboard({
         </section>
       </ResultsRegionOrFragment>
 
-      {/* Free-tier prompt — ONE card, after the numbers, never between the
-          decision and the ledger (2026-10 polish). Decision tree:
-            - Anonymous user → SignupPromptCard (cheap "save this" ask).
-              Signing up is the lower-friction win; we don't double-up
-              with a Pro pitch on top of it.
-            - Signed-in free users already saw the deal-specific Offer Ceiling
-              upgrade moment directly after the answer above.
-            - Pro user → nothing renders here. */}
-      {result && !isLoading && !isAuthenticated && (
-        <SignupPromptCard
-          address={values?.address}
-          isAuthenticated={isAuthenticated}
-          onPrepareSaveIntent={() =>
-            onPrepareAuthSave(adoptedMaoTarget, adoptedMaoTargetSource)
-          }
+      {/* Free-tier prompt — ONE card. For an anonymous visitor it sits under
+          the decision card (saveCaptureBlock above); it renders here only
+          when no decision card leads the result. Signed-in free users
+          already saw the deal-specific Offer Ceiling upgrade moment after the
+          answer; a Pro user gets nothing. */}
+      {saveCaptureUnderDecision ? null : saveCaptureBlock}
+      {/* Phones: the save ask stays one tap away down the whole report. */}
+      {result && !isLoading && !isAuthenticated ? (
+        <StickySaveBar
+          onSave={handleSaveClick}
+          disabled={resultActionsBlocked}
+          disabledReason={resultActionsBlockedReason}
         />
-      )}
+      ) : null}
     </div>
   );
 }

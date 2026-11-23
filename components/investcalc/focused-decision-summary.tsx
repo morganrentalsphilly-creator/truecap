@@ -682,7 +682,12 @@ export function FocusedDecisionSummary({
             : "The operating economics above are available now. Review the downside and verify the assumptions before making your own decision.",
         }
     : !clearsTargets
-      ? offerCeiling
+      ? isOfferCeilingLoading && !offerCeiling && !rangePreview
+        ? // Still solving: say so, as the headline above does. This block
+          // used to fall through to "No qualifying Offer Ceiling was found"
+          // for as long as the request took (2026-11 ads pass, A6).
+          { label: "Calculating…", reason: "" }
+        : offerCeiling
         ? {
             label: bindingCriterionLabel
               ? `Review the binding rule: ${bindingCriterionLabel}`
@@ -964,6 +969,47 @@ export function FocusedDecisionSummary({
   const offerCeilingAnnouncement = `${isScenarioActive ? "Base " : ""}Offer Ceiling: ${offerCeilingHeadline}.${
     targetAdopted && !targetBlocked ? ` Targets: ${targetLabel}.` : ""
   }`;
+
+  // One Save button, placed by who is looking. Signed in: the outline "Save"
+  // after "Edit assumptions", as before. Anonymous: the row's filled primary,
+  // first, "Save this deal free" (it starts the free-account hand-off), on
+  // its own full-width line in the two-up phone grid.
+  const saveAction = (
+    <Button
+      type="button"
+      variant={isAuthenticated ? "outline" : "default"}
+      onClick={onSave}
+      disabled={isSaving || resultActionsBlocked}
+      data-result-save-action={isAuthenticated ? undefined : ""}
+      title={
+        resultActionsBlockedReason ??
+        (isSaveLocked ? saveLockedHint : undefined)
+      }
+      className={
+        isAuthenticated
+          ? "h-11 w-full gap-2 rounded-md max-[250px]:h-auto max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight sm:w-auto"
+          : "h-auto min-h-11 w-full gap-2 whitespace-normal rounded-md py-2 text-center leading-tight min-[320px]:col-span-2 sm:h-11 sm:w-auto sm:whitespace-nowrap sm:py-0"
+      }
+    >
+      {isSaving ? (
+        <Loader2 className="size-4 animate-spin" aria-hidden />
+      ) : (
+        <Save className="size-4" aria-hidden />
+      )}
+      {isSaving
+        ? "Saving…"
+        : isSaved
+          ? "Saved"
+          : isAuthenticated
+            ? "Save"
+            : "Save this deal free"}
+      {isSaveLocked ? (
+        <span className="ml-1 rounded-sm border border-border px-1.5 py-0.5 font-mono text-2xs text-muted-foreground">
+          Pro
+        </span>
+      ) : null}
+    </Button>
+  );
 
   return (
     <section
@@ -1280,10 +1326,16 @@ export function FocusedDecisionSummary({
         role="group"
         aria-label="Primary result actions"
       >
+        {/* An anonymous visitor's primary action is saving the deal to a
+            free account (2026-11 ads pass, A2): Save leads, filled, and the
+            targets control is the secondary one. A signed-in user keeps the
+            order and weights below unchanged. */}
+        {!isAuthenticated ? saveAction : null}
         {canTunePriceCeiling ? (
           <Button
             id="offer-ceiling-criteria-trigger"
             type="button"
+            variant={isAuthenticated ? "default" : "outline"}
             onClick={() => {
               if (tuneOpen) {
                 resetTargetDraft();
@@ -1315,6 +1367,9 @@ export function FocusedDecisionSummary({
         ) : !targetAdopted ? (
           <Button
             type="button"
+            // One filled action in the row: for an anonymous visitor that is
+            // Save, above.
+            variant={isAuthenticated ? "default" : "outline"}
             onClick={onUpgrade}
             // The conversion CTA crossed its own border below ~388px as a
             // nowrap run; it wraps on phones like its siblings now.
@@ -1337,29 +1392,7 @@ export function FocusedDecisionSummary({
           <Edit3 className="size-4" aria-hidden />
           Edit assumptions
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onSave}
-          disabled={isSaving || resultActionsBlocked}
-          title={
-            resultActionsBlockedReason ??
-            (isSaveLocked ? saveLockedHint : undefined)
-          }
-          className="h-11 w-full gap-2 rounded-md max-[250px]:h-auto max-[250px]:whitespace-normal max-[250px]:py-2 max-[250px]:text-center max-[250px]:leading-tight sm:w-auto"
-        >
-          {isSaving ? (
-            <Loader2 className="size-4 animate-spin" aria-hidden />
-          ) : (
-            <Save className="size-4" aria-hidden />
-          )}
-          {isSaving ? "Saving…" : isSaved ? "Saved" : "Save"}
-          {isSaveLocked ? (
-            <span className="ml-1 rounded-sm border border-border px-1.5 py-0.5 font-mono text-2xs text-muted-foreground">
-              Pro
-            </span>
-          ) : null}
-        </Button>
+        {isAuthenticated ? saveAction : null}
         <Button
           type="button"
           variant="outline"
