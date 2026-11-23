@@ -1,4 +1,6 @@
-import { Section, SectionHeading } from "@/components/marketing/section";
+import Link from "next/link";
+import { PAGE_CONTAINER, Section, SectionHeading } from "@/components/marketing/section";
+import { cn } from "@/lib/utils";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { formatPublishedMonth, ROLE_LABELS, type PublicTestimonial } from "@/lib/testimonials/rules";
 import { listPublishedTestimonials } from "@/lib/testimonials/store";
@@ -68,5 +70,78 @@ export async function Testimonials({
         ))}
       </div>
     </Section>
+  );
+}
+
+/**
+ * <QuoteStrip /> — the compact form of the same published rows (2026-11 ads
+ * pass, D1): the most recent one or two, for the pages a paid click lands on
+ * (/, /for-investors, /for-agents) and beside the sign-up form. It reads the
+ * same source as <Testimonials /> (status = 'published' only) and follows
+ * the same rule: with no rows, or on any read failure, it renders NOTHING,
+ * not a heading, a rule or a placeholder.
+ *
+ * "band" is a full-width strip under a page hero, set on the page container
+ * with one bottom line; "stacked" is a narrow column (the auth page).
+ */
+export async function QuoteStrip({
+  limit = 2,
+  variant = "band",
+  className,
+}: {
+  limit?: number;
+  variant?: "band" | "stacked";
+  className?: string;
+}) {
+  const rows = await loadPublishedTestimonials(limit);
+  if (rows.length === 0) return null;
+  const quotes = (
+    <>
+      <div
+        className={cn(
+          "grid gap-x-10 gap-y-5",
+          variant === "band" && rows.length > 1 ? "md:grid-cols-2" : null,
+        )}
+      >
+        {rows.map((t) => {
+          const who = attribution(t);
+          const when = formatPublishedMonth(t.publishedAt);
+          return (
+            <figure key={t.id} className="min-w-0">
+              <blockquote className="text-pretty text-base leading-relaxed text-foreground">
+                &ldquo;{t.quote}&rdquo;
+              </blockquote>
+              <figcaption className="mt-1.5 text-sm text-muted-foreground">
+                {who ? <span className="font-semibold text-foreground">{who}</span> : null}
+                {who && when ? " · " : null}
+                {when ? <time dateTime={t.publishedAt}>{when}</time> : null}
+              </figcaption>
+            </figure>
+          );
+        })}
+      </div>
+      <p className="mt-2 text-sm">
+        <Link href="/reviews" className="tc-link inline-flex min-h-11 items-center">
+          See verified proof &amp; methodology
+        </Link>
+      </p>
+    </>
+  );
+  return variant === "band" ? (
+    <section
+      aria-label="From people who use it"
+      data-quote-strip=""
+      className={cn("border-b border-border bg-background", className)}
+    >
+      <div className={cn(PAGE_CONTAINER, "pb-2 pt-6")}>{quotes}</div>
+    </section>
+  ) : (
+    <section
+      aria-label="From people who use it"
+      data-quote-strip=""
+      className={cn("border-t border-border pt-5", className)}
+    >
+      {quotes}
+    </section>
   );
 }
