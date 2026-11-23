@@ -312,7 +312,10 @@ export function Topbar({
                 : undefined
             }
             autoComplete="off"
-            className="h-11 w-full rounded-md border border-input bg-field pr-4 pl-10 text-base outline-none transition-[border-color,box-shadow] duration-150 focus:border-primary sm:text-sm focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            // placeholder:text-muted-foreground (audit C6): the browser
+            // default is the text colour at half opacity, about 3.0:1 on the
+            // field. The muted ink is the palette's AA text colour.
+            className="h-11 w-full rounded-md border border-input bg-field pr-4 pl-10 text-base outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-muted-foreground focus:border-primary sm:text-sm focus-visible:ring-[3px] focus-visible:ring-ring/50"
           />
           <span
             id="dashboard-search-status"

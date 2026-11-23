@@ -39,7 +39,10 @@ function MoneyField({
   name,
   label,
   hint,
-  placeholder = "0",
+  // No default placeholder (2026-11 audit C6). This card says a blank field
+  // and a typed 0 mean different things; a grey "0" in every empty money
+  // field made a blank one look like it already held the 0.
+  placeholder,
 }: {
   form: UseFormReturn<InvestmentFormValues>;
   name: MoneyFieldName;
