@@ -1511,6 +1511,7 @@ export function AnalysisDashboard({
               : (exactOfferCeiling?.presentation?.ceiling ?? null)
           }
           asking={Number(values.purchasePrice)}
+          ceilingLocked={!canUseMaxOffer}
         />
       ) : null}
       {/* Sample-deal Pro preview banner - one dismissible line on a 1px

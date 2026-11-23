@@ -20,12 +20,16 @@ export function ResultSummaryBar({
   anchor,
   ceiling,
   asking,
+  ceilingLocked = false,
 }: {
   /** The decision card; the bar shows once this has scrolled above the header. */
   anchor: HTMLElement | null;
   /** The exact Offer Ceiling when it is on screen. */
   ceiling: number | null;
   asking: number;
+  /** The plan does not include the Offer Ceiling: the bar says so instead of
+   *  printing a dash that reads as "no ceiling for this deal" (audit A4). */
+  ceilingLocked?: boolean;
 }) {
   const [visible, setVisible] = useState(false);
   const [decision, setDecision] = useState("");
@@ -72,7 +76,16 @@ export function ResultSummaryBar({
           {decision}
         </p>
         <p className="hidden shrink-0 font-figure text-sm text-foreground min-[480px]:block">
-          <span className="text-muted-foreground">Ceiling</span> {ceiling != null ? usd(ceiling) : "—"}
+          {ceilingLocked && ceiling == null ? (
+            <>
+              <span className="text-muted-foreground">Offer Ceiling:</span> Pro
+            </>
+          ) : (
+            <>
+              <span className="text-muted-foreground">Ceiling</span>{" "}
+              {ceiling != null ? usd(ceiling) : "—"}
+            </>
+          )}
           <span className="text-muted-foreground"> · Asking</span> {usd(asking)}
         </p>
         <button

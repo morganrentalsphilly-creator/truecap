@@ -172,9 +172,15 @@ export function LiveVerdictPanel({
               Your preliminary numbers will appear here
             </p>
             <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-              Enter the price and expected monthly rent to see a live screening
-              preview. Add the address when you&apos;re ready to run the full
-              analysis.
+              {hasInvalidInput ? (
+                "Fix the highlighted field to see the preview."
+              ) : (
+                <>
+                  Enter the price and expected monthly rent to see a live
+                  screening preview. Add the address when you&apos;re ready to
+                  run the full analysis.
+                </>
+              )}
             </p>
           </div>
         </aside>
@@ -302,9 +308,13 @@ export function LiveVerdictPanel({
               {runTargetsLine(runTargets)}
             </p>
           ) : null}
-          <p className="mt-2.5 text-2xs leading-snug text-muted-foreground">
-            Updating as you type — run the full analysis for your
-            Offer Ceiling, sensitivity, and 10-year cash-flow and equity projections.
+          <p
+            data-live-preview-footer=""
+            className="mt-2.5 text-sm leading-snug text-muted-foreground"
+          >
+            {proOutputsIncluded
+              ? "Updating as you type — run the full analysis for your Offer Ceiling, sensitivity, and 10-year cash-flow and equity projections."
+              : "Updating as you type. The full analysis adds the monthly breakdown, deal score and cash to close. Pro adds the Offer Ceiling, stress test and 10-year projections."}
           </p>
         </div>
       ) : null}

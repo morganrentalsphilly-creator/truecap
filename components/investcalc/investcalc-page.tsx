@@ -10254,6 +10254,12 @@ export function InvestCalcPage({
     window.dispatchEvent(new Event("tc-analyzer-engaged"));
   }, [analyzerEngaged]);
 
+  // A signed-in account whose plan does not include the Offer Ceiling (the
+  // existing entitlement flag). Anonymous visitors are not this: their first
+  // full decision includes it. Only this account's copy changes (audit A4):
+  // the form used to promise the ceiling, the stress test and the 10-year
+  // projections, and the free result then showed all three locked.
+  const freePlanWithoutProOutputs = isAuthenticated && !canUseMaxOffer;
   const liveFormValues = form.getValues();
   const liveResultSourceContext = resolveLiveInputConfidenceContext(
     liveFormValues,
@@ -10318,7 +10324,9 @@ export function InvestCalcPage({
                 and value fields can still be estimates. Every imported value
                 remains labeled and editable before calculation. */}
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-              Check cash flow and the price that meets your targets.
+              {freePlanWithoutProOutputs
+                ? "Check cash flow, cap rate and DSCR. Offer Ceiling is a Pro output."
+                : "Check cash flow and the price that meets your targets."}
               {!isAuthenticated
                 ? anonymousDecisionUsed
                   ? ANONYMOUS_DECISION_USED_INTRO
@@ -10941,6 +10949,11 @@ export function InvestCalcPage({
                       showGenericLivePreview ? livePreviewMsg : ""
                     }
                     assumptionBasis={livePreviewAssumptionBasis}
+                    proOutputsIncluded={!freePlanWithoutProOutputs}
+                    hasInvalidInput={Boolean(
+                      form.formState.errors.purchasePrice ||
+                        form.formState.errors.monthlyRent,
+                    )}
                     runTargets={visibleDecisionTarget ? decisionTargetLabel : null}
                     desktopAction={
                       <div>

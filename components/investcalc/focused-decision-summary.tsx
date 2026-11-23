@@ -918,6 +918,9 @@ export function FocusedDecisionSummary({
     !canShowPriceCeiling &&
     Boolean(rangePreview?.downsideFeasible) &&
     rangePreview?.lower != null;
+  // The plan does not include the Offer Ceiling and no criteria were adopted:
+  // the headline below reads "Available with Pro".
+  const offerCeilingLockedForPlan = !targetAdopted && !canTunePriceCeiling;
   const offerCeilingHeadline = !targetAdopted
     ? canTunePriceCeiling
       ? "Choose criteria"
@@ -1160,7 +1163,13 @@ export function FocusedDecisionSummary({
               </Button>
             </div>
           ) : null}
-          <details className="group tc-accordion mt-2 border-t border-border pt-1">
+          {/* Nothing was calculated while the ceiling is locked for the plan
+              ("Available with Pro" above), so there is no method to explain
+              (audit A4). */}
+          <details
+            hidden={offerCeilingLockedForPlan}
+            className="group tc-accordion mt-2 border-t border-border pt-1"
+          >
             <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-md text-xs font-semibold text-primary focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
               How this ceiling was calculated
               <ChevronDown
