@@ -389,8 +389,9 @@ export function AssumptionsStrip({
           role="dialog"
           aria-label={`Edit ${chipEditorName(chipId)}`}
           data-assumption-chip-editor={chip.id}
-          // The 10px float radius and a width that fits a phone.
-          className="w-[min(20rem,calc(100vw-2rem))] rounded-xl p-4"
+          // A width that fits a phone; the surface, float radius and shadow
+          // are the Popover primitive's.
+          className="w-[min(20rem,calc(100vw-2rem))] p-4"
           onKeyDown={(event) => {
             // Enter in a field means "done". The popover is portaled out of
             // the form in the DOM but not in React, so without this the
