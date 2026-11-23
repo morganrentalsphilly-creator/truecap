@@ -7,6 +7,31 @@ export function FieldError({ message, id }: { message?: string; id?: string }) {
   );
 }
 
+/**
+ * The one "Required" marker (2026-11 audit B5). Address showed it; purchase
+ * price and rent are just as required and showed nothing. It sits BESIDE the
+ * label, not inside it, and is hidden from assistive tech: the input's own
+ * `aria-required` says it there, and the label's accessible name stays the
+ * label.
+ */
+export function RequiredMark() {
+  return (
+    <span
+      aria-hidden="true"
+      className="text-xs font-semibold text-muted-foreground"
+    >
+      Required
+    </span>
+  );
+}
+
+/** The one "(optional)" marker: lower case, 12px, inside the label. */
+export function OptionalMark() {
+  return (
+    <span className="text-xs font-normal text-muted-foreground">(optional)</span>
+  );
+}
+
 export function optionalNumberSetValueAs(value: unknown) {
   if (value === "" || value == null) return undefined;
   const parsed = typeof value === "number" ? value : Number(value);

@@ -10,6 +10,8 @@ import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
 import {
   FieldError,
+  OptionalMark,
+  RequiredMark,
   isMinimumErrorHeldWhileTyping,
   optionalNumberSetValueAs,
 } from "@/components/investcalc/form-field-helpers";
@@ -113,12 +115,7 @@ export function PropertyDetailsSection({
         >
           Property Address
         </Label>
-        <span
-          aria-hidden="true"
-          className="text-xs font-semibold text-muted-foreground"
-        >
-          Required
-        </span>
+        <RequiredMark />
       </div>
       {/* First-run signpost (card chrome only — on the analyzer the page
           heading carries the one-line "Type an address — we fill your assumptions."
@@ -211,12 +208,15 @@ export function PropertyDetailsSection({
       )}
     >
       <div>
-        <Label
-          htmlFor="purchasePrice"
-          className="text-sm font-medium text-foreground mb-1.5 block"
-        >
-          {priceLabel ?? (bare ? "Price to analyze" : "Purchase Price")}
-        </Label>
+        <div className="mb-1.5 flex items-center gap-2">
+          <Label
+            htmlFor="purchasePrice"
+            className="text-sm font-medium text-foreground"
+          >
+            {priceLabel ?? (bare ? "Price to analyze" : "Purchase Price")}
+          </Label>
+          <RequiredMark />
+        </div>
         <div className="relative">
           <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Controller
@@ -337,8 +337,7 @@ export function YearBuiltField({
         htmlFor="yearBuilt"
         className="text-sm font-medium text-foreground mb-1.5 block"
       >
-        Year Built{" "}
-        <span className="text-xs text-muted-foreground">(Optional)</span>
+        Year Built <OptionalMark />
       </Label>
       <Input
         {...register("yearBuilt", { setValueAs: optionalNumberSetValueAs })}

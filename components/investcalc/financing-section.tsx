@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { isAllCashDownPayment } from "@/lib/financing-classification";
 import {
   FieldError,
+  OptionalMark,
   optionalNumberSetValueAs,
 } from "@/components/investcalc/form-field-helpers";
 import { GlossaryTip } from "@/components/investcalc/glossary-tip";
@@ -233,9 +234,7 @@ export function FinancingSection({
               {closingCostsInputMode === "fixed"
                 ? "Closing Costs $"
                 : "Closing Costs %"}{" "}
-              <span className="text-3xs text-muted-foreground sm:text-xs">
-                (Optional)
-              </span>
+              <OptionalMark />
             </Label>
             <GlossaryTip term="closingCosts" className="shrink-0 no-underline">
               <span className="sr-only">Closing costs guidance</span>
@@ -352,10 +351,7 @@ export function FinancingSection({
             htmlFor="rehabBudget"
             className="mb-1.5 block text-xs font-semibold text-muted-foreground [overflow-wrap:anywhere]"
           >
-            Rehab / Initial Repairs{" "}
-            <span className="text-3xs sm:text-xs text-muted-foreground">
-              (Optional)
-            </span>
+            Rehab / Initial Repairs <OptionalMark />
           </Label>
           <div className="relative">
             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

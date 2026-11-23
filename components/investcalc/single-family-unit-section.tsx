@@ -7,7 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InvestmentFormValues } from "@/lib/investcalc-schema";
 import { cn } from "@/lib/utils";
-import { FieldError } from "@/components/investcalc/form-field-helpers";
+import {
+  FieldError,
+  OptionalMark,
+  RequiredMark,
+} from "@/components/investcalc/form-field-helpers";
 import { CurrencyInput } from "@/components/ui/currency-input";
 
 /**
@@ -201,8 +205,7 @@ export function SingleFamilyUnitSection({
         {showBeds ? (
           <div>
             <Label htmlFor="bedrooms" className={plainLabelClassName}>
-              Bedrooms{" "}
-              <span className="text-xs text-muted-foreground">(optional)</span>
+              Bedrooms <OptionalMark />
             </Label>
             <Input
               {...register("bedrooms", { valueAsNumber: true })}
@@ -229,9 +232,15 @@ export function SingleFamilyUnitSection({
 
         {incomeMounted ? (
           <div className={cn(!showRent && "hidden")}>
-            <Label htmlFor="monthlyRent" className={plainLabelClassName}>
-              {rentLabel ?? "Expected gross monthly rent"}
-            </Label>
+            <div className="mb-1.5 flex items-center gap-2">
+              <Label
+                htmlFor="monthlyRent"
+                className="text-sm font-medium text-foreground"
+              >
+                {rentLabel ?? "Expected gross monthly rent"}
+              </Label>
+              <RequiredMark />
+            </div>
             <div className="relative">
               <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Controller
