@@ -60,7 +60,7 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
     // Batch triage stays paid-only. Evaluation users can spend their one
     // side-by-side comparison without inheriting this separate bulk tool;
     // `overview` is paid-plan-only while `compareDeals` may be evaluative.
-    { icon: ListChecks, label: "Screen a shortlist", href: "/dashboard/triage", enabled: navAccess.compareDeals && navAccess.overview },
+    { icon: ListChecks, label: "Screen a Shortlist", href: "/dashboard/triage", enabled: navAccess.compareDeals && navAccess.overview },
     { icon: FileBarChart, label: "Strategy Profiles", href: "/dashboard/templates", enabled: navAccess.templates },
     { icon: Users, label: "Clients", href: "/dashboard/clients", enabled: navAccess.clients },
     // Buy Boxes are decision criteria, not an account setting. Give them a
@@ -73,6 +73,68 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
     // hub that links to Branding, Defaults, and Billing sub-pages.
     { icon: Settings, label: "Settings", href: "/settings", enabled: true },
   ].map((item) => ({ ...item, active: isActive(item.href) }));
+
+  // Sidebar order (audit C4): the items this account can open come first, in
+  // their usual order, so a free account reads New Analysis, My Deals, Buy
+  // Boxes, Settings. Items that need a paid plan follow under one "Pro"
+  // label instead of being scattered through the list (half the rail used to
+  // be locked rows, the first one included). Clients is the exception it
+  // always was: an Agent-Pro-only surface is hidden, not greyed, for
+  // everyone else.
+  const visibleNav = nav.filter((item) => item.enabled || item.label !== "Clients");
+  const mainItems = visibleNav.filter((item) => item.enabled);
+  const proItems = visibleNav.filter((item) => !item.enabled);
+  const proGroupLabelId = mobile ? "sidebar-pro-group-mobile" : "sidebar-pro-group";
+
+  const renderItem = (item: (typeof nav)[number]) => {
+    const Icon = item.icon;
+    return (
+      <Link
+        key={item.label}
+        href={item.enabled ? item.href : "/pricing"}
+        // Prefetch ON for in-app dashboard nav (Jun 2026): these
+        // are the tabs a signed-in user bounces between; fetching
+        // the RSC payload on hover makes switches feel instant
+        // and pairs with the segment layout that keeps the shell
+        // mounted. The prefetch={false} convention elsewhere is
+        // for marketing surfaces, not the app shell.
+        prefetch={item.enabled}
+        aria-current={item.active ? "page" : undefined}
+        onClick={(event) => {
+          onNavigate?.();
+          if (
+            item.enabled &&
+            item.href.startsWith("/dashboard/new") &&
+            pathname === "/dashboard/new"
+          ) {
+            event.preventDefault();
+            requestMountedNewAnalysis();
+          }
+        }}
+        title={item.enabled ? undefined : `${item.label} is included with TrueCap Pro`}
+        className={`group flex min-h-11 items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-[color,background-color] duration-150 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+          item.active
+            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+        } ${item.enabled ? "" : "opacity-75 hover:opacity-100"}`}
+      >
+        <Icon className="h-[18px] w-[18px]" />
+        <span className="flex-1">{item.label}</span>
+        {item.badge && (
+          <span className="rounded-sm bg-sidebar-accent px-1.5 py-0.5 font-figure text-xs font-semibold text-sidebar-foreground/80">
+            {item.badge}
+          </span>
+        )}
+        {!item.enabled ? (
+          <span className="inline-flex items-center gap-1 rounded-sm bg-sidebar-accent px-1.5 py-0.5 font-figure text-xs text-sidebar-foreground/80">
+            <LockKeyhole className="size-3" aria-hidden />
+            Pro
+          </span>
+        ) : null}
+        {item.active && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
+      </Link>
+    );
+  };
 
   return (
     <aside
@@ -103,64 +165,14 @@ export function Sidebar({ activeDealCount, navAccess, mobile = false, onNavigate
         {/* Sentence case at 12px and 70% alpha: about 6:1 on the navy rail.
             It was 10px, tracked capitals at 40% alpha, about 2.8:1. */}
         <div className="px-3 mb-2 text-xs font-semibold text-sidebar-foreground/70">Main menu</div>
-        <nav aria-label={mobile ? "Dashboard (mobile)" : "Dashboard"} className="space-y-1">
-          {nav
-            // Disabled items normally render greyed as a one-tier-up upsell
-            // (Compare Deals to a Free user). Clients is different: it is an
-            // Agent-Pro-only surface, so greying it for every $29.99 Pro user
-            // adds a permanently dead row with no explanation — exactly the
-            // "confusing" chrome this workflow pass is removing. Hide it
-            // instead; every other item keeps the existing upsell behavior.
-            .filter((item) => item.enabled || item.label !== "Clients")
-            .map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.label}
-                href={item.enabled ? item.href : "/pricing"}
-                // Prefetch ON for in-app dashboard nav (Jun 2026): these
-                // are the tabs a signed-in user bounces between; fetching
-                // the RSC payload on hover makes switches feel instant
-                // and pairs with the segment layout that keeps the shell
-                // mounted. The prefetch={false} convention elsewhere is
-                // for marketing surfaces, not the app shell.
-                prefetch={item.enabled}
-                aria-current={item.active ? "page" : undefined}
-                onClick={(event) => {
-                  onNavigate?.();
-                  if (
-                    item.enabled &&
-                    item.href.startsWith("/dashboard/new") &&
-                    pathname === "/dashboard/new"
-                  ) {
-                    event.preventDefault();
-                    requestMountedNewAnalysis();
-                  }
-                }}
-                title={item.enabled ? undefined : `${item.label} is included with TrueCap Pro`}
-                className={`group flex min-h-11 items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-[color,background-color] duration-150 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
-                  item.active
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
-                } ${item.enabled ? "" : "opacity-75 hover:opacity-100"}`}
-              >
-                <Icon className="h-[18px] w-[18px]" />
-                <span className="flex-1">{item.label}</span>
-                {item.badge && (
-                  <span className="rounded-sm bg-sidebar-accent px-1.5 py-0.5 font-figure text-xs font-semibold text-sidebar-foreground/80">
-                    {item.badge}
-                  </span>
-                )}
-                {!item.enabled ? (
-                  <span className="inline-flex items-center gap-1 rounded-sm bg-sidebar-accent px-1.5 py-0.5 font-figure text-xs text-sidebar-foreground/80">
-                    <LockKeyhole className="size-3" aria-hidden />
-                    Pro
-                  </span>
-                ) : null}
-                {item.active && <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
-              </Link>
-            );
-          })}
+        <nav aria-label={mobile ? "Dashboard (mobile)" : "Dashboard"}>
+          <div className="space-y-1">{mainItems.map(renderItem)}</div>
+          {proItems.length > 0 ? (
+            <div role="group" aria-labelledby={proGroupLabelId}>
+              <div id={proGroupLabelId} className="px-3 mt-5 mb-2 text-xs font-semibold text-sidebar-foreground/70">Pro</div>
+              <div className="space-y-1">{proItems.map(renderItem)}</div>
+            </div>
+          ) : null}
         </nav>
       </div>
 
