@@ -2,10 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import {
-  HOMEPAGE_INVESTOR_FAQ_QUESTIONS,
-  homepageFaqItems,
-} from "@/components/marketing/landing-sections";
+import { homepageFaqItems } from "@/components/marketing/landing-sections";
 
 const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
 
@@ -34,20 +31,21 @@ describe("/for-investors page structure", () => {
     expect(close).toBeGreaterThan(mainStart);
     expect(close).toBeLessThan(mainEnd);
     expect(footer).toBeGreaterThan(mainEnd);
-    // One FAQ block. structuredData stays false: "/" already claims the
-    // question the two sets share (structured-data-f4.test.tsx).
+    // One FAQ block. structuredData stays false: "/" claims this set's
+    // FAQPage node (structured-data-f4.test.tsx).
     expect(source.match(/<HomepageFaq\b/g)).toHaveLength(1);
   });
 
-  // DESIGN.md "Homepage structure" 7: the homepage keeps a curated few of the
-  // investor questions. The rest live here, so this page has to render the
-  // full investor set and not a trimmed list.
-  it("renders the investor questions the homepage dropped", () => {
+  // Since the 2026-11 ads pass (C2) the homepage shows this same set, so the
+  // two pages cannot drift: this page renders the full investor set, and the
+  // homepage's is equal to it.
+  it("renders the full investor set, the one the homepage shows", () => {
     const investorSet = homepageFaqItems("investors").map((item) => item.q);
     const homepage = homepageFaqItems("home").map((item) => item.q);
 
-    for (const q of HOMEPAGE_INVESTOR_FAQ_QUESTIONS) expect(investorSet).toContain(q);
-    expect(investorSet.filter((q) => !homepage.includes(q)).length).toBeGreaterThan(0);
+    expect(investorSet).toContain("Is TrueCap really free?");
+    expect(investorSet.length).toBeGreaterThanOrEqual(5);
+    expect(homepage).toEqual(investorSet);
   });
 
   it("leaves the one Disclaimer to SiteFooter", () => {

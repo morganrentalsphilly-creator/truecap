@@ -11,28 +11,31 @@ describe("public funnel and trust guards", () => {
     const hero = read("components/marketing/marketing-hero.tsx");
     const form = read("components/marketing/hero-address-form.tsx");
 
-    // Short agent-focused lead; keep the investor route and free-entry terms.
+    // 2026-11 ads pass (C1): the hero leads with the investor; keep the
+    // agent route and the free-entry terms.
     expect(config).toContain(
-      'decision_system: "Send clients rentals that fit."',
+      'decision_system: "Know your max offer on any rental."',
     );
     expect(hero).toContain(
-      "Screen the listing, check your client's targets, and see the highest price that meets them.",
+      "Paste a listing or address. See cash flow, cap rate and DSCR at the asking price, and your Offer Ceiling: the highest price that still meets your targets.",
     );
     expect(hero).not.toContain('Send it co-branded."');
     expect(hero).not.toMatch(/\b\d+ seconds|about a minute/);
-    expect(hero).toContain('href="/for-investors"');
-    expect(hero).toContain("data-hero-investor-cue");
-    // The investor cue comes before the form
+    expect(hero).toContain('href="/for-agents"');
+    expect(hero).toContain("data-hero-agent-cue");
+    // The agent cue comes before the form
     // and the risk line in the source (so in the DOM and on screen).
     expect(hero.replace(/\s+/g, " ")).toContain(
-      "Buying for yourself?",
+      "Working with investor clients?",
     );
-    const cueAt = hero.indexOf('data-hero-investor-cue=""');
+    const cueAt = hero.indexOf('data-hero-agent-cue=""');
     const formAt = hero.indexOf("<HeroAddressForm className");
     expect(cueAt).toBeGreaterThan(-1);
     expect(formAt).toBeGreaterThan(cueAt);
     expect(hero.indexOf("Free. No account. Your first full decision is included.")).toBeGreaterThan(formAt);
-    expect(hero.slice(cueAt, formAt)).toContain('href="/for-investors"');
+    expect(hero.slice(cueAt, formAt)).toContain('href="/for-agents"');
+    // The cue links a page that redirects where Agent Pro is not sold.
+    expect(hero).toContain("{agentProConfigured ? (");
     expect(hero).toContain("Cash flow · Cap rate · Cash-on-cash return · DSCR · Editable");
     expect(hero).toContain(
       "Free. No account. Your first full decision is included.",
@@ -81,12 +84,12 @@ describe("public funnel and trust guards", () => {
   // 2026-09 design pass (DESIGN.md "Homepage structure", approved at
   // checkpoint 1): the opened ledger replaced the problem block's three
   // question cards, and "What your client receives" joined the page.
-  it("keeps the homepage tail to how-it-works, sources, client, offer, founder, proof, FAQ, and final CTA blocks", () => {
+  it("keeps the homepage tail to how-it-works, sources, the agent band, offer, founder, proof, FAQ, and final CTA blocks", () => {
     for (const path of ["app/page.tsx", "app/home-authed/page.tsx"]) {
       const page = read(path);
       for (const component of [
         "HowTrueCapWorks",
-        "ClientReceivesSection",
+        "ForAgentsBand",
         "PdfProUpsell",
         "DataSourcesSection",
         "BuiltByInvestor",

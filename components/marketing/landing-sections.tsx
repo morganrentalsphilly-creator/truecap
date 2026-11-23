@@ -1,8 +1,9 @@
 /**
  * The homepage sections below the hero, in page order (DESIGN.md "Homepage
  * structure"): the ledger opened row by row (HowTrueCapWorks), where the
- * numbers come from (DataSourcesSection), what the client receives
- * (ClientReceivesSection), the plans (PdfProUpsell), who builds it
+ * numbers come from (DataSourcesSection), one band for agents
+ * (ForAgentsBand; the co-branding preview it replaced is MakeItYoursSection,
+ * on /for-agents since the 2026-11 ads pass), the plans (PdfProUpsell), who builds it
  * (BuiltByInvestor), verified proof (SocialProof, empty until real records
  * exist), the questions (HomepageFaq) and the close (FinalCta). FaqSection
  * (defined in faq-section.tsx, re-exported here), HomepageFaq and
@@ -41,13 +42,11 @@ import { DisclosureMark, LedgerVerdict } from "@/components/ledger/ledger-parts"
 import { formatDscr } from "@/lib/financial-presentation";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import type { ReactNode } from "react";
-import { ClientPdfCover } from "@/components/marketing/client-pdf-cover";
 import { FaqSection } from "@/components/marketing/faq-section";
 import { Note } from "@/components/marketing/page-parts";
 import { PAGE_CONTAINER, Section, SectionHeading } from "@/components/marketing/section";
 import { OpenLedger } from "@/components/ledger/open-ledger";
 import { buttonVariants } from "@/components/ui/button";
-import { CLIENT_RECEIVES } from "@/lib/client-receives";
 import {
   formatPublicUsd,
   PUBLIC_AGENT_PRO_ANNUAL_USD,
@@ -73,9 +72,11 @@ export { FaqSection };
  * The scroll story (OVERHAUL.md §6.2, DESIGN.md "The homepage" 2): one pinned
  * sheet, built from real parts with the sample deal's figures, that changes
  * as three steps scroll past. Step 1 pastes the listing and the starting
- * values fill in with their source chips; step 2 runs the Buy Box check and
- * the binding target lights up; step 3 resolves the Offer Ceiling and the
- * send-to-client card arrives. From 1024px ONE sheet is sticky beside the
+ * values fill in with their source chips; step 2 checks it against the
+ * visitor's targets and the binding target lights up; step 3 resolves the
+ * Offer Ceiling and the share card arrives. First person since the 2026-11
+ * ads pass (C2): the homepage speaks to the investor, and the client framing
+ * of the same three steps lives on /for-agents. From 1024px ONE sheet is sticky beside the
  * steps and accumulates each step's rows (audit A16; StoryObserver arms the
  * entrance); on phones each step keeps its own frame in flow, and without
  * JavaScript the sheet is complete. The full line items
@@ -84,18 +85,18 @@ export { FaqSection };
 const STORY_STEPS = [
   {
     n: 1,
-    title: "Paste the listing at the showing",
+    title: "Paste the listing",
     body: "Rent fills from HUD and the rate from FRED, each labeled. Property tax stays your input, because a state average is not a parcel bill. Every assumption is yours to change.",
   },
   {
     n: 2,
-    title: "Screen it against the client's Buy Box",
-    body: "Cash flow, cap rate, cash-on-cash and DSCR at the asking price, a 0–100 Deal score, and whether it meets the client's targets, with the criterion it misses if it doesn't.",
+    title: "Check it against your targets",
+    body: "Cash flow, cap rate, cash-on-cash and DSCR at the asking price, a 0–100 Deal score, and whether it meets your targets, with the criterion it misses if it doesn't.",
   },
   {
     n: 3,
-    title: "Send the Offer Ceiling, co-branded",
-    body: "The highest price that still meets the client's targets, the assumptions most likely to break the deal, and a memo the client opens without an account and can rerun with their own numbers. The Offer Ceiling and the memo are included in your first complete decision; co-branding comes with Pro and Agent Pro.",
+    title: "Know your Offer Ceiling",
+    body: "The highest price that still meets your targets, the assumptions most likely to break the deal, and a memo anyone you send it to opens without an account and can rerun with their own numbers. The Offer Ceiling and the memo are included in your first complete decision; co-branding comes with Pro and Agent Pro.",
   },
 ] as const;
 
@@ -188,7 +189,7 @@ function StoryCeilingRows({ ledger }: { ledger: SampleDealLedger }) {
         Meets the Buy Box: <LedgerVerdict pass={ledger.meetsTargets.ceiling}>{ledger.meetsTargets.ceiling ? "Yes" : "No"}</LedgerVerdict>.
       </p>
       <div className="mt-3 border-t border-border pt-3 text-sm">
-        <p className="font-semibold">Send to client</p>
+        <p className="font-semibold">Share it</p>
         <p className="text-muted-foreground">A share link that opens without an account, and the decision memo, co-branded with Pro.</p>
       </div>
     </>
@@ -263,7 +264,7 @@ function StoryFrames({ ledger, only }: { ledger: SampleDealLedger; only?: 1 | 2 
         <div data-story-frame="3" className={frameClass}>
           <p className={caption}>
             <span>Step 3 · the Offer Ceiling</span>
-            <span>send to client</span>
+            <span>share it</span>
           </p>
           <div className="mt-3">
             <StoryCeilingRows ledger={ledger} />
@@ -359,9 +360,7 @@ export function BuiltByInvestor() {
   return (
     <Section rhythm="tight" data-homepage-block="built-by-investor">
       <div className="max-w-[68ch]">
-        <SectionHeading>
-          Built by a rental investor. Now built for the agents who serve them, too.
-        </SectionHeading>
+        <SectionHeading>Built by a rental investor.</SectionHeading>
         <p className="mt-4 text-lg leading-relaxed">
           TrueCap is built by one person, a rental investor in Philadelphia, to
           answer one question before every offer: what price makes this
@@ -390,8 +389,9 @@ export function FinalCta() {
     <section className="bg-navy-grid text-navy-foreground" aria-labelledby="final-cta-heading" data-sticky-suppress="">
       <div className={cn(PAGE_CONTAINER, "grid gap-x-12 gap-y-6 py-18 sm:py-24 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-end xl:gap-x-16")}>
         <div>
+          {/* The /for-investors close, word for word (2026-11 ads pass, C2). */}
           <h2 id="final-cta-heading" className="font-display text-balance text-section-sm text-white sm:text-section">
-            Paste the listing. Send the deal that already pencils.
+            Paste a listing. See if it works before you write the offer.
           </h2>
           <p className="mt-4 max-w-[56ch] text-pretty text-lg leading-relaxed text-navy-muted">
             Your first complete decision includes cash flow, cap rate, CoC, DSCR,
@@ -401,12 +401,16 @@ export function FinalCta() {
         </div>
         <div>
           <HeroAddressForm placement="close" tone="dark" className="max-w-none lg:mt-0" />
-          <p className="mt-4 border-t border-navy-line pt-2.5 text-base text-navy-muted">
-            Buying for your own portfolio?{" "}
-            <IntentPrefetchLink href="/for-investors" className="-my-3 inline-block py-3 text-white underline underline-offset-[3px]">
-              See TrueCap for investors
-            </IntentPrefetchLink>
-          </p>
+          {/* /for-agents redirects while Agent Pro is unconfigured, so the
+              link renders only behind the same gate as its sitemap entry. */}
+          {isAgentProConfigured() ? (
+            <p className="mt-4 border-t border-navy-line pt-2.5 text-base text-navy-muted">
+              Working with investor clients as an agent?{" "}
+              <IntentPrefetchLink href="/for-agents" className="-my-3 inline-block py-3 text-white underline underline-offset-[3px]">
+                See TrueCap for agents
+              </IntentPrefetchLink>
+            </p>
+          ) : null}
         </div>
       </div>
     </section>
@@ -704,40 +708,14 @@ const HOMEPAGE_FAQS: { q: string; a: string }[] = [
 ];
 
 /**
- * The homepage's eight (DESIGN.md "Homepage structure" 7): the agent
- * questions that no section above already answers, plus the price question.
- * Every other question stays on /for-agents or /for-investors.
+ * The questions HomepageFaq shows for an audience, in order. The homepage
+ * shows the investor set, the one /for-investors shows (2026-11 ads pass,
+ * C2: the homepage speaks to the investor first). The agent questions are on
+ * /for-agents, and both sets on /why-truecap.
  */
-export const HOMEPAGE_AGENT_FAQ_QUESTIONS = [
-  "My investor clients run their own numbers. Why would I need this?",
-  "Am I giving investment advice?",
-  "Do my clients need a TrueCap account to view what I send?",
-  "What does the client see? Is it my branding or TrueCap's?",
-  "Can I keep different criteria for different investor clients?",
-  "Does it work on my phone at a showing?",
-  "My brokerage already gives me tools.",
-] as const;
-export const HOMEPAGE_INVESTOR_FAQ_QUESTIONS = ["Is TrueCap really free?"] as const;
-
-function pickFaqs(
-  source: readonly { q: string; a: string }[],
-  questions: readonly string[],
-): { q: string; a: string }[] {
-  // A renamed question drops out rather than breaking the static page;
-  // homepage-faq.test.ts fails on it instead.
-  return questions.flatMap((q) => source.filter((faq) => faq.q === q));
-}
-
-/** The questions HomepageFaq shows for an audience, in order. */
 export function homepageFaqItems(
   audience: "home" | "both" | "investors",
 ): { q: string; a: string }[] {
-  if (audience === "home") {
-    return [
-      ...pickFaqs(AGENT_FAQS, HOMEPAGE_AGENT_FAQ_QUESTIONS),
-      ...pickFaqs(HOMEPAGE_FAQS, HOMEPAGE_INVESTOR_FAQ_QUESTIONS),
-    ];
-  }
   return audience === "both" ? [...AGENT_FAQS, ...HOMEPAGE_FAQS] : [...HOMEPAGE_FAQS];
 }
 
@@ -747,7 +725,7 @@ export function HomepageFaq({
 }: {
   structuredData?: boolean;
   /**
-   * "home" (the homepage): the curated eight under one heading.
+   * "home" (the homepage): the investor set, under the /for-investors heading.
    * "both" (/why-truecap): the agent set, then the investor set.
    * "investors" (/for-investors): the investor set alone.
    * Whatever shows, ONE FAQPage node carries exactly the visible questions:
@@ -762,7 +740,7 @@ export function HomepageFaq({
       {audience === "home" ? (
         <FaqSection
           id="questions"
-          heading="The questions agents ask first."
+          heading="The questions investors ask first."
           items={allItems}
           structuredData={false}
           layout="split"
@@ -846,18 +824,51 @@ export function DataSourcesSection() {
   );
 }
 
+// ───────────────────────────────────────── For agents (the homepage band)
+/**
+ * The homepage's one section for agents (2026-11 ads pass, C2): a compact
+ * band that sends an agent to /for-agents, where the co-branding preview and
+ * "What your client receives" now live. Every sentence is one the site
+ * already prints: the heading is the hero's agent cue, the line is the Agent
+ * Pro plan card's lead, the link is the /for-investors close's. It renders
+ * only where Agent Pro is sold (/for-agents redirects otherwise).
+ */
+export function ForAgentsBand() {
+  if (!isAgentProConfigured()) return null;
+  return (
+    <Section rhythm="tight" aria-labelledby="for-agents-band-heading" data-homepage-block="for-agents">
+      <div className="flex flex-col gap-x-12 gap-y-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="max-w-[62ch]">
+          <SectionHeading id="for-agents-band-heading">Working with investor clients?</SectionHeading>
+          <p className="mt-3 text-pretty text-lg leading-relaxed text-muted-foreground">
+            Screen each listing against the client&apos;s own Buy Box and send
+            the decision memo, co-branded, under your name.
+          </p>
+        </div>
+        <IntentPrefetchLink
+          href="/for-agents"
+          className={buttonVariants({ variant: "outline", size: "cta", className: "shrink-0 self-start lg:self-auto" })}
+        >
+          See TrueCap for agents
+        </IntentPrefetchLink>
+      </div>
+    </Section>
+  );
+}
+
 // ───────────────────────────────────────── Make it yours
 /**
- * The co-branding preview (OVERHAUL.md §6.4): the visitor types a name and
+ * The co-branding preview (OVERHAUL.md §6.4), on /for-agents since the
+ * 2026-11 ads pass (it was a homepage section): the visitor types a name and
  * picks a color, and a mock share page and PDF cover recolor live
  * (components/home/cobrand-preview.tsx), composed from the real parts with
  * the sample deal's own figures (the ledger, lib/sample-deal-ledger.ts, and
  * the product's verdict label, lib/decision-contract.ts). What the client
  * receives, exactly (lib/client-receives.ts) and page 1 of the real PDF
- * report (ClientPdfCover, shared with /for-agents) sit behind one
- * disclosure: the facts stay on the page and the section keeps its weight.
+ * report are the section that follows it on /for-agents, so the disclosure
+ * that repeated them on the homepage is not carried over.
  */
-export function ClientReceivesSection() {
+export function MakeItYoursSection() {
   const ledger = buildSampleDealLedger();
   const dscrTarget = ledger?.target.dscr ?? null;
   const sample: CoBrandSample | null = ledger
@@ -894,33 +905,17 @@ export function ClientReceivesSection() {
       }
     : null;
   return (
-    <Section id="what-your-client-receives" aria-labelledby="client-receives-heading">
+    <Section id="make-it-yours" aria-labelledby="make-it-yours-heading">
       <div className="max-w-3xl">
-        <SectionHeading id="client-receives-heading">Make it yours.</SectionHeading>
+        <SectionHeading id="make-it-yours-heading">Make it yours.</SectionHeading>
+        {/* The rest of the homepage sentence ("no account on their side…
+            Branding is set up once in Settings…") is the lede of the section
+            that follows on /for-agents, so it is not said twice. */}
         <p className="mt-3 max-w-[60ch] text-lg leading-relaxed text-muted-foreground">
-          Type a name and pick a color: this is what your client opens, with no
-          account on their side and nothing hidden on yours. Branding is set up
-          once in Settings and applies to every link and report.
+          Type a name and pick a color: this is what your client opens.
         </p>
       </div>
       {sample ? <CoBrandPreview sample={sample} className="mt-8" /> : null}
-      <details className="tc-accordion group mt-10 border-t border-border">
-        <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 py-3 text-base font-semibold [&::-webkit-details-marker]:hidden">
-          What your client receives, exactly
-          <DisclosureMark />
-        </summary>
-        <div className="grid gap-x-16 gap-y-10 pb-4 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-          <dl className="border-t border-border">
-            {CLIENT_RECEIVES.map((item) => (
-              <div key={item.key} className="border-b border-rule-soft py-4">
-                <dt className="text-lg font-semibold">{item.title}</dt>
-                <dd className="mt-1 max-w-[64ch] text-base leading-relaxed text-muted-foreground">{item.body}</dd>
-              </div>
-            ))}
-          </dl>
-          <ClientPdfCover className="lg:pt-2" />
-        </div>
-      </details>
     </Section>
   );
 }

@@ -40,7 +40,7 @@ import { LedgerFigure } from "@/components/ledger/ledger-parts";
 import { SampleClientPreview, SampleClientWorkflow } from "@/components/marketing/sample-client-workflow";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
-import { FaqSection } from "@/components/marketing/landing-sections";
+import { FaqSection, MakeItYoursSection } from "@/components/marketing/landing-sections";
 import {
   ActionRow,
   CloseSection,
@@ -249,10 +249,15 @@ export default async function ForAgentsPage() {
             lib/proof-records.ts gate (first consumer of VERIFIED_AGENT_PROOF). */}
         <AgentProofSection />
 
-        {/* What your client receives: the list is shared with the homepage
-            (lib/client-receives.ts), and so is the picture beside it, page 1
-            of the real PDF report (ClientPdfCover). The hero's aside shows calculated
-            sample client results. */}
+        {/* The co-branding preview, moved here from the homepage (2026-11
+            ads pass, C2): type a name, pick a color, and the client's share
+            page and PDF cover recolor. */}
+        <MakeItYoursSection />
+
+        {/* What your client receives: the list (lib/client-receives.ts) and
+            the picture beside it, page 1 of the real PDF report
+            (ClientPdfCover). The hero's aside shows calculated sample client
+            results. */}
         <Section id="what-your-client-receives" aria-labelledby="client-receives">
           <div className="grid gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
             <div className="min-w-0">

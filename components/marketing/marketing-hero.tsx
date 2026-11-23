@@ -6,11 +6,12 @@
  * Desktop: a 5/7 grid from 1024px, headline and the address form on the
  * left, the sheet in the wider column. The display size eases between 900
  * and 1280px (--text-display) so the headline keeps to four lines and the
- * form stays in the first screen of a 1095x760 window. The investor cue sits
- * ABOVE the address form at every width (founder ruling, 2026-10-03), so the
- * cookie banner cannot cover it on a short phone. Below 1024px: one column,
- * the sheet (its price track and Offer Ceiling first) directly under the form
- * and the risk line, the listing helper line under the sheet (audit A8).
+ * form stays in the first screen of a 1095x760 window. The hero speaks to the
+ * investor (2026-11 ads pass, C1); the agent cue sits ABOVE the address form
+ * at every width (the place the founder ruled for the audience cue,
+ * 2026-10-03), so the cookie banner cannot cover it on a short phone. Below
+ * 1024px: one column, the sheet (its price track and Offer Ceiling first)
+ * directly under the form and the risk line.
  *
  * SERVER COMPONENT. The sheet is set from the engine's own sample-deal output
  * at build time (lib/sample-deal-ledger.ts, lib/sample-deal-sweep.ts) and
@@ -20,12 +21,12 @@
 
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { HeroAddressForm } from "@/components/marketing/hero-address-form";
-import { HERO_LISTING_EXPECTATION } from "@/lib/hero-copy";
 import { HeroSheet } from "@/components/home/hero-sheet";
 import { PAGE_CONTAINER } from "@/components/marketing/section";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
 import { buildSampleDealLedger } from "@/lib/sample-deal-ledger";
 import { buildSampleDealSweep } from "@/lib/sample-deal-sweep";
+import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { cn } from "@/lib/utils";
 
 /** The walkthrough section's anchor (HowTrueCapWorks in landing-sections). */
@@ -36,6 +37,9 @@ export function MarketingHero() {
     getMarketingOfferConfig();
   const ledger = buildSampleDealLedger();
   const sweep = buildSampleDealSweep();
+  // /for-agents redirects while Agent Pro is not sold on this deployment, so
+  // the cue renders behind the same gate as the page (as /for-investors does).
+  const agentProConfigured = isAgentProConfigured();
   return (
     // data-page-hero: this bottom rule is the one rule under the hero; the
     // story Section after it drops its own (components/marketing/section.tsx).
@@ -62,7 +66,7 @@ export function MarketingHero() {
           </h1>
           <p className="mt-4 max-w-[46ch] text-pretty text-lg leading-normal text-muted-foreground sm:mt-5">
             {newHomepagePositioningEnabled
-              ? "Screen the listing, check your client's targets, and see the highest price that meets them."
+              ? "Paste a listing or address. See cash flow, cap rate and DSCR at the asking price, and your Offer Ceiling: the highest price that still meets your targets."
               : "Enter an address, the asking price and a bedroom count for a first-pass screen with labeled, editable assumptions. Pro adds the Offer Ceiling: the highest price that still meets your targets."}
           </p>
           {/* The math supports the decision; it is not the headline. */}
@@ -79,41 +83,34 @@ export function MarketingHero() {
             </p>
           ) : null}
 
-          {/* The investor cue (2026-09 agent-first pass): the hero addresses
-              the agent, so the investor buying for their own portfolio gets
-              one unmissable line pointing at the investor hub. It sits ABOVE
-              the form (audit row P1-01): under the form it was covered by
-              the cookie banner at 390x664, 393x659, 375x667 and 375x629. No
-              rule and 12px margins, so at 375x629 the primary button still
-              ends above the banner. */}
-          <p data-hero-investor-cue="" className="mt-3 text-base">
-            Buying for yourself?{" "}
-            {/* A 44px tap target from padding that the negative margin takes
-                back out of the line box, so the cue keeps its body leading. */}
-            <IntentPrefetchLink href="/for-investors" className="tc-link -my-3 inline-block py-3">
-              For investors
-            </IntentPrefetchLink>
-          </p>
+          {/* The agent cue (2026-11 ads pass, C1): the hero addresses the
+              investor, so an agent with investor clients gets one line
+              pointing at the agent page. It sits ABOVE the form (audit row
+              P1-01, when it was the investor cue): under the form it was
+              covered by the cookie banner at 390x664, 393x659, 375x667 and
+              375x629. No rule and 12px margins, so at 375x629 the primary
+              button still ends above the banner. */}
+          {agentProConfigured ? (
+            <p data-hero-agent-cue="" className="mt-3 text-base">
+              Working with investor clients?{" "}
+              {/* A 44px tap target from padding that the negative margin takes
+                  back out of the line box, so the cue keeps its body leading. */}
+              <IntentPrefetchLink href="/for-agents" className="tc-link -my-3 inline-block py-3">
+                For agents
+              </IntentPrefetchLink>
+            </p>
+          ) : null}
 
           {/* The one primary action; its secondary is the sample-deal link.
               mt-3 on phones (the form's own default is mt-5): the cue above
               it is the gap. From 640px the form keeps its sm:mt-7. */}
-          <HeroAddressForm className="mt-3" listingExpectation={false} />
+          <HeroAddressForm className="mt-3" />
 
           {/* The full risk reversal stays next to the primary action at every
               viewport: paid mobile traffic must not have to infer account or
               card requirements. */}
           <p className="mt-3 text-sm text-muted-foreground">
             Free. No account. Your first full decision is included.
-          </p>
-
-          {/* Helper line: after the form at every width, so it never moves
-              the field or the button; below 1024px it follows the sheet. */}
-          <p
-            data-hero-listing-expectation=""
-            className="mt-2 max-w-[62ch] text-pretty text-sm text-muted-foreground max-lg:order-2 max-lg:mt-5"
-          >
-            {HERO_LISTING_EXPECTATION}
           </p>
         </div>
 

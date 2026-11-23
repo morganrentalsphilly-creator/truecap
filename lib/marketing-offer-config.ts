@@ -13,9 +13,10 @@
  */
 
 export const HOMEPAGE_HEADLINES = {
-  // Agent-first (2026-09 pass): the homepage headline is the agent's outcome;
-  // the subhead (marketing-hero.tsx) keeps the product's topical nouns.
-  decision_system: "Send clients rentals that fit.",
+  // Investor-first (2026-11 ads pass, C1): the homepage leads with the
+  // investor's outcome; agents get one cue under the subhead
+  // (marketing-hero.tsx) and their own page.
+  decision_system: "Know your max offer on any rental.",
   a: "Screen a rental and compare asking with its Offer Ceiling.",
   b: "See how a rental models under the assumptions shown.",
   walkaway: "Review the Offer Ceiling and the targets that produced it.",

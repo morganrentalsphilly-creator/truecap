@@ -78,9 +78,15 @@ describe("customer-facing decision vocabulary", () => {
     // source for /pricing and the homepage (plan-answers.ts), which explains
     // the Offer Ceiling without "walk-away price", so that mention left the
     // pricing cards; the Pro card's "Know what to offer" lead stays.
+    // 2026-11-23 (ads pass, C1): the founder's homepage headline is "Know
+    // your max offer on any rental.", the searcher's own words. It lives in
+    // lib/marketing-offer-config.ts (outside these roots) and is repeated
+    // verbatim by the homepage OG card, which is inside them. The subhead
+    // names the number Offer Ceiling straight away; product UI still does.
     expect(violations).toEqual([
       "app/about/page.tsx: walk-away price",
       "app/home-authed/page.tsx: Max Offer",
+      "app/og/home/route.tsx: max offer",
       "app/page.tsx: Max Offer",
       "app/pricing/page.tsx: what to offer",
       "app/pricing/page.tsx: walk-away price",

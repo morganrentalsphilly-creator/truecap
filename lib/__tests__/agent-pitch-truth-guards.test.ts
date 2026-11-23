@@ -130,10 +130,12 @@ describe("what the agent pitch says the client receives", () => {
 
   it("pictures the real, unbranded PDF cover of the sample deal under 'What your client receives'", () => {
     // Row P1-47, founder answer 5 (2026-10-03): the picture is page 1 of the
-    // real PDF. Both pages mount the one component inside the block.
+    // real PDF. Since the 2026-11 ads pass (C2) the block lives on
+    // /for-agents only: the homepage sends agents there with one band, and
+    // its sections mount no cover of their own.
     const home = copy("components/marketing/landing-sections.tsx");
-    const homeBlock = home.slice(home.indexOf("export function ClientReceivesSection"));
-    expect(homeBlock.slice(0, homeBlock.indexOf("</Section>"))).toContain("<ClientPdfCover");
+    expect(home).toContain("export function ForAgentsBand");
+    expect(home).not.toContain("<ClientPdfCover");
     expect(home).not.toContain("MEMO_SHOT");
     const agents = copy("app/for-agents/page.tsx");
     const agentsBlock = agents.slice(agents.indexOf('<Section id="what-your-client-receives"'));
@@ -199,8 +201,10 @@ describe("TrueCap's own product on the money and persona pages", () => {
     expect(read("components/investcalc/assumptions-strip.tsx")).toContain("Review assumptions");
     for (const file of ["app/for-agents/page.tsx", "components/marketing/landing-sections.tsx"]) {
       expect(copy(file), file).not.toMatch(/set up once in your profile/i);
-      expect(copy(file), file).toContain("up once in Settings");
     }
+    // The sentence is said once, on /for-agents, where the co-branding
+    // preview moved (2026-11 ads pass, C2).
+    expect(copy("app/for-agents/page.tsx")).toContain("up once in Settings");
     const houseHack = copy("app/for-house-hackers/page.tsx");
     expect(houseHack).not.toContain("propertyType");
     expect(houseHack).toContain("Owner Occupant property type");

@@ -30,7 +30,7 @@ import { BillingSuccessBanner } from "@/components/marketing/billing-success-ban
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
   BuiltByInvestor,
-  ClientReceivesSection,
+  ForAgentsBand,
   DataSourcesSection,
   FinalCta,
   HomepageFaq,
@@ -186,15 +186,15 @@ export default function Home() {
           pins that neither homepage imports the analyzer. */}
       {/* The ledger story (DESIGN.md "Homepage structure", 2026-09 design
           pass): 1 the hero's Verdict Ledger, 2 the same ledger opened row
-          by row, 3 where the numbers come from, 4 what the client
-          receives, 5 the plans, 6 who builds it + verified proof when
-          records exist, 7 the eight questions, 8 the address form again.
+          by row, 3 where the numbers come from, 4 one band for agents
+          (their page holds the rest), 5 the plans, 6 who builds it + verified proof when
+          records exist, 7 the investor questions, 8 the address form again.
           (The live analyzer is one click away at /analyze.)
           MUST stay in lockstep with app/home-authed/page.tsx. */}
       <div className="truecap-marketing-tail contents">
         <HowTrueCapWorks />
         <DataSourcesSection />
-        <ClientReceivesSection />
+        <ForAgentsBand />
         <PdfProUpsell />
         <BuiltByInvestor />
         <div data-homepage-block="real-proof" className="contents">

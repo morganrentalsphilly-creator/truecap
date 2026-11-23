@@ -24,7 +24,7 @@ import { AnalyzePageContent } from "@/components/marketing/analyze-page-content"
 import { MarketingHero } from "@/components/marketing/marketing-hero";
 import {
   BuiltByInvestor,
-  ClientReceivesSection,
+  ForAgentsBand,
   DataSourcesSection,
   FinalCta,
   HomepageFaq,
@@ -260,7 +260,7 @@ export default async function AuthedHome({
         <div className="truecap-marketing-tail contents">
           <HowTrueCapWorks />
           <DataSourcesSection />
-          <ClientReceivesSection />
+          <ForAgentsBand />
           <PdfProUpsell />
           <BuiltByInvestor />
           <div data-homepage-block="real-proof" className="contents">
