@@ -381,7 +381,7 @@ export default function BlogPost() {
                 or similar; check each vendor&apos;s current pricing.
               </li>
               <li>
-                <strong>Channel manager / PMS.</strong> Hostfully, Hostaway,
+                <strong>Channel manager / PMS.</strong> <Link href="/blog/hostfully-vs-hostaway-vs-guesty" className="tc-link">Hostfully</Link>, Hostaway,
                 Guesty. Pricing varies by vendor and listing count; get a current
                 quote from each vendor.
               </li>
