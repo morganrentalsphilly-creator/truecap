@@ -79,7 +79,10 @@ test("guest Save survives sign-in, saves automatically, and reopens from its dur
   try {
     await openSampleDecision(guest.page);
     savedAddress = await makeSampleAddressUnique(guest.page);
-    await guest.page.getByRole("button", { name: "Save", exact: true }).click();
+    // A guest's Save is the card's primary action, "Save this deal free"
+    // (2026-11 ads pass, A2); the attribute picks the card's button, not the
+    // phone-only sticky bar that carries the same label.
+    await guest.page.locator("[data-result-save-action]").click();
 
     await expect(guest.page).toHaveURL(
       /\/auth\/sign-up\?next=%2F|\/auth\/sign-up\?next=\//,

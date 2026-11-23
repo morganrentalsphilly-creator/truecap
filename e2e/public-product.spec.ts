@@ -148,7 +148,7 @@ test("mobile hero leads with the decision outcome and keeps empty submissions at
   await expect(
     hero.getByRole("heading", {
       level: 1,
-      name: "Send clients rentals that fit.",
+      name: "Know your max offer on any rental.",
     }),
   ).toBeVisible();
 
@@ -638,7 +638,7 @@ test("a restored dark-strategy draft falls back safely to Buy & Hold", async ({
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "Underwrite a buy & hold rental",
+      name: "Analyze a rental property",
     }),
   ).toBeVisible();
   await expect(
@@ -1137,7 +1137,7 @@ test("next deal confirms the reset, clears property facts, and keeps reusable as
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "Buy & Hold underwriting",
+      name: "Buy & Hold analysis",
     }),
   ).toBeVisible();
   const address = page.getByLabel("Property Address", { exact: true });

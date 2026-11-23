@@ -183,24 +183,25 @@ test("at 375px the header is one row and the hero CTA is in the first viewport",
   await expect(signIn).toHaveAttribute("href", "/auth/login");
 });
 
-// Audit row P1-01 (founder ruling, 2026-10-03): the investor cue sits above
-// the address form. Under the form it was covered by the cookie bar at these
+// Audit row P1-01 (founder ruling, 2026-10-03): the audience cue sits above
+// the address form. Since the 2026-11 ads pass the hero speaks to the investor
+// and the cue is the agent's ("Working with investor clients? For agents"). Under the form it was covered by the cookie bar at these
 // browser sizes (cue top 589px, bar top 568 to 606px).
 for (const size of [
   { width: 390, height: 664 },
   { width: 375, height: 629 },
 ]) {
-  test(`at ${size.width}x${size.height} the investor cue is above the hero form and clear of the cookie bar`, async ({
+  test(`at ${size.width}x${size.height} the agent cue is above the hero form and clear of the cookie bar`, async ({
     page,
   }) => {
     await page.setViewportSize(size);
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
-    const cue = page.locator('[data-hero-investor-cue=""]');
-    await expect(cue).toContainText("Buying for yourself?");
-    await expect(cue.getByRole("link", { name: "For investors", exact: true })).toHaveAttribute(
+    const cue = page.locator('[data-hero-agent-cue=""]');
+    await expect(cue).toContainText("Working with investor clients?");
+    await expect(cue.getByRole("link", { name: "For agents", exact: true })).toHaveAttribute(
       "href",
-      "/for-investors",
+      "/for-agents",
     );
     const cueBox = await cue.boundingBox();
     const formBox = await page.locator('form[data-hero-address-form=""]').boundingBox();
