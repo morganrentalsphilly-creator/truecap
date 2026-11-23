@@ -567,6 +567,28 @@ textarea,
       overflow-x: clip;
     }
   }
+  /* Scroll lock (audit A5). Radix dialogs and the mobile nav drawer lock
+     scrolling through react-remove-scroll, which writes
+     `body[data-scroll-locked] { overflow: hidden !important }`. Because
+     <html> carries `overflow-x: clip` (above), the body's overflow no longer
+     propagates to the viewport: the BODY became the scroll container. Every
+     position:sticky descendant then stuck to a box that never scrolls, so
+     with a dialog open at any scroll offset the sticky header left the
+     screen and the sidebar jumped up by that offset.
+     Lock the viewport on <html> instead, and keep the body out of the
+     scroll-container business exactly as it is when nothing is open. The
+     scroll position, the sticky header and the sidebar all stay where they
+     were; react-remove-scroll still reserves the scrollbar's width on the
+     body, so nothing shifts sideways either. */
+  html:has(> body[data-scroll-locked]) {
+    overflow-y: hidden;
+  }
+  @supports (overflow: clip) {
+    html body[data-scroll-locked] {
+      overflow-x: clip !important;
+      overflow-y: visible !important;
+    }
+  }
   /* Contain absolutely-positioned descendants (notably `.sr-only` labels in
      the `min-w-[…]` comparison tables on the homepage and /why-truecap) inside
      their horizontal scroller instead of letting them escape to <body> and
