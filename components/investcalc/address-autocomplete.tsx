@@ -28,6 +28,18 @@ type PlacePrediction = {
   text: FormattableText;
   toPlace: () => Place;
 };
+/**
+ * Predictions are limited to places whose PRIMARY type is an address (audit
+ * B3). Unfiltered, Autocomplete (New) returns every place type, so the list
+ * offered businesses at an address ("Philadelphia Redevelopment Authority,
+ * 1234 Market St", "1500 Locust Street Parking") as if they were properties.
+ * These three are Table B types, which Places API (New) accepts in
+ * `includedPrimaryTypes` (up to five values): a street address, a named
+ * building at an address, and a unit inside one. `route` is left out on
+ * purpose: a street with no number is not a property to underwrite.
+ */
+const ADDRESS_PRIMARY_TYPES = ["street_address", "premise", "subpremise"];
+
 type AutocompleteSuggestionResult = {
   placePrediction: PlacePrediction | null;
 };
@@ -346,6 +358,7 @@ export function AddressAutocomplete({
         input,
         sessionToken: ensureSessionToken(),
         includedRegionCodes: ["us"],
+        includedPrimaryTypes: ADDRESS_PRIMARY_TYPES,
       });
       // Responses are not guaranteed to resolve in typing order. Never let an
       // older query replace the suggestions for the address now on screen.
