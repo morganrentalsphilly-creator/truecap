@@ -14,7 +14,9 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight, Calculator, ChevronUp, Loader2 } from "lucide-react";
+// No trailing arrow on the run button (2026-11 audit C2): an up-right arrow
+// reads as "opens another site", and this button runs the analysis in place.
+import { Calculator, ChevronUp, Loader2 } from "lucide-react";
 
 import type { LivePreviewSnapshot } from "./live-verdict-panel";
 import { formatDscr } from "@/lib/financial-presentation";
@@ -339,7 +341,6 @@ export function StickyCalculateBar({
           >
             <Calculator className="size-4" />
             {ctaLabel}
-            <ArrowUpRight className="size-4" />
           </button>
         </div>
       ) : (
@@ -358,7 +359,6 @@ export function StickyCalculateBar({
             <>
               <Calculator className="size-4" />
               {ctaLabel}
-              <ArrowUpRight className="size-4" />
             </>
           )}
         </button>

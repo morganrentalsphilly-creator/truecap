@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type FormEvent,
   type KeyboardEvent,
 } from "react";
@@ -34,6 +35,15 @@ type Suggestion = { id: string; address: string; propertyType: string };
 
 const SUGGESTIONS_LISTBOX_ID = "dashboard-search-suggestions";
 
+/** Tailwind's `sm` breakpoint, from below. */
+const NARROW_VIEWPORT_QUERY = "(max-width: 639.98px)";
+
+function subscribeToNarrowViewport(onChange: () => void): () => void {
+  const query = window.matchMedia(NARROW_VIEWPORT_QUERY);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+
 export function Topbar({
   displayName,
   email,
@@ -44,6 +54,15 @@ export function Topbar({
 }: TopbarProps) {
   const router = useRouter();
   const pathname = usePathname() ?? "";
+  // Below 640px the search field is about 150px wide and the long placeholder
+  // was cut to "Search your s" (2026-11 audit C2). A placeholder cannot be
+  // swapped in CSS, so the breakpoint is read here; the server and the first
+  // client render use the long one, which is right from sm up.
+  const isNarrow = useSyncExternalStore(
+    subscribeToNarrowViewport,
+    () => window.matchMedia(NARROW_VIEWPORT_QUERY).matches,
+    () => false,
+  );
   const searchFormRef = useRef<HTMLFormElement | null>(null);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -275,7 +294,9 @@ export function Topbar({
               setIsPanelDismissed(false);
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Search your saved deals by address…"
+            placeholder={
+              isNarrow ? "Search deals" : "Search your saved deals by address…"
+            }
             aria-label="Search saved deals"
             role="combobox"
             aria-expanded={isOpen}
