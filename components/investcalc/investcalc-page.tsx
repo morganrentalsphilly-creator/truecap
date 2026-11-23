@@ -87,6 +87,11 @@ import {
 import { AssumptionsStrip } from "./assumptions-strip";
 import { StuckFlag } from "./stuck-sentinel";
 import {
+  CALC_FORM_DRAFT_KEY,
+  adoptAnonymousCalcDraft,
+  calcDraftKeyFor,
+} from "@/lib/calc-draft-key";
+import {
   hasResultView,
   resultViewPath,
   resultViewTitle,
@@ -624,7 +629,15 @@ function replaceSavedDealUrl(savedDealId: string | null): void {
  * Version-suffixed so future schema changes can bump the key and
  * gracefully ignore stale drafts instead of crashing on parse.
  */
-const CALC_FORM_DRAFT_KEY = "truecap_calc_form_draft_v1";
+// The key itself now depends on who is signed in (2026-11 audit C7; see
+// lib/calc-draft-key.ts). The helpers below are module-level and called from
+// many places, so the current owner is held here and set by InvestCalcPage on
+// every render, before any effect can read or write a draft.
+let calcDraftOwnerId: string | null = null;
+/** Idempotent: the same owner for every render of one mounted page. */
+function setCalcDraftOwner(ownerId: string | null): void {
+  calcDraftOwnerId = ownerId;
+}
 const DRAFT_INPUT_CONFIDENCE_SOURCE_CONTEXT_FIELD =
   "__truecapInputConfidenceSourceContext";
 /**
@@ -646,7 +659,8 @@ function readCalcDraftRaw(): string | null {
   try {
     return typeof window === "undefined"
       ? null
-      : window.localStorage.getItem(CALC_FORM_DRAFT_KEY);
+      : (adoptAnonymousCalcDraft(window.localStorage, calcDraftOwnerId),
+        window.localStorage.getItem(calcDraftKeyFor(calcDraftOwnerId)));
   } catch {
     return null;
   }
@@ -656,7 +670,7 @@ function readCalcDraftRaw(): string | null {
 function writeCalcDraftRaw(json: string): void {
   try {
     if (typeof window !== "undefined")
-      window.localStorage.setItem(CALC_FORM_DRAFT_KEY, json);
+      window.localStorage.setItem(calcDraftKeyFor(calcDraftOwnerId), json);
   } catch {
     /* private-mode Safari, quota exceeded, etc. - drafts are best-effort */
   }
@@ -781,7 +795,11 @@ function isFreshNavigation(): boolean {
 function clearCalcDraftRaw(): void {
   try {
     if (typeof window !== "undefined")
+    {
+      window.localStorage.removeItem(calcDraftKeyFor(calcDraftOwnerId));
+      // An anonymous draft not yet adopted must not come back after a reset.
       window.localStorage.removeItem(CALC_FORM_DRAFT_KEY);
+    }
   } catch {
     /* no-op */
   }
@@ -1111,6 +1129,7 @@ export function InvestCalcPage({
   memoCaptureEnabled = false,
   initialSavedDeal = null,
   initialMortgageRate = null,
+  draftOwnerId = null,
 }: {
   canSaveDeals?: boolean;
   canCompareDeals?: boolean;
@@ -1151,7 +1170,13 @@ export function InvestCalcPage({
    * account-level rate default still wins, and a typed rate, a restored draft
    * or a saved deal is never rewritten by it. */
   initialMortgageRate?: MortgageRateBenchmarkInput | null;
+  /** The signed-in user's id, or null for an anonymous visitor. It scopes
+   * the localStorage form draft to the account (audit C7), so one account's
+   * unfinished deal is never restored for the next account on a shared
+   * device. Never sent anywhere; it only names a storage key. */
+  draftOwnerId?: string | null;
 }) {
+  setCalcDraftOwner(draftOwnerId);
   const router = useRouter();
   const { confirmDialog } = useActionConfirm();
   const advocacyDecisionContract =

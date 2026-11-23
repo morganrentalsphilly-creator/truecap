@@ -177,6 +177,7 @@ export default async function NewAnalysisPage({
           advocacyContractEligible={isAdvocacyInternalUser(user.email)}
           initialSavedDeal={initialSavedDeal}
           initialMortgageRate={initialMortgageRate}
+          draftOwnerId={user.id}
         />
       </div>
     </div>
