@@ -22,7 +22,7 @@
  */
 
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
-import { HeroAddressForm } from "@/components/marketing/hero-address-form";
+import { HeroAddressForm, HeroSampleLink } from "@/components/marketing/hero-address-form";
 import { HeroSheet } from "@/components/home/hero-sheet";
 import { PAGE_CONTAINER } from "@/components/marketing/section";
 import { getMarketingOfferConfig } from "@/lib/marketing-offer-config";
@@ -111,13 +111,20 @@ export function MarketingHero() {
           {/* The one primary action; its secondary is the sample-deal link.
               mt-3 on phones (the form's own default is mt-5): the cue above
               it is the gap. From 640px the form keeps its sm:mt-7. */}
-          <HeroAddressForm className="mt-3" />
+          <HeroAddressForm className="mt-3" sampleOnPhones="caller" />
 
           {/* The full risk reversal stays next to the primary action at every
               viewport: paid mobile traffic must not have to infer account or
-              card requirements. */}
+              card requirements. Below 640px the sample link ends this line
+              instead of standing as a second full-width button (founder
+              decision 2026-11-24): with one button less the sheet's Offer
+              Ceiling clears a first visit's cookie banner at 390x664. The
+              link's 44px tap box reaches 12px above its text line; mt-3 is
+              that 12px, so where the link fits on the first row (from about
+              470px) the box stops at the submit button's edge. Keep it. */}
           <p className="mt-3 text-sm text-muted-foreground">
-            Free. No account. Your first full decision is included.
+            Free. No account. Your first full decision is included.{" "}
+            <HeroSampleLink variant="inline" className="sm:hidden" />
           </p>
         </div>
 

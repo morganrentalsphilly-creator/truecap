@@ -124,7 +124,7 @@ export function HeroSheet({
                   From 1024px it sits under the price track and above the
                   readout, on its own 2px rule; below 1024px the island sets
                   it first (price-scrubber.tsx), under the caption's rule. */}
-              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 max-lg:mt-3 max-lg:border-t-0 max-lg:pt-0 lg:mt-5 lg:border-t-2 lg:border-foreground lg:pt-3">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 max-lg:mt-0 max-lg:border-t-0 max-lg:pt-0 lg:mt-5 lg:border-t-2 lg:border-foreground lg:pt-3">
                 <span className="font-display text-xl sm:text-2xl">Offer Ceiling</span>
                 <LedgerTotal draw className="highlight-stroke text-key-sm lg:text-key">
                   {formatLedgerDollars(ledger.offerCeiling)}

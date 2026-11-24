@@ -510,10 +510,12 @@ Phase 5 restyles their internals and the pages follow.
 ## The homepage (Phase 3)
 
 1. **Hero:** left, the copy (H1, subhead, the metrics line from 640px, the
-   agent cue above the form while Agent Pro is sold, the address form, the
-   risk line), pinned beside the sheet from 1024px in a window at least 680px
-   tall; right, the sheet: the schematic (rent in on the left in green, the
-   mortgage and the operating costs out on the right in red, both live with
+   agent cue above the form while Agent Pro is sold, the address form with its
+   secondary "See the sample deal" button from 640px (below it, a text link
+   ending the risk line), the risk line), pinned beside the sheet from
+   1024px in a window at least 680px tall; right, the sheet: the schematic
+   (rent in on the left in green, the mortgage and the operating costs out on
+   the right in red, both live with
    the price, cash flow landing under the house on a dashed leader, with the
    price it is read at beside it as a 16px note in Ink 2), the price track
    with its help line, the Offer Ceiling on the highlight stroke with the gap
@@ -1059,8 +1061,7 @@ change) sit above it.
     the shorter login and password forms still end well above the sheet's
     foot. From 1024px to 1279px the access line stacks as three phrases
     without bullets. Phones are unchanged, and no grid sits under the form.
-  - **Held for the founder**, not built: the phone hero's "See the sample
-    deal" as a text link; the homepage H1 on /for-investors (its copy column
+  - **Held for the founder**, not built: the homepage H1 on /for-investors (its copy column
     cannot pin in a laptop window until the H1 is shorter); the engine's
     decision card in place of the product shots on the persona and /vs
     pages, and /pricing's "Real output" row; the homepage close (with its
@@ -1086,6 +1087,17 @@ change) sit above it.
     cobalt. Also left as they are: the panel shadow's values, `::selection`,
     the unused `.dark` block, `interpolate-size`, band and grid section
     tones, a `SplitSection` or `Sheet` part.
+- 2026-11-24, the phone hero's sample link (founder, answering the first held
+  question; this reverses the 2026-10-21 line that "See the sample deal" is
+  the secondary button on phones). On the homepage below 640px "See the
+  sample deal" is a text link ending the risk line (`HeroSampleLink`
+  `variant="inline"`, its 44px tap box taken back out of the line, the agent
+  cue's pattern); from 640px it stays the secondary button. The sheet's key
+  row sits 16px under its 2px caption rule on phones (it was 28px). Together
+  they lift the Offer Ceiling about 50px: at 390x664 on a first visit it ends
+  9px above the cookie banner, where it sat 41px under it. At 375x629 and
+  360x640 the banner still covers it, by about 30px; the H1 and the lede set
+  that. /for-investors and /for-agents keep the button at every width.
 
 ## Do and don't
 

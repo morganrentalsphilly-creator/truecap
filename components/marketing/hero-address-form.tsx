@@ -19,7 +19,10 @@
  * The homepage renders it twice: in the hero, and again as the page's close
  * (DESIGN.md "Homepage structure" 8). `placement` keeps the two apart in
  * analytics and gives each its own element ids. Only the hero carries the
- * sample-deal link, so the page has one link by that name.
+ * sample-deal link, so the page has one visible link by that name at any
+ * width. On the homepage's phones that link is `HeroSampleLink` set inline
+ * on the risk line by the caller (`sampleOnPhones="caller"`), and this
+ * form's button shows from 640px only.
  */
 
 import Link from "next/link";
@@ -112,12 +115,20 @@ function newToken() {
 export function HeroAddressForm({
   placement = "hero",
   tone = "light",
+  sampleOnPhones = "button",
   className,
 }: {
   /** "hero": the first screen. "close": the same form at the page's end. */
   placement?: "hero" | "close";
   /** "dark": the form sits on the navy band (the close), so the button is white on cobalt text. */
   tone?: "light" | "dark";
+  /**
+   * The hero's sample link below 640px. "button": this form's secondary
+   * button at every width. "caller": the button shows from 640px only and
+   * the caller sets `<HeroSampleLink variant="inline" />` in its risk line
+   * (the homepage, founder decision 2026-11-24).
+   */
+  sampleOnPhones?: "button" | "caller";
   className?: string;
 } = {}) {
   const isHero = placement === "hero";
@@ -321,27 +332,58 @@ export function HeroAddressForm({
       </p>
 
       {/* The one secondary action, as the secondary button under the
-          primary (audit A8, benchmarks P3: the sample weighs the same as the
-          primary). A real link, so it works before hydration and for
-          crawlers; /analyze?sample=1 opens with the sample's decision
-          already painted (components/investcalc/sample-decision-prerender.tsx). */}
+          primary (audit A8, benchmarks P3). On the homepage's phones it is a
+          text link on the risk line instead (founder decision 2026-11-24:
+          one full-width button less lifts the sheet's Offer Ceiling clear of
+          a first visit's cookie banner at 390x664), so the button shows from
+          640px there. */}
       {isHero ? (
-        <Link
-          href="/analyze?sample=1"
-          prefetch={false}
-          data-hero-sample-link=""
-          onClick={() => {
-            // sample_viewed is sent once, by /analyze?sample=1 when it
-            // mounts (analyze-entry-from-query.tsx). Sending it here too
-            // counted every hero click twice.
-            trackEvent("hero_sample_clicked");
-            trackEvent("hero_sample_opened");
-          }}
-          className="mt-2.5 inline-flex h-12 min-h-11 w-full items-center justify-center rounded-md border border-muted-foreground bg-transparent px-5 text-base font-semibold text-foreground transition-[color,background-color,border-color,scale] duration-[var(--duration-fast)] hover:bg-band active:scale-[0.98] sm:w-auto"
-        >
-          See the sample deal
-        </Link>
+        <HeroSampleLink
+          variant="button"
+          className={sampleOnPhones === "caller" ? "max-sm:hidden" : undefined}
+        />
       ) : null}
     </div>
+  );
+}
+
+/**
+ * The hero's sample-deal link: a real link, so it works before hydration and
+ * for crawlers; /analyze?sample=1 opens with the sample's decision already
+ * painted (components/investcalc/sample-decision-prerender.tsx). "button" is
+ * the secondary button under the form; "inline" is a text link set at the
+ * end of the risk line, its 44px tap target taken back out of the line box
+ * (the agent cue's pattern). Wherever both render, exactly one is displayed
+ * at any width, so the page keeps one visible link by this name and one
+ * click sends one pair of events.
+ */
+export function HeroSampleLink({
+  variant,
+  className,
+}: {
+  variant: "button" | "inline";
+  className?: string;
+}) {
+  return (
+    <Link
+      href="/analyze?sample=1"
+      prefetch={false}
+      data-hero-sample-link=""
+      onClick={() => {
+        // sample_viewed is sent once, by /analyze?sample=1 when it
+        // mounts (analyze-entry-from-query.tsx). Sending it here too
+        // counted every hero click twice.
+        trackEvent("hero_sample_clicked");
+        trackEvent("hero_sample_opened");
+      }}
+      className={cn(
+        variant === "inline"
+          ? "tc-link -my-3 inline-block min-h-11 py-3 font-medium"
+          : "mt-2.5 inline-flex h-12 min-h-11 w-full items-center justify-center rounded-md border border-muted-foreground bg-transparent px-5 text-base font-semibold text-foreground transition-[color,background-color,border-color,scale] duration-[var(--duration-fast)] hover:bg-band active:scale-[0.98] sm:w-auto",
+        className,
+      )}
+    >
+      See the sample deal
+    </Link>
   );
 }
