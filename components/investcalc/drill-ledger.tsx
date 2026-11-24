@@ -20,11 +20,17 @@ import { cn } from "@/lib/utils";
 
 export function DrillLedger({
   label,
+  variant = "card",
   className,
   children,
 }: {
   /** Accessible name for the group (was the tablist's aria-label). */
   label: string;
+  /**
+   * 'card' (default) stacks card rows 12px apart. 'row' sets no gap: the
+   * rows are `<DrillRow variant="row">`, separated by their own 1px lines.
+   */
+  variant?: "card" | "row";
   className?: string;
   children: ReactNode;
 }) {
@@ -62,7 +68,9 @@ export function DrillLedger({
     <section
       aria-label={label}
       onKeyDown={handleKeyDown}
-      className={cn("space-y-3", className)}
+      className={
+        cn(variant === "row" ? null : "space-y-3", className) || undefined
+      }
     >
       {children}
     </section>

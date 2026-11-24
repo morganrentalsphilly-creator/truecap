@@ -34,7 +34,7 @@ import {
   LedgerVerdict,
 } from "@/components/ledger/ledger-parts";
 import { ToolNumberField } from "@/components/tools/tool-number-field";
-import { ToolFrame } from "@/components/tools/tool-parts";
+import { TOOL_RESULT_LABEL_CLASS, ToolFrame } from "@/components/tools/tool-parts";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
@@ -236,7 +236,9 @@ export function SeventyPercentRuleWidget() {
             </p>
           ) : (
             <>
-              <p className="text-sm leading-snug font-semibold text-foreground">
+              {/* The label row every calculator's result has: sentence
+                  case, on the 2px rule. */}
+              <p className={TOOL_RESULT_LABEL_CLASS}>
                 70%-rule price screen ({result.mult}%)
               </p>
               {/* The key figure in the display face over the 2px rule, in ink: a

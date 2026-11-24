@@ -17,7 +17,8 @@
  * scenario, not a pass or a miss against a rule, and green and orange are
  * kept for those (DESIGN.md). The result is announced by its own one-line
  * status, so the visible block is not a second live region (ToolResult is
- * one, and has no switch for that). The grid reads the frame's own width
+ * one, and has no switch for that); it takes ToolResult's label row and, on
+ * one column, its place above the fields. The grid reads the frame's own width
  * (@container), so the widget lays out the same in the tool page's hero
  * column and in the /embed iframe.
  */
@@ -29,7 +30,11 @@ import { buttonVariants } from "@/components/ui/button";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 import { LedgerTotal } from "@/components/ledger/ledger-parts";
 import { ToolNumberField } from "@/components/tools/tool-number-field";
-import { ToolFrame } from "@/components/tools/tool-parts";
+import {
+  TOOL_RESULT_LABEL_CLASS,
+  TOOL_RESULT_LEAD_CLASS,
+  ToolFrame,
+} from "@/components/tools/tool-parts";
 import { validateToolNumber } from "@/lib/public-tool-validation";
 
 const fmtMoney = (n: number) =>
@@ -164,8 +169,8 @@ export function BreakEvenCalculatorWidget() {
           }
         >
           <legend className="sr-only">Break-even inputs</legend>
-          {/* Two fields a row on a phone, so the result and the action stay
-              near the first screen, and again once the frame is 672px wide;
+          {/* Two fields a row on a phone, so the fields and the action stay
+              near the result, and again once the frame is 672px wide;
               between the two the field column is too narrow for a pair and
               they stack. */}
           <div className="grid grid-cols-2 items-start gap-x-4 gap-y-5 @lg:grid-cols-1 @2xl:grid-cols-2">
@@ -222,49 +227,59 @@ export function BreakEvenCalculatorWidget() {
           ) : null}
         </fieldset>
 
-        {/* On one column the result opens on the rule under the fields. */}
-        <div className="min-w-0 border-t border-border pt-5 @lg:border-t-0 @lg:pt-0">
-          <span
-            className="sr-only"
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {result && verdict
-              ? result.months == null
-                ? `${verdict.label}. ${verdict.note}`
-                : `${verdict.label}. Modeled break-even ${Math.round(result.months)} months, or ${result.years?.toFixed(1)} years.`
-              : "Fix the highlighted inputs to calculate cash-flow break-even."}
-          </span>
-          <p className="text-sm leading-snug font-semibold text-foreground">
-            Break-even
-          </p>
-          {/* The figure carries its unit ("162 months"), so it stays at the
-              smaller key size at every width and fits the result column.
-              The color sits on the line, as in ToolResult. */}
-          <p
-            className={cn(
-              "mt-3 wrap-anywhere",
-              result?.months != null ? "text-foreground" : "text-muted-foreground",
-            )}
-          >
-            <LedgerTotal className="text-key-sm">
-              {result?.months != null ? `${Math.round(result.months)} months` : "—"}
-            </LedgerTotal>
-          </p>
-          <p className="mt-4 text-pretty text-base text-muted-foreground">
-            {result?.months != null && result.years != null
-              ? `${result.years.toFixed(1)} years · ${fmtMoney(result.totalInvested)} modeled initial cash`
-              : result
-                ? `${fmtMoney(result.totalInvested)} modeled initial cash · enter positive monthly cash flow to calculate recovery time`
-                : "Fix the highlighted inputs to calculate"}
-          </p>
-          {verdict ? (
-            <p className="mt-2 max-w-[46ch] text-pretty text-base leading-relaxed">
-              <span className="font-semibold">{verdict.label}.</span>{" "}
-              <span className="text-muted-foreground">{verdict.note}</span>
+        {/* The result is two parts. On one column the first (the label and
+            the months, whose height never changes) leads the frame above the
+            four fields, and the second (the line under the figure and the
+            band) follows the fields: those two lines run from one line to
+            six as the visitor types, and above the fields they moved every
+            field. `contents` lets each part take its own place in the grid;
+            from 32rem the wrapper is a block again and the parts stack
+            beside the fields as one result. Source order is unchanged and
+            nothing in either part takes focus. */}
+        <div className="contents @lg:block @lg:min-w-0">
+          <div className={cn("min-w-0", TOOL_RESULT_LEAD_CLASS)}>
+            <span
+              className="sr-only"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {result && verdict
+                ? result.months == null
+                  ? `${verdict.label}. ${verdict.note}`
+                  : `${verdict.label}. Modeled break-even ${Math.round(result.months)} months, or ${result.years?.toFixed(1)} years.`
+                : "Fix the highlighted inputs to calculate cash-flow break-even."}
+            </span>
+            <p className={TOOL_RESULT_LABEL_CLASS}>Break-even</p>
+            {/* The figure carries its unit ("162 months"), so it stays at the
+                smaller key size at every width and fits the result column.
+                The color sits on the line, as in ToolResult. */}
+            <p
+              className={cn(
+                "mt-3 wrap-anywhere",
+                result?.months != null ? "text-foreground" : "text-muted-foreground",
+              )}
+            >
+              <LedgerTotal className="text-key-sm">
+                {result?.months != null ? `${Math.round(result.months)} months` : "—"}
+              </LedgerTotal>
             </p>
-          ) : null}
+          </div>
+          <div className="min-w-0 @lg:mt-4">
+            <p className="text-pretty text-base text-muted-foreground">
+              {result?.months != null && result.years != null
+                ? `${result.years.toFixed(1)} years · ${fmtMoney(result.totalInvested)} modeled initial cash`
+                : result
+                  ? `${fmtMoney(result.totalInvested)} modeled initial cash · enter positive monthly cash flow to calculate recovery time`
+                  : "Fix the highlighted inputs to calculate"}
+            </p>
+            {verdict ? (
+              <p className="mt-2 max-w-[46ch] text-pretty text-base leading-relaxed">
+                <span className="font-semibold">{verdict.label}.</span>{" "}
+                <span className="text-muted-foreground">{verdict.note}</span>
+              </p>
+            ) : null}
+          </div>
         </div>
       </div>
 

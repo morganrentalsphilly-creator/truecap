@@ -22,6 +22,11 @@
  *   polite live region, read whole (label, figure, verdict, note) when an
  *   edit changes it; the text is not duplicated for screen readers, because
  *   the e2e specs find the figure and the verdict by their one text node.
+ *   `lead` sets it above the fields while the frame is one column (a phone,
+ *   a narrow iframe), so the answer comes first; in the two-column frame it
+ *   stays beside them. A widget that sets its own result block (it owns a
+ *   separate status line) takes the same classes from TOOL_RESULT_LEAD_CLASS
+ *   and its label from TOOL_RESULT_LABEL_CLASS.
  * - ToolFormula: a formula printed between two 1px lines, in the text face
  *   at 600, left-aligned, with an optional worked
  *   example. A formula written in words ("Monthly rent ≥ 1% of purchase
@@ -54,10 +59,35 @@ export function ToolFrame({
   );
 }
 
+/**
+ * The result's label row: sentence case, on the 2px graphite rule a key
+ * figure keeps for its label.
+ */
+export const TOOL_RESULT_LABEL_CLASS =
+  "border-b-2 border-foreground pb-2 text-sm leading-snug font-semibold text-foreground";
+
+/**
+ * A result that leads its frame while the frame is one column: first in the
+ * visual order, closed by a 1px line over the fields, and back in source
+ * order (no line) once the frame is 32rem wide and the widget's grid is two
+ * columns. The parent must be a grid or flex container for `order` to apply.
+ * Source order does not change, so reading and tab order do not either; keep
+ * anything focusable out of a block that takes these.
+ *
+ * Every field sits under a block that leads, so its height must not change
+ * as the visitor types: a field that moves under the thumb is a defect.
+ * Either the block holds only the label and the figure (ARV, break-even), or
+ * it reserves its tallest state while it leads (mortgage: `min-h-49
+ * @lg:min-h-0`; closing cost: two lines for its note).
+ */
+export const TOOL_RESULT_LEAD_CLASS =
+  "order-first border-b border-border pb-5 @lg:order-none @lg:border-b-0 @lg:pb-0";
+
 export function ToolResult({
   label,
   figure,
   pending = false,
+  lead = false,
   verdict,
   note,
   className,
@@ -72,6 +102,13 @@ export function ToolResult({
   figure: string;
   /** No result yet: the placeholder in Ink 2. */
   pending?: boolean;
+  /**
+   * Set the result above the fields in the one-column frame (see
+   * TOOL_RESULT_LEAD_CLASS). For a widget that stacks enough fields to push
+   * the answer off a phone's first screen. Do not also pass a top border in
+   * `className`: the block is first, and closes on its own line.
+   */
+  lead?: boolean;
   /** A pass or miss against a rule, set with LedgerVerdict; omit without a result. */
   verdict?: ReactNode;
   /** The line under the verdict, in Ink 2. */
@@ -82,9 +119,9 @@ export function ToolResult({
     <div
       aria-live="polite"
       aria-atomic="true"
-      className={cn("min-w-0", className)}
+      className={cn("min-w-0", lead && TOOL_RESULT_LEAD_CLASS, className)}
     >
-      <p className="border-b-2 border-foreground pb-2 text-sm leading-snug font-semibold text-foreground">{label}</p>
+      <p className={TOOL_RESULT_LABEL_CLASS}>{label}</p>
       {/* The color sits on the line, not on LedgerTotal: cn (tailwind-merge)
           reads the custom text-key-sm as a text color, so a color class
           merged beside it would silently drop the phone size. The double

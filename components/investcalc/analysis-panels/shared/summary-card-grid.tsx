@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTapTooltip } from "@/components/investcalc/use-tap-tooltip";
+import { useDrillRowVariant } from "@/components/investcalc/drill-row";
 
 type SummaryItem = {
   label: string;
@@ -52,15 +53,33 @@ function SummaryLabelHint({ label, hint }: { label: string; hint: string }) {
 export function SummaryCardGrid({
   items,
   columnsClassName = "md:grid-cols-3",
+  variant,
 }: {
   items: SummaryItem[];
   columnsClassName?: string;
+  /**
+   * 'card': one bordered, rounded surface. 'row': the cells sit between two
+   * 1px lines with no side border and no radius, for a grid inside an object
+   * that already has a border. Left unset it follows the DrillRow it sits
+   * in: 'row' inside a "Go deeper" row of the decision-first report, 'card'
+   * everywhere else (the default, unchanged).
+   */
+  variant?: "card" | "row";
 }) {
+  const rowVariant = useDrillRowVariant();
+  const isRow = (variant ?? rowVariant) === "row";
   return (
     // Dashboard-hardening: one surface with hairline-separated cells
     // (gap-px over a border-colored background) instead of a row of
     // boxed cards. Robust for any column count, including wrapping.
-    <div className={cn("grid gap-px overflow-hidden rounded-lg border border-border bg-border", columnsClassName)}>
+    <div
+      className={cn(
+        isRow
+          ? "grid gap-px overflow-hidden border-y border-border bg-border"
+          : "grid gap-px overflow-hidden rounded-lg border border-border bg-border",
+        columnsClassName,
+      )}
+    >
       {items.map((item) => (
         <div key={item.label} className="bg-card p-4 sm:p-5">
           {item.labelTooltip ? (

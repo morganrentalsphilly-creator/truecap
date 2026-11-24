@@ -10,6 +10,8 @@
  *
  * Blueprint (2026-10): one card, a heading on a 1px line, the three axes
  * as rows on soft lines, every figure in the figure face. No inner box.
+ * Inside a report row that is already framed, `variant="row"` drops the
+ * card too.
  */
 
 import { useMemo } from "react";
@@ -24,6 +26,14 @@ import { NO_DEBT_SERVICE_DSCR_LABEL } from "@/lib/financial-presentation";
 
 interface SensitivityGridProps {
   values: InvestmentFormValues | null;
+  /**
+   * 'card' (default): the grid is its own bordered, shadowed object.
+   * 'row': it sits inside an object that already has a border (a "Go
+   * deeper" row of the decision-first report), so it opens on the 1px
+   * graphite line with no box of its own, like the cash-flow strip and the
+   * waterfall, and runs the row's full width.
+   */
+  variant?: "card" | "row";
 }
 
 const fmtCash = (n: number) =>
@@ -143,14 +153,23 @@ function Row({ row }: { row: SensitivityRow }) {
   );
 }
 
-export function SensitivityGrid({ values }: SensitivityGridProps) {
+export function SensitivityGrid({
+  values,
+  variant = "card",
+}: SensitivityGridProps) {
   const report = useMemo(() => {
     if (!values) return null;
     return buildSensitivityReport(values);
   }, [values]);
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6">
+    <div
+      className={
+        variant === "row"
+          ? "border-t border-foreground pt-4"
+          : "rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6"
+      }
+    >
       <div className="border-b border-border pb-3">
         <p className="text-sm font-semibold text-foreground">
           Sensitivity analysis

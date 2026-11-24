@@ -30,9 +30,22 @@
  * buttons had, so the metric-jump scrollIntoView targets keep landing.
  */
 
-import { type ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+/**
+ * Which kind of row the content sits in, for a shared report part that draws
+ * a frame of its own (the summary figures of the projection panels): inside
+ * a 'row' it drops the frame, because the region around the row is the one
+ * object. 'card' is the default and is what a part reads outside any
+ * DrillRow, so the saved-deal workspace and the shared views are unchanged.
+ */
+const DrillRowVariantContext = createContext<"card" | "row">("card");
+
+export function useDrillRowVariant(): "card" | "row" {
+  return useContext(DrillRowVariantContext);
+}
 
 export interface DrillRowProps {
   /** Row id — for the six analysis rows this IS the AnalysisDashboardTab id. */
@@ -50,6 +63,14 @@ export interface DrillRowProps {
   onOpenChange: (open: boolean) => void;
   /** Keep children mounted (hidden) while closed — see module docs. */
   keepMounted?: boolean;
+  /**
+   * 'card' (default): the row is its own bordered, shadowed object.
+   * 'row': the row sits on a 1px line inside an object that already has a
+   * border (a ResultsRegion), so the report is one object per region with
+   * rows on lines, not cards in cards. Pair it with
+   * `<DrillLedger variant="row">`, which drops the gap between rows.
+   */
+  variant?: "card" | "row";
   children?: ReactNode;
 }
 
@@ -62,6 +83,7 @@ export function DrillRow({
   open,
   onOpenChange,
   keepMounted = false,
+  variant = "card",
   children,
 }: DrillRowProps) {
   // Same id scheme the tab buttons used, so every scroll/focus target
@@ -69,11 +91,16 @@ export function DrillRow({
   const headerId = `analysis-tab-${id}`;
   const panelId = `analysis-row-panel-${id}`;
   const renderPanel = open || keepMounted;
+  const isRow = variant === "row";
 
   return (
     <section
       data-drill-row={id}
-      className="overflow-hidden rounded-lg border border-border bg-card shadow-sm"
+      className={
+        isRow
+          ? "border-t border-border first:border-t-0"
+          : "overflow-hidden rounded-lg border border-border bg-card shadow-sm"
+      }
     >
       <h3 className="m-0">
         <button
@@ -88,7 +115,15 @@ export function DrillRow({
           // scroll-mt clears the sticky site header when metric-tap /
           // jump wiring smooth-scrolls this row into view (same offsets
           // the tab buttons carried).
-          className="scroll-mt-24 sm:scroll-mt-28 flex min-h-14 w-full cursor-pointer items-center gap-3 px-3 py-3 text-left transition-colors duration-150 hover:bg-band focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset sm:px-4"
+          className={cn(
+            "scroll-mt-24 sm:scroll-mt-28 flex min-h-14 w-full cursor-pointer items-center gap-3 py-3 text-left transition-colors duration-150 hover:bg-band focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-inset",
+            // Row: no frame to inset from, so the glyph and the title start
+            // 4px from the region's content edge (room for the inset ring,
+            // and the inset the "Full breakdown" control inside the row
+            // has), not 12-16px in from the headings and rules of the open
+            // panel under them.
+            isRow ? "px-1" : "px-3 sm:px-4",
+          )}
         >
           {/* A plain glyph, not an icon tile (DESIGN.md: no icon tiles). */}
           {icon ? (
@@ -133,9 +168,19 @@ export function DrillRow({
           id={panelId}
           aria-labelledby={headerId}
           hidden={!open}
-          className="min-w-0 overflow-hidden border-t border-border p-2 sm:p-6"
+          className={cn(
+            "min-w-0 overflow-hidden",
+            // Row: the content runs the region's full inner width (no second
+            // frame, no side padding). The 4px bleed on each side is room
+            // for a 3px focus ring on a full-width control, which this
+            // panel's overflow would otherwise clip; the content edge itself
+            // stays on the region's.
+            isRow ? "-mx-1 px-1 pb-5 pt-1" : "border-t border-border p-2 sm:p-6"
+          )}
         >
-          {children}
+          <DrillRowVariantContext.Provider value={variant}>
+            {children}
+          </DrillRowVariantContext.Provider>
         </div>
       ) : null}
     </section>

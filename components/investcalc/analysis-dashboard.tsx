@@ -1550,6 +1550,10 @@ export function AnalysisDashboard({
   // Presentation only: reads the ALREADY-COMPUTED Screening Index. The
   // recommendation string is the INTERNAL enum; <Verdict> maps it.
   const decisionFirst = isFeatureEnabled("decision_first_results");
+  // The deeper-analysis rows are framed by the "Go deeper" ResultsRegion only
+  // in the decision-first layout; there they are rows on lines. Without the
+  // region each row keeps its own card.
+  const drillRowVariant = decisionFirst ? "row" : "card";
   // The two asks an anonymous visitor gets at the result: save it to a free
   // account, and email the memo. ONE instance of each, directly under the
   // decision card and above the Deal score (2026-11 ads pass, A1: on a phone
@@ -1841,23 +1845,28 @@ export function AnalysisDashboard({
               claim (advocacy-accessibility-guards pins that), and a
               secondary heuristic belongs in a secondary strip. */}
           {dealScoreResult?.ok && dealScoreResult.tier === "pro" ? (
-            // A figure on a rule in the flow, not a mono strip: the label
-            // row sits on the 2px graphite rule a result keeps for its key
-            // figure, the score is the display face with tabular numerals,
-            // and the one-line explanation sits under it.
-            <div id="screening-index" className="mt-3 px-1">
-              <div className="flex items-baseline justify-between gap-4 border-b-2 border-foreground pb-1.5">
+            // A figure on a rule in the flow, not a mono strip and not a
+            // card: the block opens on a 1px graphite line (the 2px rule is
+            // the Offer Ceiling's alone), the score sits directly under its
+            // label at the left edge in the display face with tabular
+            // numerals, and the one-line explanation sits under it.
+            // 24px over the rule, as much as follows the block, so the rule
+            // opens the score and does not underline the card above; the
+            // side padding is the cards' own, so the label starts on their
+            // text column and the rule is as long as the rules inside them.
+            <div id="screening-index" className="mt-6 px-4 sm:px-6">
+              <div className="border-t border-foreground pt-3">
                 <p className="text-sm font-semibold text-foreground">
                   Deal score
                 </p>
-                <p className="font-display font-figure text-2xl leading-none text-foreground">
+                <p className="mt-1 font-display font-figure text-2xl leading-none text-foreground">
                   {Math.round(dealScoreResult.data.score)}
                   <span className="text-sm font-normal text-muted-foreground">
                     /100
                   </span>
                 </p>
               </div>
-              <p className="mt-1.5 text-2xs text-muted-foreground">
+              <p className="mt-1.5 text-sm text-muted-foreground">
                 {/* Beside a miss, an 86/100 under "Doesn't meet" needs its
                     scope (audit A12): it scores the base economics at
                     asking, not the fit to the targets. */}
@@ -2889,13 +2898,17 @@ export function AnalysisDashboard({
               ? "Base long-term analysis"
               : "Long-term analysis"}
           </h2>
-          <DrillLedger label="Deeper analysis">
+          {/* Inside the region the rows sit on 1px lines (one object per
+              region, rows on lines); in the flat layout, where no region
+              frames them, each row stays its own card. */}
+          <DrillLedger label="Deeper analysis" variant={drillRowVariant}>
             {RELEASED_TABS.map((tab) => {
               const Icon = tab.icon;
               return (
                 <DrillRow
                   key={tab.id}
                   id={tab.id}
+                  variant={drillRowVariant}
                   title={tab.label}
                   icon={<Icon className="size-4" />}
                   summary={rowSummaries[tab.id]}
@@ -3012,7 +3025,10 @@ export function AnalysisDashboard({
                   {tab.id === "stress-test" && (
                     <div className="space-y-4">
                       {canUseSensitivity ? (
-                        <SensitivityGrid values={values} />
+                        <SensitivityGrid
+                          values={values}
+                          variant={drillRowVariant}
+                        />
                       ) : (
                         <ProInlineGate
                           icon={Activity}
@@ -3042,6 +3058,7 @@ export function AnalysisDashboard({
             {isAuthenticated && values?.address && !compsUnavailable ? (
               <DrillRow
                 id="comps"
+                variant={drillRowVariant}
                 title="Check rent against the market"
                 icon={<Search className="size-4" />}
                 summary={rowSummaries.comps}
@@ -3080,6 +3097,7 @@ export function AnalysisDashboard({
             {isExistingSavedDeal && savedDealId ? (
               <DrillRow
                 id="notes"
+                variant={drillRowVariant}
                 title="Notes"
                 icon={<NotebookPen className="size-4" />}
                 summary={rowSummaries.notes}
@@ -3389,20 +3407,22 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
   })();
 
   return (
-    // @container: the three figures size off this card's own width. Three
+    // @container: the three figures size off this strip's own width. Three
     // columns at 18px with 12px side padding need about 97px each for a
-    // four-digit figure; at 360px the card gave 75px and "+$1,032" ran 10px
-    // past its border. Under 21rem of content width (a phone up to about
-    // 450px) the figure is 14px with 6px padding and a 6px gap, which leaves
-    // a four-digit figure about 6px of room at 360px; under 14.5rem (a
-    // 344px phone and below) the three stack. Anything longer wraps inside
-    // its card instead of crossing the border. Written as max-width
+    // four-digit figure; as a card at 360px the strip gave 75px and
+    // "+$1,032" ran 10px past its border. Under 21rem of width the figure is
+    // 14px with 6px padding and a 6px gap; under 14.5rem the three stack.
+    // Anything longer wraps inside its column. Written as max-width
     // container rules so they can never apply next to the sm: sizes.
     // Three figures in three columns on one rule, not three tiles in a card
-    // (2026-10 polish): the section is the object, the columns are rows.
+    // (2026-10 polish). Since 2026-11 the strip is not a card either: it
+    // opens on the 1px graphite line and runs the full width of the row that
+    // holds it. Inside the "Go deeper" region that is the viewport less
+    // about 66px (324px on a 390px phone), so the 14px step now ends near a
+    // 402px viewport (it was about 450px) and the stack starts under 300px.
     <section
       aria-label="Cash flow over time"
-      className="@container rounded-lg border border-border bg-card p-4 sm:p-5"
+      className="@container border-t border-foreground pt-4"
     >
       <div className="mb-3 flex items-baseline justify-between gap-3 border-b border-border pb-2">
         <p className="text-sm font-semibold text-foreground">
@@ -3412,7 +3432,10 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
           monthly · 10-yr horizon
         </p>
       </div>
-      <div className="grid grid-cols-3 items-stretch gap-2 @max-[21rem]:gap-1.5 @max-[14.5rem]:grid-cols-1 sm:gap-4">
+      {/* The negative side margins are the cells' own side padding, so the
+          first column's text starts on the heading's edge above it (the
+          strip has no box to inset from). The cells keep their padding. */}
+      <div className="-mx-3 grid grid-cols-3 items-stretch gap-2 @max-[21rem]:-mx-1.5 @max-[21rem]:gap-1.5 @max-[14.5rem]:grid-cols-1 sm:-mx-4 sm:gap-4">
         {points.map((point) => {
           const tone =
             point.monthly > 25
@@ -3448,7 +3471,7 @@ function CashFlowOverTimeStrip({ result }: { result: AnalysisResult }) {
         })}
       </div>
       {growthInsight ? (
-        <p className="mt-3 text-2xs leading-relaxed text-muted-foreground sm:text-xs">
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           {growthInsight}
         </p>
       ) : null}
@@ -3484,11 +3507,17 @@ function CashFlowTab({
     // Skeleton matches what actually renders: time strip (short, wide),
     // waterfall (medium height), then a thin toggle row. Used to be a
     // 3-column line-item stub that didn't resemble the real content at
-    // all, which made the loading state feel like a glitch.
+    // all, which made the loading state feel like a glitch. The strip and
+    // the waterfall each open on a 1px graphite line with no box, so their
+    // placeholders do too (the same overall heights as before).
     return (
       <div className="space-y-5 sm:space-y-6">
-        <Skeleton className="h-20 w-full rounded-lg sm:h-24" />
-        <Skeleton className="h-40 w-full rounded-lg sm:h-48" />
+        <div className="border-t border-foreground pt-4">
+          <Skeleton className="h-16 w-full sm:h-20" />
+        </div>
+        <div className="border-t border-foreground pt-4">
+          <Skeleton className="h-36 w-full sm:h-44" />
+        </div>
         <Skeleton className="h-6 w-40" />
       </div>
     );
@@ -3641,7 +3670,7 @@ function CashFlowTab({
               Debt service
             </p>
             <div className="space-y-3">
-              <div className="flex items-baseline justify-between gap-4 border-b-2 border-foreground pb-1.5">
+              <div className="flex items-baseline justify-between gap-4 border-b border-foreground pb-1.5">
                 <p className="text-sm text-muted-foreground">Loan amount</p>
                 <p className="font-figure text-lg font-semibold text-foreground">
                   ${Math.round(result.loanAmount).toLocaleString()}
@@ -3724,7 +3753,7 @@ function CashFlowTab({
                   ) : null;
                 })()}
               </div>
-              <div className="mt-2 flex items-baseline justify-between gap-4 border-t-2 border-foreground pt-2">
+              <div className="mt-2 flex items-baseline justify-between gap-4 border-t border-foreground pt-2">
                 <p className="text-sm font-semibold text-foreground">
                   Total cash to close
                 </p>
@@ -3772,7 +3801,11 @@ function CashFlowTab({
       {/* THE disclaimer (docs/voice.md rule 3): once, at the bottom of the
           results view. The footer's copy is switched off on /analyze so a
           page with results shows exactly one. */}
-      <Disclaimer tone="card" className="mt-6" />
+      {/* On a 1px line that runs the row's width, the sentence in Ink 2 at
+          its reading measure: not a tinted box inside the row. */}
+      <div className="mt-6 border-t border-border pt-4">
+        <Disclaimer tone="muted" />
+      </div>
     </div>
   );
 }

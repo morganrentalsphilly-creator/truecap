@@ -69,6 +69,17 @@ function glossaryTitle(term: string): string {
 }
 
 /**
+ * A definition's first sentence, for a related term's one-line detail: up to
+ * the first full stop, question mark or exclamation mark that ends a word
+ * (so "27.5 years" and "0.3-0.7%" do not end it). Across the 44 definitions
+ * that is 21 to 161 characters; a definition with no such mark is returned
+ * whole.
+ */
+function firstSentence(definition: string): string {
+  return definition.match(/^.*?[.!?](?=\s|$)/)?.[0] ?? definition;
+}
+
+/**
  * A term's description for a search snippet (155 characters) or a link
  * preview (200), ending on a full stop wherever the text allows:
  *   1. the definition and the benchmark, when both fit whole;
@@ -383,12 +394,11 @@ export default async function GlossaryTermPage({
                             {r.term}
                           </IntentPrefetchLink>
                         ),
-                        detail: (
-                          <>
-                            {r.definition.slice(0, 100)}
-                            {r.definition.length > 100 ? "…" : ""}
-                          </>
-                        ),
+                        // The definition's first sentence, whole: it
+                        // ends on its own full stop. A two-line CSS clamp
+                        // cut it mid-word ("Tel…") in the two-column rows,
+                        // as the old 100-character cut did.
+                        detail: firstSentence(r.definition),
                       }))}
                     />
                   </>
@@ -407,7 +417,7 @@ export default async function GlossaryTermPage({
                   href="/glossary"
                   className="tc-link inline-flex min-h-11 min-w-11 items-center"
                 >
-                  ← Glossary
+                  Glossary
                 </IntentPrefetchLink>
               </p>
               {/* Where the term shows up in the product (true for every entry in

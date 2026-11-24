@@ -166,9 +166,10 @@ export function VacancyRateCalculatorWidget() {
           />
         </div>
 
-        {/* On one column the result opens on the rule under the fields. */}
+        {/* On one column the result leads the frame, above the fields; in
+            the two-column layout it sits beside them. */}
         <ToolResult
-          className="border-t border-border pt-5 @lg:border-t-0 @lg:pt-0"
+          lead
           label="Effective vacancy rate"
           figure={hasFieldError ? "—" : fmtPct(result.vacancyPct)}
           pending={hasFieldError}
@@ -230,8 +231,9 @@ export function VacancyRateCalculatorWidget() {
       </details>
 
       {/* The caveat closes the widget at the reading measure, after the
-          action, so the fields lead straight to the result (on phones too).
-          It stays in the widget, so the /embed iframe keeps it. */}
+          action, so nothing sits between the result, the fields and the
+          action (on phones too). It stays in the widget, so the /embed
+          iframe keeps it. */}
       <p className="mt-6 max-w-[68ch] text-pretty text-sm text-muted-foreground">
         Vacancy varies by property, lease terms, submarket, season, and
         management. Treat the entered value as an editable scenario, compare it

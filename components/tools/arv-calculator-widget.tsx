@@ -33,7 +33,11 @@ import {
   LedgerVerdict,
 } from "@/components/ledger/ledger-parts";
 import { ToolNumberField } from "@/components/tools/tool-number-field";
-import { ToolFrame } from "@/components/tools/tool-parts";
+import {
+  TOOL_RESULT_LABEL_CLASS,
+  TOOL_RESULT_LEAD_CLASS,
+  ToolFrame,
+} from "@/components/tools/tool-parts";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
@@ -240,208 +244,242 @@ export function ArvCalculatorWidget() {
         ARV + 70% rule calculator
       </h2>
 
-      <p className="text-base font-semibold text-foreground">
-        Sold comps — renovated, recent, nearby
-      </p>
-      {/* A comp is a row: its sale price beside its square footage, at every
-          width. */}
-      <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-5">
-        <Money
-          label="Comp 1 sale price"
-          value={comp1Price}
-          setValue={setComp1Price}
-          max={PRICE_MAX}
-          error={errors.comp1Price}
-        />
-        <Plain
-          label="Comp 1 sq ft"
-          value={comp1Sqft}
-          setValue={setComp1Sqft}
-          max={SQFT_MAX}
-          error={errors.comp1Sqft}
-        />
-        <Money
-          label="Comp 2 sale price"
-          value={comp2Price}
-          setValue={setComp2Price}
-          max={PRICE_MAX}
-          error={errors.comp2Price}
-        />
-        <Plain
-          label="Comp 2 sq ft"
-          value={comp2Sqft}
-          setValue={setComp2Sqft}
-          max={SQFT_MAX}
-          error={errors.comp2Sqft}
-        />
-        <Money
-          label="Comp 3 sale price"
-          value={comp3Price}
-          setValue={setComp3Price}
-          max={PRICE_MAX}
-          error={errors.comp3Price}
-        />
-        <Plain
-          label="Comp 3 sq ft"
-          value={comp3Sqft}
-          setValue={setComp3Sqft}
-          max={SQFT_MAX}
-          error={errors.comp3Sqft}
-        />
-      </div>
+      {/* One column: the fields, then the result. The wrapper is a grid only
+          so the ARV can lead the fields by `order` while the frame is narrow;
+          every gap is still a margin on the child, as before. */}
+      <div className="grid grid-cols-[minmax(0,1fr)]">
+        <p className="text-base font-semibold text-foreground">
+          Sold comps — renovated, recent, nearby
+        </p>
+        {/* A comp is a row: its sale price beside its square footage, at every
+            width. */}
+        <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-5">
+          <Money
+            label="Comp 1 sale price"
+            value={comp1Price}
+            setValue={setComp1Price}
+            max={PRICE_MAX}
+            error={errors.comp1Price}
+          />
+          <Plain
+            label="Comp 1 sq ft"
+            value={comp1Sqft}
+            setValue={setComp1Sqft}
+            max={SQFT_MAX}
+            error={errors.comp1Sqft}
+          />
+          <Money
+            label="Comp 2 sale price"
+            value={comp2Price}
+            setValue={setComp2Price}
+            max={PRICE_MAX}
+            error={errors.comp2Price}
+          />
+          <Plain
+            label="Comp 2 sq ft"
+            value={comp2Sqft}
+            setValue={setComp2Sqft}
+            max={SQFT_MAX}
+            error={errors.comp2Sqft}
+          />
+          <Money
+            label="Comp 3 sale price"
+            value={comp3Price}
+            setValue={setComp3Price}
+            max={PRICE_MAX}
+            error={errors.comp3Price}
+          />
+          <Plain
+            label="Comp 3 sq ft"
+            value={comp3Sqft}
+            setValue={setComp3Sqft}
+            max={SQFT_MAX}
+            error={errors.comp3Sqft}
+          />
+        </div>
 
-      <p className="mt-8 text-base font-semibold text-foreground">
-        Your property + the rule
-      </p>
-      <div className="mt-3 grid grid-cols-[minmax(0,1fr)] gap-x-4 gap-y-5 @sm:grid-cols-2 @2xl:grid-cols-3">
-        <Plain
-          label="Subject finished sq ft"
-          value={subjectSqft}
-          setValue={setSubjectSqft}
-          max={SQFT_MAX}
-          error={errors.subjectSqft}
-        />
-        <Money
-          label="Repair costs"
-          value={repairs}
-          setValue={setRepairs}
-          max={PRICE_MAX}
-          error={errors.repairs}
-        />
-        <Pct
-          label="Rule multiplier"
-          value={multiplier}
-          setValue={setMultiplier}
-          step={1}
-          max={100}
-          error={errors.multiplier}
-        />
-      </div>
+        <p className="mt-8 text-base font-semibold text-foreground">
+          Your property + the rule
+        </p>
+        <div className="mt-3 grid grid-cols-[minmax(0,1fr)] gap-x-4 gap-y-5 @sm:grid-cols-2 @2xl:grid-cols-3">
+          <Plain
+            label="Subject finished sq ft"
+            value={subjectSqft}
+            setValue={setSubjectSqft}
+            max={SQFT_MAX}
+            error={errors.subjectSqft}
+          />
+          <Money
+            label="Repair costs"
+            value={repairs}
+            setValue={setRepairs}
+            max={PRICE_MAX}
+            error={errors.repairs}
+          />
+          <Pct
+            label="Rule multiplier"
+            value={multiplier}
+            setValue={setMultiplier}
+            step={1}
+            max={100}
+            error={errors.multiplier}
+          />
+        </div>
 
-      {/* The result opens on the rule under the fields. */}
-      <div className="mt-8 border-t border-border pt-5">
-        {/* One polite status line when the result changes, for screen
-            readers; the visible figures below stay as they were. The figure
-            block is therefore not ToolResult, whose own live region would
-            read the result a second time. */}
-        <span
-          className="sr-only"
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
+        {/* The ARV: its label and the figure, nothing that takes focus. While
+            the frame is narrow (a phone, a narrow iframe) it leads the nine
+            fields, closed by a 1px line 24px over the first one; from 32rem it
+            opens the result on the rule under the fields, as before. It is a
+            sibling of the rest of the result so that `order` can move it alone,
+            and it is two lines of fixed height in every state (the placeholder
+            while there is no ARV), so the fields under it do not move as the
+            visitor types. From 32rem the placeholder is withheld: there the
+            sentence under the fields says what is missing, as before. */}
+        <div
+          className={cn(
+            "min-w-0",
+            TOOL_RESULT_LEAD_CLASS,
+            "mb-6 @lg:mt-8 @lg:mb-0 @lg:border-t @lg:pt-5",
+            result === null && "@lg:hidden",
+          )}
         >
-          {hasErrors
-            ? "Fix the highlighted inputs to estimate ARV."
-            : result === null
-              ? "Enter a sold comp and your property's finished square footage to estimate ARV."
-              : result.mao > 0
-                ? `Estimated ARV ${fmt(result.arv)}. 70%-rule price screen ${fmt(result.mao)}.`
-                : `Estimated ARV ${fmt(result.arv)}. No feasible price screen at this multiplier.`}
-        </span>
-        {hasErrors ? (
-          <p className="text-pretty text-base leading-relaxed text-muted-foreground">
-            Fix the highlighted inputs to estimate ARV.
-          </p>
-        ) : result === null || priceScreen === null ? (
-          <p className="max-w-[46ch] text-pretty text-base leading-relaxed text-muted-foreground">
-            Enter at least one sold comp (sale price + square footage) and your
-            property&apos;s finished square footage to estimate ARV.
-          </p>
-        ) : (
-          <>
-            {/* The ARV is the key figure, in the display face over the 2px rule, in
-                ink; the two figures it leads to follow as ruled rows. */}
-            <Metric label="Estimated ARV" value={fmt(result.arv)} />
-            <div className="mt-5 border-t border-border">
-              <Row
-                label="Avg comp $/sq ft"
-                value={`$${result.avgPpsf.toFixed(2)}`}
-                bold
-              />
-              <Row
-                label={`70%-rule price screen (${num(multiplier)}%)`}
-                value={priceScreen}
-                bold
-              />
-            </div>
+          <Metric
+            label="Estimated ARV"
+            value={result === null ? "—" : fmt(result.arv)}
+            pending={result === null}
+          />
+        </div>
 
-            {/* Sanity check straight from the comps method: a credible ARV
-                sits inside the range the comps actually sold in. A pass or a
-                miss against that range, so it takes the verdict colors. */}
-            <p className="mt-4 max-w-[68ch] text-pretty text-sm">
-              {result.arv > result.maxCompPrice ? (
-                <LedgerVerdict pass={false}>
-                  Sanity check: this ARV is ABOVE every comp&apos;s actual sale
-                  price ({fmt(result.minCompPrice)}–{fmt(result.maxCompPrice)}).
-                  Be suspicious — check the subject square footage and whether the
-                  comps are truly comparable before trusting it.
-                </LedgerVerdict>
-              ) : result.arv < result.minCompPrice ? (
-                <LedgerVerdict pass={false}>
-                  Sanity check: this ARV is below every comp&apos;s actual sale
-                  price ({fmt(result.minCompPrice)}–{fmt(result.maxCompPrice)}).
-                  That can happen when the subject is much smaller than the comps
-                  — stay within about ±20% of your square footage when picking
-                  them.
-                </LedgerVerdict>
-              ) : (
-                <LedgerVerdict pass>
-                  Sanity check passed: the ARV sits inside your comps&apos; actual
-                  sale range ({fmt(result.minCompPrice)}–
-                  {fmt(result.maxCompPrice)}).
-                </LedgerVerdict>
-              )}
+        {/* The rest of the result, under the fields. Without an ARV it opens on
+            the rule with the sentence that says what is missing; with one, its
+            rows open on their own line (on one column the ARV is above the
+            fields; from 32rem it is directly over them). */}
+        <div
+          className={
+            result === null ? "mt-8 border-t border-border pt-5" : "mt-8 @lg:mt-0"
+          }
+        >
+          {/* One polite status line when the result changes, for screen
+              readers; the visible figures below stay as they were. The figure
+              block is therefore not ToolResult, whose own live region would
+              read the result a second time. */}
+          <span
+            className="sr-only"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {hasErrors
+              ? "Fix the highlighted inputs to estimate ARV."
+              : result === null
+                ? "Enter a sold comp and your property's finished square footage to estimate ARV."
+                : result.mao > 0
+                  ? `Estimated ARV ${fmt(result.arv)}. 70%-rule price screen ${fmt(result.mao)}.`
+                  : `Estimated ARV ${fmt(result.arv)}. No feasible price screen at this multiplier.`}
+          </span>
+          {hasErrors ? (
+            <p className="text-pretty text-base leading-relaxed text-muted-foreground">
+              Fix the highlighted inputs to estimate ARV.
             </p>
-
-            {result.mao <= 0 && (
-              <p className="mt-3 max-w-[68ch] text-pretty text-sm">
-                <LedgerVerdict pass={false}>
-                  At this multiplier the repairs consume the entire allowable
-                  price — the rule produces no feasible price screen for this deal
-                  as entered.
-                </LedgerVerdict>
-              </p>
-            )}
-            {result.mao > 0 && result.arv < 150_000 && (
-              <p className="mt-3 max-w-[68ch] text-pretty text-sm">
-                <LedgerVerdict pass={false}>
-                  Sub-$150k ARV: fixed costs (title, permits, utilities,
-                  insurance) eat a big share of a small spread — many flippers
-                  drop the multiplier to 60–65% here.
-                </LedgerVerdict>
-              </p>
-            )}
-            {result.mao > 0 && result.arv > 600_000 && (
-              <p className="mt-3 max-w-[68ch] text-pretty text-sm font-semibold text-muted-foreground">
-                $600k+ ARV with a light rehab can justify 72–75% — but a thinner
-                margin needs a tighter rehab number and a faster exit.
-              </p>
-            )}
-
-            <div className="mt-6">
-              <p className="border-b border-border pb-2 text-sm font-semibold text-foreground">
-                Comp breakdown
-              </p>
-              {result.comps.map((c, i) => (
+          ) : result === null || priceScreen === null ? (
+            <p className="max-w-[46ch] text-pretty text-base leading-relaxed text-muted-foreground">
+              Enter at least one sold comp (sale price + square footage) and your
+              property&apos;s finished square footage to estimate ARV.
+            </p>
+          ) : (
+            <>
+              {/* The two figures the ARV leads to, as ruled rows. */}
+              <div className="border-t border-border @lg:mt-5">
                 <Row
-                  key={i}
-                  label={`Comp ${i + 1} — ${fmt(c.price)} ÷ ${c.sqft.toLocaleString("en-US")} sq ft`}
-                  value={`$${result.ppsfs[i].toFixed(2)}/sq ft`}
+                  label="Avg comp $/sq ft"
+                  value={`$${result.avgPpsf.toFixed(2)}`}
+                  bold
                 />
-              ))}
-              <Row
-                label={`ARV — $${result.avgPpsf.toFixed(2)} × ${num(subjectSqft).toLocaleString("en-US")} sq ft`}
-                value={fmt(result.arv)}
-                bold
-              />
-              <Row
-                label={`70%-rule price screen — ${num(multiplier)}% of ARV − ${fmt(num(repairs))} repairs, rounded down to $500`}
-                value={priceScreen}
-                bold
-              />
-            </div>
-          </>
-        )}
+                <Row
+                  label={`70%-rule price screen (${num(multiplier)}%)`}
+                  value={priceScreen}
+                  bold
+                />
+              </div>
+
+              {/* Sanity check straight from the comps method: a credible ARV
+                  sits inside the range the comps actually sold in. A pass or a
+                  miss against that range, so it takes the verdict colors. */}
+              <p className="mt-4 max-w-[68ch] text-pretty text-sm">
+                {result.arv > result.maxCompPrice ? (
+                  <LedgerVerdict pass={false}>
+                    Sanity check: this ARV is ABOVE every comp&apos;s actual sale
+                    price ({fmt(result.minCompPrice)}–{fmt(result.maxCompPrice)}).
+                    Be suspicious — check the subject square footage and whether the
+                    comps are truly comparable before trusting it.
+                  </LedgerVerdict>
+                ) : result.arv < result.minCompPrice ? (
+                  <LedgerVerdict pass={false}>
+                    Sanity check: this ARV is below every comp&apos;s actual sale
+                    price ({fmt(result.minCompPrice)}–{fmt(result.maxCompPrice)}).
+                    That can happen when the subject is much smaller than the comps
+                    — stay within about ±20% of your square footage when picking
+                    them.
+                  </LedgerVerdict>
+                ) : (
+                  <LedgerVerdict pass>
+                    Sanity check passed: the ARV sits inside your comps&apos; actual
+                    sale range ({fmt(result.minCompPrice)}–
+                    {fmt(result.maxCompPrice)}).
+                  </LedgerVerdict>
+                )}
+              </p>
+
+              {result.mao <= 0 && (
+                <p className="mt-3 max-w-[68ch] text-pretty text-sm">
+                  <LedgerVerdict pass={false}>
+                    At this multiplier the repairs consume the entire allowable
+                    price — the rule produces no feasible price screen for this deal
+                    as entered.
+                  </LedgerVerdict>
+                </p>
+              )}
+              {result.mao > 0 && result.arv < 150_000 && (
+                <p className="mt-3 max-w-[68ch] text-pretty text-sm">
+                  <LedgerVerdict pass={false}>
+                    Sub-$150k ARV: fixed costs (title, permits, utilities,
+                    insurance) eat a big share of a small spread — many flippers
+                    drop the multiplier to 60–65% here.
+                  </LedgerVerdict>
+                </p>
+              )}
+              {result.mao > 0 && result.arv > 600_000 && (
+                <p className="mt-3 max-w-[68ch] text-pretty text-sm font-semibold text-muted-foreground">
+                  $600k+ ARV with a light rehab can justify 72–75% — but a thinner
+                  margin needs a tighter rehab number and a faster exit.
+                </p>
+              )}
+
+              <div className="mt-6">
+                <p className="border-b border-border pb-2 text-sm font-semibold text-foreground">
+                  Comp breakdown
+                </p>
+                {result.comps.map((c, i) => (
+                  <Row
+                    key={i}
+                    label={`Comp ${i + 1} — ${fmt(c.price)} ÷ ${c.sqft.toLocaleString("en-US")} sq ft`}
+                    value={`$${result.ppsfs[i].toFixed(2)}/sq ft`}
+                  />
+                ))}
+                <Row
+                  label={`ARV — $${result.avgPpsf.toFixed(2)} × ${num(subjectSqft).toLocaleString("en-US")} sq ft`}
+                  value={fmt(result.arv)}
+                  bold
+                />
+                <Row
+                  label={`70%-rule price screen — ${num(multiplier)}% of ARV − ${fmt(num(repairs))} repairs, rounded down to $500`}
+                  value={priceScreen}
+                  bold
+                />
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* One plain action, then one line saying what does not carry over
@@ -537,15 +575,30 @@ function Plain({ label, value, setValue, max, error }: FieldProps) {
     />
   );
 }
-/** The key figure: its sentence-case label, then the display face over the 2px rule. */
-function Metric({ label, value }: { label: string; value: string }) {
+/**
+ * The key figure: its sentence-case label on the 2px rule (the label row
+ * every calculator's result has), then the figure in the display face.
+ */
+function Metric({
+  label,
+  value,
+  pending = false,
+}: {
+  label: string;
+  value: string;
+  /** No figure yet: the placeholder in Ink 2. */
+  pending?: boolean;
+}) {
   return (
     <div>
-      <p className="text-sm leading-snug font-semibold text-foreground">
-        {label}
-      </p>
+      <p className={TOOL_RESULT_LABEL_CLASS}>{label}</p>
       {/* The color sits on the line, not on LedgerTotal (see ToolResult). */}
-      <p className="mt-3 wrap-anywhere text-foreground">
+      <p
+        className={cn(
+          "mt-3 wrap-anywhere",
+          pending ? "text-muted-foreground" : "text-foreground",
+        )}
+      >
         <LedgerTotal className="text-key-sm sm:text-key">{value}</LedgerTotal>
       </p>
     </div>

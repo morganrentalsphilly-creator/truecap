@@ -394,16 +394,16 @@ export function InputConfidenceCard({
         Decision confidence
       </h2>
 
-      {/* The one figure, on the 2px rule a result card keeps for its key
-          figure's label row. */}
-      <div className="mt-4 flex items-baseline justify-between gap-4 border-b-2 border-foreground pb-2">
+      {/* The one figure, directly under its label at the left edge, on a
+          1px graphite line (the 2px rule is the Offer Ceiling's alone). */}
+      <div className="mt-4 border-t border-foreground pt-3">
         <p className="text-sm font-semibold text-foreground">
           Input confidence
-          <span className="ml-2 text-2xs font-normal text-muted-foreground">
+          <span className="ml-2 text-xs font-normal text-muted-foreground">
             Input readiness
           </span>
         </p>
-        <p className="font-display font-figure text-2xl leading-none text-foreground sm:text-3xl">
+        <p className="mt-1 font-display font-figure text-2xl leading-none text-foreground sm:text-3xl">
           {confidence.score}%
         </p>
       </div>
@@ -429,11 +429,11 @@ export function InputConfidenceCard({
           {summarySentence}
         </p>
         {showOfferReadyStatus ? (
-          <p className="mt-1 text-2xs text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground">
             {currentStageDetail}.
           </p>
         ) : null}
-        <p className="mt-2 max-w-xl text-2xs leading-relaxed text-muted-foreground">
+        <p className="mt-2 max-w-xl text-pretty text-sm leading-relaxed text-muted-foreground">
           Scope: rental base-case inputs. ARV, refinance, hold-time, and{" "}
           flip assumptions are outside this score.
         </p>
@@ -483,7 +483,7 @@ export function InputConfidenceCard({
                         {isVerified ? "Verified" : item.sourceDisplay}
                       </span>
                     </div>
-                    <p className="mt-1 max-w-[68ch] text-2xs leading-relaxed text-muted-foreground">
+                    <p className="mt-1 max-w-[68ch] text-pretty text-sm leading-relaxed text-muted-foreground">
                       {item.reason}
                       {item.verifyAction ? ` ${item.verifyAction}.` : ""}
                     </p>

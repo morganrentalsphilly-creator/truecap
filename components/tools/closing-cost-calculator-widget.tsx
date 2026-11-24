@@ -25,7 +25,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 import { ToolNumberField } from "@/components/tools/tool-number-field";
-import { ToolFrame } from "@/components/tools/tool-parts";
+import { TOOL_RESULT_LABEL_CLASS, ToolFrame } from "@/components/tools/tool-parts";
 import { validateToolNumber } from "@/lib/public-tool-validation";
 
 const fmtMoney = (n: number) =>
@@ -206,169 +206,188 @@ export function ClosingCostCalculatorWidget() {
 
   return (
     <ToolFrame>
-      <ToolNumberField
-        id="cc-price"
-        label="Purchase price"
-        prefix="$"
-        min={0.01}
-        max={100_000_000}
-        value={purchasePrice}
-        onChange={(e) => setPurchasePrice(e.target.value)}
-        error={validated.purchasePrice.error}
-      />
+      {/* One column: the result, then the fields. In the source the result
+          follows the fields (reading and tab order); the wrapper is a grid
+          only so it can lead them by `order`. Every gap is still a margin on
+          the child, as before. */}
+      <div className="grid grid-cols-[minmax(0,1fr)]">
+        <ToolNumberField
+          id="cc-price"
+          label="Purchase price"
+          prefix="$"
+          min={0.01}
+          max={100_000_000}
+          value={purchasePrice}
+          onChange={(e) => setPurchasePrice(e.target.value)}
+          error={validated.purchasePrice.error}
+        />
 
-      <p className="mt-8 text-base font-semibold text-foreground">
-        Loan + title fees
-      </p>
-      <div className={FIELD_GRID_CLASS}>
-        <ToolNumberField
-          id="cc-down"
-          label="Down payment"
-          suffix="%"
-          min={0}
-          max={100}
-          step={1}
-          value={downPaymentPct}
-          onChange={(e) => setDownPaymentPct(e.target.value)}
-          error={validated.downPaymentPct.error}
-        />
-        <ToolNumberField
-          id="cc-orig"
-          label="Origination (% of loan)"
-          suffix="%"
-          min={0}
-          max={25}
-          step={0.1}
-          value={originationPct}
-          onChange={(e) => setOriginationPct(e.target.value)}
-          error={validated.originationPct.error}
-        />
-        <ToolNumberField
-          id="cc-title"
-          label="Title insurance"
-          suffix="%"
-          min={0}
-          max={25}
-          step={0.1}
-          value={titlePct}
-          onChange={(e) => setTitlePct(e.target.value)}
-          error={validated.titlePct.error}
-        />
-        <ToolNumberField
-          id="cc-record"
-          label="Recording fees"
-          prefix="$"
-          min={0}
-          max={10_000_000}
-          value={recordingFees}
-          onChange={(e) => setRecordingFees(e.target.value)}
-          error={validated.recordingFees.error}
-        />
-        <ToolNumberField
-          id="cc-transfer"
-          label="Transfer tax"
-          suffix="%"
-          min={0}
-          max={25}
-          step={0.1}
-          value={transferTaxPct}
-          onChange={(e) => setTransferTaxPct(e.target.value)}
-          error={validated.transferTaxPct.error}
-        />
-      </div>
+        <p className="mt-8 text-base font-semibold text-foreground">
+          Loan + title fees
+        </p>
+        <div className={FIELD_GRID_CLASS}>
+          <ToolNumberField
+            id="cc-down"
+            label="Down payment"
+            suffix="%"
+            min={0}
+            max={100}
+            step={1}
+            value={downPaymentPct}
+            onChange={(e) => setDownPaymentPct(e.target.value)}
+            error={validated.downPaymentPct.error}
+          />
+          <ToolNumberField
+            id="cc-orig"
+            label="Origination (% of loan)"
+            suffix="%"
+            min={0}
+            max={25}
+            step={0.1}
+            value={originationPct}
+            onChange={(e) => setOriginationPct(e.target.value)}
+            error={validated.originationPct.error}
+          />
+          <ToolNumberField
+            id="cc-title"
+            label="Title insurance"
+            suffix="%"
+            min={0}
+            max={25}
+            step={0.1}
+            value={titlePct}
+            onChange={(e) => setTitlePct(e.target.value)}
+            error={validated.titlePct.error}
+          />
+          <ToolNumberField
+            id="cc-record"
+            label="Recording fees"
+            prefix="$"
+            min={0}
+            max={10_000_000}
+            value={recordingFees}
+            onChange={(e) => setRecordingFees(e.target.value)}
+            error={validated.recordingFees.error}
+          />
+          <ToolNumberField
+            id="cc-transfer"
+            label="Transfer tax"
+            suffix="%"
+            min={0}
+            max={25}
+            step={0.1}
+            value={transferTaxPct}
+            onChange={(e) => setTransferTaxPct(e.target.value)}
+            error={validated.transferTaxPct.error}
+          />
+        </div>
 
-      <p className="mt-8 text-base font-semibold text-foreground">
-        Prepaid items + due diligence
-      </p>
-      <div className={FIELD_GRID_CLASS}>
-        <ToolNumberField
-          id="cc-ins"
-          label="Insurance prepay"
-          prefix="$"
-          min={0}
-          max={10_000_000}
-          value={insurancePrepay}
-          onChange={(e) => setInsurancePrepay(e.target.value)}
-          error={validated.insurancePrepay.error}
-        />
-        <ToolNumberField
-          id="cc-tax"
-          label="Tax escrow"
-          prefix="$"
-          min={0}
-          max={10_000_000}
-          value={taxEscrow}
-          onChange={(e) => setTaxEscrow(e.target.value)}
-          error={validated.taxEscrow.error}
-        />
-        <ToolNumberField
-          id="cc-appr"
-          label="Appraisal"
-          prefix="$"
-          min={0}
-          max={10_000_000}
-          value={appraisal}
-          onChange={(e) => setAppraisal(e.target.value)}
-          error={validated.appraisal.error}
-        />
-        <ToolNumberField
-          id="cc-inspect"
-          label="Inspection"
-          prefix="$"
-          min={0}
-          max={10_000_000}
-          value={inspection}
-          onChange={(e) => setInspection(e.target.value)}
-          error={validated.inspection.error}
-        />
-      </div>
+        <p className="mt-8 text-base font-semibold text-foreground">
+          Prepaid items + due diligence
+        </p>
+        <div className={FIELD_GRID_CLASS}>
+          <ToolNumberField
+            id="cc-ins"
+            label="Insurance prepay"
+            prefix="$"
+            min={0}
+            max={10_000_000}
+            value={insurancePrepay}
+            onChange={(e) => setInsurancePrepay(e.target.value)}
+            error={validated.insurancePrepay.error}
+          />
+          <ToolNumberField
+            id="cc-tax"
+            label="Tax escrow"
+            prefix="$"
+            min={0}
+            max={10_000_000}
+            value={taxEscrow}
+            onChange={(e) => setTaxEscrow(e.target.value)}
+            error={validated.taxEscrow.error}
+          />
+          <ToolNumberField
+            id="cc-appr"
+            label="Appraisal"
+            prefix="$"
+            min={0}
+            max={10_000_000}
+            value={appraisal}
+            onChange={(e) => setAppraisal(e.target.value)}
+            error={validated.appraisal.error}
+          />
+          <ToolNumberField
+            id="cc-inspect"
+            label="Inspection"
+            prefix="$"
+            min={0}
+            max={10_000_000}
+            value={inspection}
+            onChange={(e) => setInspection(e.target.value)}
+            error={validated.inspection.error}
+          />
+        </div>
 
-      {/* The result opens on the rule under the fields. */}
-      <div className="mt-8 border-t border-border pt-5">
-        {/* One polite status line when the result changes, for screen
-            readers. The figure block is therefore not ToolResult, whose own
-            live region would read the result a second time. */}
-        <span
-          className="sr-only"
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {result && verdict
-            ? `${verdict}. Total modeled closing costs ${fmtMoney(result.total)}, or ${fmtPct(result.pctOfPrice)} of purchase price.`
-            : "Fix the highlighted inputs to calculate modeled closing costs."}
-        </span>
-        <p className="text-sm leading-snug font-semibold text-foreground">
-          Total closing costs
-        </p>
-        {/* The key figure in the display face over the 2px rule, in ink (Ink 2 for
-            the placeholder); the caution color stays on the line under it.
-            The color sits on the line, not on LedgerTotal (see ToolResult). */}
-        <p
-          className={cn(
-            "mt-3 wrap-anywhere",
-            result ? "text-foreground" : "text-muted-foreground",
-          )}
-        >
-          <LedgerTotal className="text-key-sm sm:text-key">
-            {result ? fmtMoney(result.total) : "—"}
-          </LedgerTotal>
-        </p>
-        <p className="mt-4 max-w-[46ch] text-pretty text-base leading-relaxed text-muted-foreground">
-          {result && verdict ? (
-            <>
-              <LedgerFigure>{fmtPct(result.pctOfPrice)}</LedgerFigure> of
-              purchase price ·{" "}
-              <span className={cn("font-semibold", verdictColor)}>
-                {verdict}
-              </span>
-            </>
-          ) : (
-            "Fix the highlighted inputs to calculate"
-          )}
-        </p>
+        {/* The result. It leads the ten fields at every width, closed by a
+            1px line 24px over the first one: this frame is one column
+            whatever its width, so there is no two-column layout for the
+            result to return to, and under ten fields the total fell below a
+            900px screen. Source order is unchanged, and the block holds
+            nothing that takes focus: the breakdown disclosure is the next
+            sibling, after the fields. */}
+        <div className="order-first mb-6 min-w-0 border-b border-border pb-5">
+          {/* One polite status line when the result changes, for screen
+              readers. The figure block is therefore not ToolResult, whose own
+              live region would read the result a second time. */}
+          <span
+            className="sr-only"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {result && verdict
+              ? `${verdict}. Total modeled closing costs ${fmtMoney(result.total)}, or ${fmtPct(result.pctOfPrice)} of purchase price.`
+              : "Fix the highlighted inputs to calculate modeled closing costs."}
+          </span>
+          <p className={TOOL_RESULT_LABEL_CLASS}>Total closing costs</p>
+          {/* The key figure in the display face over the 2px rule, in ink (Ink 2 for
+              the placeholder); the caution color stays on the line under it.
+              The color sits on the line, not on LedgerTotal (see ToolResult). */}
+          <p
+            className={cn(
+              "mt-3 wrap-anywhere",
+              result ? "text-foreground" : "text-muted-foreground",
+            )}
+          >
+            <LedgerTotal className="text-key-sm sm:text-key">
+              {result ? fmtMoney(result.total) : "—"}
+            </LedgerTotal>
+          </p>
+          {/* Two lines of room (min-h-13 is twice the 26px line), because the
+              fields sit under this block: the line is one line for a prompt
+              and two for a band ("Modeled costs of 6% or more — verify" is
+              two at every width, and a retyped price passes through it on
+              each digit), and a line more or less moved every field. With
+              under 18rem inside the frame (a 320px phone) that band is three
+              lines, so the line keeps three. */}
+          <p className="mt-4 min-h-13 max-w-[46ch] text-pretty text-base leading-relaxed text-muted-foreground @max-2xs:min-h-19.5">
+            {result && verdict ? (
+              <>
+                <LedgerFigure>{fmtPct(result.pctOfPrice)}</LedgerFigure> of
+                purchase price ·{" "}
+                <span className={cn("font-semibold", verdictColor)}>
+                  {verdict}
+                </span>
+              </>
+            ) : (
+              "Fix the highlighted inputs to calculate"
+            )}
+          </p>
+        </div>
+        {/* The breakdown, its own row under the fields, on a line like a ruled
+            disclosure row. */}
         {result ? (
-          <details className="group mt-3">
+          <details className="group mt-8 border-t border-border">
             <summary className="flex min-h-12 max-w-md cursor-pointer list-none items-center justify-between gap-4 text-base font-semibold text-foreground [&::-webkit-details-marker]:hidden">
               Breakdown
               <DisclosureMark />

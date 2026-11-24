@@ -10,9 +10,10 @@
  * fields are the shared ToolNumberField, and the payment is the key figure
  * in the display face over the 2px rule (LedgerTotal), in ink. The result is
  * announced by its own one-line status, so the visible block is not a
- * second live region (ToolResult is one, and has no switch for that). The
- * seven lines behind the payment sit under the result on soft rules (after
- * the action on one column). The grid reads the frame's own width
+ * second live region (ToolResult is one, and has no switch for that); it
+ * takes ToolResult's label row and, on one column, its place above the
+ * fields. The seven lines behind the payment sit under the result on soft
+ * rules (after the action on one column). The grid reads the frame's own width
  * (@container), so the widget lays out the same in the tool page's hero
  * column and in the /embed iframe.
  */
@@ -23,7 +24,11 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { LedgerFigure, LedgerTotal } from "@/components/ledger/ledger-parts";
 import { ToolNumberField } from "@/components/tools/tool-number-field";
-import { ToolFrame } from "@/components/tools/tool-parts";
+import {
+  TOOL_RESULT_LABEL_CLASS,
+  TOOL_RESULT_LEAD_CLASS,
+  ToolFrame,
+} from "@/components/tools/tool-parts";
 import { buildAnalyzerHandoffUrl } from "@/lib/analyzer-handoff";
 import {
   allToolNumbersValid,
@@ -297,8 +302,19 @@ export function MortgagePaymentWidget() {
           </div>
         </div>
 
-        {/* Output. On one column it opens on the rule under the fields. */}
-        <div className="min-w-0 border-t border-border pt-5 @lg:border-t-0 @lg:pt-0">
+        {/* Output. On one column it leads the frame, above the six fields,
+            so a phone shows the payment with the first field; in the
+            two-column layout it sits beside them. Source order is unchanged
+            and nothing in the block takes focus. While it leads it keeps the
+            height of its tallest state (the three-line note once mortgage
+            insurance applies, 196px), so the fields under it do not move
+            when the note changes length or a field is emptied. */}
+        <div
+          className={cn(
+            "min-h-49 min-w-0 @lg:min-h-0",
+            TOOL_RESULT_LEAD_CLASS,
+          )}
+        >
           {/* The result is announced when it changes: one polite status line
               for screen readers, in place of eight rows re-read per keystroke. */}
           <span
@@ -311,9 +327,7 @@ export function MortgagePaymentWidget() {
               ? `Estimated monthly payment ${fmtMoney(result.monthlyTotal)}. Monthly principal and interest ${fmtMoney(result.monthlyPI)}.`
               : "Fix the highlighted inputs to calculate the payment."}
           </span>
-          <p className="text-sm leading-snug font-semibold text-foreground">
-            Estimated monthly payment
-          </p>
+          <p className={TOOL_RESULT_LABEL_CLASS}>Estimated monthly payment</p>
           {/* The color sits on the line, as in ToolResult; wrap-anywhere
               keeps an eight-figure payment inside the frame. */}
           <p
@@ -341,8 +355,8 @@ export function MortgagePaymentWidget() {
         </div>
 
         {/* What the payment is made of. On one column it follows the action
-            (order-4 after the action's order-3), so the fields lead straight
-            to the result and the action on a phone; in the two-column layout
+            (order-4 after the action's order-3), so the result, the fields
+            and the action come first on a phone; in the two-column layout
             it sits under the result, beside the fields. Withheld while a
             field is in error, so a rejected value is never printed as a
             figure. */}

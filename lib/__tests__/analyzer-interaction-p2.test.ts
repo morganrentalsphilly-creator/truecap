@@ -477,15 +477,79 @@ describe("the cash-flow strip keeps a four-digit figure inside its card (P2-154)
       dashboard.indexOf("function CashFlowOverTimeStrip"),
       dashboard.indexOf("// NetCashFlowCard was deleted"),
     );
-    // Re-anchored: analysis-dashboard.tsx — the strip is a card at the
-    // object radius (rounded-lg) since the 2026-10 polish; the container
-    // query contract is unchanged.
-    expect(strip).toContain('className="@container rounded-lg border border-border bg-card p-4 sm:p-5"');
+    // Re-anchored: analysis-dashboard.tsx — the strip is no longer a card
+    // inside the row's card (2026-11 site elevation, one object per region):
+    // it opens on the 1px graphite line with no box of its own. It is still
+    // the container; the container query contract is unchanged.
+    expect(strip).toContain('className="@container border-t border-foreground pt-4"');
     expect(strip).toContain("@max-[14.5rem]:grid-cols-1");
     expect(strip).toContain("@max-[21rem]:text-sm");
     expect(strip).toContain("@max-[21rem]:px-1.5");
     expect(strip).toContain("[overflow-wrap:anywhere]");
     expect(strip).not.toContain("min-[280px]:grid-cols-3");
+  });
+
+  it("starts the first column's text on the heading's edge (2026-11 QA, RR-07)", () => {
+    const dashboard = read("components/investcalc/analysis-dashboard.tsx");
+    const strip = dashboard.slice(
+      dashboard.indexOf("function CashFlowOverTimeStrip"),
+      dashboard.indexOf("// NetCashFlowCard was deleted"),
+    );
+    // The grid pulls out by exactly the cells' side padding at each of the
+    // three steps, so "Year 1" starts where "Cash flow over time" does.
+    expect(strip).toMatch(/className="-mx-3 grid grid-cols-3 [^"]*@max-\[21rem\]:-mx-1\.5 [^"]*sm:-mx-4 [^"]*"/);
+    expect(strip).toContain("px-3 py-2 @max-[21rem]:px-1.5 sm:px-4 sm:py-3");
+  });
+});
+
+describe("a Go deeper row holds no card of its own (2026-11 QA, RR-02, RR-03, RR-06, RR-07, RR-10)", () => {
+  const dashboard = read("components/investcalc/analysis-dashboard.tsx");
+
+  it("opens the sensitivity grid on a line inside a row, and keeps its card everywhere else", () => {
+    const grid = read("components/investcalc/sensitivity-grid.tsx");
+    expect(grid).toMatch(/variant = "card",\s*\}: SensitivityGridProps/);
+    expect(grid).toMatch(
+      /variant === "row"\s*\? "border-t border-foreground pt-4"\s*: "rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6"/,
+    );
+    expect(dashboard).toMatch(/<SensitivityGrid\s+values=\{values\}\s+variant=\{drillRowVariant\}\s*\/>/);
+    // The shared and saved-deal views pass no variant: the card.
+    expect(read("components/investcalc/read-only-analysis-view.tsx")).toContain(
+      "<SensitivityGrid values={values} />",
+    );
+  });
+
+  it("sets the summary figures between two lines inside a row, and in their card by default", () => {
+    const row = read("components/investcalc/drill-row.tsx");
+    expect(row).toContain('createContext<"card" | "row">("card")');
+    expect(row).toContain("<DrillRowVariantContext.Provider value={variant}>");
+    const summary = read("components/investcalc/analysis-panels/shared/summary-card-grid.tsx");
+    expect(summary).toContain("const isRow = (variant ?? rowVariant) === \"row\";");
+    expect(summary).toContain('"grid gap-px overflow-hidden border-y border-border bg-border"');
+    expect(summary).toContain('"grid gap-px overflow-hidden rounded-lg border border-border bg-border"');
+  });
+
+  it("insets a row's header by 4px, a card's by its own padding", () => {
+    const row = read("components/investcalc/drill-row.tsx");
+    expect(row).toContain('isRow ? "px-1" : "px-3 sm:px-4"');
+    // The 56px header and its inset focus ring are unchanged.
+    expect(row).toContain("flex min-h-14 w-full cursor-pointer items-center gap-3 py-3");
+    expect(row).toContain("focus-visible:ring-inset");
+  });
+
+  it("prints the one disclaimer as a sentence on a line, not in a tinted box", () => {
+    const tab = dashboard.slice(dashboard.indexOf("function CashFlowTab"));
+    expect(tab.match(/<Disclaimer\b/g)).toHaveLength(1);
+    expect(tab).toMatch(
+      /<div className="mt-6 border-t border-border pt-4">\s*<Disclaimer tone="muted" \/>\s*<\/div>/,
+    );
+    expect(dashboard).not.toContain('<Disclaimer tone="card"');
+  });
+
+  it("keeps the 2px graphite rule for the Offer Ceiling: the breakdown's two are 1px", () => {
+    const tab = dashboard.slice(dashboard.indexOf("function CashFlowTab"));
+    expect(tab).not.toMatch(/border-[tb]-2 border-foreground/);
+    expect(tab).toContain("flex items-baseline justify-between gap-4 border-b border-foreground pb-1.5");
+    expect(tab).toContain("mt-2 flex items-baseline justify-between gap-4 border-t border-foreground pt-2");
   });
 });
 

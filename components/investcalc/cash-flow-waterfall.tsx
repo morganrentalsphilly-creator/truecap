@@ -95,7 +95,7 @@ export function CashFlowWaterfall({ result }: { result: AnalysisResult }) {
   return (
     <section
       aria-label="Cash flow waterfall"
-      className="rounded-lg border border-border bg-card p-4 sm:p-5"
+      className="border-t border-foreground pt-4"
     >
       {/* Header - title left, the two headline numbers (Gross rent IN,
           Net cash flow OUT) prominently displayed on the right so the

@@ -29,9 +29,12 @@ vi.mock("react", async (importOriginal) => {
   };
 });
 
+import { ArvCalculatorWidget } from "@/components/tools/arv-calculator-widget";
 import { BreakEvenCalculatorWidget } from "@/components/tools/break-even-calculator-widget";
+import { ClosingCostCalculatorWidget } from "@/components/tools/closing-cost-calculator-widget";
 import { GrmCalculatorWidget } from "@/components/tools/grm-calculator-widget";
 import { MortgagePaymentWidget } from "@/components/tools/mortgage-payment-widget";
+import { SeventyPercentRuleWidget } from "@/components/tools/seventy-percent-rule-widget";
 import { TwoPercentRuleWidget } from "@/components/tools/two-percent-rule-widget";
 import { VacancyRateCalculatorWidget } from "@/components/tools/vacancy-rate-calculator-widget";
 
@@ -342,5 +345,100 @@ describe("mortgage payment calculator: pinned outputs", () => {
   it("the payment figure is one text node", () => {
     const { html } = render(MortgagePaymentWidget, {});
     expect(html.match(/>\$2,020</g)).toHaveLength(1);
+  });
+});
+
+/**
+ * A result that leads its fields (2026-11 QA, RR-01, RR-04, RR-05). On one
+ * column the result block is first in the visual order and every field sits
+ * under it, so a block whose height changed with the state moved the field
+ * under the visitor's thumb (134px on break-even). Each block is pinned to
+ * the way it holds its height: only the label and the figure, or a reserved
+ * tallest state. Heights are a browser's to measure; these pin the markup the
+ * measurement was made on.
+ */
+describe("a leading result keeps its height while the visitor types", () => {
+  /** The leading block: the one element ordered first. It nests no div. */
+  const lead = (html: string) => {
+    const blocks = [...html.matchAll(/<div class="([^"]*\border-first\b[^"]*)">([\s\S]*?)<\/div>/g)];
+    expect(blocks, "one leading block").toHaveLength(1);
+    const [, classes, inner] = blocks[0];
+    return { classes, text: textOf(inner), inner };
+  };
+  const LABEL_ROW = "border-b-2 border-foreground pb-2 text-sm leading-snug font-semibold text-foreground";
+
+  it.each([
+    [{}, "162 months"],
+    [{ "450": "" }, "—"],
+    [{ "450": "-100" }, "—"],
+    [{ "450": "4" }, "18250 months"],
+  ] as const)("break-even %o: the block is the label and the months, nothing that wraps", (fields, figure) => {
+    const { html } = render(BreakEvenCalculatorWidget, fields);
+    const block = lead(html);
+    // The status line (sr-only, out of flow), the label row, the figure.
+    expect(block.inner.match(/<(?:p|span)\b/g)).toHaveLength(4);
+    expect(block.inner).toContain(`<p class="${LABEL_ROW}">Break-even</p>`);
+    expect(block.inner).toContain(`>${figure}<`);
+    // The line under the figure and the band follow the fields.
+    // (The status line names the fix too, so the visible prompt is told
+    // apart by its paragraph, not by its words.)
+    expect(block.text).not.toContain("modeled initial cash");
+    expect(block.inner).not.toContain("text-pretty");
+    expect(html).toMatch(
+      /<\/div><div class="min-w-0 @lg:mt-4"><p class="text-pretty text-base text-muted-foreground">(?:[^<]*modeled initial cash[^<]*|Fix the highlighted inputs to calculate)<\/p>/,
+    );
+    // From 32rem the two parts are one block beside the fields again.
+    expect(html).toContain('<div class="contents @lg:block @lg:min-w-0">');
+  });
+
+  it.each([[{}], [{ "20": "5" }], [{ "20": "" }]] as const)(
+    "mortgage %o: the block reserves its three-line state while it leads",
+    (fields) => {
+      const block = lead(render(MortgagePaymentWidget, fields).html);
+      expect(block.classes).toMatch(/\bmin-h-49\b/);
+      expect(block.classes).toContain("@lg:min-h-0");
+      expect(block.classes).toContain("@lg:order-none");
+    },
+  );
+
+  it.each([[{}], [{ "300000": "" }], [{ "300000": "3000" }]] as const)(
+    "closing cost %o: the block leads at every width and its line keeps two lines",
+    (fields) => {
+      const block = lead(render(ClosingCostCalculatorWidget, fields).html);
+      // One column at every width, so no return to source order.
+      expect(block.classes).toBe("order-first mb-6 min-w-0 border-b border-border pb-5");
+      expect(block.inner).toMatch(/<p class="mt-4 min-h-13 [^"]*@max-2xs:min-h-19\.5">/);
+    },
+  );
+
+  it("closing cost: the breakdown stays out of the leading block, after the fields", () => {
+    const { html } = render(ClosingCostCalculatorWidget, {});
+    expect(lead(html).inner).not.toMatch(/<(?:details|summary|button|a|input)\b/);
+    expect(html.indexOf("<details")).toBeGreaterThan(html.lastIndexOf("<input"));
+    expect(html).toContain('<details class="group mt-8 border-t border-border">');
+  });
+
+  it.each([
+    [{}, "$254,223", false],
+    [{ "70": "" }, "—", true],
+    [{ "1400": "" }, "—", true],
+  ] as const)("ARV %o: the block is the label and the figure in every state", (fields, figure, pending) => {
+    const { html, text } = render(ArvCalculatorWidget, fields);
+    const block = lead(html);
+    expect(block.text).toBe(`Estimated ARV ${figure}`);
+    expect(block.inner).toContain(`<p class="${LABEL_ROW}">Estimated ARV</p>`);
+    // Without an ARV the placeholder holds the block's height on one column;
+    // from 32rem, where the block is under the fields, it is withheld and the
+    // sentence says what is missing.
+    expect(block.classes.includes("@lg:hidden")).toBe(pending);
+    expect(text).toMatch(pending ? /to estimate ARV\./ : /Avg comp \$\/sq ft \$181\.59/);
+    // Nothing in it takes focus, and the status line stays out of it.
+    expect(block.inner).not.toMatch(/<(?:button|a|input|details)\b|role="status"/);
+  });
+
+  it("the 70% rule's label is on the same 2px rule, and its result does not lead", () => {
+    const { html } = render(SeventyPercentRuleWidget, {});
+    expect(html).toContain(`<p class="${LABEL_ROW}">70%-rule price screen (70%)</p>`);
+    expect(html).not.toMatch(/\border-first\b/);
   });
 });
