@@ -28,8 +28,10 @@ const NEW_PASSWORD = `AuditPass${runKey}9Zx`;
 test("sign-up creates an account, lands in the app, and opens the 21-day no-card trial", async ({ page }) => {
   await page.goto("/auth/sign-up?next=/dashboard/new", { waitUntil: "domcontentloaded" });
   await page.getByLabel("Email", { exact: true }).fill(NEW_EMAIL);
+  // One password field: sign-up no longer asks for the password twice
+  // (commit 5e3b8fb7, B3). The exact label keeps the "Show password" toggle
+  // out of the match.
   await page.getByLabel("Password", { exact: true }).fill(NEW_PASSWORD);
-  await page.getByLabel("Confirm password", { exact: true }).fill(NEW_PASSWORD);
   await page.getByRole("button", { name: /^create account — \$0 today$/i }).click();
   await expect(page).toHaveURL(/^https?:\/\/[^/]+\/dashboard\/new(?:[?#]|$)/, { timeout: 30_000 });
   await expect(page.locator('form[data-calc-form="true"]')).toBeVisible({ timeout: 30_000 });

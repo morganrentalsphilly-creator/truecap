@@ -12,7 +12,14 @@ test("a cold mobile homepage waits for intent before fetching secondary routes",
   expect(prefetchedRoutes).not.toContain("/");
   expect(prefetchedRoutes).not.toContain("/privacy");
   expect(prefetchedRoutes).not.toContain("/for-investors");
-  await expect(page.getByRole("link", { name: "For investors", exact: true }).first()).toHaveAttribute("href", "/for-investors");
+  // The hero's audience cue is the agent's since the 2026-11 ads pass (C1):
+  // "For agents" is the secondary route a phone shows in the first screen
+  // (the header's own links sit in the closed menu), so it is the link that
+  // must be on the page and still not prefetched.
+  expect(prefetchedRoutes).not.toContain("/for-agents");
+  await expect(
+    page.locator('[data-hero-agent-cue=""]').getByRole("link", { name: "For agents", exact: true }),
+  ).toHaveAttribute("href", "/for-agents");
 });
 
 for (const reducedMotion of ["reduce", "no-preference"] as const) {

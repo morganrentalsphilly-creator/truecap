@@ -496,13 +496,33 @@ test("calculator inputs reflow at a 195 CSS-pixel effective viewport", async ({
   await expectContainedInViewport(page, listingLink, 44);
   await expectMinimumTouchTarget(listingLink);
 
-  // The assumptions chip must open BOTH disclosure layers and land keyboard
-  // focus on the exact editable field, rather than scrolling to a collapsed
-  // Operating Expenses card.
+  // The assumptions chip opens its own editor (2026-11 audit B1): a popover
+  // with that chip's one field, focused, which has to fit the 195px viewport
+  // like every other control here.
   const vacancyChip = page.getByRole("button", {
     name: /Vacancy 5% of rent TrueCap default/i,
   });
   await vacancyChip.click();
+  const chipEditor = page.getByRole("dialog", {
+    name: "Edit vacancy",
+    exact: true,
+  });
+  await expect(chipEditor).toBeVisible();
+  const chipField = chipEditor.getByLabel("Vacancy", { exact: true });
+  await expect(chipField).toBeFocused();
+  await expectContainedInViewport(page, chipField, 80);
+  await expectMinimumTouchTarget(chipField);
+
+  // The editor's link into the full section must open BOTH disclosure layers
+  // and land keyboard focus on the exact editable field, rather than
+  // scrolling to a collapsed Operating Expenses card.
+  const openInAllAssumptions = chipEditor.getByRole("button", {
+    name: "Open in all assumptions",
+    exact: true,
+  });
+  await expectMinimumTouchTarget(openInAllAssumptions);
+  await openInAllAssumptions.click();
+  await expect(chipEditor).toBeHidden();
   const downPaymentInput = page.getByLabel("Down Payment %", { exact: true });
   await expect(downPaymentInput).toBeVisible();
   await expectContainedInViewport(page, downPaymentInput, 80);

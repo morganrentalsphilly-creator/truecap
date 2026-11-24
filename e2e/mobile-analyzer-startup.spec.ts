@@ -75,7 +75,9 @@ test("details mount on demand and retain edits across closing and reload", async
   await page.reload();
   await expect(page.locator('form[data-calculator-ready="true"]')).toBeAttached();
   await expect(page.locator("#buy-and-hold-assumptions")).toHaveCount(0);
-  await page.getByRole("button", { name: /% down.*% interest/i }).click();
+  // The financing chip opens its own three-field editor (2026-11 audit, B1,
+  // B8); the full region, which holds this field, opens from its own toggle.
+  await page.getByRole("button", { name: "Show all assumptions", exact: true }).click();
   await expect(income).toHaveValue("275");
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1);
   expect(overflow).toBe(false);

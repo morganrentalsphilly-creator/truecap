@@ -38,8 +38,8 @@ test("capture public product evidence without entering checkout", async ({
       animations: "disabled",
     });
 
-    // The hero renders the sample deal's Verdict Ledger (2026-09 design
-    // pass, components/ledger/verdict-ledger.tsx).
+    // The hero's sheet for the sample deal (components/home/hero-sheet.tsx).
+    // Below 1024px the Offer Ceiling leads it, above the price track.
     const sampleCard = page.locator('[data-hero-ledger=""]').first();
     await expect(sampleCard).toBeVisible();
     await sampleCard.screenshot({
