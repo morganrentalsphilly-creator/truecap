@@ -2,7 +2,8 @@
 
 /**
  * The receipt flow's leaders (components/home/receipt-flow.tsx): three dashed
- * cobalt lines from the sources into the result, drawn once as the section
+ * lines from the sources into the result, in the lighter cobalt the navy band
+ * needs (inside the band --primary is white), drawn once as the section
  * enters the viewport, on every engine, with a CSS keyframe on the mask's
  * stroke (globals.css `tc-leader-draw`). No animation library: a static
  * import of Motion here put its whole runtime (layout projection, presence)
@@ -18,7 +19,23 @@
  * keyframe draws from hidden to full when the leaders scroll into view, so
  * the dash pattern survives the drawing and the leader rests dashed. While a
  * source's popover is open its leader goes solid and the figure it feeds
- * brightens (globals.css, by the attributes below).
+ * darkens (globals.css, by the attributes below).
+ *
+ * Only the mask paths carry pathLength={1} (the keyframe draws a normalised
+ * stroke). A visible path must not: it would scale the 5 4 dash array to
+ * five whole path lengths, and the leader would never read as dashed.
+ * And only the visible paths carry vector-effect="non-scaling-stroke" (they
+ * stay 2px and evenly dashed in the stretched viewBox). A mask path must
+ * not: Chromium then lays the normalised dash out in screen pixels against
+ * the path's 120 viewBox units, so the mask uncovered only the first 120px
+ * of a leader that is 167px (1095) or 197px (1440) long, and the drawn
+ * leaders stopped short of the result. The mask's 6-unit stroke scales with
+ * the box instead and still covers the 2px line.
+ *
+ * The svg fills its wrapper absolutely (receipt-flow.tsx stretches the
+ * wrapper to the flow's row). In flow it took its height from the viewBox's
+ * 1:2 ratio, set the row's height itself, and its starts at 1/6, 1/2 and
+ * 5/6 no longer met the three source rows.
  */
 
 import { useEffect, useId, useRef, useState } from "react";
@@ -69,7 +86,7 @@ export function ReceiptLeaders() {
       ref={ref}
       viewBox="0 0 120 240"
       preserveAspectRatio="none"
-      className="hidden h-full w-full lg:block"
+      className="absolute inset-0 hidden h-full w-full lg:block"
       aria-hidden
       data-receipt-leaders={armed ? (playing ? "play" : "armed") : "drawn"}
     >
@@ -93,7 +110,6 @@ export function ReceiptLeaders() {
                 stroke="white"
                 strokeWidth="6"
                 strokeLinecap="round"
-                vectorEffect="non-scaling-stroke"
                 style={{ "--tc-leader-index": index } as React.CSSProperties}
               />
             </mask>
@@ -104,12 +120,11 @@ export function ReceiptLeaders() {
         <path
           key={leader.key}
           data-receipt-leader={leader.key}
-          className="tc-leader fill-none stroke-primary"
-          strokeWidth="1.5"
+          className="tc-leader fill-none stroke-sidebar-primary"
+          strokeWidth="2"
           strokeDasharray="5 4"
           vectorEffect="non-scaling-stroke"
           d={leader.d}
-          pathLength="1"
           mask={armed ? `url(#${id}-${leader.key})` : undefined}
         />
       ))}

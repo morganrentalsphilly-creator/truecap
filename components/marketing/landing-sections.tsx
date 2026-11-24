@@ -111,7 +111,7 @@ function SheetRow({ label, value, chip, tone }: { label: string; value: ReactNod
         {chip ? (
           <span
             className={cn(
-              "ml-2 font-mono text-xs leading-4",
+              "ml-2 tc-meta",
               tone === "flag" ? "text-highlight-text" : "text-muted-foreground",
             )}
           >
@@ -206,9 +206,9 @@ function StoryCeilingRows({ ledger }: { ledger: SampleDealLedger }) {
  * the sheet rests complete.
  */
 function StorySheet({ ledger }: { ledger: SampleDealLedger }) {
-  const caption = "flex justify-between gap-3 border-b border-border pb-2 font-mono text-xs text-muted-foreground";
+  const caption = "flex justify-between gap-3 border-b border-border pb-2 tc-meta text-muted-foreground";
   return (
-    <div className="rounded-lg bg-card p-5 shadow-lg" data-story-sheet="">
+    <div className="rounded-lg border border-border bg-card p-5 shadow-lg" data-story-sheet="">
       <p className={caption}>
         <span>The sample deal</span>
         <span>{ledger.title}</span>
@@ -231,11 +231,12 @@ function StorySheet({ ledger }: { ledger: SampleDealLedger }) {
 /**
  * The story's frames below 1024px: each step's inline frame renders `only`
  * its own, so a phone sees one frame per step (the pinned StorySheet serves
- * 1024px and up).
+ * 1024px and up). A frame is a resting object on a 1px line, not a panel:
+ * the one panel-shadow sheet a phone meets above the receipts is the hero's.
  */
 function StoryFrames({ ledger, only }: { ledger: SampleDealLedger; only?: 1 | 2 | 3 }) {
-  const frameClass = "rounded-lg bg-card p-4 shadow-lg sm:p-5";
-  const caption = "flex justify-between gap-3 border-b border-border pb-2 font-mono text-xs text-muted-foreground";
+  const frameClass = "rounded-object border border-border bg-card p-4 shadow-rest sm:p-5";
+  const caption = "flex justify-between gap-3 border-b border-border pb-2 tc-meta text-muted-foreground";
   const show = (n: 1 | 2 | 3) => only == null || only === n;
   return (
     <>
@@ -296,7 +297,9 @@ export function HowTrueCapWorks() {
               {STORY_STEPS.map((step) => (
                 <li key={step.n} data-story-step={step.n} className="grid gap-4 lg:min-h-[12rem] lg:py-6">
                   <div className="flex gap-4">
-                    <span aria-hidden className="mt-1 w-8 shrink-0 font-figure text-sm font-semibold text-muted-foreground">
+                    {/* The numeral is set as its title is (same size, same
+                        line height), so the two share a first baseline. */}
+                    <span aria-hidden className="w-8 shrink-0 font-display font-figure text-h3-sm text-foreground sm:text-2xl">
                       {step.n}
                     </span>
                     <div>
@@ -339,7 +342,10 @@ export function HowTrueCapWorks() {
           ))}
         </ol>
       )}
-      <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-3">
+      {/* data-sticky-suppress: this row carries the page's primary action, so
+          the sticky conversion bar (from 1024px, where it reads the marker)
+          stands down while the row is on screen instead of repeating it. */}
+      <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-3" data-sticky-suppress="">
         <AnalyzeCtaLink analyticsSource="how_it_works" className={buttonVariants({ size: "cta" })}>
           Analyze a deal free
         </AnalyzeCtaLink>
@@ -359,23 +365,32 @@ export function HowTrueCapWorks() {
  */
 export function BuiltByInvestor() {
   return (
-    <Section rhythm="tight" data-homepage-block="built-by-investor">
-      <div className="max-w-[68ch]">
+    // data-sticky-suppress: between the plans and the close, both of which
+    // stand the sticky conversion bar down, this block and the FAQ are barely
+    // taller than a laptop window, so the bar came back for 80 to 200px of
+    // scroll and left again. The block holds it down until the close enters.
+    <Section rhythm="tight" data-homepage-block="built-by-investor" data-sticky-suppress="">
+      {/* The FAQ split's grid (faq-section.tsx, layout="split"), so this
+          heading and the FAQ's share one rail and the paragraph starts on
+          the FAQ list's edge, opening on the same 1px graphite line. */}
+      <div className="grid gap-x-12 gap-y-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] xl:gap-x-16">
         <SectionHeading>Built by a rental investor.</SectionHeading>
-        <p className="mt-4 text-lg leading-relaxed">
-          TrueCap is built by one person, a rental investor in Philadelphia, to
-          answer one question before every offer: what price makes this
-          property work? The defaults lean conservative, every assumption is
-          editable, and the core formulas are published.
-        </p>
-        <p className="mt-3 flex flex-wrap gap-x-6 text-base">
-          <IntentPrefetchLink href="/about" className="tc-link inline-flex min-h-11 items-center">
-            About TrueCap
-          </IntentPrefetchLink>
-          <IntentPrefetchLink href="/methodology" className="tc-link inline-flex min-h-11 items-center">
-            Read the methodology
-          </IntentPrefetchLink>
-        </p>
+        <div className="border-t border-foreground pt-5">
+          <p className="max-w-[60ch] text-lg leading-relaxed">
+            TrueCap is built by one person, a rental investor in Philadelphia, to
+            answer one question before every offer: what price makes this
+            property work? The defaults lean conservative, every assumption is
+            editable, and the core formulas are published.
+          </p>
+          <p className="mt-3 flex flex-wrap gap-x-6 text-base">
+            <IntentPrefetchLink href="/about" className="tc-link inline-flex min-h-11 items-center">
+              About TrueCap
+            </IntentPrefetchLink>
+            <IntentPrefetchLink href="/methodology" className="tc-link inline-flex min-h-11 items-center">
+              Read the methodology
+            </IntentPrefetchLink>
+          </p>
+        </div>
       </div>
     </Section>
   );
@@ -387,7 +402,7 @@ export function BuiltByInvestor() {
  */
 export function FinalCta() {
   return (
-    <section className="bg-navy-grid text-navy-foreground" aria-labelledby="final-cta-heading" data-sticky-suppress="">
+    <section className="bg-navy-grid text-navy-foreground" aria-labelledby="final-cta-heading" data-sticky-suppress="" data-navy-close="">
       <div className={cn(PAGE_CONTAINER, "grid gap-x-12 gap-y-6 py-18 sm:py-24 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-end xl:gap-x-16")}>
         <div>
           {/* The /for-investors close, word for word (2026-11 ads pass, C2). */}
@@ -407,7 +422,14 @@ export function FinalCta() {
           {isAgentProConfigured() ? (
             <p className="mt-4 border-t border-navy-line pt-2.5 text-base text-navy-muted">
               Working with investor clients as an agent?{" "}
-              <IntentPrefetchLink href="/for-agents" className="-my-3 inline-block py-3 text-white underline underline-offset-[3px]">
+              {/* The tc-link states by hand: this close draws its navy by
+                  class, outside the navy tone scope, where tc-link would be
+                  cobalt on navy. --primary-wash is the value that scope gives
+                  --primary-deep, so hover and press match a tc-link on a band. */}
+              <IntentPrefetchLink
+                href="/for-agents"
+                className="-my-3 inline-block py-3 text-white underline decoration-1 underline-offset-[3px] hover:text-primary-wash hover:decoration-2 active:text-primary-wash active:decoration-2"
+              >
                 See TrueCap for agents
               </IntentPrefetchLink>
             </p>
@@ -802,14 +824,17 @@ export function HomepageFaq({
  * Where the numbers come from (OVERHAUL.md §6.3): the sources drawn as a flow
  * into the result (components/home/receipt-flow.tsx). Each node is read from
  * lib/product-facts.ts so the claims cannot drift from the product, and each
- * opens its source, its basis and what to replace it with.
+ * opens its source, its basis and what to replace it with. The page's one
+ * mid-page navy band (DESIGN.md "The homepage" 3): the Section's navy tone
+ * remaps the tokens, so the lede's muted class reads light here; only the
+ * heading names white.
  */
 export function DataSourcesSection() {
   const ledger = buildSampleDealLedger();
   return (
-    <Section rhythm="tight" aria-labelledby="data-sources-heading">
+    <Section tone="navy" aria-labelledby="data-sources-heading">
       <div className="max-w-3xl">
-        <SectionHeading id="data-sources-heading">Every number has a receipt.</SectionHeading>
+        <SectionHeading id="data-sources-heading" className="text-white">Every number has a receipt.</SectionHeading>
         <p className="mt-3 max-w-[62ch] text-lg leading-relaxed text-muted-foreground">
           HUD sets the rent benchmark, FRED sets the rate, you set the property
           tax. Each is labeled, each flows into the result, and each is yours to
