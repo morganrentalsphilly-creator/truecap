@@ -199,6 +199,174 @@ describe("the close", () => {
   });
 });
 
+/**
+ * The 2026-11 site elevation: the navy band as a Section tone, the close's
+ * navy option and PageHero's two layout options. Each is off by default (the
+ * assertions above pin the defaults); these pin what the option switches on.
+ */
+describe("the navy band", () => {
+  const openTag = (html: string) => html.slice(0, html.indexOf(">") + 1);
+
+  it("is a Section tone: the navy scope and its grid in place of the paper, and no top rule whatever the rule says", () => {
+    for (const rule of ["rule", "heavy", "none"] as const) {
+      const html = renderToStaticMarkup(<Section tone="navy" rule={rule}>x</Section>);
+      const section = openTag(html);
+      expect(section).toContain('data-tone="navy"');
+      expect(section).toMatch(/^<section class="bg-navy-grid text-foreground"/);
+      // bg-navy-grid sets the background colour itself: never both.
+      expect(section).not.toContain("bg-background");
+      expect(section).not.toContain("border-t");
+      expect(section).not.toContain("bg-sheet-grid");
+    }
+    // The default stays the sheet, unmarked.
+    const sheet = openTag(renderToStaticMarkup(<Section>x</Section>));
+    expect(sheet).not.toContain(" data-tone=");
+    expect(sheet).toMatch(/^<section class="bg-background border-t border-border /);
+    expect(openTag(renderToStaticMarkup(<Section tone="sheet">x</Section>))).toBe(sheet);
+  });
+
+  it("takes the rule off the ruled section that directly follows it, after the hero hooks", () => {
+    const ruled = openTag(renderToStaticMarkup(<Section>x</Section>));
+    expect(ruled).toContain("[[data-page-hero]+*&gt;&amp;:first-child]:border-t-0 [[data-tone=navy]+&amp;]:border-t-0");
+    // The heavy rule and rule="none" carry no hook, as with the hero's.
+    expect(openTag(renderToStaticMarkup(<Section rule="heavy">x</Section>))).not.toContain("data-tone");
+    expect(openTag(renderToStaticMarkup(<Section rule="none">x</Section>))).not.toContain("data-tone");
+  });
+
+  it("is backed by the scope, the reset and the footer seam in the stylesheet", () => {
+    const css = read("app/globals.css");
+    expect(css).toMatch(/\n\[data-tone="navy"\] \{\n {2}--background: oklch\(0\.21 0\.035 262\);/);
+    expect(css).toMatch(/\n\[data-tone="sheet"\] \{\n {2}--background: oklch\(0\.985 0\.004 90\);/);
+    // The seam is keyed on the close, and the footer keeps its own classes
+    // (pinned in "the close" above).
+    expect(css).toMatch(/\nbody:has\(\[data-navy-close\]\) \[data-site-footer\] \{\s*margin-top: 0;\s*border-top-width: 0;\s*\}/);
+  });
+});
+
+describe("the close on the band", () => {
+  const buttons = (
+    <ActionRow>
+      <a href="/analyze">Analyze</a>
+    </ActionRow>
+  );
+
+  it("sets a button close on the hero's 5/7 grid, the actions on the case's last line", () => {
+    const html = renderToStaticMarkup(
+      <CloseSection tone="navy" heading="H" headingId="h" lede="Lede" actions={buttons}>
+        <p>Cue</p>
+      </CloseSection>,
+    );
+    const section = html.slice(0, html.indexOf(">") + 1);
+    expect(section).toContain('data-tone="navy"');
+    expect(section).toContain('data-navy-close=""');
+    // The sticky conversion bar stands down over it, as over the homepage close.
+    expect(section).toContain('data-sticky-suppress=""');
+    expect(section).toContain('aria-labelledby="h"');
+    expect(section).toContain("bg-navy-grid");
+    expect(html).not.toContain("bg-sheet-grid");
+    expect(html).not.toContain("border-t border-foreground");
+    // The band pads evenly: no bottom padding given back to a footer margin.
+    expect(html).toMatch(/<div class="[^"]*py-18 sm:py-24">/);
+    expect(html).not.toContain("pb-6 sm:pb-12");
+    expect(html).toMatch(
+      /<div data-close-layout="stack" class="grid gap-x-12 gap-y-6 lg:grid-cols-\[minmax\(0,5fr\)_minmax\(0,7fr\)\] lg:items-end xl:gap-x-16"><div class="min-w-0"><h2 id="h" class="font-display[^"]* text-white">H<\/h2><p class="mt-4 max-w-\[56ch\] text-pretty text-lg leading-relaxed text-muted-foreground">Lede<\/p><\/div><div class="min-w-0"><div class="flex[\s\S]*<p>Cue<\/p><\/div><\/div>/,
+    );
+  });
+
+  it("keeps a close that carries a block on the split, from the top", () => {
+    const html = renderToStaticMarkup(
+      <CloseSection tone="navy" heading="H" headingId="h" actions={<>{buttons}</>} />,
+    );
+    expect(html).toContain('data-navy-close=""');
+    expect(html).toContain(
+      'data-close-layout="split" class="grid gap-x-12 gap-y-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start xl:gap-x-16"',
+    );
+    expect(html).not.toContain("items-end");
+  });
+
+  it("marks no close but the navy one, so only a navy close moves the footer", () => {
+    const html = renderToStaticMarkup(<CloseSection heading="H" headingId="h" actions={buttons} />);
+    expect(html).not.toContain("data-navy-close");
+    expect(html).not.toContain("data-tone");
+    expect(html).not.toContain("data-sticky-suppress");
+    expect(html).not.toContain("text-white");
+    expect(renderToStaticMarkup(<CloseSection tone="sheet" heading="H" headingId="h" actions={buttons} />)).toBe(html);
+  });
+});
+
+describe("the page hero's layout options", () => {
+  const aside = <span>Sheet</span>;
+  const base = { title: "T", lede: "Lede", actions: <a href="/analyze">Go</a>, note: "Free.", aside } as const;
+
+  it("changes nothing by default, and nothing without an aside", () => {
+    const plain = renderToStaticMarkup(<PageHero {...base}><p>Cue</p></PageHero>);
+    expect(renderToStaticMarkup(<PageHero {...base} asideOrder="after-text" titleSpan="column"><p>Cue</p></PageHero>)).toBe(plain);
+    expect(plain).toContain('<div class="min-w-0 lg:pt-1.5"><span>Sheet</span></div>');
+    expect(plain).not.toMatch(/max-lg:|lg:col-span-2|\bcontents\b|sticky|lg:self-|lg:flex/);
+    // The default text column is the string it always was.
+    expect(plain).toContain('<div class="min-w-0"><h1 ');
+    const noAside = renderToStaticMarkup(<PageHero title="T" lede="Lede" />);
+    expect(renderToStaticMarkup(<PageHero title="T" lede="Lede" asideOrder="after-actions" titleSpan="full" />)).toBe(noAside);
+  });
+
+  it("after-actions sets the aside directly under the actions below 1024px, the note and the cue after it", () => {
+    const html = renderToStaticMarkup(
+      <PageHero {...base} asideOrder="after-actions">
+        <p>Cue</p>
+      </PageHero>,
+    );
+    // The text column dissolves into the hero grid; order places its parts.
+    // From 1024px it is pinned beside the taller sheet, by the homepage hero's
+    // mechanism, behind a min-height guard (880px: the column is about 720px
+    // under a 96px offset), so a short window keeps it in normal flow.
+    expect(html).toContain(
+      '<div class="contents lg:block lg:min-w-0 lg:self-start lg:top-24 lg:[@media(min-height:880px)]:sticky"><h1 ',
+    );
+    expect(html).toContain('<div class="min-w-0 max-lg:order-1 max-lg:mt-6 lg:pt-1.5"><span>Sheet</span></div>');
+    expect(html).toContain('<p class="mt-3 text-sm text-muted-foreground max-lg:order-2">Free.</p>');
+    expect(html).toContain('<div class="max-lg:order-2"><p>Cue</p></div>');
+    // The row gap applies from 1024px only: below it the parts are grid
+    // items with their own margins.
+    expect(html).toContain("gap-x-12 lg:gap-y-10 pb-12");
+    expect(html).not.toMatch(/gap-x-12 gap-y-10/);
+    // DOM order is unchanged: actions, then the note, then the aside.
+    expect(html.indexOf('href="/analyze"')).toBeLessThan(html.indexOf("Free."));
+    expect(html.indexOf("Free.")).toBeLessThan(html.indexOf("<span>Sheet</span>"));
+  });
+
+  it('titleSpan="full" runs the H1 across both columns and sets the lede beside the aside', () => {
+    const html = renderToStaticMarkup(<PageHero {...base} titleSpan="full" />);
+    expect(html).toMatch(/<h1 class="font-display [^"]*lg:text-display lg:col-span-2 lg:max-w-5xl">T<\/h1><div class="min-w-0 lg:flex lg:flex-col lg:self-stretch"><p class="mt-4 max-w-\[52ch\] [^"]*sm:mt-5 lg:mt-0">Lede<\/p>/);
+    expect(html).toContain("gap-x-12 gap-y-0 lg:gap-y-8 pb-12");
+    expect(html).toContain('<div class="min-w-0 max-lg:mt-10 lg:pt-1.5"><span>Sheet</span></div>');
+    // From 1024px the text column takes the row's height as a flex column, so
+    // a page can set its last line on the sheet's bottom edge (lg:mt-auto).
+    // It is not pinned: that is the after-actions column alone.
+    expect(html).not.toContain("sticky");
+    // One H1, still the first thing in the hero.
+    expect(count(html, "<h1")).toBe(1);
+    expect(html.indexOf("<h1")).toBeLessThan(html.indexOf("Lede"));
+    // after-actions wins when both are asked for.
+    const both = renderToStaticMarkup(<PageHero {...base} titleSpan="full" asideOrder="after-actions" />);
+    expect(both).not.toContain("lg:col-span-2");
+    expect(both).not.toContain("lg:self-stretch");
+    expect(both).toContain("max-lg:order-1");
+  });
+});
+
+describe("the homepage's sticky bar never cuts its sentence", () => {
+  const bar = read("components/marketing/sticky-conversion-bar.tsx");
+
+  it("shows the sentence from 768px, where it fits, and gives the button the row below that", () => {
+    // In the 608px compact float at 640px the sentence had 336px and needs
+    // 395px, so it was cut mid-word up to 699px.
+    expect(bar).toContain('<div className="hidden min-w-0 flex-1 md:block">');
+    expect(bar).not.toMatch(/hidden min-w-0 flex-1 sm:block/);
+    expect(bar).toMatch(/className="inline-flex min-h-11 shrink-0 [^"]*max-md:flex-1 max-md:justify-center[^"]*"/);
+    expect(bar).not.toContain("max-sm:");
+  });
+});
+
 describe("the plan card lines up with its row", () => {
   const minimal = { name: "Free", audience: "A", price: "$0", answers: [{ term: "One" }], action: <span>Go</span> };
 

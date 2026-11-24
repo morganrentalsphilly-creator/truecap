@@ -4,9 +4,12 @@
  * Sticky bottom CTA bar for cold visitors on the homepage. Fires after
  * the user has scrolled past the hero (~600px) — at that point they've
  * read enough to be evaluating. Mobile-prominent (it's the main funnel
- * for paid traffic); a compact float from 640px; docked full width on the
- * bottom edge from 1024px, where it also stands down while the hero, the
- * plans or the close (each with its own action) is on screen.
+ * for paid traffic): below 768px it is the button alone, full width beside
+ * the dismiss control, since the sentence was cut by an ellipsis there (the
+ * 608px float at 640px leaves it 336px and it needs 395px); a compact float
+ * from 640px, with the sentence from 768px, where it fits; docked full width
+ * on the bottom edge from 1024px, where it also stands down while the hero,
+ * the plans or the close (each with its own action) is on screen.
  *
  * Dismissible. Hides on the /auth and /pricing routes via the parent
  * not rendering it.
@@ -124,11 +127,15 @@ export function StickyConversionBar() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] shadow-float-up sm:inset-x-4 sm:bottom-4 sm:mx-auto sm:max-w-3xl sm:rounded-lg sm:border sm:px-4 sm:py-3 sm:shadow-md lg:inset-x-0 lg:bottom-0 lg:mx-0 lg:max-w-none lg:rounded-none lg:border-x-0 lg:border-b-0 lg:px-12 lg:shadow-float-up"
     >
       <div className="mx-auto flex max-w-5xl items-center gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-foreground sm:text-base">
+        {/* From 768px, the first width where the sentence fits beside the
+            button. Below that it was cut mid-word (on a phone, and in the
+            compact float from 640 to 767px); the button says what the bar is
+            for. */}
+        <div className="hidden min-w-0 flex-1 md:block">
+          <p className="truncate text-base font-semibold text-foreground">
             Have a rental in mind? See whether the numbers work.
           </p>
-          <p className="hidden truncate text-sm text-muted-foreground sm:block">
+          <p className="truncate text-sm text-muted-foreground">
             No card · No signup · Editable assumptions
           </p>
         </div>
@@ -139,7 +146,7 @@ export function StickyConversionBar() {
             trackEvent("homepage_primary_cta", { source: "sticky_bar" });
             track("primary_cta_clicked", { source: "sticky_bar" });
           }}
-          className="inline-flex min-h-11 shrink-0 items-center rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-deep sm:px-4 sm:text-base"
+          className="inline-flex min-h-11 shrink-0 items-center rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-deep max-md:flex-1 max-md:justify-center sm:px-4 sm:text-base"
         >
           {/* The primary CTA's wording, as everywhere on the site. Phones
               under 380px fall back to the short form because the full

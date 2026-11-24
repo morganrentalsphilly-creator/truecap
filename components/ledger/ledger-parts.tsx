@@ -93,7 +93,10 @@ export function LedgerTotal({
 /**
  * The disclosure mark for <details> rows, shared by the ledger and the FAQ:
  * a plus when closed, a minus when open, one stroke, sized to the text. The
- * parent <details> needs the `group` class.
+ * parent <details> needs the `group` class. The vertical stroke closes to the
+ * horizontal one with a short scale about its own centre (the fast duration;
+ * no transition under reduced motion), so the mark turns instead of
+ * switching.
  */
 export function DisclosureMark({ className }: { className?: string }) {
   return (
@@ -106,7 +109,10 @@ export function DisclosureMark({ className }: { className?: string }) {
       strokeWidth="1.5"
     >
       <path d="M2 8h12" />
-      <path d="M8 2v12" className="group-open:hidden" />
+      <path
+        d="M8 2v12"
+        className="origin-center [transform-box:fill-box] transition-[scale] duration-[var(--duration-fast)] ease-[var(--ease-out)] group-open:scale-y-0 motion-reduce:transition-none"
+      />
     </svg>
   );
 }

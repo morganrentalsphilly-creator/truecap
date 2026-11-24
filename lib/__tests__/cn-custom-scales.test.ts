@@ -24,3 +24,32 @@ describe("cn() knows the custom type ramp", () => {
     expect(cn("shadow-md", "shadow-float-up")).toBe("shadow-float-up");
   });
 });
+
+/**
+ * DESIGN.md names elevation and radius by role. The aliases in
+ * app/globals.css (`--shadow-rest`, `--radius-object` and their siblings)
+ * are sizes, not colors: tailwind-merge has to know them, or `shadow-rest`
+ * reads as a shadow color and stacks on the size class it should replace.
+ */
+describe("cn() knows the role names for elevation and radius", () => {
+  it("merges a role shadow with a size shadow, and one role shadow with another", () => {
+    expect(cn("shadow-sm", "shadow-rest")).toBe("shadow-rest");
+    expect(cn("shadow-float", "shadow-float-up")).toBe("shadow-float-up");
+    expect(cn("shadow-rest", "shadow-panel")).toBe("shadow-panel");
+  });
+
+  it("merges a role radius with a size radius and keeps it next to a border color", () => {
+    expect(cn("rounded-lg", "rounded-object")).toBe("rounded-object");
+    expect(cn("rounded-object", "border-border").split(" ")).toEqual(["rounded-object", "border-border"]);
+  });
+
+  it.each(["rounded-tag", "rounded-control", "rounded-object", "rounded-float"])("treats %s as a radius", (radius) => {
+    expect(cn("rounded-md", radius)).toBe(radius);
+  });
+
+  it.each(["shadow-rest", "shadow-float", "shadow-panel"])("treats %s as a shadow size", (shadow) => {
+    expect(cn("shadow-lg", shadow)).toBe(shadow);
+    // A shadow color is a different group and stays.
+    expect(cn(shadow, "shadow-primary/20").split(" ")).toEqual([shadow, "shadow-primary/20"]);
+  });
+});

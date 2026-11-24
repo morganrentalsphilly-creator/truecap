@@ -7,13 +7,20 @@ import { extendTailwindMerge } from 'tailwind-merge'
  * tailwind-merge reads `text-key-sm` as a text COLOR: `cn("text-key-sm",
  * "text-foreground")` silently dropped the size (the calculator's key figure
  * fell to 16px on phones). Every custom size and shadow token is listed so a
- * color class never evicts a size, and a size never evicts a color.
+ * color class never evicts a size, and a size never evicts a color. The role
+ * names for elevation (shadow-rest, shadow-float, shadow-panel) and radius
+ * (rounded-tag, rounded-control, rounded-object, rounded-float) are listed
+ * for the same reason: unlisted, `shadow-rest` reads as a shadow COLOR and
+ * would sit beside `shadow-sm` instead of replacing it. A token or alias
+ * added to app/globals.css is registered here and in
+ * lib/__tests__/cn-custom-scales.test.ts in the same change.
  */
 const twMerge = extendTailwindMerge<'font-display' | 'font-figure' | 'bg-grid'>({
   extend: {
     theme: {
       text: ['3xs', '2xs', 'h3-sm', 'section-sm', 'section', 'key-sm', 'key', 'display-sm', 'display'],
-      shadow: ['float-up', 'glow', 'gold-glow'],
+      shadow: ['float-up', 'glow', 'gold-glow', 'rest', 'float', 'panel'],
+      radius: ['tag', 'control', 'object', 'float'],
     },
     // The two voice utilities in globals.css (`font-display` sets weight and
     // tracking, `font-figure` sets tabular numerals) are not font families:

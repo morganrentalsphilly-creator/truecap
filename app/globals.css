@@ -182,17 +182,94 @@
   --sidebar-ring: oklch(0.439 0 0);
 }
 
+/* The band: the sheet inverted (DESIGN.md "Color"). One scope remaps the
+   semantic tokens for a subtree, so a button, a tc-link, a rule and muted
+   text invert with no class of their own: white primary with cobalt text,
+   light lines, a lighter cobalt focus ring. Measured on the navy: text
+   14.4:1, secondary text 7.2:1, green 7.6:1, red 6.2:1, highlight text
+   6.3:1, the ring 4.8:1, cobalt on the white button 6.8:1
+   (lib/__tests__/navy-tone-contrast.test.ts holds each threshold).
+   Unlayered, so it sits outside the cascade layers the utilities live in.
+   Literal OKLCH, as the contrast guards parse; the values are :root's
+   --navy, --navy-foreground, --navy-muted, --navy-line and
+   --sidebar-primary, and the lightened Sign colours.
+   --card, --popover and --field stay white: a white object set in a band
+   takes data-tone="sheet" (below), or its text is light on white. */
+[data-tone="navy"] {
+  --background: oklch(0.21 0.035 262);
+  --foreground: oklch(0.93 0.008 262);
+  --muted-foreground: oklch(0.72 0.02 262);
+  --border: oklch(1 0 0 / 0.12);
+  --rule-soft: oklch(1 0 0 / 0.12);
+  --input: oklch(0.72 0.02 262);
+  --primary: oklch(1 0 0);
+  --primary-foreground: oklch(0.48 0.19 262);
+  --primary-deep: oklch(0.95 0.025 262);
+  --accent: oklch(0.27 0.04 262);
+  --accent-foreground: oklch(0.995 0 0);
+  --band: oklch(0.27 0.04 262);
+  --secondary: oklch(0.27 0.04 262);
+  --secondary-foreground: oklch(0.93 0.008 262);
+  --muted: oklch(0.27 0.04 262);
+  --ring: oklch(0.62 0.17 262);
+  --success: oklch(0.72 0.15 150);
+  --brand-green: oklch(0.72 0.15 150);
+  --metric-positive: oklch(0.72 0.15 150);
+  --metric-negative: oklch(0.70 0.17 25);
+  --highlight-text: oklch(0.70 0.17 55);
+  --brand-orange-text: oklch(0.70 0.17 55);
+  color: var(--foreground);
+}
+/* A white object inside a band (a result sheet, a card): every property the
+   navy scope sets, back at :root's value. Keep the two lists the same length;
+   the test fails when the navy scope sets one this block does not restate. */
+[data-tone="sheet"] {
+  --background: oklch(0.985 0.004 90);
+  --foreground: oklch(0.28 0.01 262);
+  --muted-foreground: oklch(0.47 0.01 262);
+  --border: oklch(0.87 0.008 90);
+  --rule-soft: oklch(0.93 0.005 90);
+  --input: oklch(0.47 0.01 262);
+  --primary: oklch(0.48 0.19 262);
+  --primary-foreground: oklch(0.995 0 0);
+  --primary-deep: oklch(0.41 0.17 262);
+  --accent: oklch(0.955 0.005 90);
+  --accent-foreground: oklch(0.28 0.01 262);
+  --band: oklch(0.955 0.005 90);
+  --secondary: oklch(0.955 0.005 90);
+  --secondary-foreground: oklch(0.28 0.01 262);
+  --muted: oklch(0.955 0.005 90);
+  --ring: oklch(0.48 0.19 262);
+  --success: oklch(0.50 0.15 150);
+  --brand-green: oklch(0.50 0.15 150);
+  --metric-positive: oklch(0.50 0.15 150);
+  --metric-negative: oklch(0.52 0.20 25);
+  --highlight-text: oklch(0.55 0.17 50);
+  --brand-orange-text: oklch(0.55 0.17 50);
+  color: var(--foreground);
+}
+/* A navy close runs into the footer: the footer's 48px top margin and its top
+   line would leave a strip of sheet and a hairline under the band. Keyed on
+   the close (data-navy-close: CloseSection's navy tone and the homepage's
+   FinalCta), not on every band, so a mid-page band changes nothing here. The
+   footer keeps its classes (shared-visual-guards pins them). */
+body:has([data-navy-close]) [data-site-footer] {
+  margin-top: 0;
+  border-top-width: 0;
+}
+
 @theme inline {
   --font-sans: var(--font-sans-variable), "TrueCap Text Fallback Roboto", "TrueCap Text Fallback Liberation Sans", "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono-variable), "TrueCap Mono Fallback Roboto", "TrueCap Mono Fallback Liberation Sans", "Geist Mono", ui-monospace, monospace;
   /* The two dense product-UI steps below text-xs (DESIGN.md "Label-xs" /
      "Label-2xs"). Defined as font-size only so they behave exactly like the
      arbitrary text-[11px] / text-[10px] values they replace (line-height
-     keeps coming from the leading-* utility or inherits). Phase 4 raised
-     them: 12px and 11px, so no functional text sits under the 11px floor
-     and body text is never below 12px (DESIGN.md "Typography"). */
+     keeps coming from the leading-* utility or inherits). Both steps are
+     12px (Phase 4 raised them to 12px and 11px; the 2026-11 elevation pass
+     raised the second), so nothing sits under the 12px floor (DESIGN.md
+     "Typography"). */
   --text-2xs: 0.75rem;
-  --text-3xs: 0.6875rem;
+  --text-3xs: 0.75rem;
   /* The decided ramp (DESIGN.md "Typography"): small and label 14px
      (text-sm), UI 16px (text-base), marketing body 18px (text-lg), H4 20px
      (text-xl), H3 24px (text-2xl) and 21px on phones (text-h3-sm), H2 34px
@@ -278,6 +355,15 @@
   --radius-xl: 14px;
   --radius-2xl: 16px;
   --radius-3xl: 20px;
+  /* The same radii by the role DESIGN.md names (rounded-tag, rounded-control,
+     rounded-object, rounded-float). Literal values: this block is `inline`,
+     so a utility compiles to the value it is given and --radius-lg is never
+     emitted as a custom property; var(--radius-lg) would resolve to nothing.
+     Each name is registered with tailwind-merge in lib/utils.ts. */
+  --radius-tag: 4px;
+  --radius-control: 8px;
+  --radius-object: var(--radius);
+  --radius-float: 14px;
   /* Elevation (DESIGN.md): rest, float, panel. A resting card carries the
      soft rest shadow; floats (menus, popovers, dialogs, the sticky bars)
      the float shadow; the hero panel and dark instruments the panel shadow. */
@@ -286,6 +372,12 @@
   --shadow-sm: 0 1px 2px oklch(0.28 0.01 262 / 0.05), 0 6px 14px -8px oklch(0.48 0.19 262 / 0.2);
   --shadow-md: 0 6px 12px -6px oklch(0.28 0.01 262 / 0.22), 0 2px 4px -2px oklch(0.28 0.01 262 / 0.08);
   --shadow-lg: 0 2px 4px oklch(0.28 0.01 262 / 0.08), 0 12px 24px -12px oklch(0.28 0.01 262 / 0.3);
+  /* The three steps by role (shadow-rest, shadow-float, shadow-panel): byte
+     copies of --shadow-sm, --shadow-md and --shadow-lg above, literal for the
+     same reason as the radius roles. Change a step in both places. */
+  --shadow-rest: 0 1px 2px oklch(0.28 0.01 262 / 0.05), 0 6px 14px -8px oklch(0.48 0.19 262 / 0.2);
+  --shadow-float: 0 6px 12px -6px oklch(0.28 0.01 262 / 0.22), 0 2px 4px -2px oklch(0.28 0.01 262 / 0.08);
+  --shadow-panel: 0 2px 4px oklch(0.28 0.01 262 / 0.08), 0 12px 24px -12px oklch(0.28 0.01 262 / 0.3);
   /* The float, cast upward, for bars fixed to the bottom edge. */
   --shadow-float-up: 0 -6px 12px -6px oklch(0.28 0.01 262 / 0.18), 0 -2px 4px -2px oklch(0.28 0.01 262 / 0.08);
   --color-sidebar: var(--sidebar);
@@ -330,6 +422,18 @@ textarea,
   font-feature-settings: "tnum" 1;
 }
 
+/* Metadata (DESIGN.md "Typography"): Geist Mono at its 500 face, 12px, for a
+   source chip, a sheet's caption row and a dimension label. Never a figure
+   and never a heading. It sets no colour: the call site keeps its own colour
+   class and drops `font-mono text-xs` when it adopts this. */
+@utility tc-meta {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-synthesis-weight: none;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
 /* The drafting sheet's grid: 16px minor lines and 80px major lines in cobalt
    at low alpha, for the marketing hero and the close. A band inverts it. */
 @utility bg-sheet-grid {
@@ -345,6 +449,12 @@ textarea,
   background-color: oklch(0.21 0.035 262);
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><path d='M0 0.5H16M0.5 0V16' stroke='white' stroke-opacity='0.05' stroke-width='1' shape-rendering='crispEdges'/></svg>");
   background-size: 16px 16px;
+  /* Focus on navy: the cobalt ring is 2.6:1 against it, this lighter cobalt
+     4.8:1. Set here as well as in the [data-tone="navy"] scope, because the
+     homepage close draws the band with hand-written classes and must not
+     take the whole scope (its address form sets bg-card and bg-field, which
+     the scope's light text would turn white on white). */
+  --ring: oklch(0.62 0.17 262);
 }
 
 /* The warm highlighter stroke under the Offer Ceiling: a fill behind the
@@ -363,6 +473,12 @@ textarea,
   text-underline-offset: 3px;
   &:hover {
     color: var(--primary-deep);
+    text-decoration-thickness: 2px;
+  }
+  /* The pressed state, which is all a touch screen shows of a link. */
+  &:active {
+    color: var(--primary-deep);
+    text-decoration-thickness: 2px;
   }
 }
 
@@ -1034,7 +1150,7 @@ summary:has([class*="rotate-"])::marker {
    dashed state is the default and nothing in view ever hides to redraw. The
    open state: while a source's popover is open (Radix marks its trigger
    data-state="open"), that source's leader goes solid and the result figure
-   it feeds brightens. */
+   it feeds takes the panel's full ink (it darkens on the white result sheet). */
 .tc-leader-mask {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
@@ -1108,7 +1224,10 @@ html[data-plan-cadence="monthly"] [data-stage-cadence="monthly"] {
 [data-receipt-flow]:has([data-receipt-node="rent"] [data-state="open"]) [data-receipt-figure="cash-flow"],
 [data-receipt-flow]:has([data-receipt-node="tax"] [data-state="open"]) [data-receipt-figure="cash-flow"],
 [data-receipt-flow]:has([data-receipt-node="rate"] [data-state="open"]) [data-receipt-figure="dscr"] {
-  color: var(--navy-foreground);
+  /* The emphasized figure is the panel's own ink. On a navy panel that is the
+     navy foreground (the fallback); a white result sheet sets
+     --receipt-open-color to its graphite ([--receipt-open-color:var(--foreground)]). */
+  color: var(--receipt-open-color, var(--navy-foreground));
 }
 
 /* A details row's content eases in as it opens (transform and opacity,
@@ -1124,14 +1243,20 @@ html[data-plan-cadence="monthly"] [data-stage-cadence="monthly"] {
 }
 
 /* The sticky header condenses once the page has scrolled (data-condensed on
-   its wrapper, set by components/investcalc/header.tsx). */
-[data-header-condensed="true"] header > div {
-  height: 3.25rem;
+   its wrapper, set by components/investcalc/header.tsx). Its condensed height
+   is a token, 52px and 56px from 640px, so whatever docks under the header
+   (the result's summary bar, top-[var(--header-condensed-h)]) reads the same
+   number instead of repeating it. */
+:root {
+  --header-condensed-h: 3.25rem;
 }
 @media (min-width: 640px) {
-  [data-header-condensed="true"] header > div {
-    height: 3.5rem;
+  :root {
+    --header-condensed-h: 3.5rem;
   }
+}
+[data-header-condensed="true"] header > div {
+  height: var(--header-condensed-h);
 }
 /* No height transition: a layout animation is off the motion rules
    (transform and opacity only); the row simply takes its condensed size. */
@@ -1150,6 +1275,23 @@ html[data-plan-cadence="monthly"] [data-stage-cadence="monthly"] {
   [data-result-reveal="play"] [data-reveal-step="3"] { --reveal-step: 3; }
   [data-result-reveal="play"] [data-reveal-step="4"] { --reveal-step: 4; }
   [data-result-reveal="play"] [data-reveal-step="5"] { --reveal-step: 5; }
+  /* Two drawings inside the same window, both from and to the resting state,
+     so the card at rest is the complete drawing: the Offer Ceiling's
+     highlight stroke draws under the figure as it rolls in (step 2), and the
+     price track's meets-range draws out from the left end to the ceiling
+     (step 3; the fill carries data-meets-fill and its own left origin). Only
+     while the root says play, never under reduced motion. */
+  [data-result-reveal="play"] [data-reveal-step="2"] .highlight-stroke {
+    background-repeat: no-repeat;
+    animation: tc-stroke-in var(--duration-draw) var(--ease-out) 450ms both;
+  }
+  [data-result-reveal="play"] [data-result-price-scrubber] [data-meets-fill] {
+    animation: tc-fill-in var(--duration-draw) var(--ease-out) 600ms both;
+  }
+  @keyframes tc-fill-in {
+    from { scale: 0 1; }
+    to { scale: 1 1; }
+  }
   /* The analyzer's advanced options (display-toggled, kept mounted) ease in
      when opened, with the same step. */
   .tc-disclosure {
@@ -1173,8 +1315,52 @@ html[data-plan-cadence="monthly"] [data-stage-cadence="monthly"] {
     background: #fff;
     color: #000;
   }
-  .shadow-xs, .shadow-sm, .shadow-md, .shadow-lg {
+  .shadow-xs, .shadow-sm, .shadow-md, .shadow-lg,
+  .shadow-rest, .shadow-float, .shadow-panel {
     box-shadow: none !important;
+  }
+  /* A band prints as the sheet: the light tokens (the same list the
+     data-tone="sheet" reset restates) on white, without the grid. Keyed on
+     bg-navy-grid as well, so every navy surface is covered: the homepage
+     close paints the band with that utility and takes no data-tone. */
+  [data-tone="navy"],
+  .bg-navy-grid {
+    --background: oklch(0.985 0.004 90);
+    --foreground: oklch(0.28 0.01 262);
+    --muted-foreground: oklch(0.47 0.01 262);
+    --border: oklch(0.87 0.008 90);
+    --rule-soft: oklch(0.93 0.005 90);
+    --input: oklch(0.47 0.01 262);
+    --primary: oklch(0.48 0.19 262);
+    --primary-foreground: oklch(0.995 0 0);
+    --primary-deep: oklch(0.41 0.17 262);
+    --accent: oklch(0.955 0.005 90);
+    --accent-foreground: oklch(0.28 0.01 262);
+    --band: oklch(0.955 0.005 90);
+    --secondary: oklch(0.955 0.005 90);
+    --secondary-foreground: oklch(0.28 0.01 262);
+    --muted: oklch(0.955 0.005 90);
+    --ring: oklch(0.48 0.19 262);
+    --success: oklch(0.50 0.15 150);
+    --brand-green: oklch(0.50 0.15 150);
+    --metric-positive: oklch(0.50 0.15 150);
+    --metric-negative: oklch(0.52 0.20 25);
+    --highlight-text: oklch(0.55 0.17 50);
+    --brand-orange-text: oklch(0.55 0.17 50);
+    background-image: none;
+    background-color: #fff;
+    color: var(--foreground);
+  }
+  /* A band's heading is set in white by class, which the tokens above cannot
+     reach: on the printed sheet it takes the ink. So do the navy text classes
+     the homepage close writes by hand (text-navy-foreground on the band
+     itself is covered by the colour above), and its line takes the border. */
+  [data-tone="navy"] .text-white,
+  .bg-navy-grid :is(.text-white, .text-navy-foreground, .text-navy-muted) {
+    color: var(--foreground);
+  }
+  .bg-navy-grid .border-navy-line {
+    border-color: var(--border);
   }
   a {
     text-decoration: none;

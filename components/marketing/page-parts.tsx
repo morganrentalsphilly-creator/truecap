@@ -7,7 +7,10 @@
  * - PageHero: a page's H1 in the display voice, its lede, actions and the
  *   risk line, with an optional aside (a ProductShot, a ledger) in the wider
  *   column from 1024px, on the homepage hero's 5/7 grid (or, for a narrow
- *   phone capture, a fixed column on the container's right edge).
+ *   phone capture, a fixed column on the container's right edge). Two
+ *   options change where things sit, both off by default: `asideOrder` sets
+ *   the aside directly under the actions on phones, and `titleSpan` runs a
+ *   long H1 across both columns.
  * - RuledList: term and detail rows on rules instead of a grid of cards (the
  *   "What your client receives" pattern), one or two columns.
  * - StepList: a real sequence, numbered in the figure face on rules.
@@ -16,6 +19,7 @@
  *   tinted box.
  * - CloseSection: the page's closing ask on the heavy rule (FinalCta's
  *   grammar), stacked for buttons or split for a block such as a price table.
+ *   `tone="navy"` sets it on the band instead, for a commercial page.
  * - UnderTitleAnalyzeLink: the one short "Analyze a deal free" text link
  *   under a content page's H1 (audit row P2-80), also exported from
  *   components/marketing/article.tsx for blog posts.
@@ -39,6 +43,30 @@ const HERO_ASIDE_COLUMNS = {
   shot: "lg:grid-cols-[minmax(0,1fr)_19.125rem]",
 } as const;
 
+const HERO_TITLE = "font-display hyphens-auto break-words text-balance text-display-sm text-foreground lg:text-display";
+const HERO_LEDE = "mt-4 max-w-[52ch] text-pretty text-lg leading-normal text-foreground sm:mt-5";
+
+/**
+ * The text column of asideOrder="after-actions". Below 1024px it dissolves
+ * into the hero grid (display: contents). From 1024px it is pinned, by the
+ * homepage hero's mechanism (components/marketing/marketing-hero.tsx,
+ * position only, nothing animates): the aside is a live sheet and the taller
+ * column, so the H1 and the actions stay beside it until the hero ends
+ * instead of scrolling away from blank paper. top-24 clears the header. The
+ * min-height guard leaves a shorter window in normal flow: this column is
+ * about 720px tall from 1280px, so under the 96px offset it needs 880px of
+ * window to fit with room for one more line.
+ */
+const HERO_PINNED_TEXT = "contents lg:block lg:min-w-0 lg:self-start lg:top-24 lg:[@media(min-height:880px)]:sticky";
+
+/**
+ * The text column of titleSpan="full". From 1024px it takes the row's full
+ * height (the aside is the taller cell) as a flex column, so the last thing
+ * in it can sit on the aside's bottom edge with `lg:mt-auto`; without that
+ * class the column lays out as it did.
+ */
+const HERO_FULL_TITLE_TEXT = "min-w-0 lg:flex lg:flex-col lg:self-stretch";
+
 export function PageHero({
   title,
   lede,
@@ -46,6 +74,8 @@ export function PageHero({
   note,
   aside,
   asideWidth = "wide",
+  asideOrder = "after-text",
+  titleSpan = "column",
   children,
   className,
   ...props
@@ -60,10 +90,49 @@ export function PageHero({
   aside?: ReactNode;
   /** The aside's column from 1024px (see HERO_ASIDE_COLUMNS). */
   asideWidth?: keyof typeof HERO_ASIDE_COLUMNS;
+  /**
+   * Where the aside sits below 1024px (it is the right column from 1024px
+   * either way). "after-text": after everything in the text column, the
+   * default. "after-actions": directly under the actions, with the note and
+   * `children` after it, for an aside that is the product itself (a live
+   * sheet) and should not wait under the fine print. It is the homepage
+   * hero's mechanism: the text column dissolves into the hero grid
+   * (display: contents) and `order` places its parts.
+   *
+   * In this mode the note and `children` render after the aside on screen but
+   * stay before it in the DOM, so they must hold no focusable element (focus
+   * would jump backward): a link belongs in `actions`. Ignored without an
+   * aside.
+   */
+  asideOrder?: "after-text" | "after-actions";
+  /**
+   * "column": the H1 sits in the text column, the default. "full": from
+   * 1024px a long H1 runs across both columns, and the lede, actions, note
+   * and `children` share the row under it with the aside; below 1024px the
+   * order is unchanged. Give the hero a lede in this mode (it opens the row
+   * under the title). Ignored without an aside, and not combined with
+   * asideOrder="after-actions", which wins.
+   */
+  titleSpan?: "column" | "full";
   /** Extra content under the note (an audience cue on its soft rule). */
   children?: ReactNode;
   className?: string;
 } & Omit<ComponentProps<"section">, "title" | "className" | "children">) {
+  // Both options need an aside; with the defaults every class below is the
+  // string it always was.
+  const afterActions = Boolean(aside) && asideOrder === "after-actions";
+  const fullTitle = Boolean(aside) && titleSpan === "full" && !afterActions;
+  // The space between the text and the aside below 1024px. after-actions:
+  // none from the grid, since the text column's parts are grid items there
+  // and keep their own margins. full: the title sits against the lede, and
+  // the aside brings its own margin.
+  const rowGap = afterActions ? "lg:gap-y-10" : fullTitle ? "gap-y-0 lg:gap-y-8" : "gap-y-10";
+  const heading = (
+    <h1 className={fullTitle ? `${HERO_TITLE} lg:col-span-2 lg:max-w-5xl` : HERO_TITLE}>
+      {title}
+    </h1>
+  );
+  const ledeClass = fullTitle ? `${HERO_LEDE} lg:mt-0` : HERO_LEDE;
   return (
     // data-page-hero: the hero's bottom rule is the one rule under it; a ruled
     // Section that follows drops its own (components/marketing/section.tsx).
@@ -71,26 +140,41 @@ export function PageHero({
       <div
         className={cn(
           PAGE_CONTAINER,
-          "grid grid-cols-[minmax(0,1fr)] gap-x-12 gap-y-10 pb-12 pt-6 sm:pb-16 sm:pt-10 lg:pb-18 lg:pt-12 xl:gap-x-16",
+          `grid grid-cols-[minmax(0,1fr)] gap-x-12 ${rowGap} pb-12 pt-6 sm:pb-16 sm:pt-10 lg:pb-18 lg:pt-12 xl:gap-x-16`,
           aside ? `${HERO_ASIDE_COLUMNS[asideWidth]} lg:items-start` : null,
         )}
       >
-        <div className={cn("min-w-0", aside ? null : "max-w-3xl")}>
-          <h1 className="font-display hyphens-auto break-words text-balance text-display-sm text-foreground lg:text-display">
-            {title}
-          </h1>
+        {fullTitle ? heading : null}
+        <div className={afterActions ? HERO_PINNED_TEXT : fullTitle ? HERO_FULL_TITLE_TEXT : cn("min-w-0", aside ? null : "max-w-3xl")}>
+          {fullTitle ? null : heading}
           {typeof lede === "string" ? (
-            <p className="mt-4 max-w-[52ch] text-pretty text-lg leading-normal text-foreground sm:mt-5">{lede}</p>
+            <p className={ledeClass}>{lede}</p>
           ) : lede ? (
-            <div className="mt-4 max-w-[52ch] text-pretty text-lg leading-normal text-foreground sm:mt-5">
+            <div className={ledeClass}>
               {lede}
             </div>
           ) : null}
           {actions ? <div className="mt-6 sm:mt-7">{actions}</div> : null}
-          {note ? <p className="mt-3 text-sm text-muted-foreground">{note}</p> : null}
-          {children}
+          {note ? (
+            <p className={afterActions ? "mt-3 text-sm text-muted-foreground max-lg:order-2" : "mt-3 text-sm text-muted-foreground"}>
+              {note}
+            </p>
+          ) : null}
+          {afterActions ? (children != null && children !== false ? <div className="max-lg:order-2">{children}</div> : null) : children}
         </div>
-        {aside ? <div className="min-w-0 lg:pt-1.5">{aside}</div> : null}
+        {aside ? (
+          <div
+            className={
+              afterActions
+                ? "min-w-0 max-lg:order-1 max-lg:mt-6 lg:pt-1.5"
+                : fullTitle
+                  ? "min-w-0 max-lg:mt-10 lg:pt-1.5"
+                  : "min-w-0 lg:pt-1.5"
+            }
+          >
+            {aside}
+          </div>
+        ) : null}
       </div>
     </section>
   );
@@ -239,6 +323,18 @@ export function Note({
  * The close is the last section before SiteFooter, whose 48px top margin
  * stacks on the section's bottom padding; the close gives that margin back
  * (pb-6 / sm:pb-12), so its ask sits centered in its band, not high in it.
+ *
+ * `tone="navy"` sets the close on the band (DESIGN.md "The marketing pages":
+ * a commercial page may opt in, one band per page). The band has no top rule
+ * and no grid of the sheet's; it pads evenly at the default rhythm, because
+ * the footer starts flush under it (data-navy-close, app/globals.css) and
+ * there is no margin to give back. "stack" then sets the case and the
+ * actions on the hero's 5/7 grid from 1024px, the actions on the case's last
+ * line, the way the homepage's close sets its address form: a button row
+ * alone under the lede leaves the wide column empty on navy. Its children
+ * need no navy classes: buttons, links, rules and muted text invert through
+ * the [data-tone="navy"] scope. The sticky conversion bar stands down while
+ * it is on screen (data-sticky-suppress), as it does for the homepage close.
  */
 export function CloseSection({
   heading,
@@ -247,6 +343,7 @@ export function CloseSection({
   actions,
   children,
   layout,
+  tone = "sheet",
 }: {
   heading: ReactNode;
   headingId: string;
@@ -254,16 +351,51 @@ export function CloseSection({
   actions: ReactNode;
   children?: ReactNode;
   layout?: "stack" | "split";
+  tone?: "sheet" | "navy";
 }) {
   const resolved = layout ?? (isValidElement(actions) && actions.type === Fragment ? "split" : "stack");
+  const navy = tone === "navy";
   const theCase = (
     <>
-      <SectionHeading id={headingId}>{heading}</SectionHeading>
+      {/* White on the band, as the homepage close sets its heading. */}
+      <SectionHeading id={headingId} className={navy ? "text-white" : undefined}>{heading}</SectionHeading>
       {lede ? (
         <p className="mt-4 max-w-[56ch] text-pretty text-lg leading-relaxed text-muted-foreground">{lede}</p>
       ) : null}
     </>
   );
+  const split = (
+    <div
+      data-close-layout="split"
+      className="grid gap-x-12 gap-y-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start xl:gap-x-16"
+    >
+      <div className="min-w-0">{theCase}</div>
+      <div className="min-w-0">
+        {actions}
+        {children}
+      </div>
+    </div>
+  );
+  if (navy) {
+    return (
+      <Section tone="navy" aria-labelledby={headingId} data-navy-close="" data-sticky-suppress="">
+        {resolved === "stack" ? (
+          <div
+            data-close-layout="stack"
+            className="grid gap-x-12 gap-y-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-end xl:gap-x-16"
+          >
+            <div className="min-w-0">{theCase}</div>
+            <div className="min-w-0">
+              {actions}
+              {children}
+            </div>
+          </div>
+        ) : (
+          split
+        )}
+      </Section>
+    );
+  }
   return (
     <Section rule="heavy" aria-labelledby={headingId} className="bg-sheet-grid" containerClassName="pb-6 sm:pb-12">
       {resolved === "stack" ? (
@@ -275,16 +407,7 @@ export function CloseSection({
           </div>
         </div>
       ) : (
-        <div
-          data-close-layout="split"
-          className="grid gap-x-12 gap-y-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start xl:gap-x-16"
-        >
-          <div className="min-w-0">{theCase}</div>
-          <div className="min-w-0">
-            {actions}
-            {children}
-          </div>
-        </div>
+        split
       )}
     </Section>
   );
