@@ -647,6 +647,10 @@ const DRAFT_INPUT_CONFIDENCE_SOURCE_CONTEXT_FIELD =
  * sweet spot: imperceptible to humans, kind to mobile CPUs.
  */
 const CALC_FORM_DRAFT_DEBOUNCE_MS = 400;
+// How long a run waits on the property lookup before it says so. A lookup
+// that returns sooner raised a notice for a fifth of a second, too brief to
+// read; one that takes longer still gets the notice for the rest of the wait.
+const LOOKUP_NOTICE_DELAY_MS = 400;
 /**
  * Remembers whether the user opened the collapsible "advanced options"
  * (financing + operating expenses) block, so their open/closed choice
@@ -6674,11 +6678,23 @@ export function InvestCalcPage({
     if (pendingEnrichment) {
       if (deferredRunAfterEnrichmentRef.current) return;
       deferredRunAfterEnrichmentRef.current = true;
-      toast({
-        title: "Finishing the property lookup",
-        description:
-          "We’ll run automatically as soon as the address-based assumptions are ready.",
-      });
+      // The notice leaves with the wait it describes: it is dismissed in the
+      // finally below, before the deferred run is requested, so nothing sits
+      // over the decision when it paints. It is raised only once the wait
+      // has lasted (LOOKUP_NOTICE_DELAY_MS), so a quick lookup shows none. A
+      // run the sample started raises none: its decision is already on screen.
+      const lookupNotice: { current: ReturnType<typeof toast> | null } = {
+        current: null,
+      };
+      const lookupNoticeTimer = pendingSampleRunRef.current
+        ? null
+        : window.setTimeout(() => {
+            lookupNotice.current = toast({
+              title: "Finishing the property lookup",
+              description:
+                "We’ll run automatically as soon as the address-based assumptions are ready.",
+            });
+          }, LOOKUP_NOTICE_DELAY_MS);
       try {
         await pendingEnrichment;
       } catch {
@@ -6686,6 +6702,8 @@ export function InvestCalcPage({
         // calculation authority if the lookup fails.
       } finally {
         deferredRunAfterEnrichmentRef.current = false;
+        if (lookupNoticeTimer != null) window.clearTimeout(lookupNoticeTimer);
+        lookupNotice.current?.dismiss();
       }
       requestAnimationFrame(() => {
         void form.handleSubmit(onSubmit, onError)();
@@ -10371,17 +10389,26 @@ export function InvestCalcPage({
     if (pendingEnrichment) {
       if (deferredRunAfterEnrichmentRef.current) return;
       deferredRunAfterEnrichmentRef.current = true;
-      toast({
-        title: "Finishing the property lookup",
-        description:
-          "We’ll continue automatically as soon as the address-based assumptions are ready.",
-      });
+      // Raised once the wait has lasted and gone before the run continues,
+      // as in onSubmit above.
+      const lookupNotice: { current: ReturnType<typeof toast> | null } = {
+        current: null,
+      };
+      const lookupNoticeTimer = window.setTimeout(() => {
+        lookupNotice.current = toast({
+          title: "Finishing the property lookup",
+          description:
+            "We’ll continue automatically as soon as the address-based assumptions are ready.",
+        });
+      }, LOOKUP_NOTICE_DELAY_MS);
       try {
         await pendingEnrichment;
       } catch {
         // Best-effort enrichment failed; explicit inputs remain authoritative.
       } finally {
         deferredRunAfterEnrichmentRef.current = false;
+        window.clearTimeout(lookupNoticeTimer);
+        lookupNotice.current?.dismiss();
       }
     }
 
@@ -10688,7 +10715,7 @@ export function InvestCalcPage({
                 no intro above the form (2026-09 audit) and the signed-in
                 homes never did, so nothing else on the page competes for
                 the document outline. */}
-            <h1 className="font-display text-2xl sm:text-3xl xl:text-4xl text-foreground mb-2 text-balance">
+            <h1 className="font-display text-2xl sm:text-3xl md:text-section text-foreground mb-2 text-balance">
               {underwritingHeading}
             </h1>
             {/* ONE headline (Choose-TrueCap Phase B, finding 3): this page
@@ -10735,7 +10762,6 @@ export function InvestCalcPage({
               <span className="sr-only text-xs text-muted-foreground sm:not-sr-only">
                 Preview a sample Pro report
               </span>
-              <ArrowUpRight aria-hidden="true" className="size-4 text-muted-foreground sm:hidden" />
             </button>
           )}
         </div>
@@ -11245,7 +11271,7 @@ export function InvestCalcPage({
                     className="min-w-0 scroll-mt-24 rounded-xl border-0 p-0 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   >
                     <legend className="mb-2">
-                      <h2 className="text-sm font-semibold text-foreground">
+                      <h2 className="font-display text-base leading-tight text-foreground sm:text-lg">
                         3. Rental income
                       </h2>
                     </legend>

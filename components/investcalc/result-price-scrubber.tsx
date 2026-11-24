@@ -16,11 +16,24 @@
  * tick at each price, the dashed gap, a cobalt-bordered diamond handle that
  * is the thumb itself (the site's focus ring follows its edges) and fills
  * while pressed; the 44px slider root is the pointer target.
+ *
+ * Dimension labels: when the two prices are far enough apart
+ * (trackLabelsAnchored), each label is centred on its own tick, held inside
+ * the track, and the gap is the measure of the dashed segment on a line of
+ * its own under the track from 640px. That line is the one the what-if help
+ * text takes when the handle moves, so the card keeps its height. Closer
+ * together, the labels keep to the two ends of one row.
  */
 
 import * as SliderPrimitive from "@radix-ui/react-slider";
-import { useId, useState } from "react";
-import { priceTrackDomain } from "@/lib/price-track-domain";
+import { useId, useRef, useState } from "react";
+import {
+  PRICE_TRACK_LABEL_CLASS as LABEL,
+  priceTrackDomain,
+  trackLabelLeft,
+  trackLabelsAnchored,
+  trackLabelsFitNarrow,
+} from "@/lib/price-track-domain";
 import { cn } from "@/lib/utils";
 
 const usd = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
@@ -32,6 +45,7 @@ export function ResultPriceScrubber({
   onPriceChange,
   valueText,
   compact = false,
+  gapStatedFromLg = false,
 }: {
   asking: number;
   ceiling: number;
@@ -42,40 +56,64 @@ export function ResultPriceScrubber({
   valueText: (price: number) => string;
   /** Tighter spacing and the short label, for a card. */
   compact?: boolean;
+  /**
+   * The caller states the gap beside the ceiling from 1024px, so the track
+   * stops repeating it there: the gap is said once at every width.
+   */
+  gapStatedFromLg?: boolean;
 }) {
   const id = useId();
   const { low, high, pct } = priceTrackDomain(asking, ceiling);
   const gap = asking - ceiling;
   const moved = price !== asking;
   const [announcement, setAnnouncement] = useState("");
+  // "Back to asking" unmounts itself; focus goes back to the handle it reset.
+  const thumbRef = useRef<HTMLSpanElement>(null);
 
+  const ceilingText = `${compact ? "Ceiling" : "Offer Ceiling"} ${usd(ceiling)}`;
+  const askingText = `Asking ${usd(asking)}`;
+  const anchored = trackLabelsAnchored(pct(asking), pct(ceiling));
+  // A pair too long for a 320px track goes back to the row's two ends there.
+  const narrow = anchored && !trackLabelsFitNarrow(ceilingText.length, askingText.length);
+  const labelClass = (tone: string) =>
+    anchored ? cn(LABEL.anchoredLabel, narrow && LABEL.narrowLabel, tone) : tone;
+  const labelStyle = (at: number, text: string) =>
+    anchored ? { left: trackLabelLeft(pct(at), text.length) } : undefined;
   const ceilingLabel = (
-    <span className="text-highlight-text">
-      {compact ? "Ceiling" : "Offer Ceiling"} {usd(ceiling)}
+    <span className={labelClass("text-highlight-text")} style={labelStyle(ceiling, ceilingText)}>
+      {ceilingText}
     </span>
   );
   const askingLabel = (
-    <span className="text-muted-foreground">Asking {usd(asking)}</span>
+    <span className={labelClass("text-muted-foreground")} style={labelStyle(asking, askingText)}>
+      {askingText}
+    </span>
   );
+  // The gap under the line, as the measure of the dashed segment.
+  const gapUnderLine = anchored && gap > 0 && !moved;
 
   return (
     <div
-      className={cn("relative mx-1", compact ? "pb-0" : "pb-2")}
+      className={cn(
+        "relative mx-1",
+        compact ? "pb-0" : "pb-2",
+        gapUnderLine && (gapStatedFromLg ? LABEL.gapRoomUntilLg : LABEL.gapRoom),
+      )}
       data-result-price-scrubber=""
       data-what-if={moved ? "true" : "false"}
     >
       <div
-        className="flex items-baseline justify-between gap-3 font-mono text-xs"
+        className={anchored ? cn(LABEL.anchoredRow, narrow && LABEL.narrowRow) : LABEL.edgeRow}
         aria-hidden
       >
         {ceiling <= asking ? (
           <>
             {ceilingLabel}
-            {gap > 0 && !moved ? (
+            {!anchored && gap > 0 && !moved ? (
               // From 640px: three labels fit one row; on a phone the gap
               // would wrap the row and push the card's actions under the fold
               // (the sr-only sentence below states it for assistive tech).
-              <span className="hidden text-muted-foreground sm:inline">Gap {usd(gap)}</span>
+              <span className={gapStatedFromLg ? LABEL.edgeGapUntilLg : LABEL.edgeGap}>Gap {usd(gap)}</span>
             ) : null}
             {askingLabel}
           </>
@@ -103,7 +141,11 @@ export function ResultPriceScrubber({
         <SliderPrimitive.Track className="relative h-[2px] w-full grow bg-foreground">
           <span
             aria-hidden
-            className="absolute top-1/2 left-0 h-2 -translate-y-1/2 bg-highlight/85"
+            // The reveal draws this range out from the left end to the
+            // ceiling, once, after an explicit run (app/globals.css,
+            // [data-result-reveal="play"] … [data-meets-fill]).
+            data-meets-fill=""
+            className="absolute top-1/2 left-0 h-2 origin-left -translate-y-1/2 bg-highlight/85"
             style={{ width: `${pct(ceiling)}%` }}
           />
           <SliderPrimitive.Range className="absolute h-full bg-transparent" />
@@ -131,6 +173,7 @@ export function ResultPriceScrubber({
           ) : null}
         </SliderPrimitive.Track>
         <SliderPrimitive.Thumb
+          ref={thumbRef}
           aria-label="What-if offer price"
           // Radix derives aria-valuenow from a collection index the server
           // does not have; the value is known here.
@@ -145,6 +188,15 @@ export function ResultPriceScrubber({
           className="block size-5 rotate-45 cursor-grab rounded-none border-2 border-primary bg-card shadow-xs transition-[scale,background-color] duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:scale-110 active:scale-125 active:cursor-grabbing active:bg-primary motion-reduce:transition-none"
         />
       </SliderPrimitive.Root>
+      {gapUnderLine ? (
+        <span
+          aria-hidden
+          className={gapStatedFromLg ? LABEL.gapUntilLg : LABEL.gap}
+          style={{ left: `${(pct(ceiling) + pct(asking)) / 2}%` }}
+        >
+          Gap {usd(gap)}
+        </span>
+      ) : null}
       <p
         id={`${id}-help`}
         className={cn(
@@ -159,7 +211,10 @@ export function ResultPriceScrubber({
               type="button"
               // 44px target without a 44px line: the box overlaps the line.
               className="tc-link -my-3 inline-flex min-h-11 items-center font-sans"
-              onClick={() => onPriceChange(asking)}
+              onClick={() => {
+                onPriceChange(asking);
+                thumbRef.current?.focus();
+              }}
             >
               Back to asking
             </button>

@@ -306,9 +306,10 @@ export function PropertyDetailsSection({
         <fieldset className="min-w-0 border-0 p-0">
           {/* A real heading inside the legend (audit C3): the section
               titles were styled text only, so the form had no outline below
-              its h1. Same classes, no visual change. */}
+              its h1. In the display voice, a step above the field labels,
+              so the three steps read as steps. */}
           <legend className="mb-2">
-            <h2 className="text-sm font-semibold text-foreground">
+            <h2 className="font-display text-base leading-tight text-foreground sm:text-lg">
               1. Property
             </h2>
           </legend>
@@ -318,7 +319,7 @@ export function PropertyDetailsSection({
         </fieldset>
         <fieldset className="min-w-0 border-0 p-0">
           <legend className="mb-2">
-            <h2 className="text-sm font-semibold text-foreground">
+            <h2 className="font-display text-base leading-tight text-foreground sm:text-lg">
               2. Purchase price
             </h2>
           </legend>

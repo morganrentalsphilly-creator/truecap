@@ -29,7 +29,13 @@ import {
 import { describeMaoTarget } from "@/lib/mao-targets";
 import { meetsMaoTarget } from "@/lib/mao-target-evaluation";
 import { buildOfferCeilingPresentation } from "@/lib/offer-ceiling";
-import { priceTrackDomain } from "@/lib/price-track-domain";
+import {
+  PRICE_TRACK_LABEL_CLASS as LABEL,
+  priceTrackDomain,
+  trackLabelLeft,
+  trackLabelsAnchored,
+  trackLabelsFitNarrow,
+} from "@/lib/price-track-domain";
 import { SAMPLE_DEAL_FIXTURE } from "@/lib/sample-deal";
 import { calculateSampleDealOutcome } from "@/lib/sample-deal-analysis";
 import { cn } from "@/lib/utils";
@@ -71,6 +77,29 @@ export function SampleDecisionPrerender() {
   const meets = meetsMaoTarget(analysis, target, values);
   const gap = asking - ceiling;
   const { pct } = priceTrackDomain(asking, ceiling);
+  // The live track's dimension labels (result-price-scrubber.tsx), through
+  // the same helpers and classes: each on its own tick when the two prices
+  // are far enough apart, the gap under the dashed segment from 640px to
+  // 1024px, where the readout beside the ceiling takes it over.
+  const ceilingText = `Ceiling ${money(ceiling)}`;
+  const askingText = `Asking ${money(asking)}`;
+  const anchored = trackLabelsAnchored(pct(asking), pct(ceiling));
+  const narrow = anchored && !trackLabelsFitNarrow(ceilingText.length, askingText.length);
+  const labelClass = (tone: string) =>
+    anchored ? cn(LABEL.anchoredLabel, narrow && LABEL.narrowLabel, tone) : tone;
+  const labelStyle = (at: number, text: string) =>
+    anchored ? { left: trackLabelLeft(pct(at), text.length) } : undefined;
+  const ceilingLabel = (
+    <span className={labelClass("text-highlight-text")} style={labelStyle(ceiling, ceilingText)}>
+      {ceilingText}
+    </span>
+  );
+  const askingLabel = (
+    <span className={labelClass("text-muted-foreground")} style={labelStyle(asking, askingText)}>
+      {askingText}
+    </span>
+  );
+  const gapUnderLine = anchored && gap > 0;
   // Radix places its 20px thumb inside the track's bounds; the same offset
   // keeps the static diamond exactly where the live one lands.
   const thumbLeft = (p: number) => `calc(${p}% + ${10 - p / 5}px)`;
@@ -117,29 +146,69 @@ export function SampleDecisionPrerender() {
                     </div>
 
                     <div className="border-t-2 border-foreground pt-3">
-                      <p className="flex items-baseline justify-between gap-3 text-sm font-semibold text-foreground">
-                        <span>Offer Ceiling</span>
+                      {/* The live card's ceiling row: from 1024px one grid,
+                          the labels on one baseline and the figure, the gap
+                          and asking on the next. No readout, and the single
+                          column, when asking is at or below the ceiling. */}
+                      <div
+                        className={
+                          gap > 0
+                            ? "lg:grid lg:grid-cols-[minmax(max-content,5fr)_minmax(0,7fr)] lg:items-baseline lg:gap-x-10"
+                            : undefined
+                        }
+                      >
+                        <div className={gap > 0 ? "min-w-0 lg:contents" : "min-w-0"}>
+                          <p className="flex items-baseline justify-between gap-3 text-sm font-semibold text-foreground lg:col-start-1 lg:row-start-1">
+                            <span>Offer Ceiling</span>
+                            {gap > 0 ? (
+                              <span className="tc-meta text-muted-foreground sm:hidden">
+                                Gap {money(gap)}
+                              </span>
+                            ) : null}
+                          </p>
+                          <p className="font-display text-key-sm text-foreground [overflow-wrap:anywhere] max-[250px]:text-3xl sm:mt-1 lg:text-key lg:col-start-1 lg:row-start-2">
+                            {/* The live card's figure component, so the box is the same. */}
+                            <AnimatedNumber value={ceiling} kind="usd" className="highlight-stroke" />
+                          </p>
+                        </div>
                         {gap > 0 ? (
-                          <span className="font-mono text-xs font-normal text-muted-foreground sm:hidden">
-                            Gap {money(gap)}
-                          </span>
+                          <div className="hidden lg:contents" data-ceiling-readout="">
+                            <p className="text-sm font-semibold text-foreground lg:col-start-2 lg:row-start-1">Gap</p>
+                            <p className="flex min-w-0 flex-wrap items-baseline gap-x-4 lg:col-start-2 lg:row-start-2">
+                              <span className="font-display font-figure text-key-sm text-foreground">{money(gap)}</span>
+                              <span className="text-sm text-muted-foreground">
+                                Asking <span className="font-figure font-semibold text-foreground">{money(asking)}</span>
+                              </span>
+                            </p>
+                          </div>
                         ) : null}
-                      </p>
-                      <p className="mt-1 font-display text-3xl text-foreground [overflow-wrap:anywhere] sm:text-key-sm lg:text-key">
-                        {/* The live card's figure component, so the box is the same. */}
-                        <AnimatedNumber value={ceiling} kind="usd" className="highlight-stroke" />
-                      </p>
-                      <div className="mt-2">
-                        <div className="relative mx-1 pb-0">
-                          <div className="flex items-baseline justify-between gap-3 font-mono text-xs" aria-hidden>
-                            <span className="text-highlight-text">Ceiling {money(ceiling)}</span>
-                            {gap > 0 ? <span className="hidden text-muted-foreground sm:inline">Gap {money(gap)}</span> : null}
-                            <span className="text-muted-foreground">Asking {money(asking)}</span>
+                      </div>
+                      <div className="sm:mt-2">
+                        <div className={cn("relative mx-1 pb-0", gapUnderLine && LABEL.gapRoomUntilLg)}>
+                          <div
+                            className={anchored ? cn(LABEL.anchoredRow, narrow && LABEL.narrowRow) : LABEL.edgeRow}
+                            aria-hidden
+                          >
+                            {ceiling <= asking ? (
+                              <>
+                                {ceilingLabel}
+                                {!anchored && gap > 0 ? (
+                                  <span className={LABEL.edgeGapUntilLg}>Gap {money(gap)}</span>
+                                ) : null}
+                                {askingLabel}
+                              </>
+                            ) : (
+                              <>
+                                {askingLabel}
+                                {ceilingLabel}
+                              </>
+                            )}
                           </div>
                           <span aria-hidden className="relative mt-[-6px] mb-[-14px] flex h-11 w-full items-center">
                             <span className="relative h-[2px] w-full grow bg-foreground">
                               <span
-                                className="absolute top-1/2 left-0 h-2 -translate-y-1/2 bg-highlight/85"
+                                data-meets-fill=""
+                                className="absolute top-1/2 left-0 h-2 origin-left -translate-y-1/2 bg-highlight/85"
                                 style={{ width: `${pct(ceiling)}%` }}
                               />
                               <span
@@ -163,6 +232,15 @@ export function SampleDecisionPrerender() {
                               <span className="block size-5 rotate-45 rounded-none border-2 border-primary bg-card shadow-xs" />
                             </span>
                           </span>
+                          {gapUnderLine ? (
+                            <span
+                              aria-hidden
+                              className={LABEL.gapUntilLg}
+                              style={{ left: `${(pct(ceiling) + pct(asking)) / 2}%` }}
+                            >
+                              Gap {money(gap)}
+                            </span>
+                          ) : null}
                           <p className="sr-only">
                             {gap > 0
                               ? `Asking ${money(asking)} is ${money(gap)} above the Offer Ceiling ${money(ceiling)}.`
@@ -170,10 +248,10 @@ export function SampleDecisionPrerender() {
                           </p>
                         </div>
                       </div>
-                      <p className="mt-1 text-xs leading-relaxed text-foreground">
+                      <p className="mt-1 text-xs leading-relaxed text-foreground sm:text-sm">
                         Targets: {describeMaoTarget(target)}
                       </p>
-                      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                      <p className="mt-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">
                         The highest price that still meets the criteria shown.
                       </p>
                       <details className="group tc-accordion mt-2 border-t border-border pt-1">

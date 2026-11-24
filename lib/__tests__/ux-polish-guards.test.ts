@@ -173,9 +173,11 @@ describe("non-pointer help and concise announcements", () => {
     expect(source).toContain(
       'className="text-sm font-semibold text-foreground">',
     );
+    // Re-anchored: focused-decision-summary.tsx — the next-step label is
+    // 14px from 640px (site elevation, 2026-11-23); 12px on a phone as before.
     expect(normalizeSource(source)).toContain(
       normalizeSource(
-        'text-xs font-medium text-foreground/75">Best next step',
+        'text-xs font-medium text-foreground/75 sm:text-sm">Best next step',
       ),
     );
     expect(normalizeSource(source)).toContain(

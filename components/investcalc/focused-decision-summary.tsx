@@ -966,6 +966,15 @@ export function FocusedDecisionSummary({
     offerCeiling && offerCeilingHeadline === money(offerCeiling.ceiling)
       ? offerCeiling.ceiling
       : null;
+  // The readout beside the ceiling from 1024px: the gap, asking less the
+  // ceiling. Present only while asking is above the ceiling, which is when
+  // the track and the phone label state a gap too, so the gap is said once
+  // at every width and a deal that meets at asking has none to state (it
+  // keeps the single column).
+  const ceilingReadoutGap =
+    exactCeilingValue != null && Number(values.purchasePrice) > exactCeilingValue
+      ? Number(values.purchasePrice) - exactCeilingValue
+      : null;
   const offerCeilingAnnouncement = `${isScenarioActive ? "Base " : ""}Offer Ceiling: ${offerCeilingHeadline}.${
     targetAdopted && !targetBlocked ? ` Targets: ${targetLabel}.` : ""
   }`;
@@ -1075,47 +1084,91 @@ export function FocusedDecisionSummary({
           >
             {offerCeilingAnnouncement}
           </span>
-          <p className="flex items-baseline justify-between gap-3 text-sm font-semibold text-foreground">
-            <span>
-              {!targetAdopted
-                ? "Optional decision criteria"
-                : isScenarioActive
-                  ? "Base Offer Ceiling"
-                  : "Offer Ceiling"}
-            </span>
-            {/* Below 640px the track has room for two dimension labels, so
-                the gap moves up beside the label it measures from. */}
-            {exactCeilingValue != null &&
-            Number(values.purchasePrice) > exactCeilingValue &&
-            !whatIfActive ? (
-              <span className="font-mono text-xs font-normal text-muted-foreground sm:hidden">
-                Gap {money(Number(values.purchasePrice) - exactCeilingValue)}
-              </span>
+          {/* From 1024px the ceiling shares its row with the number an
+              investor negotiates with. One grid, two rows: the labels
+              ("Offer Ceiling", "Gap") on one baseline, and under them the
+              ceiling figure, the gap at the smaller key-figure step and
+              asking to its right, on one baseline. The two wrappers are
+              `contents` there, so the four paragraphs are the grid's own
+              items and the baselines are the grid's, not padding. Below
+              that the row is the label and the figure alone. The hero's
+              5/7 columns; the first never narrower than its figure, which
+              cannot wrap (a seven-figure ceiling in the signed-in shell). */}
+          <div
+            className={
+              ceilingReadoutGap != null
+                ? "lg:grid lg:grid-cols-[minmax(max-content,5fr)_minmax(0,7fr)] lg:items-baseline lg:gap-x-10"
+                : undefined
+            }
+          >
+            <div className={ceilingReadoutGap != null ? "min-w-0 lg:contents" : "min-w-0"}>
+              <p className="flex items-baseline justify-between gap-3 text-sm font-semibold text-foreground lg:col-start-1 lg:row-start-1">
+                <span>
+                  {!targetAdopted
+                    ? "Optional decision criteria"
+                    : isScenarioActive
+                      ? "Base Offer Ceiling"
+                      : "Offer Ceiling"}
+                </span>
+                {/* Below 640px the track has room for two dimension labels,
+                    so the gap moves up beside the label it measures from. */}
+                {exactCeilingValue != null &&
+                Number(values.purchasePrice) > exactCeilingValue &&
+                !whatIfActive ? (
+                  <span className="tc-meta text-muted-foreground sm:hidden">
+                    Gap {money(Number(values.purchasePrice) - exactCeilingValue)}
+                  </span>
+                ) : null}
+              </p>
+              {exactCeilingValue != null ? (
+                // 38px on a phone, 54px from 1024px. Below 640px the figure
+                // and the track under it carry no margin of their own: the
+                // figure's box brings 10px of air on each side, and the card's
+                // actions have to end inside the first phone screen.
+                <p className="font-display text-key-sm text-foreground [overflow-wrap:anywhere] max-[250px]:text-3xl sm:mt-1 lg:text-key lg:col-start-1 lg:row-start-2">
+                  <AnimatedNumber
+                    value={exactCeilingValue}
+                    kind="usd"
+                    rollIn
+                    rollInDelayMs={300}
+                    className="highlight-stroke"
+                  />
+                </p>
+              ) : (
+                <p
+                  className={
+                    offerCeilingHeadlineIsRange
+                      ? "mt-1 font-display font-figure text-2xl text-foreground [overflow-wrap:anywhere] sm:text-3xl"
+                      : "mt-1 font-display text-2xl text-muted-foreground [overflow-wrap:anywhere]"
+                  }
+                >
+                  {offerCeilingHeadline}
+                </p>
+              )}
+            </div>
+            {ceilingReadoutGap != null ? (
+              // The gap is asking less the ceiling, the deal's own figure: a
+              // what-if on the track does not move it. Graphite: the stroke
+              // under the ceiling is the row's one warm mark, and the miss is
+              // carried by the dashed segment and the target chips.
+              <div className="hidden lg:contents" data-ceiling-readout="">
+                <p className="text-sm font-semibold text-foreground lg:col-start-2 lg:row-start-1">Gap</p>
+                <p className="flex min-w-0 flex-wrap items-baseline gap-x-4 lg:col-start-2 lg:row-start-2">
+                  <span className="font-display font-figure text-key-sm text-foreground">
+                    {money(ceilingReadoutGap)}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    Asking{" "}
+                    <span className="font-figure font-semibold text-foreground">
+                      {money(Number(values.purchasePrice))}
+                    </span>
+                  </span>
+                </p>
+              </div>
             ) : null}
-          </p>
-          {exactCeilingValue != null ? (
-            <p className="mt-1 font-display text-3xl text-foreground [overflow-wrap:anywhere] sm:text-key-sm lg:text-key">
-              <AnimatedNumber
-                value={exactCeilingValue}
-                kind="usd"
-                rollIn
-                rollInDelayMs={300}
-                className="highlight-stroke"
-              />
-            </p>
-          ) : (
-            <p
-              className={
-                offerCeilingHeadlineIsRange
-                  ? "mt-1 font-display font-figure text-2xl text-foreground [overflow-wrap:anywhere] sm:text-3xl"
-                  : "mt-1 font-display text-2xl text-muted-foreground [overflow-wrap:anywhere]"
-              }
-            >
-              {offerCeilingHeadline}
-            </p>
-          )}
+          </div>
           {exactCeilingValue != null && Number(values.purchasePrice) > 0 ? (
-            <div className="mt-2" data-reveal-step="3">
+            <div className="sm:mt-2" data-reveal-step="3">
               <ResultPriceScrubber
                 asking={Number(values.purchasePrice)}
                 ceiling={exactCeilingValue}
@@ -1125,16 +1178,18 @@ export function FocusedDecisionSummary({
                 }
                 valueText={whatIfValueText}
                 compact
+                // Stated beside the ceiling from 1024px (the readout above).
+                gapStatedFromLg
               />
             </div>
           ) : null}
           {targetBlocked ? (
-            <p className="mt-1 text-xs font-semibold text-foreground">
+            <p className="mt-1 text-xs font-semibold text-foreground sm:text-sm">
               {targetResolutionMessage}
             </p>
           ) : null}
           {!targetBlocked ? (
-            <p className="mt-1 text-xs leading-relaxed text-foreground">
+            <p className="mt-1 text-xs leading-relaxed text-foreground sm:text-sm">
               {targetAdopted ? "Targets" : "Example targets"}: {targetLabel}
             </p>
           ) : null}
@@ -1159,7 +1214,7 @@ export function FocusedDecisionSummary({
               Retry Offer Ceiling
             </button>
           ) : null}
-          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground sm:text-sm">
             {!targetAdopted
               ? canTunePriceCeiling
                 ? "Choose at least one criterion to calculate an Offer Ceiling."
@@ -1545,16 +1600,16 @@ export function FocusedDecisionSummary({
         data-result-next-action=""
         data-reveal-step="5"
       >
-        <p className="text-xs font-medium text-foreground/75">Best next step</p>
-        <p className="mt-0.5 text-sm font-semibold text-foreground">
+        <p className="text-xs font-medium text-foreground/75 sm:text-sm">Best next step</p>
+        <p className="mt-0.5 text-sm font-semibold text-foreground sm:text-base">
           {resolvedNextAction?.label ?? "Verify the material assumptions"}
         </p>
         {resolvedNextAction?.reason ? (
           // The running-text measure (DESIGN.md, 60 to 68ch) at the text's own size.
-          <p className="mt-1 max-w-[68ch] text-xs leading-relaxed text-foreground/80">{resolvedNextAction.reason}</p>
+          <p className="mt-1 max-w-[68ch] text-xs sm:text-sm leading-relaxed text-foreground/80">{resolvedNextAction.reason}</p>
         ) : null}
         {viabilityLabels.length > 0 ? (
-          <p className="mt-2 max-w-[68ch] text-xs leading-relaxed text-foreground">
+          <p className="mt-2 max-w-[68ch] text-xs leading-relaxed text-foreground sm:text-sm">
             <span className="text-foreground/75">Fastest path to meet your targets:</span>{" "}
             <span className="font-figure font-semibold">{viabilityLabels.join(" · ")}</span>
           </p>
@@ -1563,7 +1618,7 @@ export function FocusedDecisionSummary({
         nextVerification &&
         !nextActionCoversVerification ? (
           <p
-            className="mt-2 max-w-[68ch] text-xs leading-relaxed text-foreground"
+            className="mt-2 max-w-[68ch] text-xs leading-relaxed text-foreground sm:text-sm"
             data-result-next-verification=""
           >
             <span className="font-semibold">Verify next:</span>{" "}
