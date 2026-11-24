@@ -197,9 +197,16 @@ describe("performance contract", () => {
   // after the text on /for-buy-and-hold on a slow phone connection.
   it("loads the first-screen product shot with priority where it is the largest paint", () => {
     const firstShot = (source: string) => source.match(/<ProductShot\b[^>]*?\balt=/)?.[0] ?? null;
-    for (const path of ["app/for-investors/page.tsx", "app/for-buy-and-hold/page.tsx"]) {
+    for (const path of ["app/for-buy-and-hold/page.tsx"]) {
       expect(firstShot(read(path)), path).toMatch(/^\s*priority$/m);
     }
+    // /for-investors has no hero raster since the 2026-11 site elevation: its
+    // aside is the live sample sheet (HTML), so its largest paint is the H1
+    // text, as homepage-ledger pins the homepage hero. Nothing on the page
+    // may load an image ahead of that text.
+    const investors = read("app/for-investors/page.tsx");
+    expect(investors).toContain("<HeroSheet");
+    expect(investors).not.toMatch(/ProductShot|next\/image|\bpriority\b/);
     const comparisons = readdirSync(join(ROOT, "app/vs"))
       .filter((entry) => statSync(join(ROOT, "app/vs", entry)).isDirectory())
       .map((entry) => join("app/vs", entry, "page.tsx"))

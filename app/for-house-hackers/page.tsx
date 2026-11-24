@@ -272,6 +272,7 @@ export default function ForHouseHackersPage() {
         </Section>
 
         <CloseSection
+          tone="navy"
           heading="Screen the live-in year, then preserve a separate move-out scenario."
           headingId="close-heading"
           lede="Free covers monthly out-of-pocket, cap rate, and CoC for a first-pass live-in-year screen. Pro adds saved scenarios and comparison so the later full-rental state can be modeled separately; there is no automatic year-two occupancy switch."

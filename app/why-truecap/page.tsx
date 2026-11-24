@@ -96,6 +96,7 @@ export default function WhyTrueCapPage() {
         <VsCompetitors />
         <HomepageFaq structuredData={false} />
         <CloseSection
+          tone="navy"
           heading="See it on your own deal."
           headingId="why-truecap-close-heading"
           lede={

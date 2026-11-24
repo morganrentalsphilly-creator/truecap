@@ -37,9 +37,12 @@ const trustItems = [
  * The sign-in, sign-up and password screens (DESIGN.md "Token strategy": the
  * auth screens read the same tokens as the rest of the site). Paper page, the
  * site's page container, one logo on the header's single bottom rule, and
- * from 1024px the homepage hero's 5/7 grid: the form in the narrow column,
- * the supporting copy as a ruled list in the wide one. No card, no photo and
- * nothing that glows or floats; white is the fields only.
+ * from 1024px the homepage hero's 5/7 grid: the form in the narrow column
+ * with the supporting copy as a ruled list under it, and the sample sheet in
+ * the wide one, so the two columns end near each other (2026-11 site
+ * elevation; the list used to run on under the sheet, beside empty paper).
+ * Below 1024px the screen is the form alone. No card, no photo and nothing
+ * that glows or floats; white is the fields and the sheet only.
  * lib/__tests__/auth-design-pass.test.ts pins this.
  */
 export function AuthShell({
@@ -85,38 +88,47 @@ export function AuthShell({
 
             {children}
             {footer ? <div className="pt-5 text-sm text-muted-foreground">{footer}</div> : null}
+
+            {/* From 1024px only, after everything the form needs: nothing
+                is added above the submit button, and a phone shows the form
+                and its footer as before. */}
+            <div className="mt-10 hidden lg:block">
+              <RuledList
+                items={trustItems.map((item) => ({
+                  key: item.title,
+                  term: item.title,
+                  detail: item.description,
+                }))}
+              />
+
+              {/* The line needs 442px. The form column is narrower than that
+                  from 1024px to 1279px, where it wrapped with a bullet left
+                  hanging at the end of the first line; there the three
+                  phrases stack without bullets, and from 1280px they run on
+                  one line again. (This block is hidden below 1024px.) */}
+              <p className="mt-6 flex flex-col items-start gap-x-2 gap-y-1 text-sm text-muted-foreground xl:flex-row xl:flex-wrap xl:items-center">
+                <span>Authenticated access</span>
+                <span aria-hidden="true" className="hidden xl:inline">•</span>
+                <span>Owner-scoped saved data</span>
+                <span aria-hidden="true" className="hidden xl:inline">•</span>
+                <span>Privacy controls</span>
+              </p>
+            </div>
           </div>
 
           <aside className="hidden min-w-0 lg:block">
-            <h2 className="font-display max-w-[30ch] text-balance text-2xl text-foreground">
+            <h2 className="font-display max-w-[30ch] text-balance text-2xl text-foreground xl:max-w-none">
               {panelTitle}
             </h2>
-            <p className="mt-3 max-w-[52ch] text-pretty text-base text-muted-foreground">
+            <p className="mt-3 max-w-[52ch] text-pretty text-base text-muted-foreground xl:max-w-none">
               {panelDescription}
             </p>
 
             {ledger && sweep ? (
-              <div className="mt-6">
+              <div className="mt-5">
                 <HeroSheet ledger={ledger} sweep={sweep} walkthroughHref="/#how-it-works" />
               </div>
             ) : null}
-
-            <RuledList
-              className="mt-8"
-              items={trustItems.map((item) => ({
-                key: item.title,
-                term: item.title,
-                detail: item.description,
-              }))}
-            />
-
-            <p className="mt-6 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-              <span>Authenticated access</span>
-              <span aria-hidden="true">•</span>
-              <span>Owner-scoped saved data</span>
-              <span aria-hidden="true">•</span>
-              <span>Privacy controls</span>
-            </p>
           </aside>
         </div>
       </div>

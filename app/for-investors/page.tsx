@@ -12,7 +12,9 @@
  * Set on the homepage's grammar (DESIGN.md, 2026-09 design pass): PageHero,
  * then Sections on rules, the strategies and the four questions as ruled
  * rows instead of cards, the sources as a source table, and the close on the
- * heavy rule. No cards (the page shows no plans), no icons, no motion.
+ * navy band (2026-11 site elevation). The hero's aside is the homepage's live
+ * sample sheet, the page's one object and its one authored moment; below it
+ * there are no cards (the page shows no plans) and no icons.
  *
  * BRRRR and fix-and-flip route to their guides and calculators rather than
  * /for-brrrr and /for-flippers: those two are deliberately noindexed
@@ -23,6 +25,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Fragment, Suspense } from "react";
+import { HeroSheet } from "@/components/home/hero-sheet";
 import { Header } from "@/components/investcalc/header";
 // Links below the first screen prefetch on hover or keyboard focus, not on
 // scroll. The hero's pricing link keeps next/link's default; /analyze never
@@ -31,7 +34,6 @@ import { HeroAddressForm } from "@/components/marketing/hero-address-form";
 import { IntentPrefetchLink } from "@/components/marketing/intent-prefetch-link";
 import { HomepageFaq } from "@/components/marketing/landing-sections";
 import { ActionRow, CloseSection, PageHero, RuledList } from "@/components/marketing/page-parts";
-import { DECISION_SHOT, ProductShot } from "@/components/marketing/product-shot";
 import { ScrollDepthTracker } from "@/components/marketing/scroll-depth-tracker";
 import { Section, SectionHeading } from "@/components/marketing/section";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -43,6 +45,8 @@ import {
   PRODUCT_EVALUATION_DEAL_LIMIT,
 } from "@/lib/product-access";
 import { DATA_SOURCE_FACTS, PROPERTY_TAX_FACTS } from "@/lib/product-facts";
+import { buildSampleDealLedger } from "@/lib/sample-deal-ledger";
+import { buildSampleDealSweep } from "@/lib/sample-deal-sweep";
 import { isAgentProConfigured } from "@/lib/stripe/plan-prices";
 import { cn } from "@/lib/utils";
 import { OPEN_GRAPH_BASE } from "@/lib/seo/open-graph-base";
@@ -159,6 +163,12 @@ const SOURCE_ROW_GRID =
 
 export default function ForInvestorsPage() {
   const agentProConfigured = isAgentProConfigured();
+  // The hero's sheet (DESIGN.md "Product shots"): the homepage's sample deal,
+  // set from the engine at build time and server-rendered at the ceiling, as
+  // components/auth/auth-shell.tsx mounts it. Pure builders: the page stays
+  // static.
+  const ledger = buildSampleDealLedger();
+  const sweep = buildSampleDealSweep();
   return (
     // relative + overflow-x-clip, as on the homepage: nothing a section
     // bleeds can scroll the page sideways, and `clip` keeps the sticky
@@ -166,8 +176,16 @@ export default function ForInvestorsPage() {
     <div className="relative overflow-x-clip">
       <Header initialUser={null} initialEntitlements={null} />
       <main id="main" tabIndex={-1} className="min-w-0 outline-none">
-        {/* Hero: the investor's outcome; the same free analyzer as every page. */}
+        {/* Hero: the investor's outcome; the same free analyzer as every page.
+            Below 1024px the sheet sits directly under the actions
+            (asideOrder), as on the homepage, and from 1024px that mode pins
+            the text column beside it. The risk line is set inside the
+            actions, not passed as `note`: in this mode PageHero draws its
+            note after the sheet on a phone, which took the no-account
+            promise about 1,400px away from the form it is about (2026-11 QA,
+            CP-2). */}
         <PageHero
+          asideOrder="after-actions"
           title="Know the highest price that still meets your targets before you write the offer."
           lede={
             <>
@@ -178,8 +196,10 @@ export default function ForInvestorsPage() {
               </p>
               {/* Each metric keeps its trailing separator, so a wrapped line
                   never opens on a dot; balance keeps "Offer Ceiling" from
-                  standing alone on the second line. */}
-              <p className="mt-2 text-balance text-sm font-medium text-muted-foreground">
+                  standing alone on the second line. Hidden below 640px, as
+                  the homepage hides its own metrics line, so the sheet sits
+                  higher on a phone. */}
+              <p className="mt-2 hidden text-balance text-sm font-medium text-muted-foreground sm:block">
                 {HERO_METRICS.map((metric, index) => (
                   <Fragment key={metric}>
                     {index > 0 ? " " : null}
@@ -198,39 +218,34 @@ export default function ForInvestorsPage() {
                   same handoff to /analyze, no other field. Its top margin is
                   the actions slot's. */}
               <HeroAddressForm className="mt-0 sm:mt-0" />
-              <ActionRow className="mt-3">
-                <Link href="/pricing" className={buttonVariants({ variant: "outline", size: "cta" })}>
+              {/* A text link, not a third button, and inside the actions:
+                  below 1024px the sheet is drawn after this slot, so every
+                  focusable element of the text column has to come before
+                  the sheet in the DOM. */}
+              <p className="mt-2 text-base">
+                <Link href="/pricing" className="tc-link inline-flex min-h-11 items-center">
                   See Pro pricing
                 </Link>
-              </ActionRow>
-            </>
-          }
-          note={
-            <>
-              Free. No account. Your first full decision is included. A free
-              account adds a {PRODUCT_EVALUATION_DAYS}-day trial with{" "}
-              {PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and{" "}
-              {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card. Revisions to the same property do not use another trial analysis.
+              </p>
+              {/* The hero's risk line, in PageHero's own note voice (its
+                  class string) and last in the slot: from 1024px it sits
+                  where the `note` prop would set it, and on a phone it stays
+                  under the form and the link, above the sheet. */}
+              <p className="mt-3 text-sm text-muted-foreground">
+                Free. No account. Your first full decision is included. A free
+                account adds a {PRODUCT_EVALUATION_DAYS}-day trial with{" "}
+                {PRODUCT_EVALUATION_DEAL_LIMIT} Pro analyses and{" "}
+                {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison, no card. Revisions to the same property do not use another trial analysis.
+              </p>
             </>
           }
           aside={
-            // A real capture shown as a document, never in a browser frame.
-            // Not the homepage's Verdict Ledger: its double rule draws in,
-            // and that motion belongs to the homepage alone.
-            <ProductShot
-              shot={DECISION_SHOT}
-              frame="document"
-              priority
-              alt="TrueCap's decision view for the sample deal: the Offer Ceiling beside the asking price, cash flow after reserves, DSCR, and the best next step"
-              caption={
-                <>
-                  Real output from the free sample deal.{" "}
-                  <Link href="/analyze?sample=1" prefetch={false} className="tc-link font-medium">
-                    Run it yourself
-                  </Link>
-                </>
-              }
-            />
+            // The live sheet, not a capture: the hero has no image, so its
+            // largest paint is the H1. The sheet's walkthrough link jumps to
+            // this page's own sources table.
+            ledger && sweep ? (
+              <HeroSheet ledger={ledger} sweep={sweep} walkthroughHref="#sources-heading" />
+            ) : undefined
           }
         />
 
@@ -315,6 +330,7 @@ export default function ForInvestorsPage() {
         <HomepageFaq structuredData={false} audience="investors" />
 
         <CloseSection
+          tone="navy"
           heading="Paste a listing. See if it works before you write the offer."
           headingId="final-cta-heading"
           actions={

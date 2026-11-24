@@ -61,10 +61,18 @@ describe("the audience pages open with the homepage's one-field form (P1-64)", (
       expect(mounts[0][0]).toBe('<HeroAddressForm className="mt-0 sm:mt-0" />');
       const heroStart = source.search(/<PageHero\b/);
       const actionsAt = source.indexOf("actions={", heroStart);
-      const noteAt = source.indexOf("note={", heroStart);
+      // The actions slot ends at the hero's next prop: the note, or the aside
+      // on /for-investors, which sets its risk line last inside the actions
+      // so a phone shows it above the sheet (2026-11 QA, CP-2).
+      const slotEnd = ["note={", "aside={"]
+        .map((prop) => source.indexOf(prop, actionsAt))
+        .filter((at) => at > -1)
+        .sort((a, b) => a - b)[0];
       expect(heroStart).toBeGreaterThan(-1);
+      expect(actionsAt).toBeGreaterThan(heroStart);
+      expect(slotEnd).toBeGreaterThan(actionsAt);
       expect(mounts[0].index).toBeGreaterThan(actionsAt);
-      expect(mounts[0].index).toBeLessThan(noteAt);
+      expect(mounts[0].index).toBeLessThan(slotEnd);
       // First in the slot: no link or button precedes the form.
       expect(source.slice(actionsAt, mounts[0].index)).not.toMatch(/<(?:Link|a|button|TrackedMarketingLink|IntentPrefetchLink)\b/);
       // The page adds no field and no capture of its own.

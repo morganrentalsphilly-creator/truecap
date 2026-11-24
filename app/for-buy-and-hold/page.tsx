@@ -256,6 +256,7 @@ export default function ForBuyAndHoldPage() {
             at their hyphen or dash ("stress- / tests", "10- / year",
             "first- / pass"); the text is unchanged. */}
         <CloseSection
+          tone="navy"
           heading={
             <>
               Free screens the purchase. Pro solves and{" "}
