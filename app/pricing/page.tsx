@@ -17,8 +17,9 @@
  * the auto-resume treats as mutually exclusive — it never re-fires.
  *
  * Set in the design system's grammar (DESIGN.md): the shared hero, Section
- * and FAQ parts, plan cards as the page's only cards, rules instead of
- * boxes everywhere else, and no motion.
+ * and FAQ parts, the stage list on a white sheet in the hero, plan cards as
+ * the page's only cards, rules instead of boxes everywhere else, and no
+ * motion.
  */
 
 import { cache, Suspense, type ReactNode } from "react";
@@ -337,24 +338,33 @@ const AGENT_LINE_LINK_LABEL = "TrueCap for agents";
  * With no link it is the Suspense fallback: the same line, invisible and out
  * of the accessibility tree, so the hero keeps its height while the session
  * is read.
+ *
+ * From 1024px the line sits at the foot of the hero's text column, level with
+ * the bottom of the stage sheet beside it, when PageHero sets that column as
+ * a stretched flex column (titleSpan "full"). The auto margin is on a wrapper
+ * and the line keeps its own 24px inside it: in a column that is not a flex
+ * column, or one with no room to spare, the line still stands 24px under the
+ * actions.
  */
 function PricingAgentLine({ children }: { children?: ReactNode }) {
   const placeholder = !children;
   return (
-    <p
-      data-pricing-agent-line={placeholder ? undefined : ""}
-      aria-hidden={placeholder ? true : undefined}
-      className={cn(
-        "mt-6 border-t border-rule-soft pt-2.5 text-base",
-        placeholder && "invisible",
-      )}
-    >
-      Working with investor clients? The client remembers who caught
-      it.{" "}
-      {children ?? (
-        <span className="-my-3 inline-block py-3">{AGENT_LINE_LINK_LABEL}</span>
-      )}
-    </p>
+    <div className="lg:mt-auto">
+      <p
+        data-pricing-agent-line={placeholder ? undefined : ""}
+        aria-hidden={placeholder ? true : undefined}
+        className={cn(
+          "mt-6 border-t border-rule-soft pt-2.5 text-base",
+          placeholder && "invisible",
+        )}
+      >
+        Working with investor clients? The client remembers who caught
+        it.{" "}
+        {children ?? (
+          <span className="-my-3 inline-block py-3">{AGENT_LINE_LINK_LABEL}</span>
+        )}
+      </p>
+    </div>
   );
 }
 
@@ -448,12 +458,17 @@ function PricingStages({
   ];
 
   return (
-    /* The stage chooser, set as a ledger in the hero's wider column
-       (the homepage's 5/7 grid from 1024px; it follows the text on
-       phones): a caption on the heavy rule, then one ruled row per
+    /* The stage chooser, set as a ledger on a white sheet in the hero's
+       wider column (the homepage's 5/7 grid from 1024px; it follows the
+       text on phones): a caption on the heavy rule, then one ruled row per
        plan with the job, the plan and its price in the figure face, and what
-       it answers. It puts every price in the first screen. */
-    <div data-pricing-stages="">
+       it answers. It puts every price in the first screen. The sheet keeps
+       the hero's grid from running through a price; the last row drops its
+       line and its bottom padding, so the sheet's own padding closes it. */
+    <div
+      data-pricing-stages=""
+      className="rounded-object border border-border bg-card p-5 shadow-rest sm:p-6"
+    >
       <h2
         id="pricing-stage-title"
         className="text-balance border-b border-foreground pb-2.5 text-base font-semibold"
@@ -464,29 +479,36 @@ function PricingStages({
         {stages.map((stage) => (
           <li
             key={stage.job}
-            className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 border-b border-rule-soft py-3.5"
+            className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 border-b border-rule-soft py-3.5 last:border-b-0 last:pb-0"
           >
             <h3 className="col-span-2 text-balance text-lg font-semibold">
               {stage.job}
             </h3>
             <p className="mt-0.5 min-w-0 text-base">
               {/* A 44px tap target from padding that the negative
-                  margin takes back out of the line box. */}
+                  margin takes back out of the line box. The name stays on
+                  one line: on a narrow phone the annual note sets the price
+                  column's width, and the name runs into the empty left part
+                  of the price line instead of breaking in two. */}
               <a
                 href={stage.href}
-                className="tc-link -my-3 inline-block min-w-11 py-3 font-semibold"
+                className="tc-link -my-3 inline-block min-w-11 whitespace-nowrap py-3 font-semibold"
               >
                 {stage.product}
               </a>
             </p>
-            <div className="mt-0.5 text-right">
+            {/* A paid row holds two lines at either cadence (the 28px figure
+                line plus the 20px annual note), so the sheet, and the hero
+                it sets the height of, does not move when the cards' toggle
+                goes to Monthly. The Free row has one price and one line. */}
+            <div className={stage.prices.length > 1 ? "mt-0.5 min-h-12 text-right" : "mt-0.5 text-right"}>
               {stage.prices.map((row) => (
                 <p
                   key={row.cadence ?? "free"}
                   data-stage-cadence={row.cadence ?? undefined}
                   className="flex flex-wrap items-baseline justify-end gap-x-1"
                 >
-                  <LedgerFigure className="whitespace-nowrap text-xl font-medium">{row.price}</LedgerFigure>
+                  <LedgerFigure className="whitespace-nowrap text-xl font-semibold">{row.price}</LedgerFigure>
                   <span className="whitespace-nowrap text-sm text-muted-foreground">{row.period}</span>
                   {row.note ? (
                     <span className="basis-full whitespace-nowrap text-right font-figure text-sm text-muted-foreground">
@@ -670,6 +692,9 @@ export default function PricingPage() {
               — before you collect a dollar of rent.
             </>
           }
+          // The H1 is long, so from 1024px it runs across both columns and
+          // the lede, the actions and the stage sheet share the row under it.
+          titleSpan="full"
           lede={
             /* The fallback is the signed-out lede, invisible and out of the
                accessibility tree: it holds the lines the lede will take. */
@@ -799,49 +824,100 @@ export default function PricingPage() {
                 : ""}
             </p>
           </div>
-          {/* Phones use ruled rows (the tiers side by side under each
-              feature); tablet and desktop keep the denser semantic table.
-              No narrow viewport has to pan sideways. */}
+          {/* Phones use ruled rows: a yes-or-no feature is one line with a
+              mark per plan under a legend of the plan names, and a feature
+              with a text value lists the tiers under its label, one per line.
+              Tablet and desktop keep the denser semantic table. No narrow
+              viewport has to pan sideways. */}
           <ul className="mt-8 border-t border-foreground sm:hidden">
-            {FEATURE_COMPARISON.map(([label, free, pro]) =>
-              !alertsLive &&
-              label === "Rate-drop alerts on saved deals" ? null : (
-                <li key={label} className="border-b border-rule-soft py-3">
-                  <p className="text-base font-semibold">{label}</p>
-                  <dl
+            {/* The plan names once, over the mark columns. Out of the
+                accessibility tree: every mark below names its own plan. */}
+            <li
+              aria-hidden="true"
+              className={
+                agentProConfigured
+                  ? "grid grid-cols-[minmax(0,1fr)_repeat(3,3.25rem)] items-end gap-x-1 border-b border-border py-2 text-center text-xs font-semibold"
+                  : "grid grid-cols-[minmax(0,1fr)_repeat(2,3.25rem)] items-end gap-x-1 border-b border-border py-2 text-center text-xs font-semibold"
+              }
+            >
+              <span />
+              <span>Free</span>
+              {/* The Pro name sits on the band, as the table's Pro head does:
+                  the cell runs from the heavy rule to the legend's line (the
+                  margin takes back the row's padding), so the tint in the
+                  rows below reads as this column. */}
+              <span className="-my-2 flex items-end justify-center self-stretch bg-band py-2">{proOfferName}</span>
+              {agentProConfigured ? <span>Agent Pro</span> : null}
+            </li>
+            {FEATURE_COMPARISON.map(([label, free, pro]) => {
+              if (!alertsLive && label === "Rate-drop alerts on saved deals") {
+                return null;
+              }
+              const agentPro = agentProCell(label, pro);
+              // A feature every plan answers with yes or no is one line of
+              // marks under the legend; one with a text value keeps the
+              // stacked row, where the text has room.
+              if (
+                typeof free === "boolean" &&
+                typeof pro === "boolean" &&
+                (!agentProConfigured || typeof agentPro === "boolean")
+              ) {
+                return (
+                  <li
+                    key={label}
                     className={
                       agentProConfigured
-                        ? "mt-1.5 grid grid-cols-3 gap-x-4 text-sm"
-                        : "mt-1.5 grid grid-cols-2 gap-x-4 text-sm"
+                        ? "grid grid-cols-[minmax(0,1fr)_repeat(3,3.25rem)] items-center gap-x-1 border-b border-rule-soft py-2.5"
+                        : "grid grid-cols-[minmax(0,1fr)_repeat(2,3.25rem)] items-center gap-x-1 border-b border-rule-soft py-2.5"
                     }
                   >
-                    <div className="min-w-0">
+                    <p className="text-base font-semibold">{label}</p>
+                    <MobileFeatureMark plan="Free" included={free} />
+                    <MobileFeatureMark plan={proOfferName} included={pro} band />
+                    {agentProConfigured ? (
+                      <MobileFeatureMark plan="Agent Pro" included={agentPro === true} />
+                    ) : null}
+                  </li>
+                );
+              }
+              return (
+                <li key={label} className="border-b border-rule-soft py-3">
+                  <p className="text-base font-semibold">{label}</p>
+                  {/* One plan per line, its name beside its value: the
+                      legend's mark columns are the list's only columns, so a
+                      stacked row never puts a plan name under another plan's
+                      column. Each pair is a `contents` group, so the names
+                      share one column and the values the other. */}
+                  <dl className="mt-1.5 grid grid-cols-[5.5rem_minmax(0,1fr)] gap-x-4 gap-y-0.5 text-sm">
+                    <div className="contents">
                       <dt className="text-muted-foreground">Free</dt>
-                      <dd className="mt-0.5">
+                      <dd className="min-w-0">
                         <MobileFeatureValue value={free} />
                       </dd>
                     </div>
-                    <div className="min-w-0">
+                    <div className="contents">
                       <dt className="text-muted-foreground">{proOfferName}</dt>
-                      <dd className="mt-0.5">
+                      <dd className="min-w-0">
                         <MobileFeatureValue value={pro} />
                       </dd>
                     </div>
                     {agentProConfigured ? (
-                      <div className="min-w-0">
+                      <div className="contents">
                         <dt className="text-muted-foreground">Agent Pro</dt>
-                        <dd className="mt-0.5">
-                          <MobileFeatureValue value={agentProCell(label, pro)} />
+                        <dd className="min-w-0">
+                          <MobileFeatureValue value={agentPro} />
                         </dd>
                       </div>
                     ) : null}
                   </dl>
                 </li>
-              ),
-            )}
+              );
+            })}
           </ul>
           {/* The homepage ladder's grammar: opens on the heavy rule, a rule
-              under the heads, soft rules between rows, marks in ink. */}
+              under the heads, soft rules between rows, marks in ink. The plan
+              heads are in the display voice and the Pro column sits on the
+              band from its head to its last row. */}
           <ScrollX label="Table" className="mt-8 hidden border-t border-foreground sm:block">
             <table className="w-full border-collapse text-sm sm:text-base">
               <caption className="sr-only">
@@ -853,14 +929,14 @@ export default function PricingPage() {
                   <th scope="col" className="py-2.5 pr-4 text-left font-semibold">
                     Feature
                   </th>
-                  <th scope="col" className="px-4 py-2.5 text-center font-semibold">
+                  <th scope="col" className="px-4 py-2.5 text-center font-display text-xl">
                     Free
                   </th>
-                  <th scope="col" className="px-4 py-2.5 text-center font-semibold">
+                  <th scope="col" className="bg-band px-4 py-2.5 text-center font-display text-xl">
                     {proOfferName}
                   </th>
                   {agentProConfigured ? (
-                    <th scope="col" className="px-4 py-2.5 text-center font-semibold">
+                    <th scope="col" className="px-4 py-2.5 text-center font-display text-xl">
                       Agent Pro
                     </th>
                   ) : null}
@@ -875,7 +951,7 @@ export default function PricingPage() {
                         {label}
                       </th>
                       <Cell value={free} />
-                      <Cell value={pro} />
+                      <Cell value={pro} band />
                       {agentProConfigured ? (
                         <Cell value={agentProCell(label, pro)} />
                       ) : null}
@@ -1018,14 +1094,15 @@ export default function PricingPage() {
   );
 }
 
-function Cell({ value }: { value: boolean | string }) {
+function Cell({ value, band = false }: { value: boolean | string; band?: boolean }) {
   // sr-only text keeps the mark cells legible for screen readers and
   // for crawlers/AI assistants — icon-only cells read as empty in
   // both, which made the whole Free-vs-Pro table invisible to them.
   // Marks are ink (DESIGN.md Sign Rule: green is for a number's sign or
-  // a pass/fail, blue is for actions).
+  // a pass/fail, blue is for actions). `band` sets the cell on the band, for
+  // the Pro column.
   return (
-    <td className="px-4 py-2.5 text-center">
+    <td className={band ? "bg-band px-4 py-2.5 text-center" : "px-4 py-2.5 text-center"}>
       {value === true ? (
         <>
           <Check aria-hidden className="mx-auto size-4 text-foreground" />
@@ -1040,6 +1117,41 @@ function Cell({ value }: { value: boolean | string }) {
         <span className="text-sm">{value}</span>
       )}
     </td>
+  );
+}
+
+/**
+ * One plan's mark in a compact phone row: the table's marks (a check in ink,
+ * or a muted en dash) with the plan and the answer as text for a screen
+ * reader and a crawler, since the legend above the rows is hidden from them.
+ * The cell fills its row from line to line (the stretch plus the margin that
+ * takes back the row's padding), so `band` reads as the Pro column, not as a
+ * tinted box in each row.
+ */
+function MobileFeatureMark({
+  plan,
+  included,
+  band = false,
+}: {
+  plan: string;
+  included: boolean;
+  band?: boolean;
+}) {
+  return (
+    <div
+      className={
+        band
+          ? "-my-2.5 flex items-center justify-center self-stretch bg-band"
+          : "-my-2.5 flex items-center justify-center self-stretch"
+      }
+    >
+      {included ? (
+        <Check aria-hidden className="size-4 text-foreground" />
+      ) : (
+        <span aria-hidden className="text-muted-foreground">–</span>
+      )}
+      <span className="sr-only">{`${plan}: ${included ? "Included" : "Not included"}`}</span>
+    </div>
   );
 }
 

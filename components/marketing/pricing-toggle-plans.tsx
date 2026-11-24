@@ -320,11 +320,16 @@ export function PricingTogglePlans({
 
       {/* The trial terms, once, under the row (they were each paid card's
           fine print, which padded both cards and left holes in the others).
-          With Agent Pro on the page they carry its roster sentence too. */}
+          With Agent Pro on the page they carry its roster sentence too.
+          Set as the offer, not as fine print (2026-11): the block opens on
+          the graphite line, its bold lead on a line of its own in the
+          display voice and the sentences at body size under it. The line
+          runs the width of the card row; only the paragraph keeps a
+          reading measure. */}
       {!isPaid ? (
         <div
           data-pricing-trial-terms=""
-          className="mt-4 max-w-[68ch] text-pretty text-sm leading-relaxed text-muted-foreground"
+          className="mt-8 border-t border-foreground pt-5 text-pretty text-base leading-relaxed text-muted-foreground [&>p]:max-w-[72ch]"
         >
           <PricingTrialTerms
             isAuthenticated={isAuthenticated}
@@ -338,7 +343,9 @@ export function PricingTogglePlans({
 }
 
 /**
- * The trial terms, set once as fine print under the plan cards.
+ * The trial terms, set once under the plan cards. Each branch leads with one
+ * <strong>, a block in the display voice (still a <strong>, never a heading:
+ * the page's outline is unchanged), and the sentences follow in the same <p>.
  * Every string here is pinned (pricing-copy-guards.test.ts and the
  * authenticated e2e specs): restyle, never reword.
  * The signed-out sentence was reworded for row P1-07 ("Pro analyses" plus
@@ -363,7 +370,7 @@ function PricingTrialTerms({
   if (!isAuthenticated) {
     return (
       <p>
-        <strong className="font-semibold text-foreground">New account: $0 today, no card.</strong>{" "}
+        <strong className="mb-2 block font-display text-balance text-h3-sm text-foreground sm:text-2xl">New account: $0 today, no card.</strong>{" "}
         The {PRODUCT_EVALUATION_DAYS}-day free trial includes {PRODUCT_EVALUATION_DEAL_LIMIT} Pro
         analyses and {PRODUCT_EVALUATION_COMPARISON_LIMIT} comparison. Revisions to the same property do not use another trial analysis.
         {tier === "agent_pro"
@@ -378,7 +385,7 @@ function PricingTrialTerms({
   if (evaluation.status === "active" && allowance) {
     return (
       <p>
-        <strong className="font-semibold text-foreground">Free trial active: {allowance}.</strong>{" "}
+        <strong className="mb-2 block font-display text-balance text-h3-sm text-foreground sm:text-2xl">Free trial active: {allowance}.</strong>{" "}
         You can subscribe at the exact displayed price at any time. Saved work stays in your
         account if you downgrade.
       </p>
@@ -388,7 +395,7 @@ function PricingTrialTerms({
   if (evaluation.status === "exhausted") {
     return (
       <p>
-        <strong className="font-semibold text-foreground">Your trial property slots are used.</strong>{" "}
+        <strong className="mb-2 block font-display text-balance text-h3-sm text-foreground sm:text-2xl">Your trial property slots are used.</strong>{" "}
         Revise your trial properties until the trial expires. Free screening remains available; subscribe when you need to analyze another property.
       </p>
     );
@@ -397,7 +404,7 @@ function PricingTrialTerms({
   if (evaluation.status === "expired") {
     return (
       <p>
-        <strong className="font-semibold text-foreground">Your no-card free trial has ended.</strong>{" "}
+        <strong className="mb-2 block font-display text-balance text-h3-sm text-foreground sm:text-2xl">Your no-card free trial has ended.</strong>{" "}
         Free screening remains available; subscribe only when you choose to continue with Pro.
       </p>
     );
@@ -405,7 +412,7 @@ function PricingTrialTerms({
 
   return (
     <p>
-      <strong className="font-semibold text-foreground">Subscription access starts with the charge shown above.</strong>{" "}
+      <strong className="mb-2 block font-display text-balance text-h3-sm text-foreground sm:text-2xl">Subscription access starts with the charge shown above.</strong>{" "}
       Cancel online anytime; no contract. Your saved work stays in your account if you downgrade.
     </p>
   );
