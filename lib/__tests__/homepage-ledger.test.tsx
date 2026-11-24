@@ -115,10 +115,16 @@ describe("the homepage hero", () => {
   it("gives phones the sheet's answer directly under the form, read from the same ledger", () => {
     // Re-anchored 2026-10-21 (audit A8, founder decision): the phone-only
     // verdict sentence before the form is gone; below 1024px the column
-    // joins the hero grid and the sheet (its price track and Offer Ceiling
-    // first) follows the form. Every value still comes from the engine's ledger.
+    // joins the hero grid and the sheet follows the form. Every value still
+    // comes from the engine's ledger.
+    // Re-anchored 2026-11-23 (site elevation): the hero copy column is pinned
+    // from 1024px (DESIGN.md "the pinned copy"), and below 1024px the sheet
+    // opens on its Offer Ceiling, with the price track under it. The class
+    // string still starts with `contents lg:block lg:min-w-0`.
     expect(source).not.toContain("data-hero-verdict-line");
-    expect(source).toContain('className="contents lg:block lg:min-w-0"');
+    expect(source).toContain(
+      'className="contents lg:block lg:min-w-0 lg:self-start lg:top-24 lg:[@media(min-height:680px)]:sticky"',
+    );
     expect(source).toMatch(/max-lg:order-1[^"]*"[^>]*>\s*<HeroSheet/);
     const sheet = read("components/home/hero-sheet.tsx");
     expect(sheet).toContain("ledger.meetsTargets.asking");

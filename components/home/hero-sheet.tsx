@@ -1,10 +1,12 @@
 /**
  * The hero's sheet (DESIGN.md "The homepage", Blueprint): the sample deal on
- * a drafting sheet. A caption row, then the PriceScrubber island: the
- * schematic, the price track, the Offer Ceiling on the highlight stroke with
- * the gap in dollars (this file's key figure, handed into the island so the
- * answer sits above the readout and inside the first screen), the readout
- * and the source chips; then the link into the walkthrough.
+ * a drafting sheet, white on the grid with a 1px line under its panel shadow.
+ * A caption row, then the PriceScrubber island: the schematic, the price
+ * track, the Offer Ceiling on the highlight stroke with the gap in dollars
+ * (this file's key figure, handed into the island so the answer sits above
+ * the readout and inside the first screen), the readout and the source chips;
+ * then the link into the walkthrough. Below 1024px the key figure leads the
+ * sheet, directly under the caption and above the price track.
  *
  * SERVER COMPONENT. Every figure comes from the engine through
  * lib/sample-deal-ledger.ts and lib/sample-deal-sweep.ts; the sheet is set
@@ -80,17 +82,21 @@ export function HeroSheet({
   return (
     <figure
       data-hero-ledger=""
-      className="min-w-0 rounded-lg bg-card p-4 shadow-lg sm:p-6"
+      className="min-w-0 rounded-lg border border-border bg-card p-4 shadow-lg sm:p-6"
       aria-labelledby="hero-sheet-caption"
     >
+      {/* Below 1024px the caption's line is the 2px graphite rule: the key
+          figure leads the sheet there, so the one rule sits directly over its
+          label row (from 1024px the rule is the key figure's own top border). */}
       <figcaption
         id="hero-sheet-caption"
-        className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-border pb-3 font-mono text-xs text-muted-foreground"
+        className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5 border-b border-border pb-3 tc-meta text-muted-foreground max-lg:border-b-2 max-lg:border-foreground"
       >
         <span>
           <span className="font-medium text-foreground">{ledger.title}</span> · Sample deal
         </span>
-        <span>Every input editable · drag the price</span>
+        {/* Hidden below 640px: the help line under the track says the same. */}
+        <span className="max-sm:hidden">Every input editable · drag the price</span>
       </figcaption>
 
       {/* Before the island hydrates, a pointer on the sheet is the visitor
@@ -114,9 +120,11 @@ export function HeroSheet({
           sources={sources}
           keyFigure={
             <>
-              {/* The one total: the Offer Ceiling on the highlight stroke,
-                  under the price track and above the readout. */}
-              <div className="mt-5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t-2 border-foreground pt-3">
+              {/* The one total: the Offer Ceiling on the highlight stroke.
+                  From 1024px it sits under the price track and above the
+                  readout, on its own 2px rule; below 1024px the island sets
+                  it first (price-scrubber.tsx), under the caption's rule. */}
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 max-lg:mt-3 max-lg:border-t-0 max-lg:pt-0 lg:mt-5 lg:border-t-2 lg:border-foreground lg:pt-3">
                 <span className="font-display text-xl sm:text-2xl">Offer Ceiling</span>
                 <LedgerTotal draw className="highlight-stroke text-key-sm lg:text-key">
                   {formatLedgerDollars(ledger.offerCeiling)}

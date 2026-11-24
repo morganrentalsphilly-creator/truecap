@@ -305,7 +305,7 @@ export function HeroAddressForm({
           type="submit"
           aria-busy={opening || undefined}
           className={cn(
-            "inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-md px-5 text-base font-semibold transition-colors duration-150",
+            "inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-md px-5 text-base font-semibold transition-[color,background-color,border-color,scale] duration-150 active:scale-[0.98]",
             tone === "dark"
               ? "bg-card text-primary hover:bg-primary-wash"
               : "bg-primary text-primary-foreground hover:bg-primary-deep",
@@ -337,7 +337,7 @@ export function HeroAddressForm({
             trackEvent("hero_sample_clicked");
             trackEvent("hero_sample_opened");
           }}
-          className="mt-2.5 inline-flex h-12 min-h-11 w-full items-center justify-center rounded-md border border-muted-foreground bg-transparent px-5 text-base font-semibold text-foreground transition-colors duration-[var(--duration-fast)] hover:bg-band sm:w-auto"
+          className="mt-2.5 inline-flex h-12 min-h-11 w-full items-center justify-center rounded-md border border-muted-foreground bg-transparent px-5 text-base font-semibold text-foreground transition-[color,background-color,border-color,scale] duration-[var(--duration-fast)] hover:bg-band active:scale-[0.98] sm:w-auto"
         >
           See the sample deal
         </Link>

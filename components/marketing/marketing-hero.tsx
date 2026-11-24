@@ -10,8 +10,10 @@
  * investor (2026-11 ads pass, C1); the agent cue sits ABOVE the address form
  * at every width (the place the founder ruled for the audience cue,
  * 2026-10-03), so the cookie banner cannot cover it on a short phone. Below
- * 1024px: one column, the sheet (its price track and Offer Ceiling first)
- * directly under the form and the risk line.
+ * 1024px: one column, the sheet directly under the form and the risk line,
+ * its Offer Ceiling first and the price track under it. From 1024px the copy
+ * column is pinned beside the sheet (DESIGN.md "the pinned copy") in a window
+ * at least 680px tall; a shorter one keeps it in normal flow.
  *
  * SERVER COMPONENT. The sheet is set from the engine's own sample-deal output
  * at build time (lib/sample-deal-ledger.ts, lib/sample-deal-sweep.ts) and
@@ -53,9 +55,14 @@ export function MarketingHero() {
         {/* Below 1024px this column's children join the hero grid
             (display: contents), so the sheet can follow the form and the
             helper line can follow the sheet (audit A8, founder decision
-            2026-10-21): on a phone the price track and the Offer Ceiling sit
-            directly under the address form. */}
-        <div className="contents lg:block lg:min-w-0">
+            2026-10-21): on a phone the Offer Ceiling and, under it, the price
+            track sit directly under the address form.
+            From 1024px the column is pinned (position only, nothing
+            animates): the H1, the form and the risk line stay beside the
+            sheet until the hero ends. top-24 clears the header, as the
+            story's pinned sheet does; the min-height guard leaves a short
+            window in normal flow, where the column would not fit under it. */}
+        <div className="contents lg:block lg:min-w-0 lg:self-start lg:top-24 lg:[@media(min-height:680px)]:sticky">
           {/* break-words + hyphens-auto: at zoom-sensitive widths (a 195px
               column) a ten-letter word like "forwarding" is wider than the
               line; the browser may then break or hyphenate it rather than
@@ -115,7 +122,7 @@ export function MarketingHero() {
         </div>
 
         {ledger && sweep ? (
-          <div className="min-w-0 max-lg:order-1 max-lg:mt-6 lg:pt-1.5">
+          <div className="min-w-0 max-lg:order-1 max-lg:mt-3 lg:pt-1.5">
             <HeroSheet ledger={ledger} sweep={sweep} walkthroughHref={`#${HOMEPAGE_WALKTHROUGH_ID}`} />
           </div>
         ) : null}

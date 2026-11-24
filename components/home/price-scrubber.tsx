@@ -13,10 +13,13 @@
  * a drag ends, never per tick.
  *
  * Order on the sheet: the schematic (its two out-flows move with the price
- * and their arrows weigh more above the ceiling), the price track with its
- * help line, then the caller's key figure (the Offer Ceiling on the highlight
- * stroke, so the answer sits inside the first screen), then the readout the
- * drag animates, then the source chips.
+ * and their arrows weigh more above the ceiling, and its landing figure turns
+ * from green to the miss colour there), the price track with its help line,
+ * then the caller's key figure (the Offer Ceiling on the highlight stroke, so
+ * the answer sits inside the first screen), then the readout the drag
+ * animates, then the source chips. Below 1024px the key figure leads instead:
+ * the Offer Ceiling and its gap, the price track, the schematic, the readout,
+ * the chips (flex order only; the DOM is the same at every width).
  *
  * The handle is a 20px diamond (the thumb element itself, rotated), so the
  * site's 3px focus ring draws as a diamond around it; the slider root is the
@@ -157,9 +160,9 @@ export function PriceScrubber({
   );
 
   return (
-    // Below 1024px the answer leads (audit A8): the price track and the Offer
-    // Ceiling, then the schematic, the readout and the chips (flex order; the
-    // DOM keeps the drawing first for the wide layout).
+    // Below 1024px the answer leads (audit A8): the Offer Ceiling with its
+    // gap, then the price track, the schematic, the readout and the chips
+    // (flex order; the DOM keeps the drawing first for the wide layout).
     <div ref={rootRef} className="flex min-w-0 flex-col lg:block" data-price-scrubber="" data-glide="idle">
       <div className="max-lg:order-1 max-lg:mt-6">
       <Schematic
@@ -171,18 +174,29 @@ export function PriceScrubber({
         // them shows the flow with no figure rather than a typed number.
         mortgageLabel={mortgage != null ? <AnimatedNumber value={mortgage} kind="usdPerMonth" /> : null}
         operatingLabel={operating != null ? <AnimatedNumber value={operating} kind="usdPerMonth" /> : null}
+        // Only the cash flow speaks in the display voice and takes the pass
+        // or miss colour. The price it is read at is a row-size note in the
+        // muted ink: it is neither a pass nor a miss, and the sheet's one
+        // display-size price is the Offer Ceiling below.
         cashFlowLabel={
           <>
-            <AnimatedNumber value={cashFlow} kind="usdPerMonth" /> at <AnimatedNumber value={point[0]} kind="usd" />
+            <AnimatedNumber value={cashFlow} kind="usdPerMonth" />{" "}
+            <span className="text-base font-medium tracking-normal text-muted-foreground">
+              at <AnimatedNumber value={point[0]} kind="usd" />
+            </span>
           </>
         }
+        // A pass or a miss against the cash-flow target (the Sign rule);
+        // with no target the landing figure stays in ink.
+        cashFlowTone={cfTarget != null ? (cfMeets ? "pass" : "miss") : undefined}
         aboveCeiling={aboveCeiling}
       />
       </div>
 
-      {/* The price track: a dimension line with the meets-range highlighted. */}
+      {/* The price track: a dimension line with the meets-range highlighted.
+          Below 1024px it follows the key figure's gap sentence. */}
       <div
-        className="relative mx-2 mt-5 pt-6 pb-5 max-lg:mt-1"
+        className="relative mx-2 mt-5 pt-6 pb-5 max-lg:mt-5"
         onPointerDownCapture={() => {
           interacted.current = true;
         }}
@@ -191,7 +205,7 @@ export function PriceScrubber({
         }}
       >
         <span
-          className="absolute top-0 -translate-x-1/2 font-mono text-xs whitespace-nowrap text-highlight-text"
+          className="absolute top-0 -translate-x-1/2 tc-meta whitespace-nowrap text-highlight-text"
           style={{ left: `${pct(ceiling)}%` }}
           aria-hidden
         >
@@ -201,7 +215,7 @@ export function PriceScrubber({
           <span className="mx-auto mt-0.5 block h-2 w-px bg-current" />
         </span>
         <span
-          className="absolute top-0 -translate-x-1/2 font-mono text-xs whitespace-nowrap text-muted-foreground"
+          className="absolute top-0 -translate-x-1/2 tc-meta whitespace-nowrap text-muted-foreground"
           style={{ left: `${pct(asking)}%` }}
           aria-hidden
         >
@@ -271,14 +285,17 @@ export function PriceScrubber({
             className="block size-5 rotate-45 cursor-grab rounded-none border-2 border-primary bg-card shadow-xs transition-[scale,background-color] duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:scale-110 active:scale-125 active:cursor-grabbing active:bg-primary motion-reduce:transition-none"
           />
         </SliderPrimitive.Root>
-        <span className="absolute bottom-0 left-0 font-mono text-xs text-muted-foreground" aria-hidden>
+        <span className="absolute bottom-0 left-0 tc-meta text-muted-foreground" aria-hidden>
           {usd(low)}
         </span>
-        <span className="absolute right-0 bottom-0 font-mono text-xs text-muted-foreground" aria-hidden>
+        <span className="absolute right-0 bottom-0 tc-meta text-muted-foreground" aria-hidden>
           {usd(high)}
         </span>
       </div>
-      <p id={`${id}-help`} className="max-w-[62ch] text-sm text-muted-foreground">
+      {/* The sentence shortens when the handle leaves the ceiling (two lines
+          to one; three to two under 390px), so the line reserves the height
+          of its longest form and nothing under it moves during a drag. */}
+      <p id={`${id}-help`} className="min-h-11 max-w-[62ch] text-sm text-muted-foreground max-[389px]:min-h-16">
         At <span className="font-figure font-semibold text-foreground"><AnimatedNumber value={point[0]} kind="usd" /></span>
         {isCeiling
           ? " · the highest price that still meets the Buy Box"
@@ -295,8 +312,11 @@ export function PriceScrubber({
 
       {/* The sheet's one total, before the readout: the answer is in the
           first screen (1440×900 and 1095×760), and the rows that the drag
-          animates sit fully visible under it. */}
-      {keyFigure}
+          animates sit fully visible under it. Below 1024px it is the first
+          thing on the sheet (order -1 in the flex column), above the track.
+          From 1024px the wrapper is a plain block the key figure's own top
+          margin collapses through, so the wide layout is unchanged. */}
+      <div className="max-lg:-order-1">{keyFigure}</div>
 
       {/* The readout: the engine's figures at asking beside the figures at
           the handle's price, with each target's chip. A table, so the
@@ -373,21 +393,34 @@ export function PriceScrubber({
         </tbody>
       </table>
 
-      {/* Where each starting value comes from: a chip opens its source. */}
-      <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-1 border-t border-rule-soft pt-3 max-lg:order-3" aria-label="Where the starting values come from">
+      {/* Where each starting value comes from: a chip opens its source
+          (DESIGN.md "Source chip": Geist Mono at 12px on a 1px line,
+          pill-shaped). The button is the 44px target; the pill is drawn
+          inside it and takes the band on hover. The text sits in one inner
+          span so the pill's flex box has a single item and the spaces around
+          the value survive. A chip wider than the sheet (two of the four at
+          390px) breaks between its value and its source before it breaks
+          anywhere else: each half is an inline-block, which moves to the
+          next line whole and wraps inside only when it is itself too wide
+          (the 195px zoom case), so no chip overflows the sheet. */}
+      <ul className="mt-4 flex flex-wrap gap-x-2 gap-y-0 border-t border-rule-soft pt-3 max-lg:order-3" aria-label="Where the starting values come from">
         {sources.map((s) => (
           <li key={s.label}>
-            <SourcePopover source={s.source} basis={s.basis} replaceWith={s.replaceWith} className="min-h-10 rounded-none px-0 font-mono text-xs text-muted-foreground decoration-dotted hover:text-foreground">
-              <span>
-                {s.label}
-                {s.value ? (
-                  <>
-                    {" "}
-                    <b className="font-medium text-foreground">{s.value}</b>
-                  </>
-                ) : null}
-                {" · "}
-                {s.source}
+            <SourcePopover source={s.source} basis={s.basis} replaceWith={s.replaceWith} className="group/chip min-h-11 rounded-full px-0 no-underline">
+              <span className="inline-flex items-center rounded-full border border-border px-3 py-1.5 tc-meta text-muted-foreground whitespace-normal text-left transition-colors duration-[var(--duration-fast)] group-hover/chip:border-muted-foreground group-hover/chip:bg-band">
+                <span>
+                  <span className="inline-block">
+                    {s.label}
+                    {s.value ? (
+                      <>
+                        {" "}
+                        <b className="font-medium text-foreground">{s.value}</b>
+                      </>
+                    ) : null}
+                    {" ·"}
+                  </span>{" "}
+                  <span className="inline-block">{s.source}</span>
+                </span>
               </span>
             </SourcePopover>
           </li>

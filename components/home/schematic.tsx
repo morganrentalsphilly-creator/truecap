@@ -2,8 +2,9 @@
  * The property as a line schematic (DESIGN.md "The homepage", Blueprint): a
  * house drawn in graphite, rent flowing in on the left in green, the mortgage
  * and the operating costs flowing out on the right in red, and the cash flow
- * landing under the house on a dashed leader. Every label is a figure from
- * the engine's sample-deal sweep; nothing is typed.
+ * landing under the house on a dashed leader, in green while it meets the
+ * cash-flow target and in the miss colour above the ceiling. Every label is a
+ * figure from the engine's sample-deal sweep; nothing is typed.
  *
  * Set as HTML on a grid, not as text inside a scaled SVG: the labels are real
  * text at the page's sizes (nothing below 12px at any width) and the three
@@ -93,6 +94,7 @@ export function Schematic({
   mortgageLabel,
   operatingLabel,
   cashFlowLabel,
+  cashFlowTone,
   aboveCeiling = false,
   className,
 }: {
@@ -109,6 +111,13 @@ export function Schematic({
   operatingLabel: ReactNode | null;
   /** The landing figure, rendered by the caller (so it can animate). */
   cashFlowLabel: ReactNode;
+  /**
+   * The landing figure against the cash-flow target: green while it meets the
+   * target, the miss colour when it falls short. The green is a pass against
+   * a target (the Sign rule, DESIGN.md "Color"), not emphasis; with no target
+   * to pass (undefined) the figure stays in ink.
+   */
+  cashFlowTone?: "pass" | "miss";
   /** The price on the handle sits above the Offer Ceiling: the out-flows weigh more. */
   aboveCeiling?: boolean;
   className?: string;
@@ -126,7 +135,7 @@ export function Schematic({
       <Flow
         label="Rent in"
         figure={rent}
-        source={<span className="font-mono text-muted-foreground">HUD FMR · {bedrooms} bed · replace with comps</span>}
+        source={<span className="tc-meta text-muted-foreground">HUD FMR · {bedrooms} bed · replace with comps</span>}
         tone="in"
         align="right"
         className="sm:col-start-1 sm:row-span-2 sm:row-start-1 sm:self-center"
@@ -152,7 +161,10 @@ export function Schematic({
         label="Mortgage out"
         figure={mortgageLabel}
         source={
-          <span className="font-mono text-muted-foreground">
+          // One line from 1280px: in Geist Mono the line fits its column with
+          // 2px to spare, so the fallback face wrapped it and the swap pulled
+          // everything under the schematic up a line.
+          <span className="tc-meta text-muted-foreground xl:whitespace-nowrap">
             FRED rate {rate} · {downPaymentPct} down
           </span>
         }
@@ -172,9 +184,21 @@ export function Schematic({
 
       {/* Cash flow lands, under the house, on a dashed leader. */}
       <div className="pt-3 text-center sm:col-span-5 sm:col-start-1 sm:row-start-3 sm:pt-0">
-        <span aria-hidden className="mx-auto mb-1 block h-5 w-px border-l border-dashed border-primary" />
+        <span aria-hidden className="mx-auto mb-1 block h-8 w-px border-l border-dashed border-primary" />
         <span className="block text-sm font-semibold">Cash flow after reserves</span>
-        <span className="block font-figure text-lg font-bold sm:text-xl">{cashFlowLabel}</span>
+        {/* The figure the drawing exists to produce, in the display voice.
+            Its colour is the Sign rule's pass or miss against the cash-flow
+            target, never emphasis: it turns as the handle crosses the ceiling
+            (at once under reduced motion). */}
+        <span
+          className={cn(
+            "block font-display font-figure text-2xl transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] motion-reduce:transition-none sm:text-section-sm",
+            cashFlowTone === "pass" && "text-positive",
+            cashFlowTone === "miss" && "text-highlight-text",
+          )}
+        >
+          {cashFlowLabel}
+        </span>
       </div>
     </div>
   );
